@@ -1,4 +1,4 @@
-Require Export Relations Wellfounded Compare_dec.
+Require Export Lia Relations Wellfounded Compare_dec.
 Require Import Sat.
 Require Import ZF ZFcoc.
 Require Import ZFlambda.
@@ -159,7 +159,7 @@ do 2 red; intros.
 apply couple_morph; try reflexivity.
 apply iSAT_morph; trivial.
 Qed.
-Hint Resolve prop_repl_morph.
+Hint Resolve prop_repl_morph : core.
 
 Lemma impredicative_prod : forall dom F,
   ZF.ext_fun (El dom) F ->
@@ -206,8 +206,8 @@ setoid_replace daimon with (cc_lam (El props) (fun _ => prf_trm)).
   reflexivity.
 Qed.
 
-Notation "x ∈ y" := (inX x y).
-Notation "x == y" := (eqX x y).
+(*Notation "x ∈ y" := (inX x y).
+Notation "x == y" := (eqX x y).*)
 
 (***********************************************************************)
 (** Building the SN addon *)
@@ -221,7 +221,7 @@ Qed.
 
   Lemma Real_prod : forall A B,
     eqSAT (Real (prod A B))
-          (prodSAT (Real A) (depSAT (fun y => y ∈ A) (fun y => Real (B y)))).
+          (prodSAT (Real A) (depSAT (fun y => y ∈ El A) (fun y => Real (B y)))).
 unfold Real, prod, piSAT, mkTY; intros.
 rewrite snd_def.
 rewrite iSAT_id.
@@ -370,7 +370,7 @@ induction t; simpl int_term; intros.
 
  simpl; unfold V.lams, I.lams, V.shift, I.shift.
  destruct (le_gt_dec k n0); simpl.
-  replace (k+(n+(n0-k))) with (n+n0) by omega.
+  replace (k+(n+(n0-k))) with (n+n0) by lia.
   split; red; auto.
 
   split; red; auto.
@@ -474,7 +474,7 @@ apply H0; trivial.
  intro; apply H1; apply Tm.exp_sort_mem with (1:=H2); trivial.
 Qed.
 
-Hint Resolve int_not_kind Ty.eq_typ_not_kind.
+Hint Resolve int_not_kind Ty.eq_typ_not_kind : core.
 
 (** Soundness of the typing rules *)
 

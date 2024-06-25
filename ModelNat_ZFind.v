@@ -8,7 +8,7 @@ Set Implicit Arguments.
  *)
 
 Require Import basic Models.
-Require Import ZF ZFwfr ZFind_nat.
+Require Import ZF ZFsum ZFwfr ZFind_nat.
 Require Import ModelZF.
 
 (** All that remains to build is the recursor *)

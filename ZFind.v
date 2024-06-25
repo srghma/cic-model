@@ -477,8 +477,6 @@ apply mkTypedRec; auto with *.
      apply ftyp; auto.
      apply subset_elim1 in aty; trivial.
 
-    apply bty; trivial.
-
   do 2 red; intros.
   apply WFm1; auto with *.
 
@@ -513,6 +511,7 @@ assert (couple (couple i a) w ∈ Σ ia ∈ Arg', W ia).
  apply couple_intro_sigma; auto with *.
  apply couple_intro_sigma; auto.
 specialize cc_prod_elim with (1:=H2) (2:=H3).
+simpl.
 rewrite fst_def, snd_def; trivial.
 Qed.
                                                  

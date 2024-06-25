@@ -33,7 +33,8 @@ Module Type Nats.
   Parameter natcase_outside : forall b0 bS n,
       n == empty ->
       natcase b0 bS n == empty.
-
+  Existing Instance natcase_morph.
+  
   Definition isNat X n := n==zero \/ exists2 m, m ∈ cc_bot X & n == succ m.
 
 End Nats.
@@ -97,7 +98,7 @@ destruct tyn as [?|[?|(m,tym,?)]].
   reflexivity.
   rewrite <- eqn; trivial.
   
- rewrite <- eqn, H, !natcase_zero; trivial.
+  rewrite <- eqn, H, !natcase_zero; trivial.
 
  rewrite <- eqn, H, !natcase_succ; trivial.
  apply eqS; auto with *.
@@ -128,7 +129,7 @@ apply sumReal_morph; auto with *.
 
  rewrite H0; reflexivity.
 Qed.
-Hint Resolve fNAT_morph.
+Hint Resolve fNAT_morph : core.
 
 Lemma fNAT_mono : monoFam fNAT.
 red; red; intros.

@@ -4,7 +4,8 @@
 (************************************************************************************)
 (************************************************************************************)
 
-Require Import GenLemmas.
+Require Import Lia GenLemmas.
+Import SN.Notations.
 
 (************************************************************************************)
 (*Abstract signature of semantic*)
@@ -63,8 +64,11 @@ destruct Ht as (_, Ht).
 
 apply Hxy; clear Hxy Hclsd e Hx Hy j' Hok' Hok.
 unfold EQ_term in Ht. simpl int in Ht.
-apply rprod_elim with (x:=int P i) (u:=tm P j) in Ht; [
-  |do 2 red; intros; apply prod_ext; [|do 2 red; intros; rewrite H2]; rewrite H0; reflexivity|trivial].
+apply rprod_elim with (x:=int P i) (u:=tm P j) in Ht.
+2:{do 2 red; intros; apply prod_ext.
+   rewrite H0; reflexivity.
+   red; intros.
+   rewrite H0,H2; reflexivity. }
 apply rprod_elim with (x:=int u i) (u:=tm u j) in Ht.
  exists (App (App t P) u). revert Ht; apply real_morph; simpl; [reflexivity| |reflexivity].
   rewrite split_lift. do 2 rewrite int_cons_lift_eq; reflexivity.
@@ -72,6 +76,8 @@ apply rprod_elim with (x:=int u i) (u:=tm u j) in Ht.
  do 2 red; intros. rewrite H0. reflexivity.
 
  revert Hv; apply real_morph; [|rewrite int_cons_lift_eq|]; reflexivity.
+
+ exact HP.
 Qed.
 
 (*False_symb for BF*)
@@ -117,7 +123,7 @@ apply typ_abs; [right| |discriminate].
  setoid_replace prop with (lift 1 prop) using relation eq_term at 2;
    [apply typ_var; trivial|simpl; split; red; reflexivity].
 
- rewrite <- (eq_term_lift_ref_fv 1 0 0); [apply typ_var; trivial|omega].
+ rewrite <- (eq_term_lift_ref_fv 1 0 0); [apply typ_var; trivial|lia].
 Qed.
 
 (*Impl for implf*)
@@ -148,7 +154,7 @@ Lemma Impl_elim : forall e t u A B,
   typ e (App t u) B.
 intros.
 setoid_replace B with (subst u (lift 1 B)) using relation eq_term;
-  [|unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|omega]].
+  [|unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|lia]].
 apply typ_app with (V:=A); [| | |destruct B; [discriminate|]]; trivial.
 Qed.
 
@@ -232,7 +238,7 @@ apply typ_abs; [right| |discriminate].
      [apply typ_var; trivial|simpl; split; red; reflexivity].
 
  setoid_replace (Ref 1) with (subst (lift 2 v) (Ref 2)) using relation eq_term;
-  [|unfold subst; rewrite red_sigma_var_gt; [reflexivity|omega]].
+  [|unfold subst; rewrite red_sigma_var_gt; [reflexivity|lia]].
  apply typ_app with (V:=(lift 2 B));
    [| |destruct B; [discriminate|]|discriminate]; trivial.
   rewrite split_lift with (n:=1) at 2.
@@ -249,14 +255,14 @@ apply typ_abs; [right| |discriminate].
 
    unfold lift at 4. rewrite red_lift_prod.
    rewrite <- split_lift with (n:=2) (T:=B).
-   rewrite eq_term_lift_ref_fv; [simpl|omega].
+   rewrite eq_term_lift_ref_fv; [simpl|lia].
    assert (eq_term ((Prod (lift 2 A) (Prod (lift 3 B) (Ref 3)))) 
      (lift 1 (Prod (lift 1 A) (Prod (lift 2 B) (Ref 2))))).
     unfold lift at 3. rewrite red_lift_prod.
     rewrite <- split_lift with (T:=A) (n:=1).
     rewrite red_lift_prod.
-    rewrite eq_term_lift_ref_fv; [|omega].
-    unfold lift at 4. rewrite lift_rec_acc; [reflexivity|omega].
+    rewrite eq_term_lift_ref_fv; [|lia].
+    unfold lift at 4. rewrite lift_rec_acc; [reflexivity|lia].
 
    rewrite H. apply typ_var; trivial.
 Qed.
@@ -290,7 +296,7 @@ apply typ_app with (V:=Prod A (Prod (lift 1 B) (lift 2 A)));
    (subst A (Prod (Prod (lift 1 A) (Prod (lift 2 B) (Ref 2))) (Ref 1)))).
   unfold subst. do 3 rewrite red_sigma_prod.
   do 2 (rewrite red_sigma_var_eq; trivial).
-  do 2 (rewrite subst_lift_lt; [|omega]).
+  do 2 (rewrite subst_lift_lt; [|lia]).
   rewrite lift0; reflexivity.
 
  rewrite H; clear H.
@@ -326,7 +332,7 @@ apply typ_app with (V:=Prod A (Prod (lift 1 B) (lift 1 (lift 1 B))));
    (subst B (Prod (Prod (lift 1 A) (Prod (lift 2 B) (Ref 2))) (Ref 1)))).
   unfold subst. do 3 rewrite red_sigma_prod.
   do 2 (rewrite red_sigma_var_eq; trivial).
-  do 2 (rewrite subst_lift_lt; [|omega]).
+  do 2 (rewrite subst_lift_lt; [|lia]).
   rewrite lift0; reflexivity.
 
  rewrite <- split_lift. rewrite H; clear H.
@@ -397,7 +403,7 @@ apply typ_abs; [left; apply typ_prop| |discriminate].
       [apply typ_var; trivial|simpl; split; red; reflexivity].
 
    setoid_replace (Ref 2) with (subst (lift 3 t) (Ref 3)) using relation eq_term at 2; [
-     |unfold subst; rewrite red_sigma_var_gt; [reflexivity|omega]].
+     |unfold subst; rewrite red_sigma_var_gt; [reflexivity|lia]].
    apply typ_app with (V:=(lift 3 A)); 
      [| |destruct A; [discriminate|trivial]|discriminate].
     do 2 rewrite split_lift with (T:=t).
@@ -405,11 +411,11 @@ apply typ_abs; [left; apply typ_prop| |discriminate].
     rewrite split_lift with (T:=A) (n:=1).
     do 3 apply weakening; trivial.
 
-    rewrite <- (eq_term_lift_ref_fv 1 1 2) by omega.
+    rewrite <- (eq_term_lift_ref_fv 1 1 2) by lia.
     rewrite split_lift with (n:=2).
     unfold lift at 3. rewrite <- red_lift_prod.
     fold (lift 1 (Prod (lift 2 A) (Ref 2))).
-    rewrite <- (eq_term_lift_ref_fv 1 1 1) at 2 by omega.
+    rewrite <- (eq_term_lift_ref_fv 1 1 1) at 2 by lia.
     rewrite split_lift with (n:=1) (T:=A).
     unfold lift at 4. rewrite <- red_lift_prod.
     fold (lift 1 (Prod (lift 1 A) (Ref 1))).
@@ -449,7 +455,7 @@ apply typ_abs; [left; apply typ_prop| |discriminate].
       [apply typ_var; trivial|simpl; split; red; reflexivity].
 
    setoid_replace (Ref 2) with (subst (lift 3 t) (Ref 3)) using relation eq_term at 2; [
-     |unfold subst; rewrite red_sigma_var_gt; [reflexivity|omega]].
+     |unfold subst; rewrite red_sigma_var_gt; [reflexivity|lia]].
    apply typ_app with (V:=(lift 3 B)); 
      [| |destruct B; [discriminate|trivial]|discriminate].
     do 2 rewrite split_lift with (T:=t).
@@ -457,7 +463,7 @@ apply typ_abs; [left; apply typ_prop| |discriminate].
     rewrite split_lift with (T:=B) (n:=1) at 2.
     do 3 apply weakening; trivial.
 
-    rewrite <- (eq_term_lift_ref_fv 1 1 2) by omega.
+    rewrite <- (eq_term_lift_ref_fv 1 1 2) by lia.
     rewrite split_lift with (n:=2).
     unfold lift at 3. rewrite <- red_lift_prod.
     fold (lift 1 (Prod (lift 2 B) (Ref 2))).
@@ -482,23 +488,23 @@ fold (typ e (App (App (App t C) (Abs A t1)) (Abs B t2)) C).
 apply Impl_intro in Ht1; [|exact HA|exact HSC].
 apply Impl_intro in Ht2; [|exact HB|exact HSC].
 setoid_replace C with (subst (Abs B t2) (lift 1 C)) using relation eq_term at 2; [
-  |unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|omega]].
-apply typ_app with (V:=(Impl B C)); 
-  [| |discriminate|destruct C; [discriminate|]]; trivial.
+  |unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|lia]].
+apply typ_app with (V:=(Impl B C));
+  [trivial| |discriminate|destruct C; [discriminate|elim HSC;reflexivity]].
 setoid_replace (Prod (Impl B C) (lift 1 C)) with
   (subst (Abs A t1) (lift 1 (Prod (Impl B C) (lift 1 C)))) using relation eq_term; [
-    |unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|omega]].
+    |unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|lia]].
 apply typ_app with (V:=(Impl A C)); [trivial| |discriminate|discriminate].
 unfold Impl; unfold Disj in Ht.
 unfold lift at 2 3 4. do 2 rewrite red_lift_prod.
-rewrite lift_rec_acc; [simpl plus|omega].
+rewrite lift_rec_acc; [simpl plus|lia].
 fold (lift 1 B) (lift 2 C).
 assert (eq_term 
   (Prod (Prod A (lift 1 C)) (Prod (Prod (lift 1 B) (lift 2 C)) (lift 2 C)))
   (subst C (Prod (Prod (lift 1 A) (Ref 1))
     (Prod (Prod (lift 2 B) (Ref 2)) (Ref 2))))).
  unfold subst. do 4 rewrite red_sigma_prod.
- do 2 (rewrite subst_lift_lt by omega). rewrite lift0.
+ do 2 (rewrite subst_lift_lt by lia). rewrite lift0.
  do 2 (rewrite red_sigma_var_eq; trivial); reflexivity.
 
 rewrite H; clear H.
@@ -606,14 +612,14 @@ apply typ_abs; [right| |discriminate].
      [apply typ_var; trivial|simpl; split; red; reflexivity].
 
  setoid_replace (Ref 1) with (subst (lift 2 p) (Ref 2)) using relation eq_term; [
-   |unfold subst; rewrite red_sigma_var_gt; [reflexivity|omega]].
+   |unfold subst; rewrite red_sigma_var_gt; [reflexivity|lia]].
  apply typ_app with (V:=(lift 2 (subst a A))); 
    [| |destruct A; [discriminate|trivial]|discriminate].
   do 2 rewrite split_lift with (n:=1). do 2 apply weakening; trivial.
 
   assert (eq_term (Prod (lift 2 (subst a A)) (Ref 2)) 
     (subst (lift 2 a) (Prod (subst (Ref 0) (lift_rec 3 1 A)) (Ref 3)))).
-   unfold subst at 2. rewrite red_sigma_prod. rewrite red_sigma_var_gt; [|omega].
+   unfold subst at 2. rewrite red_sigma_prod. rewrite red_sigma_var_gt; [|lia].
    apply Prod_morph; [rewrite subst0_lift|reflexivity].
     apply eq_term_intro; intros.
      unfold lift, subst. rewrite int_lift_rec_eq.
@@ -632,9 +638,9 @@ apply typ_abs; [right| |discriminate].
 
     assert (eq_term (Prod (subst (Ref 0) (lift_rec 3 1 A)) (Ref 3))
       (lift_rec 1 1 (Prod (subst (Ref 0) (lift_rec 2 1 A)) (Ref 2)))).
-     rewrite red_lift_prod. rewrite eq_term_lift_ref_fv by omega.
+     rewrite red_lift_prod. rewrite eq_term_lift_ref_fv by lia.
      apply Prod_morph; [|simpl plus; reflexivity].
-      do 2 rewrite subst0_lift. rewrite lift_rec_acc; [simpl; reflexivity|omega].
+      do 2 rewrite subst0_lift. rewrite lift_rec_acc; [simpl; reflexivity|lia].
 
     rewrite H; clear H. rewrite split_lift with (n:=1).
     unfold lift at 2. rewrite <- red_lift_prod. apply typ_var; trivial.
@@ -658,16 +664,16 @@ apply typ_abs in Ht2; [|right|destruct C; [discriminate|]]; trivial.
 apply typ_abs in Ht2; [|left; apply typ_sort|discriminate].
 
 assert (eq_term C (subst (Abs sort (Abs A t2)) (lift 1 C))).
- unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|omega].
+ unfold subst; rewrite subst_lift_lt; [rewrite lift0; reflexivity|lia].
 
 rewrite H at 2; clear H.
 apply typ_app with (V:=(Prod sort (Prod A (lift 2 C))));
-  [|unfold Exst in Ht1|discriminate|destruct C; [discriminate|]]; trivial.
+  [trivial|unfold Exst in Ht1|discriminate|destruct C; [discriminate|elim HSC;reflexivity]].
 assert (eq_term (Prod (Prod sort (Prod A (lift 2 C))) (lift 1 C))
   (subst C (Prod (Prod (lift 1 sort) (Prod (subst (Ref 0) (lift_rec 2 1 A)) ((Ref 2)))) (Ref 1)))).
  unfold subst. do 3 rewrite red_sigma_prod. 
  rewrite (subst0_lift A 1). do 2 (rewrite red_sigma_var_eq; [|trivial]).
- rewrite subst_lift_lt; [rewrite lift0|omega].
+ rewrite subst_lift_lt; [rewrite lift0|lia].
  apply Prod_morph; [|reflexivity].
   apply Prod_morph; [reflexivity|].
    apply Prod_morph; [|reflexivity].
@@ -675,12 +681,12 @@ assert (eq_term (Prod (Prod sort (Prod A (lift 2 C))) (lift 1 C))
      rewrite int_subst_rec_eq. rewrite int_lift_rec_eq.
      apply int_morph; [reflexivity|do 2 red; intros].
       destruct a; unfold V.lams, V.shift; simpl; intros; 
-        [|replace (a-0) with a by omega]; reflexivity.
+        [|replace (a-0) with a by lia]; reflexivity.
 
      rewrite tm_subst_rec_eq. rewrite tm_lift_rec_eq.
      apply tm_morph; [reflexivity|do 2 red; intros].
       destruct a; unfold I.lams, I.shift; simpl; intros; 
-        [|replace (a-0) with a by omega]; reflexivity.
+        [|replace (a-0) with a by lia]; reflexivity.
 
 rewrite H; clear H.
 apply typ_app with (V:=prop); [| |discriminate|discriminate]; trivial.

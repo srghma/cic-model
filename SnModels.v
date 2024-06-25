@@ -62,7 +62,8 @@ Module Type SN_univ_addon (M : CC_Model) :=
 Module Type SAT_strong_addon (M : CC_Model).
   Import M.
 
-  (** Types are equipped with a saturated set for eachh value *)
+  (** Types are equipped with a saturated set for each value
+      [Real A x] is the set of realizers of value [x] in type [A] *)
   Parameter Real : X -> X -> SAT.
   Parameter Real_morph: Proper (eqX ==> eqX ==> eqSAT) Real.
 

@@ -8,12 +8,13 @@ Require Import Sublogic.
    and we show that U is a Grothendieck universe.
  *)
 
+Require EnsEm0.
+Require EnsEm.
+
 Module BuildUniverse (L:SublogicTheory).
 
 Import L.
 
-Require EnsEm0.
-Require EnsEm.
 Module S := EnsEm0.Ensembles L. (* small sets *)
 Module B := EnsEm.Ensembles L. (* big sets *)
 
@@ -368,21 +369,22 @@ intros.
 apply U_elim in H0; Tdestruct H0 as (a',?).
 (* We use collection on small sets *)
 destruct S.collection_ax with a' (fun x y => R (injU x) (injU y)) as (B,HB).
- do 3 red; intros.
++do 3 red; intros.
  apply H; apply lift_eq; trivial.
 
- Texists (injU B).
++Texists (injU B).
   apply U_intro.
  intros.
  Tdestruct (H1 _ H2).
  apply down_in_ex with (1:=H0) in H2.
  Tdestruct H2.
- refine (let h := HB _ H5 _ in _).
-  apply U_elim in H3; Tdestruct H3.
-  Texists x2.
-  revert H4; apply H; apply B.eq_set_sym; trivial.
- Tdestruct h.
- Texists (injU x2).
+ apply U_elim in H3; Tdestruct H3.
+ assert (#exists y, R (injU x1) (injU y)).
+ {Texists x2.
+  revert H4; apply H; apply B.eq_set_sym; trivial. }
+ apply HB in H6; trivial.  
+ Tdestruct H6.
+ Texists (injU x3).
   apply lift_in; trivial.
 
   revert H7; apply H; trivial.

@@ -3,7 +3,7 @@
 
 Set Implicit Arguments.
 (*Require Export Utf8_core.*)
-Require Export Minus Peano_dec Compare_dec Max.
+Require Export Peano_dec Compare_dec.
 Require Export List.
 Require Export Relations Relation_Operators Transitive_Closure.
 Require Import Wellfounded.
@@ -140,6 +140,14 @@ Instance Sym_respect A B (R:A->A->Prop) (R':B->B->Prop) :
   Symmetric (R ==> R')%signature.
 do 2 red; intros.
 symmetry; apply H1; symmetry; trivial.
+Qed.
+
+Instance trans_fun_morph A B (R:relation A) (S:relation B) :
+  Reflexive R ->
+  Transitive S ->
+  Transitive (R==>S)%signature.
+do 2 red; intros.
+transitivity (y x0); auto with *.
 Qed.
 
 Lemma morph_impl_iff1 : forall A (R:A->A->Prop) f,
@@ -292,42 +300,22 @@ Qed.
 
 (******************************************************************)
 (** More arithmetics... *)
-Require Import Omega.
+Require Import Lia.
 
 Lemma succ_max_distr : forall n m, S (max n m) = max (S n) (S m).
 induction n; destruct m; simpl; reflexivity.
 Qed.
 
 Lemma max_split1 : forall x y z, z < x -> z < max x y.
-induction x; simpl; intros.
- apply False_ind; omega.
-
- destruct y; trivial.
-  destruct z; try omega.
-   assert (z < x) by omega. specialize IHx with (1:=H0) (y:=y). omega.
+lia.
 Qed.
 
 Lemma max_split2 : forall x y z, z < y -> z < max x y.
-induction x; simpl; intros; trivial.
- destruct y; trivial.
-  apply False_ind; omega.
- 
-  destruct z; try omega.
-   assert (z < y) by omega. specialize IHx with (1:=H0). omega.
+lia.
 Qed.
 
 Lemma max_comb : forall x y z, z < max x y -> z < x \/ z < y.
-induction x; simpl; intros.
- right; trivial.
-
- destruct y.
-  left; trivial.
-
-  destruct z.
-   left; omega.
-
-   assert (z < max x y) by omega.
-   specialize IHx with (1:=H0). destruct IHx; [left | right]; omega.
+lia.
 Qed.
 
 Fixpoint plus_rev m n :=

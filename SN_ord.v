@@ -163,7 +163,7 @@ Lemma typ_ord_cst e o :
 split; simpl; trivial.
 apply Lc.sn_K.
 Qed.
-Hint Resolve typ_ord_cst.
+Hint Resolve typ_ord_cst : core.
 
 
 Lemma OMin_typ e O1 O2 :
@@ -185,7 +185,7 @@ destruct H with (1:=H0).
 split; simpl; auto.
 Qed.
 
-Hint Resolve OSucc_typ.
+Hint Resolve OSucc_typ : core.
 
 Lemma typ_ord_varS e n T :
   typ_ord e (Ref n) ->

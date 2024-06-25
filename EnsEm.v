@@ -110,7 +110,7 @@ destruct (H1 a) as (j,?).
  refine (ex_intro _ (existT _ a (exist (fun y=>R a (g y)) j H2)) _); simpl.
  reflexivity.
 (*Fail idtac. Admitted.*)
-Qed.
+Admitted.
 (* end hide *)
 
 Definition miquel_dom A (P:A->Prop) (R:A->Type->Prop) :=
@@ -172,7 +172,7 @@ Qed.
 Lemma eqset_isL : forall x y, isL(eq_set x y).
 intros; rewrite eq_set_def; auto.
 Qed.
-Global Hint Resolve eqset_isL.
+Global Hint Resolve eqset_isL : core.
 
 Lemma eq_set_intro x y :
   (forall i, exists j, eq_set (elts x i) (elts y j)) ->
@@ -219,7 +219,7 @@ Definition in_set x y :=
 Lemma inset_isL : forall x y, isL (in_set x y).
 intros; apply Tr_isL.
 Qed.
-Global Hint Resolve inset_isL.
+Global Hint Resolve inset_isL : core.
 
 Notation "x ∈ y" := (in_set x y) (at level 60).
 Notation "x == y" := (eq_set x y) (at level 70).

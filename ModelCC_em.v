@@ -14,8 +14,6 @@ Definition inX : X -> X -> Prop := in_set.
 Definition eqX : X -> X -> Prop := eq_set.
 Definition inclX : X -> X -> Prop := incl_set.
 Definition eqX_equiv : Equivalence eqX := eq_set_equiv.
-Notation "x ∈ y" := (inX x y).
-Notation "x == y" := (eqX x y).
 
 Lemma in_ext: Proper (eqX ==> eqX ==> iff) inX.
 Proof in_set_morph.
@@ -86,6 +84,9 @@ End ClassicCCM.
 
 (** * Instantiating the generic model construction *)
 
+Require Term Env.
+Require TypeJudge.
+
 Module BuildModel := MakeModel(ClassicCCM).
 
 Import BuildModel T J R.
@@ -103,8 +104,7 @@ Qed.
 
 (** The model in ZF implies the consistency of CC *)
 
-Require Import Term Env.
-Require Import TypeJudge.
+Import Term Env TypeJudge.
 Load "template/Library.v".
 
 Lemma mt_cl_props: empty ∈ cl_props.
@@ -117,7 +117,7 @@ apply subset_intro.
  intro in_mt.
  apply empty_ax in in_mt; trivial.
 Qed.
-Hint Resolve mt_cl_props.
+Hint Resolve mt_cl_props : core.
 
 Lemma em_consistent :
   let FF := T.Prod T.prop (T.Ref 0) in

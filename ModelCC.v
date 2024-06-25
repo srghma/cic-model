@@ -91,11 +91,33 @@ Definition CH_spec a f1 f2 z :=
      a == empty /\ z == app f2 (lam empty (fun _ => empty))
   \/ (exists w, w ∈ a) /\ z == app f1 (choose a).
 
+Lemma CH_spec_morph : Proper (eq_set==>eq_set==>eq_set==>eq_set==>iff) CH_spec.
+do 5 red; intros.
+unfold CH_spec.
+apply or_iff_morphism.
+ rewrite H,H1,H2; reflexivity.
+apply and_iff_morphism.
+ apply ex_iff_morphism.
+ red; intros.
+ rewrite H; reflexivity.
+
+ apply eq_set_morph; trivial.
+ apply cc_app_morph; trivial.
+ apply choose_morph; trivial.
+Qed.
+ 
 Parameter CH_spec_u : forall a f1 f2, uchoice_pred (CH_spec a f1 f2).
 
 Definition CH : term.
 left; exists (fun i => uchoice (CH_spec (i 3) (i 1) (i 0))).
-admit.
+do 2 red; intros.
+apply uchoice_morph.
+ apply CH_spec_u.
+ intros.
+ apply CH_spec_morph; auto with *.
+  apply H.
+  apply H.
+  apply H.
 Defined.
 
 (* forall X, X + (X->False) is inhabited *)
@@ -134,7 +156,7 @@ destruct H.
  refine (prod_elim _ _ _ _ _ H1 _).
   admit.
  apply choose_ax; trivial.
-Qed.
+Admitted.
 
 End TypChoice.
 (*end hide*)

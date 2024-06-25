@@ -42,7 +42,10 @@ Set Implicit Arguments.
 (** W-types *)
 
 Module Make (*(Import SM : CCforW)*) (Import W:Wconstructor (*SM*)).
-
+  Existing Instance mkw_morph.
+  Existing Instance w1_morph.
+  Existing Instance w2_morph.
+  
 Section Wtypes.
 
 Variable A : set.
@@ -115,7 +118,7 @@ apply sigmaReal_morph_gen; auto with *.
 
  rewrite H0; reflexivity.
 Qed.
-Hint Resolve rW_morph.
+Hint Resolve rW_morph : core.
 
 
 Lemma rW_mono : monoFam rW.
@@ -197,7 +200,7 @@ setoid_replace (C n) with (C (mkw (fst (couple (w1 n) (w2 n))) (snd (couple (w1 
 unfold rW in xreal; rewrite condSAT_ok in xreal.
 2:split;[rewrite n_eq; apply discr_mt_mkw|trivial].
 eapply Real_sigma_elim with (C:=fun c => C (mkw (fst c) (snd c))) (4:=xreal).
-3:apply couple_intro_sigma with (2:=ty1)(B:=fun a=>Π _ ∈ B a, cc_bot X)(3:=ty2).
+3:apply couple_intro_sigma with (2:=ty1)(B:=fun a=>Π __ ∈ B a, cc_bot X)(3:=ty2).
  do 2 red; intros.
  apply cc_arr_morph; auto with *.
 

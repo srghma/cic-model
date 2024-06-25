@@ -2,7 +2,7 @@
 *)
 
 Require Import List Bool Models TypModels.
-Require Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck.
+Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck.
 Require Import ZFfunext ZFind_w ZFfixrec.
 Require Import ModelCC ModelECC.
 
@@ -129,8 +129,6 @@ red; simpl; trivial.
 Qed.
 
 (** Constructor *)
-
-Require Import ZFpairs.
 
 Definition Wc (x:term) (f:term) : term.
 (* begin show *)
@@ -375,7 +373,7 @@ unfold WF'.
 apply W_F_mono; trivial.
 do 2 red; intros; apply Bw_morph; auto with *.
 Qed.
-  Hint Resolve WF'mono.
+  Hint Resolve WF'mono : core.
 
   Let Wi i o := TI (WF' A B i) o.
   Let F i := fun o' f => int M (V.cons f (V.cons o' i)).
@@ -394,7 +392,7 @@ Qed.
 do 2 red; intros.
 rewrite H0;reflexivity.
 Qed.
-  Hint Resolve U'morph morph_fix_body ext_fun_ty.
+  Hint Resolve U'morph morph_fix_body ext_fun_ty : core.
 
 
   Hypothesis var_mono_U :
@@ -571,7 +569,7 @@ eapply Hstab; clear Hstab; trivial.
  rewrite El_int_W_lift; auto.
 Qed.
 
-  Hint Resolve morph_fix_body ext_fun_ty ty_fix_body fix_codom_mono fix_body_irrel.
+  Hint Resolve morph_fix_body ext_fun_ty ty_fix_body fix_codom_mono fix_body_irrel : core.
 
 Lemma WREC_ok i :
   val_ok e i ->
@@ -582,7 +580,6 @@ assert (isOrd (int O i)).
  apply isOrd_inv with infty; auto.
 apply typed_recursor; auto.
 apply mkTypedRec; auto with *.
- apply TI_morph; auto with *.
 
  red; intros; apply TI_mono_eq; auto with *.
 
@@ -607,7 +604,6 @@ apply in_int_el.
 eapply eq_elim.
 2:simpl.
 2:apply typed_rec_typ with (1:=WREC_ok _ H); auto with *.
-2:reflexivity.
 apply cc_prod_ext.
  reflexivity.
 
@@ -617,6 +613,11 @@ apply cc_prod_ext.
  2:apply V.cons_morph; reflexivity.
  rewrite V.lams0.
  rewrite H3; reflexivity.
+
+ do 2 red; intros.
+ apply U'morph; auto with *.
+ 
+ reflexivity.
 Qed.
 
 (** Fixpoint equation. *)
@@ -678,6 +679,9 @@ eapply typed_recursor_ext with (3:=WREC_ok _ isval) (4:=WREC_ok _ isval'); auto 
 
   rewrite El_int_W_lift.
   simpl; auto.
+
+ do 2 red; intros; apply U'morph; auto with *.
+ do 2 red; intros; apply U'morph; auto with *.
 Qed.
 
 Lemma wfix_equals :
@@ -702,7 +706,6 @@ apply fcompat_typ_eq with (3:=fxs).
   apply in_int_not_kind in h.
   2:discriminate.
   exact h.
- do 2 red.
  assert (h:= H _ _ H0).
  apply TI_morph_gen; auto with *.
  red; intros.
@@ -845,7 +848,8 @@ apply G_incl with (TI (WF' A B i) (W_ord (int A i) (fun x => int B (V.cons x i))
    apply (ZFecc.ecc_grot (S n)).
 
    change (omega ∈ ZFecc.ecc (S n)); auto.
-
+   apply ZFecc.omega_in_ecc.
+   
   intros.
   apply G_W_F; auto.
    apply Bw_morph; reflexivity.

@@ -481,7 +481,7 @@ Lemma fun_elt_is_ext : forall A f,
 do 2 red; intros.
 apply couple_morph; auto.
 Qed.
-Hint Resolve fun_elt_is_ext.
+Hint Resolve fun_elt_is_ext : core.
 
 
 Lemma lam_is_function : forall A f, ext_fun A f -> is_function (lam A f).
@@ -571,7 +571,7 @@ do 2 red; intros.
 apply func_morph; auto.
 reflexivity.
 Qed.
-Hint Resolve func_is_ext.
+Hint Resolve func_is_ext : core.
 
 Lemma func_stable_class A K :
   stable_class K (func A).
@@ -979,7 +979,7 @@ do 2 red; intros.
 apply cc_lam_ext; try reflexivity; red; intros.
 apply app_morph; trivial.
 Qed.
-Hint Resolve cc_prod_fun1.
+Hint Resolve cc_prod_fun1 : core.
 
 Lemma cc_prod_is_cc_fun : forall A B f,
   f ∈ cc_prod A B -> is_cc_fun A f.
@@ -991,7 +991,7 @@ rewrite H0.
 apply is_cc_fun_lam; auto.
 do 2 red; intros; apply app_morph; auto with *.
 Qed.
-Hint Resolve cc_prod_is_cc_fun.
+Hint Resolve cc_prod_is_cc_fun : core.
 
 
 Definition cc_arr A B := cc_prod A (fun _ => B).

@@ -1,3 +1,4 @@
+Require Import Lia Inverse_Image.
 Require Lambda.
 Require Import ZF ZFuniv_real Sat SN_ECC_Real.
 
@@ -42,7 +43,7 @@ induction t; simpl int_term; intros.
 
  simpl; unfold V.lams, I.lams, V.shift, I.shift.
  destruct (le_gt_dec k n0); simpl.
-  replace (k+(n+(n0-k))) with (n+n0) by omega.
+  replace (k+(n+(n0-k))) with (n+n0) by lia.
   split; red; auto.
 
   split; red; auto.
@@ -215,9 +216,11 @@ induction 1; simpl; intros.
     destruct s3; try discriminate.
     destruct (eq_nat_dec n n0); try discriminate.
     subst n0.
-    apply typ_predicative_prod; trivial.
-    apply typ_type_cumul_le with 0; auto with *.
-    apply typ_prop_cumul; trivial.
+    apply typ_predicative_prod.
+      apply typ_type_cumul_le with 0. auto with arith.
+      apply typ_prop_cumul.
+      assumption.
+      assumption.
 
    (* impredicative case *)
    destruct s3; try discriminate.

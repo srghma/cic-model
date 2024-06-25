@@ -13,7 +13,7 @@ Qed.
     Lemma star_trans R0 x y z : star_rel R0 x y -> star_rel R0 y z -> star_rel R0 x z.
 intros; apply t_trans with y; trivial.
 Qed.      
-Hint Resolve star_refl star_step.
+Hint Resolve star_refl star_step : core.
 
 
   Lemma star_rel_gen_mono :
@@ -263,10 +263,8 @@ assert (WFR_rel x (F (fun x => empty) x)).
  red; intros.
  setoid_replace (F (fun _ => empty) x) with (F' (fun x => x) x).
   apply H0; auto with *.
-   do 2 red; trivial.
-   
-   intros.
-   elim bot with (1:=H1).
+  intros.
+  elim bot with (1:=H1).
  apply Fext; reflexivity.
 assert (u: forall y y', WFR_rel x y -> WFR_rel x y' -> y==y').
  intros.

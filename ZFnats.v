@@ -72,7 +72,7 @@ Lemma le_refl : forall n, n <= n.
 intros.
 apply succ_intro1; reflexivity.
 Qed.
-Hint Resolve lt_is_le le_refl.
+Hint Resolve lt_is_le le_refl : core.
 
 
 (* building the set of natural numbers *)
@@ -340,7 +340,7 @@ elim le_total with m n; trivial; intros.
   rewrite (max_sym m n).
   rewrite (max_lt n m); trivial.
 Qed.
-Hint Resolve max_le_l max_le_r max_typ.
+Hint Resolve max_le_l max_le_r max_typ : core.
 
 (* nat -> set *)
 Fixpoint nat2set (n:nat) : set :=

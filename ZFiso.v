@@ -1,7 +1,8 @@
-Require Import basic ZF ZFpairs ZFsum ZFrelations.
+Require Import basic ZFpairs ZFsum ZFrelations.
 Require Import ZFcont.
 Require Import ZFord ZFfix ZFfunext ZFfixrec.
 Require Import ZFfixfun.
+Import ZF.
 
 Set Implicit Arguments.
 
@@ -45,7 +46,9 @@ Instance iso_fun_morph : Proper (eq_set==>eq_set==>(eq_set==>eq_set)==>iff) iso_
 apply morph_impl_iff3; auto with *.
 do 4 red; intros.
 red; apply iso_fun_ext; trivial.
- red; transitivity x1; auto with *.
+ do 3 red; intros.
+ transitivity (x1 x2); auto with *.
+ symmetry; apply H1; auto with *.
 
  red; auto.
 Qed.
@@ -79,7 +82,6 @@ Qed.
 Lemma id_iso_fun : forall X, iso_fun X X (fun x => x).
 intros.
 apply eq_iso_fun; auto with *.
-do 2 red; auto.
 Qed.
 
 (** Inverse and symmetry *)
@@ -695,8 +697,6 @@ Lemma sigma_iso_fun_1_l' : forall x F,
   iso_fun (F x) (sigma (singl x) F) (couple x).
 intros.
 constructor; intros; auto with *.
- do 2 red; intros; apply couple_morph; auto with *.
-
  red; intros.
  apply couple_intro_sigma; auto.
  apply singl_intro.
@@ -2014,7 +2014,6 @@ constructor; intros.
  apply TI_mono_eq; auto.
 
  revert H3; apply iso_fun_ext; auto with *.
-  apply cc_app_morph; reflexivity.
   apply TI_morph; trivial.
   apply TI_morph; trivial.
 
@@ -2058,8 +2057,6 @@ constructor; intros.
  2:rewrite TI_mono_succ in H; auto with *.
  unfold isoF; rewrite cc_beta_eq; auto.
   apply (@gext o); auto with *.
-   apply cc_app_morph; auto with *.
-
    red; intros.
    rewrite <- H2; auto.
 

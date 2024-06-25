@@ -93,8 +93,8 @@ red; intros.
 
  red; intros.
  rewrite sup_ax.
-rewrite (dpm_iso _ H) in H1.
-assert (H1' := subset_elim1 _ _ _ H1).
+ rewrite (dpm_iso _ H) in H1; trivial.
+ assert (H1' := subset_elim1 _ _ _ H1).
 Admitted.
 
 Lemma dINDi_dIND : forall p o,
@@ -317,7 +317,7 @@ constructor; simpl; intros.
   apply sum_ind with (3:=H1); intros.
 *)
  admit.
-Qed.
+Admitted.
 
 Definition dpos_consrec (F G:dpositive) :=
   mkDPositive (pos_consrec F G)
@@ -329,7 +329,7 @@ Lemma isDPos_consrec F G :
   isDPositive F ->
   isDPositive G ->
   isDPositive (dpos_consrec F G).
-intros (Fp,Fdm,Fdmo,F3m,F4m,Fty) (Gp,Gdm,Gdmo,G3m,G4m,Gty).
+intros (Fp,Fdm,Fdmo,F3m,F4m,Fty,?) (Gp,Gdm,Gdmo,G3m,G4m,Gty,?).
 constructor; simpl; intros.
  apply isPos_consrec; trivial.
 
@@ -376,7 +376,7 @@ constructor; simpl; intros.
   apply snd_typ in H; trivial.
 
  admit.
-Qed.
+Admitted.
 
 Definition dpos_norec (A:set) (F:set->dpositive) :=
   mkDPositive (pos_norec A F)
@@ -442,7 +442,7 @@ constructor; simpl; intros.
   apply H4.
 
  admit.
-Qed.
+Admitted.
 
 Definition dpos_param (A:set) (F:set->dpositive) :=
   mkDPositive (pos_param A F)
@@ -501,7 +501,7 @@ constructor; simpl; intros.
   rewrite H4; reflexivity.
 
  admit.
-Qed.
+Admitted.
 
 
 End InductiveFamily.
@@ -535,7 +535,7 @@ apply isDPos_sum.
    apply isDPos_rec; trivial.
 
    apply isDPos_inst.
-Qed.
+Admitted.
 
 Definition nil := inl empty.
 
@@ -561,7 +561,8 @@ Lemma cons_typ A X k x l :
 simpl; intros.
 apply inr_typ.
 apply couple_intro_sigma; trivial.
- admit.
+ do 2 red; intros.
+ rewrite H4; reflexivity.
 
  apply couple_intro; trivial.
  apply couple_intro; trivial.
@@ -607,7 +608,13 @@ Lemma sup_typ X x h :
   Wsup x h ∈ dpos_oper Wdp X (g x).
 simpl; intros.
 apply couple_intro_sigma; trivial.
- admit.
+ do 2 red; intros.
+ apply prodcart_morph.
+  apply cc_prod_ext; auto.
+  red; intros; apply H. 
+  apply fm; auto.
+ apply cond_set_morph; auto with *.
+ rewrite H4; reflexivity.
 
  apply couple_intro.
   apply cc_prod_intro; intros; auto with *.

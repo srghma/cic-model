@@ -75,7 +75,7 @@ Instance Fmono_morph F : Proper (incl_set==>incl_set) F -> morph1 F.
 do 2 red; intros.
 apply incl_eq; apply H; rewrite H0; reflexivity.
 Qed.
-Hint Resolve Fmono_morph.
+Hint Resolve Fmono_morph : core.
 
 (** Extensional equivalences *)
 
@@ -112,12 +112,12 @@ Lemma morph_is_ext : forall F X, morph1 F -> ext_fun X F.
 red; red; intros.
 apply H; trivial.
 Qed.
-Hint Resolve morph_is_ext.
+Hint Resolve morph_is_ext : core.
 
 Lemma cst_is_ext : forall X o, ext_fun o (fun _ => X).
 do 2 red; reflexivity.
 Qed.
-Hint Resolve cst_is_ext.
+Hint Resolve cst_is_ext : core.
 
 Definition eq_pred dom (P Q : set -> Prop) :=
   forall x, x ∈ dom -> (P x <-> Q x).
@@ -191,7 +191,7 @@ elim (pair_ax x y y); intros; auto.
 apply H0; right; reflexivity.
 Qed.
 
-Hint Resolve pair_intro1 pair_intro2.
+Hint Resolve pair_intro1 pair_intro2 : core.
 
 Lemma pair_elim : forall x a b, x ∈ pair a b -> x == a \/ x == b.
 Proof.
@@ -320,7 +320,7 @@ apply power_intro; intros.
 elim empty_ax with (1:=H).
 Qed.
 
-Hint Resolve empty_incl_all empty_in_power.
+Hint Resolve empty_incl_all empty_in_power : core.
 
 Lemma union_in_power :
     forall x X, x ⊆ power X -> union x ∈ power X.
@@ -899,7 +899,7 @@ red; intros.
 rewrite sup_ax; trivial.
 exists x; trivial.
 Qed.
-Hint Resolve sup_incl.
+Hint Resolve sup_incl : core.
 
 Lemma sup_lub x f A :
   ext_fun x f ->

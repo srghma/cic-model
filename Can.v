@@ -53,18 +53,18 @@ Qed.
 
 
   Lemma cand_sn : is_cand sn.
-constructor; intros; auto with coc.
+constructor; intros; auto.
 
-apply sn_red_sn with t; auto with coc.
+apply sn_red_sn with t; auto.
 
-red in |- *; apply Acc_intro; auto with coc.
+red in |- *; apply Acc_intro; auto.
 Qed.
 
-  Hint Resolve  incl_sn cand_sn: coc.
+  Hint Resolve  incl_sn cand_sn: core.
 
   Lemma var_in_cand : forall n X, is_cand X -> X (Ref n).
 intros.
-apply (clos_exp X); auto with coc.
+apply (clos_exp X); auto.
  exact I.
 
  intros.
@@ -120,11 +120,11 @@ trivial.
 (* reduction in body *)
 apply IHm; trivial.
 apply clos_red with (subst u m); trivial.
-unfold subst; auto with coc.
+unfold subst; auto.
 (* reduction in arg *)
-apply IHu; auto with coc.
+apply IHu; auto.
 apply clos_red with (subst u m); trivial.
-unfold subst; auto with coc.
+unfold subst; auto.
 Qed.
 
 
@@ -132,12 +132,12 @@ Qed.
 
   Definition eq_cand (X Y:CR) := forall t : term, X t <-> Y t.
 
-  Hint Unfold eq_cand: coc.
+  Hint Unfold eq_cand: core.
 
   Lemma eq_cand_incl : forall t X Y, eq_cand X Y -> X t -> Y t.
 Proof.
 intros.
-elim H with t; auto with coc.
+elim H with t; auto.
 Qed.
 
 (* Intersection of candidates *)
@@ -237,7 +237,7 @@ split; intros.
  destruct H.
  destruct H1.
  split.
-  apply sn_red_sn with t; auto with coc.
+  apply sn_red_sn with t; auto.
 
   exists x; trivial.
   destruct H2.
@@ -257,7 +257,7 @@ split; intros.
   destruct H0.
   destruct H2.
   exists x0; trivial.
-  transitivity x; auto with coc.
+  transitivity x; auto.
 
   exists t; auto with *.
 Qed.
@@ -275,7 +275,6 @@ Section Completion.
 split.
  intros.
  apply (H sn); auto.
- apply cand_sn.
 
  red; intros.
  apply (clos_red C) with t; auto.
@@ -308,7 +307,6 @@ apply H; intros.
     destruct H2.
     exists x; trivial.
     apply trans_conv_conv with t0; auto.
-    apply red_sym_conv; trivial.
 
     right.
     apply (clos_red Neu) with t0; trivial.
@@ -330,7 +328,7 @@ apply H; intros.
      destruct H4.
      exists x0; trivial.
      apply trans_conv_conv with x; trivial.
-     apply red_conv; auto with coc.
+     apply red_conv; auto.
 
      right.
      destruct H4.
@@ -340,7 +338,6 @@ apply H; intros.
 
       exists x0; trivial.
       apply red_trans with x; auto.
-      apply one_step_red; auto.
 
     right.
     split.
@@ -395,31 +392,31 @@ unfold Arr in |- *; intros X Y Hne Y_cand.
 constructor.
  intros t app_in_can.
  destruct (wk_wit _ Hne) as (w,?).
- apply subterm_sn with (App t w); auto with coc.
- apply (incl_sn Y); auto with coc.
+ apply subterm_sn with (App t w); auto.
+ apply (incl_sn Y); auto.
 
  intros.
- apply (clos_red Y) with (App t u0); auto with coc.
+ apply (clos_red Y) with (App t u0); auto.
 
  intros t t_neutr clos_exp_t u u_in_X.
- apply (clos_exp Y); auto with coc.
+ apply (clos_exp Y); auto.
   exact I.
 
   generalize u_in_X.
   assert (u_sn: sn u).
-   apply (wk_sn X); auto with coc.
+   apply (wk_sn X); auto.
   clear u_in_X.
   elim u_sn.
   intros v _ v_Hrec v_in_X w red_w.
   revert t_neutr.
-  inversion_clear red_w; intros; auto with coc.
+  inversion_clear red_w; intros; auto.
    destruct t_neutr.
 
-   apply (clos_exp Y); intros; auto with coc.
+   apply (clos_exp Y); intros; auto.
     exact I.
 
-    apply v_Hrec with N2; auto with coc.
-    apply (wk_red X) with v; auto with coc.
+    apply v_Hrec with N2; auto.
+    apply (wk_red X) with v; auto.
 Qed.
 
   Lemma weak_Abs_sound_Arr :
@@ -429,11 +426,11 @@ Qed.
    (forall n, X n -> Y (subst n m)) ->
    Arr X Y (Abs m).
 unfold Arr in |- *; intros.
-apply (clos_exp Y); intros; auto with coc.
+apply (clos_exp Y); intros; auto.
  exact I.
 
- apply clos_red with (App (Abs m) u); auto with coc.
- apply (cand_sat Y); auto with coc.
+ apply clos_red with (App (Abs m) u); auto.
+ apply (cand_sat Y); auto.
 Qed.
 
 
@@ -451,12 +448,12 @@ Qed.
    (forall n, X n -> Y (subst n m)) ->
    Arr X Y (Abs m).
 unfold Arr in |- *; intros.
-apply (clos_exp Y); intros; auto with coc.
+apply (clos_exp Y); intros; auto.
  exact I.
 
- apply clos_red with (App (Abs m) u); auto with coc.
- apply (cand_sat Y); auto with coc.
- right; apply (incl_sn X); auto with coc.
+ apply clos_red with (App (Abs m) u); auto.
+ apply (cand_sat Y); auto.
+ right; apply (incl_sn X); auto.
 Qed.
 
 
@@ -482,33 +479,33 @@ Qed.
 unfold Pi in |- *; intros X Y X_can Y_can.
 constructor.
  intros t app_in_can.
- apply subterm_sn with (App t (Ref 0)); auto with coc.
- apply (incl_sn (Y (Ref 0))); auto with coc.
- apply app_in_can; auto with coc.
-  apply var_in_cand with (X:=X); auto with coc.
-  apply var_in_cand with (X:=X); auto with coc.
+ apply subterm_sn with (App t (Ref 0)); auto.
+ apply (incl_sn (Y (Ref 0))); auto.
+ apply app_in_can; auto.
+  apply var_in_cand with (X:=X); auto.
+  apply var_in_cand with (X:=X); auto.
 
  intros.
- apply (clos_red (Y u')) with (App t u0); auto with coc.
+ apply (clos_red (Y u')) with (App t u0); auto.
 
  intros t t_neutr clos_exp_t u u' redu u_in_X u'_in_X.
- apply (clos_exp (Y u')); auto with coc.
+ apply (clos_exp (Y u')); auto.
   exact I.
 
   assert (u_sn: sn u).
-   apply (incl_sn X); auto with coc.
+   apply (incl_sn X); auto.
   revert u' redu u_in_X u'_in_X.
   elim u_sn.
   intros v _ v_Hrec u' redu v_in_X u'_in_X w red_w.
   revert t_neutr.
-  inversion_clear red_w; intros; auto with coc.
+  inversion_clear red_w; intros; auto.
    destruct t_neutr.
 
-   apply (clos_exp (Y u')); intros; auto with coc.
+   apply (clos_exp (Y u')); intros; auto.
     exact I.
 
-    apply v_Hrec with N2; eauto with coc.
-    apply (clos_red X) with v; auto with coc.
+    apply v_Hrec with N2; eauto.
+    apply (clos_red X) with v; auto.
 Qed.
 
   Lemma Abs_sound_Pi :
@@ -518,12 +515,12 @@ Qed.
    (forall n n', X n -> X n' -> conv n' n -> Y n' (subst n m)) ->
    Pi X Y (Abs m).
 unfold Pi in |- *; intros.
-apply (clos_exp (Y u')); intros; auto with coc.
+apply (clos_exp (Y u')); intros; auto.
  exact I.
 
- apply clos_red with (App (Abs m) u); auto with coc.
- apply (cand_sat (Y u')); auto with coc.
- right; apply (incl_sn X); auto with coc.
+ apply clos_red with (App (Abs m) u); auto.
+ apply (cand_sat (Y u')); auto.
+ right; apply (incl_sn X); auto.
 Qed.
 
 

@@ -1,5 +1,5 @@
 Require Import List.
-Require Import Omega.
+Require Import Lia.
 
 (******************************************************************************************)
 (******************************************************************************************)
@@ -167,11 +167,11 @@ induction f; simpl; intros; try reflexivity; trivial.
 
  do 2 rewrite in_app_iff. rewrite IHf1, IHf2; reflexivity.
 
- replace (S (k + k'+ k'')) with (k + k' + S k'') by omega.
- replace (S (k + k'')) with (k + S k'') by omega. apply IHf; trivial.
+ replace (S (k + k'+ k'')) with (k + k' + S k'') by lia.
+ replace (S (k + k'')) with (k + S k'') by lia. apply IHf; trivial.
 
- replace (S (k + k'+ k'')) with (k + k' + S k'') by omega.
- replace (S (k + k'')) with (k + S k'') by omega. apply IHf; trivial.
+ replace (S (k + k'+ k'')) with (k + k' + S k'') by lia.
+ replace (S (k + k'')) with (k + S k'') by lia. apply IHf; trivial.
 Qed.
 
 Lemma in_fv_fml_subst_split : forall g n N k k',
@@ -201,9 +201,9 @@ induction g; simpl; intros; try contradiction; trivial.
 
   destruct H; [left|right; right]; trivial.
 
- replace (S (k + k')) with (k + S k') in H |- * by omega. apply IHg in H; trivial.
+ replace (S (k + k')) with (k + S k') in H |- * by lia. apply IHg in H; trivial.
 
- replace (S (k + k')) with (k + S k') in H |- * by omega. apply IHg in H; trivial.
+ replace (S (k + k')) with (k + S k') in H |- * by lia. apply IHg in H; trivial.
 Qed.
 
 Lemma in_fv_fml_subst : forall f n N k k',
@@ -224,9 +224,9 @@ induction f; simpl; intros; trivial.
  rewrite in_app_iff in H |- *.
  destruct H; [left; apply IHf1|right; apply IHf2]; trivial.
 
- replace (S (k + k')) with (k + S k') in H |- * by omega. apply IHf; trivial.
+ replace (S (k + k')) with (k + S k') in H |- * by lia. apply IHf; trivial.
 
- replace (S (k + k')) with (k + S k') in H |- * by omega. apply IHf; trivial.
+ replace (S (k + k')) with (k + S k') in H |- * by lia. apply IHf; trivial.
 Qed.
 
 (*Context is a list of foterm or formula*)
@@ -247,7 +247,7 @@ Lemma wf_weakening : forall hyp t f',
   wf_fml hyp f'.
 intros; red in H |- *; intros. specialize H with (n:= S n).
 unfold fv_fml in H, H0. rewrite in_S_fv_fml in H.
-unfold lift_fml in H. replace 1 with (0+1+0) in H by omega.
+unfold lift_fml in H. replace 1 with (0+1+0) in H by lia.
 rewrite in_fv_fml_lift in H. simpl in H. apply H in H0; trivial.
 Qed.
 
@@ -356,13 +356,13 @@ induction 1; trivial.
 
  red in IHderiv |- *. unfold fv_fml in IHderiv |- *. simpl; intros.
  simpl in IHderiv. unfold subst_fml in H1.
- replace 0 with (0+0) in H1 by omega. apply in_fv_fml_subst_split in H1.
+ replace 0 with (0+0) in H1 by lia. apply in_fv_fml_subst_split in H1.
  destruct H1; [apply H in H1
    |rewrite in_S_fv_fml in H1; simpl in H1; apply IHderiv in H1]; trivial.
 
  red in IHderiv |- *. unfold fv_fml in IHderiv |- *. simpl in IHderiv |- *.
  intros; apply IHderiv. rewrite <- in_S_fv_fml in H1.
- unfold subst_fml. replace 0 with (0+0) in H1 |- * by omega.
+ unfold subst_fml. replace 0 with (0+0) in H1 |- * by lia.
  apply in_fv_fml_subst; trivial.
   
  unfold lift_fml in IHderiv2. rewrite lift_fml_split in IHderiv2.

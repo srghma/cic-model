@@ -31,6 +31,8 @@ End SimpleNats.
 (** A functor producing the realizability familes associated to natural
     numbers, given the set-theoretical intrepretation. *)
 Module Make (Import S:Sets)(Import N:SimpleNats S).
+  Existing Instance S.eqX_equiv.
+  Existing Instance S.in_ext.
   
 (** Quantification over families *)
 Definition piFAM F :=
@@ -67,7 +69,7 @@ do 3 red; intros.
 apply piFAM_morph.
 red; intros.
 apply prodSAT_morph.
- apply H1; reflexivity.
+  apply H1; reflexivity.
 
  apply prodSAT_morph; auto.
  apply interSAT_morph.

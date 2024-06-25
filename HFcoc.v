@@ -68,6 +68,7 @@ apply repl_ext; intros.
 
  specialize subset_elim1 with (1 := H1); intro.
  specialize subset_elim2 with (1:=Pm) (2 := H1); clear H1; intro.
+ cbv beta in H1.
  elim union_elim with (1 := H2); clear H2; intros.
  elim repl_elim with (1:=Pm') (2 := H3); clear H3; intros.
  assert (Pm'': ext_fun (F x1) (fun y' => couple x1 y')).
@@ -107,7 +108,7 @@ red; red; intros.
 apply cc_lam_ext; try reflexivity.
 red; intros; apply app_morph; trivial.
 Qed.
-Hint Resolve beta_morph.
+Hint Resolve beta_morph : core.
 
 Lemma cc_prod_ext :
   forall x1 x2 f1 f2,

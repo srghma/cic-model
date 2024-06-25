@@ -1,4 +1,5 @@
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
+Require Import ZFgrothendieck.
 Require Import ZFlist ZFfixfun.
 Import ZFrepl.
 Existing Instance TIF_morph.
@@ -493,7 +494,7 @@ constructor; intros.
   do 2 red; intros.
   rewrite H4; reflexivity.
 
-  specialize ty2 with (1:=H2).
+  specialize ty2 with (1:=H3).
   apply (iso_typ (H1 _ (ftyp _ _ _ tya tyx H3))).
   apply subset_intro; auto.
   rewrite inst in H3,tyx|-*.
@@ -2052,8 +2053,6 @@ Lemma W_ord_a_smaller a :
 unfold W_ord_a.
 intros.
 apply smaller_parameter with (g:=Dec a); intros; auto with *.
- apply Dec_morph; reflexivity.
-
  apply Dec_typ; trivial.
 
  reflexivity.
@@ -2096,7 +2095,6 @@ Qed.
  *)
 
 Section UniverseFacts.
-
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
   Hypothesis Unontriv : omega ∈ U.  

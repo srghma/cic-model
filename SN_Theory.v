@@ -199,7 +199,7 @@ induction n; simpl; intros.
  specialize env_incl_cons with (1:=H); intro H'.
  apply IHn in H'; clear IHn.
  unfold env_incl in H. 
- destruct H with (n0:=0) (t:=sort); [split; [simpl; trivial|apply sort_not_kind]|clear H].
+ destruct H with (n:=0) (t:=sort); [split; [simpl; trivial|apply sort_not_kind]|clear H].
  destruct H' as (es, H).
  exists (sub_cons (Ref x) es).
  red; simpl; intros. apply H1 in H0. apply H in H1.
@@ -207,7 +207,7 @@ induction n; simpl; intros.
    [|case_eq sort; [discriminate|intro HF; apply sort_not_kind in HF; contradiction]].
  apply vcons_add_var; [trivial| |apply sort_not_kind].
   unfold lift in H0; rewrite int_lift_rec_eq in H0.
-  revert H0; apply real_morph; [|apply sort_closed|]; reflexivity.
+  revert H0; apply real_morph; [| |apply sort_closed]; reflexivity.
 Qed.
 
 Lemma SN_T : forall e x y,

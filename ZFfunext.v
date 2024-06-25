@@ -101,7 +101,7 @@ apply eq_intro; intros.
   rewrite sup_ax in H1; trivial.
   destruct H1.
   rewrite couple_in_app in H2.
-  specialize in_prod with (1:=H1).
+  assert (in_prd := in_prod _ H1).
   apply fdir with x1; trivial.
 Qed.
 

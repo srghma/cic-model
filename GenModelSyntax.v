@@ -1,16 +1,15 @@
-Require Import List.
+Require Import Lia List.
 Require Import Models.
 Require Import TypeJudge.
 Require GenModel.
 
 (* Finally introducing the syntax... *)
 
-Module MakeModel (M : CC_Model).
-
+Module MakeModel (Import M : CC_Model).
 Include GenModel.MakeModel M.
 Import T.
 Import Term.
-
+  
 Fixpoint int_trm t :=
   match t with
   | Srt prop => T.prop
@@ -31,7 +30,7 @@ induction t; intros.
 
  simpl; unfold V.lams, V.shift.
  destruct (le_gt_dec k n0); simpl.
-  replace (k+(n+(n0-k))) with (n+n0) by omega.
+  replace (k+(n+(n0-k))) with (n+n0) by lia.
   red; auto.
 
   red; auto.
@@ -86,16 +85,16 @@ induction t; intros.
  simpl subst_rec.
  destruct (lt_eq_lt_dec k n) as [[fv|eqv]|bv]; simpl.
   simpl; unfold V.lams, V.shift;
-   destruct (le_gt_dec k n); try (apply False_ind; omega; fail).
-  replace (n-k) with (S(pred n-k)) by omega; simpl.
-  replace (k+(pred n-k)) with (pred n) by omega; red; auto.
+   destruct (le_gt_dec k n); try (apply False_ind; lia).
+  replace (n-k) with (S(pred n-k)) by lia; simpl.
+  replace (k+(pred n-k)) with (pred n) by lia; red; auto.
 
   case_eq (int_trm (lift k arg)); [intros (a,am) arg_eq;simpl|intro arg_eq].
    red; intros.
    subst k.
    unfold V.lams; simpl.
    destruct (le_gt_dec n n).
-   2:apply False_ind; omega.
+   2:apply False_ind; lia.
    replace (n-n) with 0; auto with arith; simpl.
    setoid_replace (V.shift n x) with (V.lams 0 (V.shift n) x).
    2:symmetry; apply V.lams0.
@@ -112,7 +111,7 @@ induction t; intros.
     discriminate.
 
   simpl; unfold V.lams, V.shift;
-   destruct (le_gt_dec k n); try (apply False_ind; omega; fail).
+   destruct (le_gt_dec k n); try (apply False_ind; lia).
   red; intros; auto.
 
  simpl; red; intros.
@@ -159,7 +158,7 @@ destruct s; trivial; discriminate.
 destruct T1; discriminate.
 Qed.
 
-Hint Resolve int_not_kind eq_typ_not_kind.
+Hint Resolve int_not_kind eq_typ_not_kind : core.
 
 
 Lemma int_sound : forall e M M' T,

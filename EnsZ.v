@@ -98,7 +98,7 @@ Qed.
 Lemma incl_set_isL x y : isL (incl_set x y).
 apply fa_isL; auto using in_set_isL.
 Qed.
-Hint Resolve eq_set_isL incl_set_isL in_set_isL.
+Hint Resolve eq_set_isL incl_set_isL in_set_isL : core.
 
 
 Lemma eq_elim0 x y i :
@@ -302,7 +302,7 @@ Qed.
   
  Definition union (x:set) :=
   isup {i:idx x & idx (elts x i)}
-    (fun p => elts (elts x (projS1 p)) (projS2 p)).
+    (fun p => elts (elts x (projT1 p)) (projT2 p)).
 
 Lemma union_ax : forall a z,
   in_set z (union a) <-> #exists2 b, in_set z b & in_set b a.

@@ -94,7 +94,7 @@ Admitted.
   Parameter imp_isL : forall P Q, isL Q -> isL (P -> Q).
   Parameter iff_isL : forall P Q, isL P -> isL Q -> isL (P <-> Q).
 
-Global Hint Resolve Tr_isL T_isL and_isL fa_isL imp_isL iff_isL.
+Global Hint Resolve Tr_isL T_isL and_isL fa_isL imp_isL iff_isL : core.
 
   Parameter rFF : forall (Q:Prop), Tr False -> Tr Q.
   Parameter rFF': forall (Q:Prop), Tr False -> isL Q -> Q.
@@ -205,7 +205,7 @@ Lemma iff_isL : forall P Q, isL P -> isL Q -> isL (P <-> Q).
 intros; apply and_isL; apply imp_isL; trivial.
 Qed.
 
-Global Hint Resolve Tr_isL T_isL and_isL fa_isL imp_isL iff_isL.
+Global Hint Resolve Tr_isL T_isL and_isL fa_isL imp_isL iff_isL : core.
 
 (** Elimination rules for falsity *)
 
@@ -267,7 +267,7 @@ Module BuildConsistentSublogic (L:ConsistentSublogic).
 Lemma FF_isL : isL False.
 Proof L.TrCons.
 
-Global Hint Resolve FF_isL.
+Global Hint Resolve FF_isL : core.
 
 End BuildConsistentSublogic.
 
@@ -350,7 +350,7 @@ Qed.
 Lemma or_isL P Q : isL P \/ isL Q -> isL (P\/Q).
 firstorder.
 Qed.
-Global Hint Resolve or_isL.
+Global Hint Resolve or_isL : core.
 
 (** existential does need to be modified when one of the
    instances is an L-prop. *)
@@ -368,7 +368,7 @@ compute; intros.
 destruct H0; trivial.
 exists X; auto.
 Qed.
-Global Hint Resolve ex_isL.
+Global Hint Resolve ex_isL : core.
 
 Lemma FF_a : Tr False <-> A.
 split.
@@ -836,7 +836,7 @@ End SubLogicFacts.
 Section Coq.
 
 Definition coq := fun (P:Prop) => P.
-Instance coq_logic : sub_logic := { P2p := coq }.
+#[refine] Instance coq_logic : sub_logic := { P2p := coq }.
 firstorder.
 firstorder.
 firstorder.
@@ -853,7 +853,7 @@ End Coq.
 Section Classic.
 Definition nnt (P:Prop) := ~~P.
 
-Instance classic_logic : sub_logic := { P2p := nnt }.
+#[refine]Instance classic_logic : sub_logic := { P2p := nnt }.
 exact (fun P Q (f:P->Q) (nnp:~~P) (nq:~Q) => nnp(fun p => nq(f p))).
 exact (fun P nnnnp np => nnnnp(fun nnp => nnp np)).
 exact (fun P p => fun np => np p).
@@ -876,7 +876,7 @@ Section Atrans.
 
 Definition Atr A P := P \/ A.
 
-Instance Atrans A : sub_logic := { P2p := Atr A }.
+#[refine]Instance Atrans A : sub_logic := { P2p := Atr A }.
 exact (fun P Q (f:P->Q) (p:P\/A) =>
   match p with
   | or_introl p => or_introl (f p)
@@ -925,7 +925,7 @@ Section PeirceTrans.
 
 Definition Ptr (R A:Prop) := (A->R)->A.
 
-Instance Ptrans R : sub_logic := { P2p := Ptr R }.
+#[refine]Instance Ptrans R : sub_logic := { P2p := Ptr R }.
 firstorder.
 firstorder.
 firstorder.

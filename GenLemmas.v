@@ -1,8 +1,8 @@
 (*This files are the defintions and lemmas about general SN model*)
+Require Import Lia.
 Require Export basic ZF SN_CC_Real ZFuniv_real.
+Import SN.Notations.
 Module Lc := Lambda.
-
-Reserved Notation "[ x , t ] \real A" (at level 60).
 
 (***************************************************************************************)
 (*This following lemmas should be put in ObjectSN, about properties of lift and subst*)
@@ -14,21 +14,21 @@ Lemma lift_rec_acc : forall t m n p q,
 intros; apply eq_term_intro; intros; [| |destruct t; simpl; trivial].
  do 3 rewrite int_lift_rec_eq. unfold V.lams, V.shift. apply int_morph; [reflexivity|].
   do 2 red; intros. destruct (le_gt_dec q a) as [le|gt].
-   replace (q+(n+(a-q))) with (n+a) by omega.
-   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|omega].
-    replace (p+(m+(n+a-p))) with (m+n+a) by omega.
-    replace (q+(m+n+(a-q))) with (m+n+a) by omega. reflexivity.
+   replace (q+(n+(a-q))) with (n+a) by lia.
+   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|lia].
+    replace (p+(m+(n+a-p))) with (m+n+a) by lia.
+    replace (q+(m+n+(a-q))) with (m+n+a) by lia. reflexivity.
 
-   destruct (le_gt_dec p a) as [le|gt']; [omega|reflexivity].
+   destruct (le_gt_dec p a) as [le|gt']; [lia|reflexivity].
    
  do 3 rewrite tm_lift_rec_eq. unfold I.lams, I.shift. apply tm_morph; [reflexivity|].
   do 2 red; intros. destruct (le_gt_dec q a) as [le|gt].
-   replace (q+(n+(a-q))) with (n+a) by omega.
-   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|omega].
-    replace (p+(m+(n+a-p))) with (m+n+a) by omega.
-    replace (q+(m+n+(a-q))) with (m+n+a) by omega. reflexivity.
+   replace (q+(n+(a-q))) with (n+a) by lia.
+   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|lia].
+    replace (p+(m+(n+a-p))) with (m+n+a) by lia.
+    replace (q+(m+n+(a-q))) with (m+n+a) by lia. reflexivity.
 
-   destruct (le_gt_dec p a) as [le|gt']; [omega|reflexivity].
+   destruct (le_gt_dec p a) as [le|gt']; [lia|reflexivity].
 Qed.
 
 Lemma lift_rec_comm : forall t m n p q,
@@ -37,35 +37,35 @@ Lemma lift_rec_comm : forall t m n p q,
 intros; apply eq_term_intro; intros; [| |destruct t; simpl; trivial].
  do 4 rewrite int_lift_rec_eq. unfold V.lams, V.shift. apply int_morph; [reflexivity|].
   do 2 red; intros. destruct (le_gt_dec q a) as [le|gt].
-   replace (q+(n+(a-q))) with (n+a) by omega.
-   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|omega].
-    destruct (le_gt_dec p a) as [le''|gt]; [|omega].
-     replace (p+(m+(a-p))) with (m+a) by omega.
-     destruct (le_gt_dec (m+q) (m+a)) as [le'''|gt]; [|omega].
-      replace (p+(m+(n+a-p))) with (m+n+a) by omega.
-      replace (m+q+(n+(m+a-(m+q)))) with (m+n+a); [reflexivity|omega].
+   replace (q+(n+(a-q))) with (n+a) by lia.
+   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|lia].
+    destruct (le_gt_dec p a) as [le''|gt]; [|lia].
+     replace (p+(m+(a-p))) with (m+a) by lia.
+     destruct (le_gt_dec (m+q) (m+a)) as [le'''|gt]; [|lia].
+      replace (p+(m+(n+a-p))) with (m+n+a) by lia.
+      replace (m+q+(n+(m+a-(m+q)))) with (m+n+a); [reflexivity|lia].
 
    destruct (le_gt_dec p a) as [le|gt'].
-    replace (p+(m+(a-p))) with (m+a) by omega.
-    destruct (le_gt_dec (m+q) (m+a)) as [le'|gt']; [omega|reflexivity].
+    replace (p+(m+(a-p))) with (m+a) by lia.
+    destruct (le_gt_dec (m+q) (m+a)) as [le'|gt']; [lia|reflexivity].
     
-    destruct (le_gt_dec (m+q) a) as [le|gt'']; [omega|reflexivity].
+    destruct (le_gt_dec (m+q) a) as [le|gt'']; [lia|reflexivity].
 
  do 4 rewrite tm_lift_rec_eq. unfold I.lams, I.shift. apply tm_morph; [reflexivity|].
   do 2 red; intros. destruct (le_gt_dec q a) as [le|gt].
-   replace (q+(n+(a-q))) with (n+a) by omega.
-   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|omega].
-    destruct (le_gt_dec p a) as [le''|gt]; [|omega].
-     replace (p+(m+(a-p))) with (m+a) by omega.
-     destruct (le_gt_dec (m+q) (m+a)) as [le'''|gt]; [|omega].
-      replace (p+(m+(n+a-p))) with (m+n+a) by omega.
-      replace (m+q+(n+(m+a-(m+q)))) with (m+n+a); [reflexivity|omega].
+   replace (q+(n+(a-q))) with (n+a) by lia.
+   destruct (le_gt_dec p (n+a)) as [le'|gt]; [|lia].
+    destruct (le_gt_dec p a) as [le''|gt]; [|lia].
+     replace (p+(m+(a-p))) with (m+a) by lia.
+     destruct (le_gt_dec (m+q) (m+a)) as [le'''|gt]; [|lia].
+      replace (p+(m+(n+a-p))) with (m+n+a) by lia.
+      replace (m+q+(n+(m+a-(m+q)))) with (m+n+a); [reflexivity|lia].
 
    destruct (le_gt_dec p a) as [le|gt'].
-    replace (p+(m+(a-p))) with (m+a) by omega.
-    destruct (le_gt_dec (m+q) (m+a)) as [le'|gt']; [omega|reflexivity].
+    replace (p+(m+(a-p))) with (m+a) by lia.
+    destruct (le_gt_dec (m+q) (m+a)) as [le'|gt']; [lia|reflexivity].
     
-    destruct (le_gt_dec (m+q) a) as [le|gt'']; [omega|reflexivity].
+    destruct (le_gt_dec (m+q) a) as [le|gt'']; [lia|reflexivity].
 Qed.
 
 Lemma subst_lift_ge : forall m n t u k,
@@ -78,40 +78,40 @@ intros; apply eq_term_intro; simpl; intros; [| |destruct u; simpl; trivial].
  apply int_morph; [reflexivity | do 2 red; intros].
   unfold V.lams, V.shift. 
   destruct (le_gt_dec k a).
-   replace (k+(S n + (a-k))) with (S n + a) by omega.
+   replace (k+(S n + (a-k))) with (S n + a) by lia.
    destruct (le_gt_dec (S m) (S n + a)) as [le|gt]; 
-     replace (k+(n+(a-k))) with (n+a) by omega.
-    destruct (le_gt_dec m (n+a)) as [le'|gt]; [|omega].
+     replace (k+(n+(a-k))) with (n+a) by lia.
+    destruct (le_gt_dec m (n+a)) as [le'|gt]; [|lia].
      apply V.cons_morph; [apply int_morph; [reflexivity|do 2 red; intros]|do 2 red; intros];
-       (destruct (le_gt_dec k (m+a0)) as [le''|gt]; [|omega]);
-       (replace (k+(1+(m+a0-k))) with (S m + a0); [reflexivity|omega]).
+       (destruct (le_gt_dec k (m+a0)) as [le''|gt]; [|lia]);
+       (replace (k+(1+(m+a0-k))) with (S m + a0); [reflexivity|lia]).
 
-    destruct (le_gt_dec m (n+a)) as [le|gt']; [omega|].
-     destruct (le_gt_dec k (n+a)) as [le|gt'']; [|omega].
-      replace (k+(1+(n+a-k))) with (S n + a); [reflexivity|omega].
+    destruct (le_gt_dec m (n+a)) as [le|gt']; [lia|].
+     destruct (le_gt_dec k (n+a)) as [le|gt'']; [|lia].
+      replace (k+(1+(n+a-k))) with (S n + a); [reflexivity|lia].
       
-   destruct (le_gt_dec (S m) a) as [le|gt]; [omega|].
-    destruct (le_gt_dec m a) as [le|gt']; [omega|reflexivity].
+   destruct (le_gt_dec (S m) a) as [le|gt]; [lia|].
+    destruct (le_gt_dec m a) as [le|gt']; [lia|reflexivity].
 
  rewrite tm_lift_rec_eq.
  do 2 rewrite tm_subst_rec_eq. do 2 rewrite tm_lift_rec_eq.
  apply tm_morph; [reflexivity|do 2 red; intros].
   unfold I.lams, I.shift. 
   destruct (le_gt_dec k a).
-   replace (k+(S n + (a-k))) with (S n + a) by omega.
+   replace (k+(S n + (a-k))) with (S n + a) by lia.
    destruct (le_gt_dec (S m) (S n + a)) as [le|gt]; 
-     replace (k+(n+(a-k))) with (n+a) by omega.
-    destruct (le_gt_dec m (n+a)) as [le'|gt]; [|omega].
+     replace (k+(n+(a-k))) with (n+a) by lia.
+    destruct (le_gt_dec m (n+a)) as [le'|gt]; [|lia].
      apply I.cons_morph; [apply tm_morph; [reflexivity|do 2 red; intros]|do 2 red; intros];
-       (destruct (le_gt_dec k (m+a0)) as [le''|gt]; [|omega]);
-       (replace (k+(1+(m+a0-k))) with (S m + a0); [reflexivity|omega]).
+       (destruct (le_gt_dec k (m+a0)) as [le''|gt]; [|lia]);
+       (replace (k+(1+(m+a0-k))) with (S m + a0); [reflexivity|lia]).
 
-    destruct (le_gt_dec m (n+a)) as [le|gt']; [omega|].
-     destruct (le_gt_dec k (n+a)) as [le|gt'']; [|omega].
-      replace (k+(1+(n+a-k))) with (S n + a); [reflexivity|omega].
+    destruct (le_gt_dec m (n+a)) as [le|gt']; [lia|].
+     destruct (le_gt_dec k (n+a)) as [le|gt'']; [|lia].
+      replace (k+(1+(n+a-k))) with (S n + a); [reflexivity|lia].
       
-   destruct (le_gt_dec (S m) a) as [le|gt]; [omega|].
-    destruct (le_gt_dec m a) as [le|gt']; [omega|reflexivity].
+   destruct (le_gt_dec (S m) a) as [le|gt]; [lia|].
+    destruct (le_gt_dec m a) as [le|gt']; [lia|reflexivity].
 Qed.
  
 Lemma subst_lift_lt : forall m n t u,
@@ -121,18 +121,18 @@ intros; apply eq_term_intro; simpl; intros; [| |destruct u; simpl; trivial].
  unfold lift. rewrite int_subst_rec_eq. do 2 rewrite int_lift_rec_eq.
  do 2 rewrite V.lams0. unfold V.lams, V.shift; simpl.
  apply int_morph; [reflexivity|do 2 red; intros].
-  destruct (le_gt_dec m (S (n + a))) as [le|gt]; [|omega].
+  destruct (le_gt_dec m (S (n + a))) as [le|gt]; [|lia].
   destruct m; simpl; [reflexivity|].
    case_eq (n + a - m); intros; simpl; 
-     [|replace (S (m + n0)) with (n + a); [reflexivity|]]; omega.
+     [|replace (S (m + n0)) with (n + a); [reflexivity|]]; lia.
 
  unfold lift. rewrite tm_subst_rec_eq. do 2 rewrite tm_lift_rec_eq.
  do 2 rewrite I.lams0. unfold I.lams, I.shift; simpl.
  apply tm_morph; [reflexivity|do 2 red; intros].
-  destruct (le_gt_dec m (S (n + a))) as [le|gt]; [|omega].
+  destruct (le_gt_dec m (S (n + a))) as [le|gt]; [|lia].
   destruct m; simpl; [reflexivity|].
    case_eq (n + a - m); intros; simpl; 
-     [|replace (S (m + n0)) with (n + a); [reflexivity|]]; omega.
+     [|replace (S (m + n0)) with (n + a); [reflexivity|]]; lia.
 Qed.
 
 Lemma subst0_lift : forall A n,
@@ -160,9 +160,9 @@ Lemma eq_term_lift_ref_bd : forall n i k,
   k > i ->
   eq_term (lift_rec n k (Ref i)) (Ref i).
 intros; simpl; split; red; intros.
- unfold V.lams, V.shift. destruct (le_gt_dec k i); [omega|apply H0].
+ unfold V.lams, V.shift. destruct (le_gt_dec k i); [lia|apply H0].
 
- unfold I.lams, I.shift. destruct (le_gt_dec k i); [omega|apply H0].
+ unfold I.lams, I.shift. destruct (le_gt_dec k i); [lia|apply H0].
 Qed.
 
 Definition closed_term t := forall i1 i2, int i1 t == int i2 t.
@@ -188,7 +188,9 @@ Lemma real_morph : forall x y u v A B,
   u = v ->
   ([x, u] \real A <-> [y, v] \real B).
 split; intros; destruct H2; unfold inX in H2.
- split; [unfold inX | rewrite <- H1]; rewrite <- H, <- H0; trivial.
+split; [unfold inX | rewrite <- H1].
+rewrite <- H, <- H0; trivial.
+rewrite <- H, <- H0; trivial.
 
  split; [unfold inX | rewrite H1]; rewrite H, H0; trivial.
 Qed.
@@ -238,15 +240,15 @@ assert (val_ok (C :: e) (V.lams 1 (V.shift 1) i) (I.lams 1 (I.shift 1) j)).
    rewrite V.lams_shift. do 2 rewrite <- V.shiftS_split.
    revert Hok; apply real_morph; [|reflexivity|].
     unfold V.lams, V.shift; simpl.
-    replace (n-0) with n; [reflexivity|omega].
+    replace (n-0) with n; [reflexivity|lia].
 
     unfold I.lams, I.shift; simpl.
-    replace (n-0) with n; [reflexivity|omega].
+    replace (n-0) with n; [reflexivity|lia].
 
    rewrite kind_ok_lift with (k:=0).
-   rewrite eq_term_lift_ref_fv; [|omega]. 
+   rewrite eq_term_lift_ref_fv; [|lia]. 
    unfold I.lams, I.shift; simpl in Hok |- *.
-   replace (n-0) with n; [trivial|omega].
+   replace (n-0) with n; [trivial|lia].
 
 red in HA. specialize HA with (1:=H). clear H.
 destruct HA as (HSA, HA). 

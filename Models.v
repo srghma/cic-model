@@ -11,6 +11,8 @@ Parameter inX : X -> X -> Prop.
 Parameter eqX : X -> X -> Prop.
 Parameter eqX_equiv : Equivalence eqX.
 Parameter in_ext: Proper (eqX ==> eqX ==> iff) inX.
+Existing Instance eqX_equiv.
+Existing Instance in_ext.
 
 Definition inclX (a b : X) : Prop :=
   forall z, inX z a -> inX z b.
@@ -24,7 +26,7 @@ Definition eq_fun (x:X) (f1 f2:X->X) :=
 
 End Sets.
 
-(** Abstract term model of CC *)
+(** Abstract model of the syntax of CC (no properties) *)
 Module Type CC_Sig (Import S:Sets).
 
 Parameter props : X.
@@ -39,6 +41,7 @@ Parameter lam_ext :
   lam x1 f1 == lam x2 f2.
 
 Parameter app_ext: Proper (eqX ==> eqX ==> eqX) app.
+Existing Instance app_ext.
 
 Parameter prod_ext :
   forall x1 x2 f1 f2,

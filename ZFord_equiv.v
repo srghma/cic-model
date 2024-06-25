@@ -87,6 +87,7 @@ apply eq_intro; intros.
  assert (ZFordcl.isOrd z).
   apply isOrd_eqv1.
   apply ZFplump.isOrd_inv with (ZFplump.osucc x); auto with *.
+  apply ZFplump.isOrd_succ; trivial.  
  apply ZFplump.olts_le in H0.
  apply ZFordcl.ClassicOrdinal.ord_incl_le in H0; trivial.
  apply isOrd_eqv1; trivial.
@@ -105,17 +106,20 @@ apply eq_intro; intros.
    apply ZFplump.isOrd_inv with N; trivial.
    rewrite isOrd_equiv; auto.
 
+   apply ZFordcl.isOrd_N.
+   
  apply ZFplump.isOrd_sup_elim in H.
  destruct H.
  apply ZFordcl.isOrd_trans with  (2:=H); auto.
  clear H z.
- induction x; simpl.
+ apply ZFordcl.isOrd_N.
+ clear H; induction x; simpl; auto.
   apply zero_typ.
 
-  rewrite <- succ_equiv.
+  rewrite <- succ_equiv; auto.
    apply succ_typ; trivial.
 
-   induction x; simpl; auto.
+   apply ZFplump.nat2ordset_typ.
 Qed.
 
 Hint Resolve isOrd_eqv1.

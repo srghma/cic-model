@@ -58,26 +58,22 @@ Proof.
 unfold forall_elt in |- *.
 destruct x as (lx); simpl.
 induction lx; simpl in |- *; intros.
- left.
-   split; trivial.
-   destruct 1.
- elimtype (P a = true \/ P a = false); intros.
-   rewrite H; simpl in |- *.
-    elim IHlx; intros.
-   left.
-     destruct H0; split; trivial.
-     destruct 1; auto.
-     elim H2; auto.
-   right.
-     destruct H0.
-     split; auto.
-     destruct H1.
-     exists x; auto.
-   rewrite H; simpl in |- *.
-    right.
-    split; auto.
-    exists a; auto.
-  destruct (P a); auto.
+*left.
+ split; trivial.
+ destruct 1.
+*destruct (P a) eqn:e; simpl.
+ +elim IHlx; intros.
+  left.
+  destruct H; split; trivial.
+  destruct 1; auto.
+  subst y; trivial.
+  right.
+  destruct H; split; auto.
+  destruct H0.
+  exists x; auto.
+ +right.
+  split; auto.
+  exists a; auto.
 Qed.
 
 Lemma forall_elt_true_intro :
@@ -656,7 +652,7 @@ induction l; simpl in |- *; intros.
   apply Eq_hf_cons; auto with *.
 Qed.
 
-Hint Resolve In_hf_head In_hf_head_hf In_hf_head_hf In_hf_tail_hf.
+Hint Resolve In_hf_head In_hf_head_hf In_hf_head_hf In_hf_tail_hf : core.
 
 (** Notations *)
 
@@ -930,7 +926,7 @@ apply fold_set_ind; intros.
     elim empty_elim with a; trivial.
 
   simpl.
-  rewrite app_ass; simpl.
+  rewrite <- app_assoc; simpl.
   trivial.
 
  apply In_app_left.

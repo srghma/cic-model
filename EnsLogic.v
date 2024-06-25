@@ -275,7 +275,7 @@ Qed.
 
 Definition union (x:set) :=
   sup {i:idx x & idx (elts x i)}
-    (fun p => elts (elts x (projS1 p)) (projS2 p)).
+    (fun p => elts (elts x (projT1 p)) (projT2 p)).
 
 Lemma union_ax : forall a z,
   z ∈ union a <-> holds (Ex2(fun b => in_set z b) (fun b => in_set b a)).
@@ -469,8 +469,8 @@ destruct (choice_axiom {i:X|exists w, R i w} set (fun i y => R (proj1_sig i) y))
  exists {i:X|exists w, R i w}.
  exists f.
  intros.
- exists (existT _ i H).
- apply (Hf (existT _ i H)).
+ exists (exist _ i H).
+ apply (Hf (exist _ i H)).
 Qed.
 
 (* ttcoll rephrased on sets: *)
@@ -716,7 +716,7 @@ Fixpoint V (x:set) := union (replf x (fun x' => power (V x'))).
 
 Lemma V_morph : forall x x', x == x' -> V x == V x'.
 induction x; destruct x'; intros.
-simpl V; unfold replf; simpl sup.
+simpl V; unfold replf; simpl idx; simpl elts.
 apply union_morph.
 rewrite eq_set_def in H0; simpl in H0.
 destruct H0.

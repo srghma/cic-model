@@ -25,7 +25,7 @@ Parameter Wsup : set -> set -> set.
 Parameter Wsup_morph : morph2 Wsup.
 Parameter Wf_intro : forall A B,
        morph1 B ->
-       forall X x f, x ∈ A -> f ∈ (Π _ ∈ B x, X) -> Wsup x f ∈ Wf A B X.
+       forall X x f, x ∈ A -> f ∈ (Π __ ∈ B x, X) -> Wsup x f ∈ Wf A B X.
 
 Parameter wsubterms : set -> (set->set) -> set -> set.
 Parameter wsubterms_morph :
@@ -104,7 +104,7 @@ Parameter Wcase_ext : forall A A' B B' X X' h h' c c',
   X ⊆ W A B ->
   X' ⊆ W A' B' ->
   (forall x x' f f', x ∈ A -> x' ∈ A' -> x == x' ->
-   f ∈ (Π _ ∈ B x, X) -> f' ∈ (Π _ ∈ B' x', X') ->
+   f ∈ (Π __ ∈ B x, X) -> f' ∈ (Π __ ∈ B' x', X') ->
    f == f' -> h x f == h' x' f') ->
   c ∈ Wf A B X ->
   c' ∈ Wf A' B' X' ->
@@ -116,12 +116,12 @@ Parameter Wcase_typ : forall (A : set) (B : set -> set),
        forall (X : set) (Q : set -> set) (h : set -> set -> set) (w : set),
        morph1 Q ->
        X ⊆ W A B ->
-       (forall x f : set, x ∈ A -> f ∈ (Π _ ∈ B x, X) -> h x f ∈ Q (Wsup x f)) ->
+       (forall x f : set, x ∈ A -> f ∈ (Π __ ∈ B x, X) -> h x f ∈ Q (Wsup x f)) ->
        w ∈ Wf A B X -> Wcase h w ∈ Q w.
 
 Parameter Wcase_eqn : forall A B,
        morph1 B -> forall h x f,
-       morph2 h -> f ∈ (Π _ ∈ B x, W A B) -> Wcase h (Wsup x f) == h x f.
+       morph2 h -> f ∈ (Π __ ∈ B x, W A B) -> Wcase h (Wsup x f) == h x f.
 
 Class subtermClass A B (K:set->Prop) :=
   { Kinter : forall X,
@@ -567,7 +567,7 @@ Qed.
 
 (** The type operator on the construction domain *)
 Definition Wf X :=
-  sup A (fun x => replf (Π _ ∈ B x, X) (fun f => Wsup x f)). 
+  sup A (fun x => replf (Π __ ∈ B x, X) (fun f => Wsup x f)). 
 
 Hint Resolve Wsup_morph.
 
@@ -678,7 +678,7 @@ Qed.
 Lemma Wsnd_fun_typ_gen X w :
   X ⊆ Wdom ->
   w ∈ Wf X ->
-  Wsnd_fun w ∈ Π _ ∈ B (Wfst w), X.
+  Wsnd_fun w ∈ Π __ ∈ B (Wfst w), X.
 intros XinclW tyw.
 apply Wf_elim in tyw; trivial.
 destruct tyw as (x,tyx,(f,tyf,eqw)).
@@ -904,7 +904,7 @@ Qed.
 
 Lemma Wsnd_fun_typ w :
   w ∈ W ->
-  Wsnd_fun w ∈ Π _ ∈ B (Wfst w), W.
+  Wsnd_fun w ∈ Π __ ∈ B (Wfst w), W.
 intros tyw.
 rewrite W_eqn in tyw.
 apply Wsnd_fun_typ_gen with (2:=tyw).
@@ -1341,7 +1341,7 @@ Lemma Wsup_sup_raw I X f a0 :
   X ⊆ Wdom ->
   (exists i, i∈I) ->
   (forall i, i∈I -> exists2 j, j ∈ I &
-                    exists2 g, g ∈ (Π _∈B a0,X) & f i ⊆ f j /\ f j == Wsup a0 g) ->
+                    exists2 g, g ∈ (Π __∈B a0,X) & f i ⊆ f j /\ f j == Wsup a0 g) ->
   sup I f == Wsup a0 (λ i ∈ B a0, sup I (fun x => Wsnd (f x) i)).
 intros fext Xty (i0,wit) fdir.
 assert (eqsm : forall A, ext_fun A (fun i1 => sup I (fun x => Wsnd (f x) i1))).
@@ -1854,7 +1854,7 @@ Lemma Fcxf_cofix w :
   w ∈ Fcfx COW ->
   w ∈ COW /\ w == F w.
 intros.
-apply subset_ax' in H. 2:admit.
+apply subset_ax' in H.
 destruct H.
 split; trivial.
 apply pre_incl_eq with (X:=COW); auto.
@@ -1863,6 +1863,9 @@ apply pre_incl_eq with (X:=COW); auto.
  rewrite COW_eqn; apply Fty; auto.
   rewrite <-COW_eqn; reflexivity.
   rewrite <-COW_eqn; reflexivity.
+do 2 red; intros.
+rewrite H1.
+reflexivity.
 Qed.
 
 
@@ -2704,7 +2707,7 @@ pattern w; apply W_ind; intros; trivial.
   destruct H2 as (i,tyi,eqz); rewrite eqz.
   apply cc_prod_elim with (1:=H0); trivial.
  pose (recf := λ w ∈ X, union (subset (P w) (Wsrec_rel w))).
- assert (tyf : f ∈ Π _ ∈ B x, X).
+ assert (tyf : f ∈ Π __ ∈ B x, X).
   rewrite cc_eta_eq with (1:=H0).
   apply cc_prod_intro; intros; auto with *.
    do 2 red; intros; apply cc_app_morph; auto with *.
@@ -3126,7 +3129,7 @@ Variable K : set -> Prop.
 Hypothesis Km : Proper (eq_set==>iff) K.
 Hypothesis Ksc : subtermClass K.
 
-Hint Resolve KW KWtop Kintro Ktrans.
+Hint Resolve KW Ktrans.
 Let KW' := KW. 
 
 Definition fsub w :=
@@ -3154,7 +3157,7 @@ apply inter_intro; intros.
  exists W.
  apply subset_intro.
   apply power_intro; trivial.
-  split; auto.
+  split; [apply KWtop|].
   rewrite <- W_eqn; trivial.
 Qed.
 
@@ -3178,7 +3181,7 @@ apply Kinter.
  apply subset_intro; auto.
   apply power_intro; trivial.
 
-  split; trivial.
+  split; [apply KWtop|].
   rewrite <- W_eqn; trivial.
 
  intros.
@@ -3213,6 +3216,8 @@ apply inter_intro; intros.
  exists W.
  apply subset_intro; auto.
  apply power_intro; trivial.
+ split ;trivial.
+ apply KWtop.
 Qed.
 
 Lemma fsub'_elim X x y :
@@ -3235,6 +3240,9 @@ apply Kinter.
  apply subset_intro; auto.
  apply power_intro; trivial.
 
+ split ;trivial.
+ apply KWtop.
+ 
  intros.
  apply subset_elim2 in H.
  destruct H as (z',eqz,(?,_)).
@@ -4045,7 +4053,7 @@ Lemma Wcase_ext A A' B B' X X' h h' c c' :
   X ⊆ W A B ->
   X' ⊆ W A' B' ->
   (forall x x' f f', x ∈ A -> x' ∈ A' -> x == x' ->
-   f ∈ (Π _ ∈ B x, X) -> f' ∈ (Π _ ∈ B' x', X') ->
+   f ∈ (Π __ ∈ B x, X) -> f' ∈ (Π __ ∈ B' x', X') ->
    f == f' -> h x f == h' x' f') ->
   c ∈ Wf A B X ->
   c' ∈ Wf A' B' X' ->

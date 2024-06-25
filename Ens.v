@@ -215,7 +215,7 @@ Qed.
 
 Definition union (x:set) :=
   sup {i:idx x & idx (elts x i)}
-    (fun p => elts (elts x (projS1 p)) (projS2 p)).
+    (fun p => elts (elts x (projT1 p)) (projT2 p)).
 
 Lemma union_ax : forall a z,
   in_set z (union a) <-> exists2 b, in_set z b & in_set b a.
@@ -813,7 +813,7 @@ Fixpoint V (x:set) := union (replf x (fun x' => power (V x'))).
 
 Lemma V_morph : forall x x', eq_set x x' -> eq_set (V x) (V x').
 induction x; destruct x'; intros.
-simpl V; unfold replf; simpl sup.
+simpl V; unfold replf; simpl idx; simpl elts.
 apply union_morph.
 simpl in H0.
 destruct H0.
@@ -1261,22 +1261,21 @@ Lemma choose_not_morph : ~ forall x x', x == x' -> choose x == choose x'.
 unfold choose; red; intros.
 generalize (H (sup bool (fun b => if b then empty else singl empty))
               (sup bool (fun b => if b then singl empty else empty))).
-simpl; intros.
+simpl idx; simpl elts; intros.
 assert (singl empty == empty).
- refine (let H1 := H0 _ in _).
+ lapply H0.
+  destruct (C bool); trivial.
+   destruct b; auto with *.
+   apply eq_set_sym; trivial.
+
+   destruct (f true).
+
   split; intros.
    exists (negb i).
    destruct i; apply eq_set_refl.
 
    exists (negb j).
    destruct j; apply eq_set_refl.
-
-  clear H0.
-  destruct (C bool).
-   destruct b; auto with *.
-   apply eq_set_sym; trivial.
-
-   destruct (f true).
 elim empty_ax with empty.
 apply eq_elim with (singl empty); trivial.
 exists tt; apply eq_set_refl.

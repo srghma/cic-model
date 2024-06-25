@@ -28,7 +28,7 @@ Definition in_int (M T:term) (i:val) (j:Lc.intt) :=
   | _ => int M i ∈ int T i /\ inSAT (tm M j) (Real (int T i))
   end.
 
-Instance in_int_morph : Proper
+#[global]Instance in_int_morph : Proper
   (eq_term ==> eq_term ==> eq_val ==> pointwise_relation nat (@eq Lc.term) ==> iff)
   in_int.
 apply morph_impl_iff4; auto with *.
@@ -155,19 +155,19 @@ Definition typ_sub (e:env) (s:sub) (f:env) :=
   forall i j, val_ok e i j ->
   val_ok f (sint s i) (stm s j).
 
-Instance typ_morph : forall e, Proper (eq_term ==> eq_term ==> iff) (typ e).
+#[global]Instance typ_morph : forall e, Proper (eq_term ==> eq_term ==> iff) (typ e).
 unfold typ; split; simpl; intros.
  rewrite <- H; rewrite <- H0; auto.
  rewrite H; rewrite H0; auto.
 Qed.
 
-Instance eq_typ_morph : forall e, Proper (eq_term ==> eq_term ==> iff) (eq_typ e).
+#[global]Instance eq_typ_morph : forall e, Proper (eq_term ==> eq_term ==> iff) (eq_typ e).
 unfold eq_typ; split; simpl; intros.
  rewrite <- H; rewrite <- H0; eauto.
  rewrite H; rewrite H0; eauto.
 Qed.
 
-Instance sub_typ_morph : forall e, Proper (eq_term ==> eq_term ==> iff) (sub_typ e).
+#[global]Instance sub_typ_morph : forall e, Proper (eq_term ==> eq_term ==> iff) (sub_typ e).
 unfold sub_typ; split; simpl; intros.
  rewrite <-H in H3,H4.
  rewrite <-H0.
@@ -371,7 +371,7 @@ unfold eq_typ; intros.
 transitivity (int M' i); eauto.
 Qed.
 
-Instance eq_typ_setoid : forall e, Equivalence (eq_typ e).
+#[global]Instance eq_typ_setoid : forall e, Equivalence (eq_typ e).
 split.
  exact (@refl e).
  exact (@sym e).

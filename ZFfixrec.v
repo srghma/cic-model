@@ -56,7 +56,7 @@ do 2 red; intros.
 apply Fmorph; eauto using isOrd_inv.
 apply REC_morph; trivial.
 Qed.
-Hint Resolve REC_fun_ext.
+Hint Resolve REC_fun_ext : core.
 
   Lemma REC_eq : forall o,
     isOrd o ->
@@ -134,7 +134,7 @@ Qed.
 
 End TransfiniteIteration.
 
-Hint Resolve REC_fun_ext.
+Hint Resolve REC_fun_ext : core.
 
 Existing Instance REC_morph.
 
@@ -358,7 +358,7 @@ Qed.
 
 Definition fincr o :=
  fdirected o (fun z => T (osucc z)) (fun z => F z (REC F z)).
-Hint Unfold fincr.
+Hint Unfold fincr : core.
 
 (* New proof *)
 
@@ -687,7 +687,7 @@ apply sup_ax in H2; auto with *.
 
 do 2 red; intros.
 apply (RXm _ _ _ _ _ frec). 
-rewrite H4; reflexivity.
+rewrite H5; reflexivity.
 Qed.
 
   Lemma recursor_ext :
@@ -1156,7 +1156,7 @@ apply cc_lam_ext.
  red; intros; apply cc_app_morph; trivial.
 Qed.
 
-  Hint Resolve Qm' Qcont' Ftyp''' Firrel' RECf_b_morph.
+  Hint Resolve Qm' Qcont' Ftyp''' Firrel' RECf_b_morph : core.
 
   Lemma RECf_recursor_hyps : forall w, w ∈ ord -> recursor_hyps w T
     (fun o f => Q o (cc_app f))

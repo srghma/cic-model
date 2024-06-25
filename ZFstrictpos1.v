@@ -582,8 +582,6 @@ rewrite sup_ax in H3.
 destruct H3.
 revert H4; apply dpos_oper_mono; auto with *.
  apply DINDi_morph; auto with *.
-
- unfold DIND; apply DINDi_morph; auto with *.
 Qed.
 
 End InductiveFamily.

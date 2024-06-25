@@ -1,7 +1,8 @@
-Require Import ZF.
-Require Import ZFpairs ZFsum ZFrelations ZFrepl ZFwf ZFord ZFfix ZFfixfun.
 Require Import ZFstable.
 Require Import ZFlist.
+Require Import ZFpairs ZFsum ZFrelations ZFrepl ZFwf ZFord ZFfix ZFfixfun.
+Import ZF ZFrelations.
+
 
 Record grot_univ (U:set) : Prop := {
   G_trans : forall x y, y ∈ x -> x ∈ U -> y ∈ U;
@@ -405,7 +406,7 @@ Section Infinite.
 apply G_trans with omega; trivial.
 apply zero_omega.
 Qed.
-  Hint Resolve G_inf_nontriv.
+  Hint Resolve G_inf_nontriv : core.
 
 
   Lemma G_List A : A ∈ U -> List A ∈ U.

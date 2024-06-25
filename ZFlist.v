@@ -70,7 +70,7 @@ rewrite eq_set_ax; intros z.
 rewrite union2_ax.
 rewrite cond_set_ax.
 rewrite cond_set_ax.
-intuition.
+intuition auto with *.
 apply discr_mt_couple in H1; contradiction.
 Qed.
 

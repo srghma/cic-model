@@ -14,7 +14,7 @@ Parameter C: A->Type.
    F(X,Y) = \Sigma x:A. (B x -> X) * (C x -> Y)
 *)
 Record F X Y := mkF { fa : A ; fb : B fa -> X ; fc : C fa -> Y }.
-Implicit Arguments mkF [X Y].
+Arguments mkF [X Y].
 
 (** The nested inductive type *)
 Inductive N (X:Type) :=
@@ -28,7 +28,7 @@ Inductive I :=
    of N, labelled with A. *)
 Inductive A' :=
  CA' : forall x:A, (C x -> A') -> A'.
-Implicit Arguments CA' [ ].
+Arguments CA' : clear implicits .
 Definition fst' (x':A') : A := let (a,_) := x' in a.
 Definition snd' (x':A') : C (fst' x') -> A' :=
   match x' with CA' _ f => f end.
@@ -57,14 +57,14 @@ Parameter X:Type.
 
 (** The equivalent W-type *)
 Record W_F X := mkWF { fA' : A' ; fB' : B' fA' -> X }.
-Implicit Arguments mkWF [X].
+Arguments mkWF [X].
 
 Definition iso_step (Y:Type) (f:Y-> W_F X) (n:F X Y) : W_F X :=
   let x' := CA' (fa n) (fun i => fA' (f (fc n i))) in
   let f' (b:B' x') :=
    match b return X with
-   | B'nil l => fb n l
-   | B'cons i b' => fB' (f (fc n i)) b'
+   | B'nil _ l => fb n l
+   | B'cons _ i b' => fB' (f (fc n i)) b'
    end in
   mkWF x' f'.
 
@@ -83,11 +83,11 @@ Definition iso'_step Y (f:forall a',(B' a'->X)->Y) (a':A') (fb':B' a' -> X) : F 
   let fc (i:C x) : Y :=
     f (snd' a' i) (fun b'':B'(snd' a' i)=> fb' (B'cons _ i b'')) in
   mkF x fb fc.
-Implicit Arguments iso'_step [Y].
+Arguments iso'_step [Y].
 
 Fixpoint iso' (a':A') (fb':B' a' -> X) : N X :=
   CN (iso'_step iso' a' fb').
-Implicit Arguments iso' [ ].
+Arguments iso' : clear implicits.
 
 Definition iso'' (w:W_F X) : N X := iso' (fA' w) (fB' w).
 

@@ -1,6 +1,7 @@
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFlist.
+Require Import ZFiso.
 Import ZFrepl.
 
 (** In this file we develop the theory of W-types:
@@ -24,7 +25,7 @@ Lemma wfm1 : forall X, ext_fun A (fun x => cc_arr (B x) X).
 do 2 red; intros.
 apply cc_arr_morph; auto with *.
 Qed.
-Hint Resolve wfm1.
+Hint Resolve wfm1 : core.
 
 Lemma W_F_intro X a f :
   ext_fun (B a) f ->
@@ -192,7 +193,6 @@ apply H; auto.
 rewrite H4; reflexivity.
 Qed.
 
-Require Import ZFiso.
 
 Lemma WFmap_iso X Y f :
   iso_fun X Y f ->
@@ -284,7 +284,7 @@ apply replf_morph_raw; auto.
  red; intros.
  rewrite H0; rewrite H1; reflexivity.
 Qed.
-Hint Resolve Wsup_ext wext1 wext2.
+Hint Resolve Wsup_ext wext1 wext2 : core.
 
 Lemma Wsup_def :
   forall x p,
@@ -434,7 +434,7 @@ Qed.
 (** The type operator on the construction domain *)
 Definition Wf X := replf (W_F X) Wsup.
 
-Hint Resolve Wsup_morph.
+Hint Resolve Wsup_morph : core.
 
 Lemma Wf_intro : forall x X,
   x ∈ W_F X ->
@@ -465,7 +465,7 @@ Qed.
 Instance Wf_morph : morph1 Wf.
 apply Fmono_morph; auto with *.
 Qed.
-Hint Resolve Wf_mono Wf_morph.
+Hint Resolve Wf_mono Wf_morph : core.
 
 Lemma Wf_typ : forall X,
   X ⊆ Wdom -> Wf X ⊆ Wdom.
@@ -474,7 +474,7 @@ apply Wf_elim in H0; destruct H0 as (x,?,?).
 rewrite H1.
 apply Wsup_typ_gen with X; auto with *.
 Qed.
-Hint Resolve Wf_typ.
+Hint Resolve Wf_typ : core.
 
 Lemma Wf_stable0 (K:set->Prop) :
   (forall X, K X -> X ⊆ Wdom) ->
@@ -592,7 +592,7 @@ Qed.
   Lemma W_o_o : isOrd W_ord.
 apply Ffix_o_o; auto.
 Qed.
-Hint Resolve W_o_o.
+Hint Resolve W_o_o : core.
 
   Lemma W'_post : forall a,
    a ∈ W' ->
@@ -657,7 +657,7 @@ apply WFmap_ext.
 
   rewrite H1; rewrite H3; reflexivity.
 Qed.
-Hint Resolve wiso_ext.
+Hint Resolve wiso_ext : core.
 
 Lemma TI_W_F_Wf_iso o :
   isOrd o ->
@@ -697,7 +697,7 @@ Require Import ZFfunext ZFfixrec.
 
 Section Recursor.
 
-  Hint Resolve W_F_mono.
+  Hint Resolve W_F_mono : core.
 
   Lemma Wi_fix :
     forall (P:set->Prop) o,
@@ -913,7 +913,6 @@ Section SimpleRecursor.
 
   Lemma W_REC_recursor_hyps : typed_recursor_hyps (TI W_F) (fun o => U) F' W_ord.
 apply mkTypedRec; auto with *.
- apply TI_morph; auto with *.
  red; intros; apply TI_mono_eq; auto with *.
 
  intros.
@@ -1340,7 +1339,7 @@ Qed.
 Lemma WREC_morph_gen : Proper ((eq_set==>eq_set==>eq_set)==>eq_set==>eq_set) WREC.
 do 3 red; intros.
 unfold WREC.
-unfold REC.
+unfold ZFfixrec.REC.
 apply TR_morph; trivial.
 do 2 red; intros.
 apply sup_morph; trivial.
@@ -1348,7 +1347,7 @@ red; intros.
 apply H; auto.
 Qed.
 
-Hint Resolve wfm1.
+Hint Resolve wfm1 : core.
 
 (** A specific instance of W-type: the type of sets (cf Ens.set) *)
 

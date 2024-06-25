@@ -254,7 +254,7 @@ rewrite (H x x'); trivial.
 rewrite (H0 x x'); trivial.
 reflexivity.
 Qed.
-Hint Resolve sum_is_ext.
+Hint Resolve sum_is_ext : core.
 
 Lemma sum_stable_class K F G :
   morph1 F ->

@@ -49,7 +49,7 @@ Qed.
   Definition del_map (n k:nat) (m:nat->A) (i:nat) : A :=
     match le_gt_dec k i with
     | left _ => m (plus n i)
-    | right_ => m i
+    | right _ => m i
    end.
 
   Lemma del_cons_map :
@@ -87,5 +87,5 @@ Qed.
 
 End Map.
 
-  Hint Resolve refl_eq_map cons_map_ext.
-  Hint Immediate sym_eq_map.
+  Hint Resolve refl_eq_map cons_map_ext : core.
+  Hint Immediate sym_eq_map : core.

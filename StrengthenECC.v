@@ -244,7 +244,7 @@ destruct H1.
  destruct H1; subst M'.
  destruct v; simpl.
   inversion H1.
- rewrite <- minus_n_O.
+  replace (v-0) with v by lia.
  destruct H0.
  assert (k<=v); auto with arith.
  specialize ins_item_ge_inv with (1:=H2) (2:=H5) (3:=H4); intro.

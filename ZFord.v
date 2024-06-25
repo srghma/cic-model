@@ -161,7 +161,7 @@ Definition isOrd x := isWf x /\ x ∈ plumps x.
 Lemma isOrd_wf o : isOrd o -> isWf o.
 destruct 1; trivial.
 Qed.
-Hint Resolve isOrd_wf.
+Hint Resolve isOrd_wf : core.
 
 Lemma isOrd_ext : forall x y, x == y -> isOrd x -> isOrd y.
 destruct 2.
@@ -351,8 +351,8 @@ Definition isOrd x :=
 Lemma isOrd_ext : forall x y, x == y -> isOrd x -> isOrd y.
 destruct 2.
 generalize x0; rewrite H; intro.
-exists H0.
-rewrite <- (plump_morph x y x0 H0 x y); trivial.
+exists x1.
+rewrite <- (plump_morph x y x0 x1 x y); trivial.
 Qed.
 
 Instance isOrd_morph : Proper (eq_set ==> iff) isOrd.
@@ -489,7 +489,7 @@ apply subset_intro; trivial.
 apply power_intro; auto.
 Qed.
 
-Hint Resolve isOrd_zero lt_osucc.
+#[global]Hint Resolve isOrd_zero lt_osucc : core.
 
 Lemma olts_le : forall x y, x < osucc y -> x ⊆ y.
 red; intros.
@@ -524,7 +524,7 @@ Qed.
 Lemma ord_lt_le : forall o o', isOrd o -> o' ∈ o -> o' ⊆ o.
 red; intros; apply isOrd_trans with o'; trivial.
 Qed.
-Hint Resolve ord_lt_le.
+#[global]Hint Resolve ord_lt_le : core.
 
 Lemma isOrd_succ : forall n, isOrd n -> isOrd (osucc n).
 unfold osucc.
@@ -554,7 +554,7 @@ apply isOrd_intro; intros.
  destruct H0.
  rewrite H0; trivial.
 Qed.
-Hint Resolve isOrd_succ.
+#[global]Hint Resolve isOrd_succ : core.
 
 Lemma lt_osucc_compat : forall n m, isOrd m -> n < m -> osucc n < osucc m.
 intros.
@@ -842,7 +842,7 @@ apply eq_intro.
   rewrite <- H1; eauto using isOrd_inv.
   rewrite H1; reflexivity.
 Qed.
-Hint Resolve increasing_is_ext.
+Hint Resolve increasing_is_ext : core.
 
 Definition increasing_bounded o F :=
   forall x x', x' < o -> x < x' -> F x ⊆ F x'.
@@ -858,7 +858,7 @@ Definition limitOrd o := isOrd o /\ (forall x, x < o -> lt (osucc x) o).
 Lemma limit_is_ord : forall o, limitOrd o -> isOrd o.
 destruct 1; trivial.
 Qed.
-Hint Resolve limit_is_ord.
+Hint Resolve limit_is_ord : core.
 
 Lemma limit_union : forall o, limitOrd o -> union o == o.
 destruct 1.
@@ -931,7 +931,7 @@ apply isOrd_intro; intros.
  rewrite inter2_def in H; destruct H.
  apply isOrd_inv with x; trivial.
 Qed.
-Hint Resolve isOrd_inter2.
+#[global]Hint Resolve isOrd_inter2 : core.
 
 Lemma inter2_succ : forall x y,
   isOrd x -> isOrd y ->
@@ -1305,7 +1305,7 @@ do 2 red; intros.
 apply Fmorph.
 apply TI_morph; trivial.
 Qed.
-Hint Resolve TI_fun_ext.
+Hint Resolve TI_fun_ext : core.
 
   Lemma TI_eq : forall o,
     isOrd o ->
@@ -1379,7 +1379,7 @@ apply isOrd_trans with x; trivial.
 Qed.
 
 End TransfiniteIteration.
-Hint Resolve TI_fun_ext.
+#[global]Hint Resolve TI_fun_ext : core.
 
 Global Instance TI_morph_gen :
   Proper ((eq_set==>eq_set)==>eq_set==>eq_set) TI.
@@ -1407,7 +1407,7 @@ Qed.
 red.
 rewrite fst_def, snd_def; reflexivity.
 Qed.
-Hint Resolve isCouple_couple.
+Hint Resolve isCouple_couple : core.
   
   Let R xy xy' := isCouple xy /\ fst xy < fst xy'.
   Let Rm : Proper (eq_set==>eq_set==>iff) R.
@@ -2084,7 +2084,7 @@ induction n; simpl; intros.
  apply isOrd_zero.
  apply isOrd_succ; trivial.
 Qed.
-Hint Resolve nat2ordset_typ.
+Hint Resolve nat2ordset_typ : core.
 
 (** Ordinal omega *)
 
@@ -2098,13 +2098,13 @@ transitivity (nat2ordset m0); trivial.
 red; intros.
 apply isOrd_trans with (2:=H0); auto.
 Qed.
-Hint Resolve isOrd_omega.
+#[global]Hint Resolve isOrd_omega : core.
 
 Lemma zero_omega : lt zero omega.
 apply isOrd_sup_intro with 1; simpl.
 apply lt_osucc; trivial.
 Qed.
-Hint Resolve zero_omega.
+#[global]Hint Resolve zero_omega : core.
 
 Lemma osucc_omega : forall n, lt n omega -> lt (osucc n) omega.
 intros.
@@ -2112,12 +2112,12 @@ apply isOrd_sup_elim in H; destruct H.
 apply isOrd_sup_intro with (S x); simpl.
 apply lt_osucc_compat; auto.
 Qed.
-Hint Resolve osucc_omega.
+#[global]Hint Resolve osucc_omega : core.
 
 Lemma omega_limit_ord : limitOrd omega.
 split; auto.
 Qed.
-Hint Resolve omega_limit_ord.
+Hint Resolve omega_limit_ord : core.
 
 (* f^w(o) *)
 Definition iter_w (f:set->set) o :=

@@ -1,4 +1,4 @@
-Require Import GenLemmas AbsTheoryIntp.
+Require Import Lia GenLemmas AbsTheoryIntp.
 Require Import PSyn PSem.
 Import ZF ZFuniv_real.
 Import SN_CC_Real SN_nat.
@@ -15,10 +15,10 @@ Import PresburgerSem.
 
 Fixpoint intp_foterm t : term :=
   match t with
-  | Var i => Ref i
-  | Cst_0 => Zero
-  | Cst_1 => App Succ Zero
-  | Df_Add u v => App (App Add (intp_foterm u)) (intp_foterm v)
+  | Var' i => Ref i
+  | Cst_0' => Zero
+  | Cst_1' => App Succ Zero
+  | Df_Add' u v => App (App Add (intp_foterm u)) (intp_foterm v)
   end.
 
 Lemma intp_foterm_not_kind : forall t, intp_foterm t <> None.
@@ -32,10 +32,10 @@ induction t; intros.
  simpl; case_eq (le_gt_dec k n); simpl; intros.
   split; red; simpl; intros.
    unfold V.lams, V.shift.
-   rewrite H. replace (k+(n0+(n-k))) with (n+n0) by omega. apply H0.
+   rewrite H. replace (k+(n0+(n-k))) with (n+n0) by lia. apply H0.
 
    unfold I.lams, I.shift.
-   rewrite H. replace (k+(n0+(n-k))) with (n+n0) by omega. apply H0.
+   rewrite H. replace (k+(n0+(n-k))) with (n+n0) by lia. apply H0.
 
   split; red; simpl; intros.
    rewrite V.lams_bv; trivial.
@@ -64,29 +64,29 @@ induction t; intros; simpl intp_foterm.
  simpl; destruct (lt_eq_lt_dec k n) as [[lt|eq]|bt]; simpl.
   split; red; intros.
    unfold V.lams, V.shift; simpl. 
-   destruct (le_gt_dec k n) as [le|gt]; [|omega].
-    replace (n-k) with (S (Peano.pred n-k)) by omega; simpl.
-    replace (k+(Peano.pred n-k)) with (Peano.pred n) by omega; apply H.
+   destruct (le_gt_dec k n) as [le|gt]; [|lia].
+    replace (n-k) with (S (Peano.pred n-k)) by lia; simpl.
+    replace (k+(Peano.pred n-k)) with (Peano.pred n) by lia; apply H.
 
    unfold I.lams, I.shift; simpl.
-   destruct (le_gt_dec k n) as [le|gt]; [|omega].
-    replace (n-k) with (S (Peano.pred n-k)) by omega; simpl.
-    replace (k+(Peano.pred n-k)) with (Peano.pred n) by omega; apply H.
+   destruct (le_gt_dec k n) as [le|gt]; [|lia].
+    replace (n-k) with (S (Peano.pred n-k)) by lia; simpl.
+    replace (k+(Peano.pred n-k)) with (Peano.pred n) by lia; apply H.
 
   case_eq (intp_foterm (lift_term nn k)); intros; 
     [|apply intp_foterm_not_kind in H; trivial].
    split; red; intros; subst k.
     unfold V.lams; simpl.
-    destruct (le_gt_dec n n) as [le|gt]; [|omega].
-     replace (n-n) with 0 by omega; simpl. rewrite H0.
+    destruct (le_gt_dec n n) as [le|gt]; [|lia].
+     replace (n-n) with 0 by lia; simpl. rewrite H0.
      setoid_replace (V.shift n y) with (V.lams 0 (V.shift n) y); [
        |rewrite V.lams0; reflexivity].
       rewrite <- int_lift_rec_eq. fold (lift n (intp_foterm nn)).
       rewrite lift_intp_lift_term. rewrite H; simpl; reflexivity.
 
     unfold I.lams; simpl.
-    destruct (le_gt_dec n n) as [le|gt]; [|omega].
-     replace (n-n) with 0 by omega; simpl. rewrite H0.
+    destruct (le_gt_dec n n) as [le|gt]; [|lia].
+     replace (n-n) with 0 by lia; simpl. rewrite H0.
      setoid_replace (I.shift n y) with (I.lams 0 (I.shift n) y) 
        using relation Lc.eq_intt; [|rewrite I.lams0; reflexivity].
       rewrite <- tm_lift_rec_eq. fold (lift n (intp_foterm nn)).
@@ -125,7 +125,7 @@ Lemma intp_foterm_sort : forall hyp t,
 induction t; simpl intp_foterm; intros.
  unfold wf_term in H. simpl in H.
  apply typ_common; [exact I|intros].
- replace (n-0) with n in H by omega.
+ replace (n-0) with n in H by lia.
  assert (n=n \/ False) by auto.
  specialize H with (1:=H1); clear H1.
  assert (forall hyp n, nth_error hyp n = Some None ->

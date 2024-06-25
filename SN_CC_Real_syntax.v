@@ -1,7 +1,7 @@
 
 (** The semantic construction *)
 
-Require Import basic SN_CC_Real.
+Require Import Lia basic SN_CC_Real.
 Import ZFuniv_real CC_Real.
 
 (***********************************************************************************************)
@@ -35,7 +35,7 @@ induction t; simpl int_term; intros.
 
  simpl; unfold V.lams, I.lams, V.shift, I.shift.
  destruct (le_gt_dec k n0); simpl.
-  replace (k+(n+(n0-k))) with (n+n0) by omega.
+  replace (k+(n+(n0-k))) with (n+n0) by lia.
   split; red; auto.
 
   split; red; auto.
@@ -103,7 +103,7 @@ Qed.
 
 End LiftAndSubstEquiv.
 
-Hint Resolve int_not_kind Ty.eq_typ_not_kind.
+Hint Resolve int_not_kind Ty.eq_typ_not_kind : core.
 
 (** Proof that beta-reduction at the Lc level simulates beta-reduction
    at the Tm level. One beta at the Tm level may require several

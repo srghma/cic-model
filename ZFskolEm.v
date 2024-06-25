@@ -66,7 +66,7 @@ constructor.
 Telim H; intro.
 destruct H; trivial.
 Qed.
-Global Hint Resolve inset_isL.
+Global Hint Resolve inset_isL : core.
 
 Lemma in_set_elim : forall x y, in_set x y <->
   #exists2 x', proj1_sig x x' &
@@ -87,7 +87,7 @@ Lemma eqset_isL x y : isL (x == y).
 red; red; intros.
 Telim H; auto.
 Qed.
-Global Hint Resolve eqset_isL.
+Global Hint Resolve eqset_isL : core.
 
 Lemma eq_set_ax : forall a b, a == b <-> (forall x, x ∈ a <-> x ∈ b).
 reflexivity.
@@ -344,6 +344,7 @@ Definition empty := proj1_sig empty_sig.
 Lemma empty_ax: forall x, x ∈ empty -> #False.
 Proof proj2_sig empty_sig.
 
+Section Pair.
 (** pair *)
 
 Let pair_spec a b x := #(x == a \/ x == b).
@@ -377,7 +378,9 @@ Qed.
 Definition pair a b := proj1_sig (pair_sig a b).
 Lemma pair_ax: forall a b x, x ∈ pair a b <-> #(x == a \/ x == b).
 Proof fun a b => proj2_sig (pair_sig a b).
+End Pair.
 
+Section Union.
 (** union *)
 
 Let union_spec a x := #exists2 y, x ∈ y & y ∈ a.
@@ -411,6 +414,9 @@ Lemma union_ax: forall a x,
   x ∈ union a <-> #exists2 y, x ∈ y & y ∈ a.
 Proof fun a => proj2_sig (union_sig a).
 
+End Union.
+
+Section Subset.
 (** subset *)
 
 Let subset_spec a P x := x ∈ a /\ #exists2 x', x == x' & P x'.
@@ -455,6 +461,9 @@ Lemma subset_ax : forall a P x,
     x ∈ subset a P <-> (x ∈ a /\ #exists2 x', x==x' & P x').
 Proof fun a P => proj2_sig (subset_sig a P).
 
+End Subset.
+
+Section PowerSet.
 (** power set *)
 
 Let power_spec a x := forall y, y ∈ x -> y ∈ a.
@@ -488,6 +497,8 @@ Definition power a := proj1_sig (power_sig a).
 Lemma power_ax:
   forall a x, x ∈ power a <-> (forall y, y ∈ x -> y ∈ a).
 Proof fun a => proj2_sig (power_sig a).
+
+End PowerSet.
 
 (** uchoice holds, but we need to give the proof that P is a specification to
     the Skolem symbol. *)
@@ -1063,13 +1074,13 @@ Module IZF_R <: IZF_R_sig CoqSublogicThms.
   Include SkolemReplacement Re.
 End IZF_R.
 
-Let IZFRpack := (IZF_R.repl_mono,IZF_R.repl_ax,IZF_R.wf_ax).
+Definition IZFRpack := (IZF_R.repl_mono,IZF_R.repl_ax,IZF_R.wf_ax).
 Print Assumptions IZFRpack. (* TTrepl *)
 
 (** Model of IZF_C *)
 
 Module IZF_C <: IZF_C_sig CoqSublogicThms := Skolem CoqSublogicThms.
-Let IZFCpack := (IZF_C.coll_ex,IZF_C.wf_ax).
+Definition IZFCpack := (IZF_C.coll_ex,IZF_C.wf_ax).
 Print Assumptions IZFCpack. (* TTcoll (with intuitionistic equality on sets) *)
 
 (** A model of ZF, based only on TTColl (no ecluded-middle in the
@@ -1093,7 +1104,7 @@ Qed.
  Proof ClassicCollection.coll_ax EM.
 End ZF.
 
-Let ZFpack := ZF.coll_ax.
+Definition ZFpack := ZF.coll_ax.
 Print Assumptions ZFpack. (* TTColl (with classical equality on sets) *)
 (* Eval cbv beta delta - [ ZF.Z.eq_set Proper respectful iff ] iota in ZF.Z.ttcoll.
  *)

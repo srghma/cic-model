@@ -434,4 +434,4 @@ apply G_TI; trivial.
  unfold Lam.LAMf.
  auto 20 using G_union2, G_prodcart.
 Qed.
-Hint Resolve G_CCLam.
+Hint Resolve G_CCLam : core.

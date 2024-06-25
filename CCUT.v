@@ -1,11 +1,14 @@
 Require Import Models.
 Require Import GenModelSN.
 Require Import ZF.
-Require Import ZFind_nat.
+Require Import ZFind_nat ZFlambda Sat.
 
 Require Import SN_CC.
 
 Import SN SN.J.
+
+Existing Instance app_ext.
+Existing Instance ZFpairs.fst_morph.
 
 Parameter Symb : Type.
 Parameter isCstr : Symb -> Prop.

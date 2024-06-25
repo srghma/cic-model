@@ -1,4 +1,4 @@
-Require Import List Bool Models.
+Require Import Lia List Bool Models.
 Require Import ZFfunext ZFecc ZFind_nat ZFfixrec.
 Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck.
 Require ModelCC.
@@ -38,8 +38,10 @@ unfold V.shift.
 apply in_set_morph; auto with *.
 apply Tm.
 do 2 red; intros.
+
 simpl.
-replace (n+(S(n0+a))) with (S (n+n0+a)); auto with *.
+replace (n+S(n0+a)) with (S(n+n0+a)) by lia.
+reflexivity.
 Qed.
 
   Lemma typ_Infty e : typ_ord e Infty.
@@ -480,7 +482,7 @@ intros [|[|k]].
  reflexivity.
 
  unfold V.lams, V.shift, V.cons; simpl.
- rewrite <- minus_n_O.
+ replace (k-0) with k by lia.
  reflexivity.
 Qed.
 
@@ -590,7 +592,7 @@ apply val_push_var; simpl; auto.
  apply lt_osucc; auto.
 Qed.
 
-  Hint Resolve morph_fix_body ext_fun_ty ty_fix_body fix_codom_mono fix_body_irrel.
+  Hint Resolve morph_fix_body ext_fun_ty ty_fix_body fix_codom_mono fix_body_irrel : core.
 
   Lemma fix_recursor i :
     val_ok e i ->
@@ -1041,7 +1043,8 @@ apply in_set_morph; auto with *.
 apply Tm.
 do 2 red; intros.
 simpl.
-replace (n+(S(n0+a))) with (S (n+n0+a)); auto with *.
+replace (n+(S(n0+a))) with (S (n+n0+a)) by lia.
+reflexivity.
 Qed.
 
   Lemma val_mono_shift e n i j :
@@ -1062,7 +1065,8 @@ split;[|split;intros].
  apply int_morph; auto with *.
  intros k.
  unfold V.shift.
-replace (n+(S n0+k)) with (S (n+n0)+k); auto with *.
+ replace (n+(S n0+k)) with (S (n+n0)+k) by lia.
+ reflexivity.
 Qed.
 
 

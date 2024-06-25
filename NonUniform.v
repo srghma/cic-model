@@ -50,7 +50,7 @@ Fixpoint extpath p n : forall l:path p n, B(decn p n l) -> path p (S n) :=
   | 0 => fun _ i => existT _ i tt
   | S k => fun l =>
       match l return B (decn p (S k) l) -> path p (S (S k)) with
-      | existT i' l' => fun i => existT _ i' (extpath _ k l' i)
+      | existT _ i' l' => fun i => existT _ i' (extpath _ k l' i)
       end
   end.
 
@@ -76,7 +76,7 @@ Definition C3 (p:P') (g:forall i:B(d p), W3 (f3 p i)) : W3 p :=
   C2 (_p p) (_m p) (_l p) g.
 Definition unC3 (p:P') (w:W3 p) : forall i:B(d p), W3 (f3 p i) :=
   match w in W2 _ n l return forall i, W3 (mkP' _ _ (extpath _ _ l i))  with
-  | C2 m l' g => g
+  | C2 _ m l' g => g
   end.
 
 Definition W3_case (p:P') (Q : W3 p -> Type)
@@ -446,7 +446,7 @@ Fixpoint decn p n : path p n -> P :=
   | 0 => fun _ => p
   | S k => fun q =>
      match q with
-     | existT x (existT i l') => decn (f p x i) k l'
+     | existT _ x (existT _ i l') => decn (f p x i) k l'
      end
   end.
 
@@ -455,7 +455,7 @@ Fixpoint extpath p n : forall (l:path p n) (x:A(decn p n l)), B _ x -> path p (S
   | 0 => fun _ x i => existT _ x (existT _ i tt)
   | S k => fun l =>
       match l return forall (x:A(decn p (S k)l)), B _ x -> path p (S (S k)) with
-      | existT x' (existT i' l') => fun x i => existT _ x' (existT _ i' (extpath _ k l' x i))
+      | existT _ x' (existT _ i' l') => fun x i => existT _ x' (existT _ i' (extpath _ k l' x i))
       end
   end.
 
@@ -467,12 +467,12 @@ Inductive W2 (p:P) : forall n, path p n -> T1 :=
 
 Definition C2hd (p : P) n (l:path p n) (w:W2 p n l) : A(decn _ _ l) :=
   match w in W2 _ n l with
-  | C2 m l' x g => x
+  | C2 _ m l' x g => x
   end.
 
 Definition C2tl (p : P) n (l:path p n) (w:W2 p n l) : forall(i:B _ (C2hd _ _ _ w)), W2 _ _ (extpath _ _ l _ i) :=
   match w in W2 _ n l return forall i:B _ (C2hd _ _ _ w), W2 _ _ (extpath _ _ l _ i)  with
-  | C2 m l' x g => g
+  | C2 _ m l' x g => g
   end.
 
 Record P' :T2:= mkP' {

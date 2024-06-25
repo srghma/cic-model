@@ -1,11 +1,12 @@
-Require Export Relations Wellfounded.
+Require Import Relations Wellfounded.
 Require Import Sat.
-Require Import ZF ZFcoc ZFuniv_real.
+Require Import ZFcoc ZFuniv_real.
 Require Import ZFlambda.
 Require Import Models SnModels.
 Require GenRealSN.
 Set Implicit Arguments.
 Module Lc := Lambda.
+Import ZF ZFrelations.
 
 (** Strong normalization proof of the Calculus of Constructions.
     It is based on GenRealSN, so it does support strong eliminations.
@@ -16,8 +17,8 @@ Module Lc := Lambda.
 
 Module SN := GenRealSN.MakeModel CC_Real.
 Export SN.
-Hint Unfold inX.
-Existing Instance in_ext.
+Hint Unfold inX : core.
+Import SN.Notations.
 
 (** Derived properties *)
 
@@ -85,8 +86,8 @@ Lemma int_Prod_intro0 dom F0 f t :
   morph1 F0 ->
   f ∈ (Π x ∈ El dom, El(F0 x)) ->
   (forall x u, [x,u] \real dom ->
-   app f x ∈ El (F0 x) ->
-   inSAT (Lc.App t u) (Real (F0 x) (app f x))) ->
+   cc_app f x ∈ El (F0 x) ->
+   inSAT (Lc.App t u) (Real (F0 x) (cc_app f x))) ->
   [f,t] \real prod dom F0.
 split.
  red; rewrite El_prod; trivial.
@@ -107,8 +108,8 @@ Qed.
 Lemma int_Prod_intro A0 B0 f t i :
   f ∈ (Π x ∈ El(int A0 i), El(int B0 (V.cons x i))) ->
   (forall x u, [x,u] \real (int A0 i) ->
-   app f x ∈ El(int B0 (V.cons x i)) ->
-   inSAT (Lc.App t u) (Real (int B0 (V.cons x i)) (app f x))) ->
+   cc_app f x ∈ El(int B0 (V.cons x i)) ->
+   inSAT (Lc.App t u) (Real (int B0 (V.cons x i)) (cc_app f x))) ->
   [f,t] \real int (Prod A0 B0) i.
 intros.
 apply int_Prod_intro0; trivial.
@@ -122,7 +123,7 @@ exists nil.
 exists T; simpl; auto with *.
 exists empty; auto with *.
 Qed.
-Hint Resolve kind_ok_trivial.
+Hint Resolve kind_ok_trivial : core.
 
 (** ** Extendability *)
 Definition cst (x:set) : term.

@@ -3,6 +3,7 @@ Require Export GenModel.
 Require Export ZFcoc.
 Require Export ModelZF.
 Require Export List.
+Require Import Lia.
 
 Module BuildModel := GenModel.MakeModel(CCM).
 Import BuildModel.
@@ -12,11 +13,11 @@ Import ZFind_basic.
 Import ZFnats.
 
 
-Lemma app2_m2 m : morph2 (fun n x => app (app m n) x).
+Lemma app2_m2 m : morph2 (fun n x => cc_app (cc_app m n) x).
 do 3 red; intros.
 rewrite H,H0; reflexivity.
 Qed.
-Hint Resolve app2_m2.
+Hint Resolve app2_m2 : core.
 
 Definition prf_term : term.
 left; exists (fun _ => empty); do 2 red; reflexivity.
@@ -48,7 +49,7 @@ Qed.
 
 Definition NatRec (f g n:term) : term.
 left; exists (fun i => natrec (int f i) 
-  (fun m t => app (app (int g i) m) t) (int n i)).
+  (fun m t => cc_app (cc_app (int g i) m) t) (int n i)).
 repeat red; intros. apply natrec_morph. 
  rewrite H; reflexivity.
  
@@ -87,35 +88,37 @@ elim H using N_ind; intros.
  
  rewrite natrec_S; auto.
   refine (let H6 := prod_elim _ _ _ _ _ H2 H4 in _).
-   red; intros. apply prod_ext.
-    apply app_ext; try assumption.
-     apply int_morph; try reflexivity.
-      do 2 red; intros. rewrite H7; reflexivity.
-   
-    red; intros. apply app_ext.
-     apply int_morph; try reflexivity.
-      do 2 red; intros. apply V.cons_morph; try assumption.
-       do 2 red; intros. rewrite H7; reflexivity.
 
-     rewrite H7; reflexivity.
-
-  simpl in H6. clear H2. 
+  simpl in H6.  
   replace (fun k : nat => V.cons n0 i k) with (V.cons n0 i) in *; 
     trivial.
   refine (let H7 := prod_elim _ _ _ _ _ H6 _ in _).
-   do 2 red; intros. apply app_ext; try reflexivity.
-    apply int_morph; try reflexivity.
-     do 2 red; intros. rewrite H7; reflexivity.
-   
-   rewrite simpl_int_lift1. apply H5.
+  Unshelve.
+   clearbody H7.
+   revert H7; apply in_ext.
+   reflexivity.
 
-  simpl in H7. revert H7. apply in_set_morph; try reflexivity.
-  set (fS' := fun n y => app (app fS n) y) in |-*.
    apply app_ext; try reflexivity.
-    replace (fun k : nat => V.cons (natrec f0 fS' n0) 
-                                       (V.cons n0 i) k) 
-    with (V.cons (natrec f0 fS' n0) (V.cons n0 i)); trivial.
-    rewrite simpl_int_lift. symmetry; apply simpl_int_lift1.
+   rewrite simpl_int_lift. symmetry; apply simpl_int_lift1.
+
+   do 2 red; intros.
+   apply prod_ext; auto with *.
+    rewrite !simpl_int_lift.
+    apply app_ext; auto with *.
+
+    red; intros.
+    apply app_ext; auto with *.
+     rewrite !simpl_int_lift.
+     reflexivity.
+
+     apply succ_morph; trivial.
+
+   red; intros.
+   rewrite !simpl_int_lift.
+   reflexivity.
+
+   rewrite simpl_int_lift1.
+   assumption.
 Qed. 
 
 Definition Add : term -> term -> term.
@@ -136,11 +139,12 @@ apply add_typ; trivial.
 Qed.
 
 Definition ind_schema_term : term.
-left; exists (fun i => natrec (i 2) (fun n x => app (app (i 1) n) x) (i 0)).
+left; exists (fun i => natrec (i 2) (fun n x => cc_app (cc_app (i 1) n) x) (i 0)).
 do 2 red; intros.
 apply natrec_morph; try apply H.
 do 2 red; intros; simpl. apply app_ext; trivial.
-  apply app_ext; trivial.
+apply app_ext; trivial.
+apply H.
 Defined.
 
 (*Presburger Axioms*)
@@ -414,6 +418,9 @@ do 3 red; intros. apply prod_ext.
  red; intros. rewrite H; reflexivity.
 Defined.
 
+Lemma Impl_lift n A B :
+  eq_term (lift n (Impl A B)) (Impl(lift n A)(lift n B)).
+Admitted.
 
 Lemma Impl_intro : forall e b A B, A <> None -> B <> None -> 
   typ (A::e) b (lift 1 B) -> typ e (Abs A b) (Impl A B).
@@ -690,161 +697,89 @@ intros e P HNP.
 exists (Abs (subst Zero P) (Abs (Fall (Impl (lift_rec 1 1 P)
   ((lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero)) (lift_rec 1 1 P)))))) 
     (Abs T ind_schema_term))).
-assert (forall i, eq_val (V.cons (i 0) (V.shift 1 i)) i) as Hcons.
- intros; apply V.cons_ext; reflexivity.
 apply Impl_intro.
  apply subst_Some; trivial.
  
  intro; simpl in *; discriminate.
- 
- assert (forall x y z, 
-   eq_term (lift 1 (Impl (Fall (Impl x y)) z)) 
-   (Impl (Fall (Impl (lift_rec 1 1 x)
-     (lift_rec 1 1 y))) (lift 1 z))) as Hrewrite.
-  red; simpl; red; intros. 
-   apply prod_ext.
-    apply prod_ext; try reflexivity.
-     do 2 red; intros. apply prod_ext; [ | red; intros];
-     rewrite int_lift_rec_eq; apply int_morph; try reflexivity;
-     rewrite V.cons_lams; [rewrite H, H1 | do 2 red; intros; rewrite H2 
-     | rewrite H, H1 | do 2 red; intros xx xy HP; rewrite HP]; reflexivity.
 
-    do 2 red; intros. rewrite H. rewrite V.lams0.
-    rewrite <- (Hcons y0). rewrite simpl_int_lift1. reflexivity.
+ apply typ_conv with
+   (Prod (Fall
+          (Impl (lift_rec 1 1 P)
+             (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero)) (lift_rec 1 1 P)))))
+      (Prod T (lift_rec 2 1 P))); [| |discriminate].
+ 2:{red; simpl.
+    intros.
+    apply prod_ext.
+    apply prod_ext;[reflexivity|].
+    red; intros.
+    apply prod_ext.
+    rewrite int_lift_rec_eq.
+    apply int_morph;[reflexivity|].
+    do 2 red.
+    destruct a as [|[|j]]; simpl; try assumption.
+    compute; reflexivity.
+    compute; reflexivity.
+    red; intros.
+    rewrite !int_lift_rec_eq.
+    rewrite !int_subst_eq.
+    rewrite !int_lift_rec_eq.
+    apply int_morph;[reflexivity|].
+    do 2 red.
+    destruct a as [|j]; simpl; try reflexivity.
+    unfold V.lams; simpl.
+    rewrite H1; reflexivity.
+    red; intros.
+    apply prod_ext; [reflexivity|].
+    do 2 red; intros.    
+    rewrite int_lift_rec_eq.
+    apply int_morph;[reflexivity|].
+    do 2 red.
+    destruct a as [|j]; simpl; try assumption.
+    unfold V.lams, V.shift; simpl.
+    reflexivity. }
+ apply typ_abs;[|discriminate].
+ apply typ_abs. 2:{ destruct P. destruct s; discriminate. contradiction. }
+ red; intros.
+ apply in_int_el; simpl.
+ rewrite int_lift_rec_eq.
+ setoid_replace (V.lams 1 (V.shift 2) i) with
+   (V.cons (i 0) (V.shift 3 i)).
+ 2:{intros [|?];try reflexivity. 
+    unfold V.lams, V.shift; simpl. replace (n-0) with n; auto with *. }
+ apply natrec_typ with (P:=fun n=> int P (V.cons n (V.shift 3 i))).
+  do 2 red; intros. 
+  rewrite H0; reflexivity.
 
- rewrite Hrewrite. apply Impl_intro.
-  intro; simpl in H; discriminate.
+  do 3 red; intros. 
+  rewrite H0,H1; reflexivity.
 
-  apply lift_Some1. intro; simpl in H; discriminate.
+  generalize (H 0 _ eq_refl).
+  simpl; trivial.
 
-  rewrite <- lift_split.
-  assert (forall t n, eq_term (lift n (Fall t)) 
-    (Fall (lift_rec n 1 t))) as Hliftin.
-   red; simpl; red; intros. apply prod_ext; try reflexivity.
-    do 2 red; intros. rewrite int_lift_rec_eq.
-    rewrite H1. rewrite H. rewrite V.cons_lams; try reflexivity.
-     do 2 red; intros. rewrite H2; reflexivity.
-  rewrite Hliftin. apply Fall_intro.
-   apply lift_Somen; trivial.
+  generalize (H 2 _ eq_refl); simpl.
+  destruct P;[|contradiction]. destruct s; simpl.
+  apply in_ext; try reflexivity.
+  apply p.
+  intros [|?];try reflexivity. 
+  unfold V.lams, V.shift; simpl. replace (n-0) with n; auto with *.
 
-   do 2 red; intros i Hhyp.
-   unfold val_ok in Hhyp.
-   assert (nth_error (T :: (Fall (Impl (lift_rec 1 1 P)
-     (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero))
-     (lift_rec 1 1 P))))) :: (subst Zero P) :: e) 0 =
-     value T) as Hind; trivial.
-   assert (nth_error (T :: (Fall (Impl (lift_rec 1 1 P)
-     (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero))
-     (lift_rec 1 1 P))))) :: (subst Zero P) :: e) 1 =
-     value (Fall (Impl (lift_rec 1 1 P)
-     (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero))
-     (lift_rec 1 1 P)))))) as Hsucc; trivial.
-   assert (nth_error (T :: (Fall (Impl (lift_rec 1 1 P)
-     (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero))
-     (lift_rec 1 1 P))))) :: (subst Zero P) :: e) 2 =
-     value (subst Zero P)) as Hzero; trivial.
-   generalize (Hhyp _ _ Hind); clear Hind; intro Hind; simpl in Hind.
-   generalize (Hhyp _ _ Hsucc); clear Hsucc; intro Hsucc; simpl in Hsucc.
-   generalize (Hhyp _ _ Hzero); clear Hzero; intro Hzero.
-     simpl in Hzero. red in Hzero.
-   clear Hrewrite Hhyp Hliftin.
+  intros.
+  generalize (H 1 _ eq_refl); simpl; intro.
+  apply cc_prod_elim with (2:=H0) in H2.
+  apply cc_prod_elim with (x:=h) in H2.
+   apply eq_elim with (2:=H2).
+   rewrite int_lift_rec_eq.
+   rewrite int_subst_eq.
+   rewrite int_lift_rec_eq.
+   apply int_morph;[reflexivity|].
+   intros [|?]; unfold V.lams,V.shift; simpl.
+    apply add1.
+    replace (n-0-0) with n; auto with *.
+    lia.    
 
-   assert (forall i, eq_val (V.shift 2 (V.shift 1 i)) (V.shift 3 i)) as Hsplit.
-    do 2 red; intros i0 a; unfold V.shift; 
-    setoid_replace (1 + (2 + a)) with (3 + a) by omega; reflexivity.
-   case_eq (lift 3 (subst Zero P)); intros.
-    2 : apply lift_Somen in H; [contradiction | apply subst_Some; trivial].
-
-    rewrite H in Hzero; rewrite <- H in Hzero; clear s H.
-    rewrite <- (Hcons i) in Hzero at 2. rewrite simpl_int_lift in Hzero.
-    rewrite <- (Hcons (V.shift 1 i)) in Hzero. 
-    rewrite simpl_int_lift in Hzero. rewrite <- V.shift_split in Hzero.
-    rewrite <- (Hcons (V.shift 2 i)) in Hzero. 
-    rewrite simpl_int_lift1 in Hzero. rewrite (Hsplit i) in Hzero.
-    rewrite int_subst_eq in Hzero; simpl in Hzero.
-
-   assert (forall z i, int (lift_rec 1 1 P) (fun k : nat =>
-      V.cons z (V.lams 0 (V.shift 2) (fun k0 : nat => i k0)) k) == 
-    int P (V.cons z (V.shift 3 i))) as Haux1.
-    intros. replace ((fun k : nat => V.cons z (V.lams 0 (V.shift 2) (fun k0 => 
-        i0 k0)) k)) with (V.cons z (V.lams 0 (V.shift 2) i0)); trivial. 
-      rewrite int_lift_rec_eq.
-      rewrite <- V.cons_lams.
-       2 : do 2 red; intros x y H1; rewrite H1; reflexivity.
-
-       do 2 rewrite V.lams0. rewrite (Hsplit i0); reflexivity.
-   assert (prod N (fun z : X => prod (int (lift_rec 1 1 P)
-    (fun k : nat => V.cons z (V.lams 0 (V.shift 2) (fun k0 : nat => i k0)) k))
-     (fun _ : X => int (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero)) 
-      (lift_rec 1 1 P))) (fun k : nat =>
-        V.cons z (V.lams 0 (V.shift 2) (fun k0 : nat => i k0)) k))) ==
-    prod N (fun z : X => prod (int P (V.cons z (V.shift 3 i))) 
-      (fun _ : X => int P (V.cons (succ z) (V.shift 3 i))))) as Haux2.
-    apply prod_ext; try reflexivity.
-     do 2 red; intros. apply prod_ext.
-      rewrite <- H0. apply Haux1.
-
-      do 2 red. intros. rewrite Haux1 in H1.
-      replace  (fun k : nat => V.cons y1 (V.lams 0 (V.shift 2) (fun k0 : nat 
-        => i k0)) k) with (V.cons y1 (V.lams 0 (V.shift 2) i)); trivial.
-      rewrite int_lift_rec_eq. rewrite int_subst_eq.
-      rewrite int_lift_rec_eq. rewrite <- V.cons_lams; simpl.
-       2 : do 2 red; intros x y H3; rewrite H3; reflexivity.
-
-       rewrite add1.
-       rewrite <- H0. rewrite <- V.cons_lams.
-       2:apply V.shift_morph; trivial.
-       apply int_morph; try reflexivity.
-         do 2 red; intros. apply V.cons_morph. 
-          rewrite V.lams_bv; try omega.
-          rewrite V.lams0. unfold V.cons. reflexivity.
-
-          rewrite V.lams0. 
-          replace ((fun k : nat => V.cons y1 (V.lams 0 (V.shift 1) 
-          (V.lams 0 (V.shift 2) i)) k)) with (V.cons y1 (V.lams 0 (V.shift 1) 
-          (V.lams 0 (V.shift 2) i))); trivial.
-          rewrite V.shift_cons. rewrite V.lams0. apply V.shiftS_split.
-    rewrite Haux2 in Hsucc. clear Haux1 Haux2.
-         
-   case_eq (lift_rec 2 1 P); intros.
-    2 : apply lift_Somen in H; [contradiction | trivial].
-
-    rewrite <- H; clear H. simpl. rewrite int_lift_rec_eq.
-    rewrite <- (Hcons i) at 3. rewrite <- V.cons_lams.
-     2 : do 2 red; intros x y H; rewrite H; reflexivity.
-     
-     rewrite V.lams0. 
-     replace (fun k : nat => V.shift 1 i k) with (V.shift 1 i); trivial.
-     rewrite (Hsplit i). elim Hind using N_ind.
-      intros. rewrite natrec_morph; auto.
-       rewrite <- H0. apply H1.
-     
-       reflexivity.
-
-       apply app2_m2.
-
-       symmetry; trivial.
-
-     rewrite natrec_0; trivial.
-     
-     intros. rewrite natrec_S; trivial.
-      generalize prod_elim; intro Haux.
-      specialize Haux with (2:=Hsucc) (3:=H). simpl in Haux.
-      assert (eq_fun N
-        (fun z : X =>
-          prod (int P (V.cons z (V.shift 3 i)))
-          (fun _ : X => int P (V.cons (succ z) (V.shift 3 i))))
-        (fun z : X =>
-          prod (int P (V.cons z (V.shift 3 i)))
-          (fun _ : X => int P (V.cons (succ z) (V.shift 3 i))))) as H'.
-      red; intros. apply prod_ext; [|do 2 red; intros]; rewrite H2; reflexivity.
-      specialize Haux with (1:=H') (2:=Hsucc) (3:=H). clear H' Hsucc.
-      generalize prod_elim; intro Haux1.
-      assert ( eq_fun (int P (V.cons n (V.shift 3 i)))
-        (fun _ : X => int P (V.cons (succ n) (V.shift 3 i)))
-        (fun _ : X => int P (V.cons (succ n) (V.shift 3 i)))) as H'.
-      red; intros; try reflexivity.
-      specialize Haux1 with (1:=H') (2:=Haux) (3:=H0). clear H'. apply Haux1.
+  rewrite int_lift_rec_eq.
+  apply eq_elim with (2:=H1).    
+  apply int_morph;[reflexivity|].
+  intros [|?]; unfold V.lams,V.shift; simpl; auto with *.
+  replace (n-0) with n; auto with *.
 Qed.
-
-

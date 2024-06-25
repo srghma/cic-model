@@ -366,11 +366,11 @@ apply fun_ext; intros x.
 unfold fun_ext_singl, f_app.
 eapply eq_trans.
  apply f_equal_compose with
-  (f0:=fun f0=>f0 x) (g0:= (fun (h:forall x,{u:_& f x = u}) x => projT1 (h x)))
+  (f:=fun f0=>f0 x) (g:= (fun (h:forall x,{u:_& f x = u}) x => projT1 (h x)))
   (e:=fun_ext_singl_raw w).
 eapply eq_trans.
  symmetry; apply f_equal_compose with
-  (f0:=fun x=>projT1 x) (g0:= fun h:forall x,{u:B x&f x=u} => h x)
+  (f:=fun x=>projT1 x) (g:= fun h:forall x,{u:B x&f x=u} => h x)
   (e:=fun_ext_singl_raw w).
 replace  (f_equal (fun h : forall x,{u:_&f x = u} => h x)
                   (fun_ext_singl_raw w))
@@ -539,7 +539,7 @@ Module trSub <: ConsistentSublogic.
   Definition TrI (P:Prop) (p:P) : Tr P := tr_i p.
   Definition TrP (P:Prop) (p:Tr (Tr P)) : Tr P := tr_f p.
   Definition TrMono (P Q:Prop) (f:P->Q) (p:Tr P) : Tr Q := tr_map f p.
-  Notation "# T" := (Tr T).
+(*  Notation "# T" := (Tr T).*)
   Definition TrCons : ~ Tr False := tr_elim_prop isProp_False.
 End trSub.
 Module TrSubThms <: SublogicTheory := BuildConsistentSublogic trSub.
@@ -548,7 +548,7 @@ Lemma isL_tr : forall P, isL (tr P).
 red; intros.
 apply tr_f; trivial.
 Qed.
-Hint Resolve isL_tr.
+Hint Resolve isL_tr : core.
 
 Instance Tr_morph : Proper (iff ==> iff) Tr. 
 do 2 red; intros.
@@ -671,7 +671,7 @@ assert (p:P' q).
    reflexivity.
 
    apply is_prop_uip; apply tr_prop.
-exact (projT1 p).
+   exact (proj1_sig p).
 Defined.
 
  Lemma tr_ind_set_eq (x:X) :
@@ -685,7 +685,7 @@ Qed.
 End TruncationSetInduction.
 
 Lemma tr_ind_set_nodep X P (Ps:isSet P) (h:X->P) (hcomp : forall x y, h x = h y) (q:tr X) : P.
-apply tr_ind_set with (P0:=fun _ =>P) (h0:=h); trivial.
+apply tr_ind_set with (P:=fun _ =>P) (h:=h); trivial.
 intros.
 destruct (tr_prop X (tr_i x) (tr_i y)); apply hcomp.
 Defined.
@@ -703,7 +703,7 @@ elim q using tr_ind.
  apply X0.
 Qed.
 
-Hint Resolve tr_prop isProp_forall isProp_conj isProp_iff.
+Hint Resolve tr_prop isProp_forall isProp_conj isProp_iff : core.
 
 (*
 Lemma prop_fun_ext_type {A B} (Bp:forall x:A, isProp (B x)) {f g:forall x:A,B x} :
@@ -734,7 +734,7 @@ unfold tr_elim.
 _ *)
  
 End Truncation.
-Global Hint Resolve tr_prop isProp_forall isProp_conj isProp_iff.
+Global Hint Resolve tr_prop isProp_forall isProp_conj isProp_iff : core.
 Arguments tr_ind {_} X P _ _ t.
 Arguments tr_prop {_} X x y.
 Arguments isProp_isProp {_} A _ _.
@@ -841,7 +841,7 @@ Class isRel {X} (R:X->X->Prop) := {
   isP : forall x y, isProp (R x y);
   isR :> Equivalence R
   }.
-
+#[global] Existing Instance isR.
 
 Instance isClass_eq {X} {R:X->X->Prop} (Rr:isRel R) x :
   isClass R (fun y => R x y).
@@ -1071,7 +1071,7 @@ Class isRel {X} (R:X->X->Prop) := {
   isP : forall x y, isProp (R x y);
   isR :> Equivalence R
   }.
-
+#[global]Existing Instance isR.
 
 Instance isClass_eq {X} {R:X->X->Prop} (Rr:isRel R) x :
   isClass R (fun y => R x y).
@@ -1369,12 +1369,12 @@ End PropUnivalence.
 Section SetUnivalence.
 
   Definition set_univ :=
-    forall {A B:Type}{f:A->B}{g:B->A},
+    forall (A B:Type)(f:A->B)(g:B->A),
       isSet A ->
       (forall a, g (f a) = a) /\ (forall b, f (g b) = b) ->
       A=B.
   Definition set_univ_comp (ax:set_univ) :=
-    forall {A B:Type}{f:A->B}{g:B->A}{As:isSet A}
+    forall (A B:Type)(f:A->B)(g:B->A)(As:isSet A)
       (e:(forall a, g (f a) = a) /\ (forall b, f (g b) = b)),
     transport (fun X=>X) (ax _ _ _ _ As e) = f.
 
@@ -1473,7 +1473,7 @@ End SetUnivalence.
 Section Univalence.
 
   Lemma eq_weqv {X Y:Type} (e:X=Y) : weqv X Y.
-refine (exist _ (univ_inv e) _).
+refine (existT _ (univ_inv e) _).
 destruct e; simpl; reflexivity.
 Defined.
           
@@ -1483,30 +1483,30 @@ Defined.
 
   Lemma weqv_eq {X Y} : weqv X Y -> X=Y.
 intros.
-specialize isContr_isProp with (1:=univ X); intros wp.
+specialize @isContr_isProp with (1:=@univ X); intros wp.
 red in wp.
 specialize wp with (x:=existT _ X (eq_weqv eq_refl)) (y:=existT _ Y X0).
 apply f_equal with (f:=projT1 (P:=_)) in wp; trivial.
 Defined.
 
   Lemma univ_comp {A B:Type}(e:weqv A B) :
-    transport (fun X=>X) (weqv_eq e) = ef (proj1_sig e).
+    transport (fun X=>X) (weqv_eq e) = ef (projT1 e).
 unfold weqv_eq.
 set (aux := isContr_isProp (univ A) (existT (weqv A) A (eq_weqv eq_refl)) (existT (weqv A) B e)).
 change ((fun (w:{Y:Type&weqv A Y}) (e:existT (weqv A) A (eq_weqv eq_refl) = w) =>
            transport (fun X=>X) (f_equal (projT1 (P:=_)) e) =
-           ef (proj1_sig (projT2 w))) (existT (weqv A) B e) aux).
+           ef (projT1 (projT2 w))) (existT (weqv A) B e) aux).
 case aux; simpl.
 reflexivity.
 Qed.
 
   Lemma univ_comp_sym {A B:Type}(e:weqv A B) :
-    transport (fun X=>X) (eq_sym (weqv_eq e)) = eg (proj1_sig e).
+    transport (fun X=>X) (eq_sym (weqv_eq e)) = eg (projT1 e).
 unfold weqv_eq.
 set (aux := isContr_isProp (univ A) (existT (weqv A) A (eq_weqv eq_refl)) (existT (weqv A) B e)).
 change ((fun (w:{Y:Type&weqv A Y}) (e:existT (weqv A) A (eq_weqv eq_refl) = w) =>
            transport (fun X=>X) (eq_sym (f_equal (projT1 (P:=_)) e)) =
-           eg (proj1_sig (projT2 w))) (existT (weqv A) B e) aux).
+           eg (projT1 (projT2 w))) (existT (weqv A) B e) aux).
 case aux; simpl.
 reflexivity.
 Qed.

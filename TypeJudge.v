@@ -1178,9 +1178,10 @@ induction 1; simpl; intros;  eauto with coc sets.
 
  apply IHeq_typ1.
  apply inv_type_conv with T s; auto with coc.
-Existential 1 := prop.
-Existential 1 := prop.
-Existential 1 := prop.
+Unshelve.
+exact prop.
+exact prop.
+exact prop.
 Qed.
 
   Lemma eq_typ_not_kind : forall e M M' T,
@@ -1228,8 +1229,9 @@ induction 1; intros;  eauto with coc sets.
     apply eq_conv_sym; trivial.
 
     apply typ_refl with B'1; trivial.
-Existential 1:=prop.
-Existential 1:=prop.
+Unshelve.
+exact prop.
+exact prop.
 Qed.
 
   Lemma red_prod_prod : forall e A B U K,
@@ -2109,7 +2111,7 @@ elim H using typ_mind
    apply type_app with V1 A' s1 s2; trivial.
     elim type_case with (1 := ty_v); intros.
     destruct H5.
-    subst V' V; simpl in unmk_V.
+    subst V' V.
      rewrite unmark_sort_inv with V1 x; auto with coc.        
       apply type_eq_conv with V' x; trivial.
       apply unmark_eq_conv with V' A' (Srt s1); trivial.

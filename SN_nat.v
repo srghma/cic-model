@@ -83,15 +83,14 @@ rewrite Real_def; intros; trivial.
  rewrite mt_in_N; trivial.
 Qed.
 
-  Notation "[ x , t ] \real A" := (x ∈ El A  /\ inSAT t (Real A x)) (at level 60).
-
 Lemma realNat_def : forall i n t,
-  [n,t] \real int Nat i <-> n ∈ N /\ inSAT t (cNAT n).
+  real n t (int Nat i) <-> n ∈ N /\ inSAT t (cNAT n).
 intros.
+unfold real, inX.
 rewrite ElNat_eq.
 split; destruct 1; split; trivial.
- rewrite RealNat_eq in H0; trivial.
- rewrite RealNat_eq; trivial.
++rewrite RealNat_eq in H0; trivial.
++rewrite RealNat_eq; trivial.
 Qed.
 
 (** Typing rules of constructors *)

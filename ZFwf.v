@@ -1,4 +1,4 @@
-Require Export basic.
+Require Import basic.
 Require Import ZF.
 
 (** Theory about well-founded sets *)
@@ -363,7 +363,7 @@ revert z H1; elim H0 using trClos_ind; intros; trivial.
   apply trClos_intro2 with y1; trivial.
 Qed.
 
-Hint Resolve isWf_trClos trClos_intro1 trClos_intro2.
+Hint Resolve isWf_trClos trClos_intro1 trClos_intro2 : core.
 
 
 Lemma isWf_ind2 x (P : set -> Prop) :
@@ -790,4 +790,4 @@ Qed.
 
 End WellFoundedRecursion.
 *)
-Hint Resolve isWf_morph.
+Hint Resolve isWf_morph : core.

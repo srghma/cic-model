@@ -317,7 +317,7 @@ apply subset_ext; intros.
 Qed.
 
 Lemma sigma_nodep : forall A B,
-  prodcart A B == Σ _∈A, B.
+  prodcart A B == Σ __∈A, B.
 intros.
 apply eq_intro; intros.
  generalize (fst_typ _ _ _ H); intro.

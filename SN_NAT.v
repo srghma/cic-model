@@ -8,7 +8,7 @@
 Set Implicit Arguments.
 Require Import basic Can Sat SATnat SN_CC_Real.
 Require Import TypModels.
-Require Import ZF ZFcoc ZFuniv_real ZFind_natbot.
+Require Import ZF ZFsum ZFcoc ZFuniv_real ZFind_natbot.
 Module Lc:=Lambda.
 
 (* Building the realizability on the nats of ZFind_natbot *)

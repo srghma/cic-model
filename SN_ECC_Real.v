@@ -136,8 +136,10 @@ Lemma typ_type_cumul_le e T m n :
   le m n ->
   typ e T (type m) ->
   typ e T (type n).
-induction 1; intros; auto.
-apply typ_type_cumul; auto.
+induction 1; intros; [assumption|].
+apply typ_type_cumul.
+apply IHle.
+assumption.
 Qed.
 
 Lemma typ_predicative_prod e T U n :

@@ -1,5 +1,5 @@
 
-Require Export Arith.
+Require Export Lia Arith.
 Require Export Compare_dec.
 Require Export Relations.
 
@@ -182,7 +182,7 @@ elim a; intros.
 absurd (k <= n); auto with arith.
 
 inversion_clear b in H.
-elim gt_irrefl with n; auto with arith.
+lia.
 Qed.
 
 
@@ -192,9 +192,9 @@ simpl in |- *; intros.
 elim (lt_eq_lt_dec k n); intros.
 elim a; intros; auto with arith.
 inversion_clear b in H.
-elim gt_irrefl with n; auto with arith.
+lia.
 
-absurd (k <= n); auto with arith.
+lia.
 Qed.
 
 
@@ -202,9 +202,9 @@ Qed.
 intros; simpl in |- *.
 elim (lt_eq_lt_dec n n); intros.
 elim a; intros; auto with coc.
-elim lt_irrefl with n; auto with coc.
+lia.
 
-elim gt_irrefl with n; auto with coc.
+lia.
 Qed.
 
 
@@ -234,13 +234,12 @@ Qed.
 simple induction M; simpl in |- *; intros; auto with coc.
 elim (le_gt_dec k n); intros.
 rewrite lift_ref_ge; auto with coc.
-rewrite plus_assoc; auto with coc.
+rewrite Nat.add_assoc; auto with coc.
 
-rewrite plus_comm.
-apply le_trans with (k + n0); auto with arith.
+lia.
 
 rewrite lift_ref_lt; auto with arith.
-apply le_gt_trans with k; auto with arith.
+lia.
 
 rewrite H; auto with arith; rewrite H0; simpl in |- *; auto with arith.
 
@@ -264,21 +263,19 @@ simple induction M; simpl in |- *; intros; auto with coc.
 elim (le_gt_dec k n); elim (le_gt_dec i n); intros.
 rewrite lift_ref_ge; auto with arith.
 rewrite lift_ref_ge; auto with arith.
-elim plus_assoc_reverse with p n0 n.
-elim plus_assoc_reverse with n0 p n.
-elim plus_comm with p n0; auto with arith.
+f_equal; lia.
 
-apply le_trans with n; auto with arith.
+lia.
 
 absurd (i <= n); auto with arith.
-apply le_trans with k; auto with arith.
+lia.
 
 rewrite lift_ref_ge; auto with arith.
 rewrite lift_ref_lt; auto with arith.
 
 rewrite lift_ref_lt; auto with arith.
 rewrite lift_ref_lt; auto with arith.
-apply le_gt_trans with k; auto with arith.
+lia.
 
 rewrite H; auto with arith; rewrite H0; auto with arith.
 rewrite plus_n_Sm; auto with arith.
@@ -307,10 +304,10 @@ simple induction M; simpl in |- *; intros; auto with arith.
 elim (le_gt_dec k n); intros.
 rewrite subst_ref_gt; auto with arith.
 red in |- *; red in |- *.
-apply le_trans with (S (n0 + k)); auto with arith.
+lia.
 
 rewrite subst_ref_lt; auto with arith.
-apply le_gt_trans with k; auto with arith.
+lia.
 
 rewrite H; auto with arith; rewrite H0; auto with arith.
 elim plus_n_Sm with n k; auto with arith.
@@ -335,43 +332,29 @@ Qed.
    lift_rec n (subst_rec N M p) k = subst_rec N (lift_rec n M k) (n + p).
 simple induction M; intros; auto with arith.
 unfold subst_rec at 1, lift_rec at 2 in |- *.
-elim (lt_eq_lt_dec p n); elim (le_gt_dec k n); intros.
-elim a0.
-case n; intros.
-inversion_clear a1.
-
-unfold pred in |- *.
-rewrite lift_ref_ge; auto with arith.
-rewrite subst_ref_gt; auto with arith.
-elim plus_n_Sm with n0 n1.
-auto with arith.
-
-apply le_trans with p; auto with arith.
-
-simple induction 1.
-rewrite subst_ref_eq.
-unfold lift in |- *.
+*destruct (lt_eq_lt_dec p n) as [[?|?]|?]; destruct (le_gt_dec k n);
+  try (exfalso; lia).
++rewrite subst_ref_gt; auto with arith.
+ rewrite lift_ref_ge; auto with arith.
+ f_equal; lia.
+ lia.
++subst p.
+ rewrite subst_ref_eq.
+ unfold lift in |- *.
 rewrite simpl_lift_rec; auto with arith.
++rewrite subst_ref_lt; auto with arith.
+ rewrite lift_ref_ge; auto with arith.
++rewrite subst_ref_lt; auto with arith.
+ 2:lia. 
+ rewrite lift_ref_lt; auto with arith.
 
-absurd (k <= n); auto with arith.
-apply le_trans with p; auto with arith.
-elim a; auto with arith.
-simple induction 1; auto with arith.
-
-rewrite lift_ref_ge; auto with arith.
-rewrite subst_ref_lt; auto with arith.
-
-rewrite lift_ref_lt; auto with arith.
-rewrite subst_ref_lt; auto with arith.
-apply le_gt_trans with p; auto with arith.
-
-simpl in |- *.
+*simpl in |- *.
 rewrite plus_n_Sm.
 rewrite H; auto with arith; rewrite H0; auto with arith.
 
-simpl in |- *; rewrite H; auto with arith; rewrite H0; auto with arith.
+*simpl in |- *; rewrite H; auto with arith; rewrite H0; auto with arith.
 
-simpl in |- *; rewrite plus_n_Sm.
+*simpl in |- *; rewrite plus_n_Sm.
 rewrite H; auto with arith; rewrite H0; auto with arith.
 Qed.
 
@@ -388,41 +371,28 @@ Qed.
    lift_rec n (subst_rec N M p) (p + k) =
    subst_rec (lift_rec n N k) (lift_rec n M (S (p + k))) p.
 simple induction M; intros; auto with arith.
-unfold subst_rec at 1 in |- *.
-elim (lt_eq_lt_dec p n); intro.
-elim a.
-case n; intros.
-inversion_clear a0.
+*unfold subst_rec at 1, lift_rec at 3.
+ destruct (lt_eq_lt_dec p n) as [[?|?]|?]; destruct (le_gt_dec (S(p+k)) n);
+  try (exfalso; lia).
++rewrite subst_ref_gt; [|lia].
+ rewrite lift_ref_ge; [|lia].
+ f_equal; lia.
++rewrite subst_ref_gt; [|lia].
+ rewrite lift_ref_lt; [|lia].
+ trivial.
++subst p.
+ rewrite subst_ref_eq.
+ unfold lift; rewrite <- permute_lift_rec; auto with arith.
++rewrite subst_ref_lt; auto with arith.
+ rewrite lift_ref_lt; auto with arith.
 
-unfold pred, lift_rec at 1 in |- *.
-elim (le_gt_dec (p + k) n1); intro.
-rewrite lift_ref_ge; auto with arith.
-elim plus_n_Sm with n0 n1.
-rewrite subst_ref_gt; auto with arith.
-red in |- *; red in |- *; apply le_n_S.
-apply le_trans with (n0 + (p + k)); auto with arith.
-apply le_trans with (p + k); auto with arith.
+*simpl in |- *; replace (S (p + k)) with (S p + k); auto with arith.
+ rewrite H; rewrite H0; auto with arith.
 
-rewrite lift_ref_lt; auto with arith.
-rewrite subst_ref_gt; auto with arith.
+*simpl in |- *; rewrite H; rewrite H0; auto with arith.
 
-simple induction 1.
-unfold lift in |- *.
-rewrite <- permute_lift_rec; auto with arith.
-rewrite lift_ref_lt; auto with arith.
-rewrite subst_ref_eq; auto with arith.
-
-rewrite lift_ref_lt; auto with arith.
-rewrite lift_ref_lt; auto with arith.
-rewrite subst_ref_lt; auto with arith.
-
-simpl in |- *; replace (S (p + k)) with (S p + k); auto with arith.
-rewrite H; rewrite H0; auto with arith.
-
-simpl in |- *; rewrite H; rewrite H0; auto with arith.
-
-simpl in |- *; replace (S (p + k)) with (S p + k); auto with arith.
-rewrite H; rewrite H0; auto with arith.
+*simpl in |- *; replace (S (p + k)) with (S p + k); auto with arith.
+ rewrite H; rewrite H0; auto with arith.
 Qed.
 
 
@@ -441,44 +411,27 @@ Qed.
    subst_rec P (subst_rec N M p) (p + n) =
    subst_rec (subst_rec P N n) (subst_rec P M (S (p + n))) p.
 simple induction M; auto with arith; intros.
-unfold subst_rec at 2 in |- *.
-elim (lt_eq_lt_dec p n); intro.
-elim a.
-case n; intros.
-inversion_clear a0.
+*unfold subst_rec at 2 in |- *.
+ destruct (lt_eq_lt_dec p n) as [[?|?]|?];
+ destruct (lt_eq_lt_dec (S(p+n0)) n) as [[?|?]|?];
+ try (exfalso;lia);
+ repeat ((rewrite subst_ref_lt;[|lia]) || (rewrite subst_ref_gt;[|lia]));
+ trivial.
+ +subst n.
+  simpl pred.
+  do 2 rewrite subst_ref_eq.
+  rewrite simpl_subst; auto with arith.
+ +subst n.
+  rewrite subst_ref_eq.
+  unfold lift; rewrite commut_lift_subst_rec; auto with arith.
 
-unfold pred, subst_rec at 1 in |- *.
-elim (lt_eq_lt_dec (p + n0) n1); intro.
-elim a1.
-case n1; intros.
-inversion_clear a2.
+*simpl in |- *; replace (S (p + n)) with (S p + n); auto with arith.
+ rewrite H; auto with arith; rewrite H0; auto with arith.
 
-rewrite subst_ref_gt; auto with arith.
-rewrite subst_ref_gt; auto with arith.
-apply gt_le_trans with (p + n0); auto with arith.
+*simpl in |- *; rewrite H; rewrite H0; auto with arith.
 
-simple induction 1.
-rewrite subst_ref_eq; auto with arith.
-rewrite simpl_subst; auto with arith.
-
-rewrite subst_ref_lt; auto with arith.
-rewrite subst_ref_gt; auto with arith.
-
-simple induction 1.
-rewrite subst_ref_lt; auto with arith.
-rewrite subst_ref_eq.
-unfold lift in |- *.
-rewrite commut_lift_subst_rec; auto with arith.
-
-do 3 (rewrite subst_ref_lt; auto with arith).
-
-simpl in |- *; replace (S (p + n)) with (S p + n); auto with arith.
-rewrite H; auto with arith; rewrite H0; auto with arith.
-
-simpl in |- *; rewrite H; rewrite H0; auto with arith.
-
-simpl in |- *; replace (S (p + n)) with (S p + n); auto with arith.
-rewrite H; rewrite H0; auto with arith.
+*simpl in |- *; replace (S (p + n)) with (S p + n); auto with arith.
+ rewrite H; rewrite H0; auto with arith.
 Qed.
 
 

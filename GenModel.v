@@ -1,5 +1,6 @@
 
 Require Import basic.
+Require Import VarMap.
 Require Import Models TypModels List.
 
 (** A general model construction of a model of CC given an
@@ -33,7 +34,6 @@ Module Xeq.
   Definition eq_equiv : Equivalence eq := eqX_equiv.
   Existing Instance eq_equiv.
 End Xeq.
-Require Import VarMap.
 Module V := VarMap.Make(Xeq).
 
 Notation val := V.map.
@@ -44,7 +44,7 @@ Definition vnil : val := V.nil props.
 Import V.
 Existing Instance cons_morph.
 Existing Instance cons_morph'.
-Hint Unfold eq_val.
+Hint Unfold eq_val : core.
 
 
 (** * Pseudo-Terms *)
@@ -61,19 +61,19 @@ Definition eq_term (x y:term) :=
   | _, _ => False
   end.
 
-Global Instance eq_term_refl : Reflexive eq_term.
+#[global] Instance eq_term_refl : Reflexive eq_term.
 red; intros.
 destruct x; simpl; trivial.
 destruct s; trivial.
 Qed.
 
-Global Instance eq_term_sym : Symmetric eq_term.
+#[global] Instance eq_term_sym : Symmetric eq_term.
 red; intros.
 destruct x; destruct y; simpl in *; auto.
 symmetry; trivial.
 Qed.
 
-Global Instance eq_term_trans : Transitive eq_term.
+#[global] Instance eq_term_trans : Transitive eq_term.
 red; intros.
 destruct x; destruct y; try contradiction; destruct z; simpl in *; auto.
 transitivity (proj1_sig s0); trivial.
@@ -86,7 +86,7 @@ Definition int (t:term) (i:val) : X :=
   | None => props
   end.
 
-Global Instance int_morph : Proper (eq_term ==> eq_val ==> eqX) int.
+#[global] Instance int_morph : Proper (eq_term ==> eq_val ==> eqX) int.
 unfold int; do 3 red; intros.
 destruct x; destruct y; simpl in *; (contradiction||reflexivity||auto).
 Qed.
@@ -114,7 +114,7 @@ Definition el (t:term) (i:val) (x:X) :=
   | None => True
   end.
 
-Global Instance el_morph : Proper (eq_term ==> eq_val ==> eqX ==> iff) el.
+#[global] Instance el_morph : Proper (eq_term ==> eq_val ==> eqX ==> iff) el.
 apply morph_impl_iff3; auto with *.
 unfold el; do 5 red; intros.
  destruct y; trivial; destruct x; (contradiction||simpl in *).
@@ -155,7 +155,7 @@ Existing Instance sub_m.
 Definition eq_sub (s1 s2:sub) :=
   (eq_val==>eq_val)%signature s1 s2.
   
-Instance eq_sub_equiv : Equivalence eq_sub.
+#[global] Instance eq_sub_equiv : Equivalence eq_sub.
 split; red; intros.
  apply x.
 
@@ -178,7 +178,7 @@ do 2 red; intros; auto.
 apply tm; apply sub_m; trivial.
 Defined.
 
-Instance Sub_morph : Proper (eq_term ==> eq_sub ==> eq_term) Sub.
+#[global] Instance Sub_morph : Proper (eq_term ==> eq_sub ==> eq_term) Sub.
 do 3 red; intros.
 destruct x as [(x,xm)|]; destruct y as [(y,ym)|];simpl in *; try contradiction; trivial.
 red; intros.
@@ -218,7 +218,6 @@ Qed.
 
 Definition sub_shift (n:nat) : sub.
 exists (V.shift n); auto with *.
-apply V.shift_morph; trivial.
 Defined.
 
 Definition sub_cons (t:term) (s:sub) : sub.
@@ -260,7 +259,6 @@ Lemma sub_nk t s :
   t <> None <->
   Sub t s <> None.
 destruct t as [(t,tm)|]; simpl; auto with *.
-split; intros; discriminate.
 Qed.
 
 (** Relocations *)
@@ -295,7 +293,6 @@ Lemma lift_rec_nk n t k :
   t <> None <->
   lift_rec n k t <> None.
 destruct t as [(t,tm)|]; simpl; auto with *.
-split; intros; discriminate.
 Qed.
 
 Definition lift1 n := lift_rec n 1.
@@ -416,7 +413,6 @@ Lemma subst_rec_nk a t k :
   t <> None <->
   subst_rec a k t <> None.
 destruct t as [(t,tm)|]; simpl; auto with *.
-split; intros; discriminate.
 Qed.
 
 Lemma int_subst_rec_eq : forall arg k T i,
@@ -556,9 +552,6 @@ apply lam_ext; intros.
  rewrite int_lift_rec_eq.
  rewrite <- V.cons_lams; auto with *.
   rewrite H1; rewrite H; reflexivity.
-
-  do 2 red; intros.
-  rewrite H2; reflexivity.
 Qed.
 
 Definition Prod (A B:term) : term.
@@ -612,9 +605,6 @@ apply prod_ext; intros.
  rewrite int_lift_rec_eq.
  rewrite <- V.cons_lams; auto with *.
   rewrite H1; rewrite H; reflexivity.
-
-  do 2 red; intros.
-  rewrite H2; reflexivity.
 Qed.
 
 Lemma eq_subst_prod : forall u A B k,
@@ -629,9 +619,6 @@ apply prod_ext; intros.
  rewrite int_subst_rec_eq.
  rewrite <- V.cons_lams; auto with *.
   rewrite H1; rewrite H; reflexivity.
-
-  do 2 red; intros.
-  rewrite H2; reflexivity.
 Qed.
 
 End T.
@@ -1122,7 +1109,7 @@ destruct n.
  replace (a-0) with a by auto with *.
  apply sub_m.
  intros a'.
- replace (a'-0) with a' by omega.
+ replace (a'-0) with a' by auto with arith.
  reflexivity.
 
  apply val_ok_shift1 in H0.
@@ -1151,7 +1138,7 @@ Qed.
 
 Lemma typ_var0 : forall e n T,
   match T, nth_error e n with
-    Some _, value T' => T' <> kind /\ sub_typ e (lift (S n) T') T
+    Some _, Some T' => T' <> kind /\ sub_typ e (lift (S n) T') T
   | _,_ => False end ->
   typ e (Ref n) T.
 intros.
@@ -1173,7 +1160,7 @@ Qed.
 
 End R.
 
-Hint Resolve in_int_el.
+Hint Resolve in_int_el : core.
 
 (** Consistency *)
 

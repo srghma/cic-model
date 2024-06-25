@@ -1,12 +1,13 @@
+Require Import basic Lia.
 Require Import Explicit_sub.
 Require Import FOTheory.
-Require Import basic Omega.
+Import ZFind_basic.
+Import ZFnats.
+Import TheoryInTerm.
 
 Import BuildModel.
 Import T J R.
 Import CCM.
-Import ZFind_basic.
-Import ZFnats.
 
 Fixpoint int_fotrm t:=
   match t with
@@ -70,7 +71,7 @@ Lemma int_trm_N : forall hyp t i, hyp_ok hyp t ->
   int (int_fotrm t) i ∈ N.
 unfold hyp_ok; unfold val_ok; induction t; simpl in *; intros.
  assert (n=n\/False). left; trivial.
- specialize H with (n0:=n) (1:=H1).
+ specialize H with (n:=n) (1:=H1).
  generalize (int_hyp_nth_trm _ _ H); intros.
  specialize H0 with (1:=H2). simpl in H0; trivial.
 
@@ -103,7 +104,7 @@ Lemma lift_int_lift_trm_rec : forall t n k,
 induction t; simpl; intros.
  unfold V.lams. unfold V.shift.
  destruct (Compare_dec.le_gt_dec k n); simpl; intros.
-  replace (k+(n0+(n-k))) with (n+n0) by omega.
+  replace (k+(n0+(n-k))) with (n+n0) by lia.
   red; auto.
 
   red; auto.
@@ -182,22 +183,22 @@ induction t; intros.
  do 2 red; simpl.
  destruct (Compare_dec.lt_eq_lt_dec k n) as [[fv|eqv]|bv]; simpl.
   unfold V.lams, V.shift; destruct (Compare_dec.le_gt_dec k n);
-  try (apply False_ind; omega; fail).
-  replace (n-k) with (S(Peano.pred n-k)) by omega; simpl.
-  replace (k+(Peano.pred n-k)) with (Peano.pred n) by omega; 
+  try (apply False_ind; lia; fail).
+  replace (n-k) with (S(Peano.pred n-k)) by lia; simpl.
+  replace (k+(Peano.pred n-k)) with (Peano.pred n) by lia; 
     red; auto.
 
   case_eq (int_fotrm (lift_trm N k)); intros.
    red; intros. subst k. unfold V.lams; simpl.
    destruct (Compare_dec.le_gt_dec n n).
-    replace (n-n) with 0 by omega; simpl. rewrite H0.
+    replace (n-n) with 0 by lia; simpl. rewrite H0.
     setoid_replace (V.shift n y) with (V.lams 0 (V.shift n) y).
      rewrite <- int_lift_rec_eq. fold (lift n (int_fotrm N)).
      rewrite lift_int_lift_trm. rewrite H. simpl. reflexivity.
 
      rewrite V.lams0; reflexivity.
 
-    apply False_ind; omega.
+    apply False_ind; lia.
    
    elim fotrm_Some with (1:=H).
 
@@ -515,12 +516,12 @@ Lemma const_env_spec : forall m n t,
 induction m; destruct n; simpl; intros.
  injection H; intros; split; [|subst t]; trivial.
 
- injection H; intros; split; [omega |subst t]; trivial.
+ injection H; intros; split; [lia |subst t]; trivial.
 
  destruct m; simpl in H; discriminate.
 
  specialize IHm with (1:=H). destruct IHm.
- split; [omega | trivial].
+ split; [lia | trivial].
 Qed.
 
 Lemma eq_ext : forall e t1 t2 s s',
@@ -534,7 +535,7 @@ unfold eq_fosub in H0.
 assert (val_ok (const_env (Peano.max (max_var t1) (max_var t2))) (esub_conv s i)).
  unfold val_ok. do 2 red; intros. apply const_env_spec in H2.
  destruct H2; subst T; simpl.
- assert (n < S (Peano.max (max_var t1) (max_var t2)))%nat by omega.
+ assert (n < S (Peano.max (max_var t1) (max_var t2)))%nat by lia.
  specialize H0 with (1:=H3); destruct H0 as (Heqtyp, (Htyps, Htyps')).
  do 2 red in Htyps; simpl in Htyps; specialize Htyps with (1:=H1). apply Htyps.
 
@@ -542,8 +543,8 @@ specialize H with (1:=H2). rewrite H.
 replace (fun k : nat => i k) with i; trivial. clear H H2.
 
 induction t2; simpl; try reflexivity.
- specialize H0 with (n0:=n). destruct H0.
-  rewrite succ_max_distr. apply max_split2. unfold max_var; simpl; omega.
+ specialize H0 with (n:=n). destruct H0.
+  rewrite succ_max_distr. apply max_split2. unfold max_var; simpl; lia.
   do 2 red in H; simpl in H; apply H; trivial.
 
  apply natrec_morph.

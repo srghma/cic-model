@@ -1,5 +1,5 @@
 Require Export Arith.
-Require Export Omega.
+Require Export Lia.
 Require Export List.
 
 Inductive foterm :=
@@ -55,24 +55,13 @@ induction t; intros; trivial.
  unfold lift_trm_rec. destruct (Compare_dec.le_gt_dec (S m) n).
   simpl. destruct (Compare_dec.lt_eq_lt_dec m (n + 1)).
    destruct s. 
-    rewrite Plus.plus_comm; simpl; trivial.
+    f_equal; lia.
 
-    rewrite e in l. apply Le.le_Sn_le in l. 
-    rewrite Plus.plus_comm in l. apply Le.le_Sn_n in l. contradiction.
-
-    assert (m < n); trivial.
-    assert (n < n + 1) by omega.
-    generalize (Lt.lt_trans _ _ _ H0 l0); intros.
-    generalize (Lt.lt_trans _ _ _ H1 H); intros.
-    apply Lt.lt_irrefl in H2; contradiction.
-
-  simpl. destruct (Compare_dec.lt_eq_lt_dec m n); trivial.
-   destruct s.
-    assert (S m <= n) by omega.
-    assert (n < S m) by omega.
-    generalize (Lt.le_lt_trans _ _ _ H H0); intros.
-    apply Lt.lt_irrefl in H1; contradiction.
-
+    lia.
+    lia.
+    simpl. destruct (Compare_dec.lt_eq_lt_dec m n); trivial.
+    destruct s.
+    lia.
     subst m. unfold lift_trm; simpl; trivial.
 
  simpl. rewrite IHt1, IHt2; trivial.

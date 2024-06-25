@@ -1,4 +1,4 @@
-Require Export Relations Wellfounded.
+Require Export Lia Relations Wellfounded.
 Require Import Sat.
 Require Import ZF ZFcoc ZFuniv ZFecc.
 Require Import ZFlambda.
@@ -42,7 +42,7 @@ Lemma eq_fun_El x f1 f2 : eq_fun x f1 f2 -> ZF.eq_fun (El x) f1 f2.
 do 2 red; intros.
 apply H; auto.
 Qed.
-Hint Resolve eq_fun_El.
+Hint Resolve eq_fun_El : core.
 
 Lemma lam_ext :
   forall x1 x2 f1 f2,
@@ -388,7 +388,7 @@ Lemma interp_nk : forall T, interp T <> SN.T.kind.
 induction T; simpl; intros; try discriminate.
 destruct s; discriminate.
 Qed.
-Hint Resolve interp_nk.
+Hint Resolve interp_nk : core.
 
 Section LiftAndSubstEquiv.
 (* Proof that lift and subst at both levels (SN and Tm) are equivalent. *)
@@ -406,7 +406,7 @@ induction t; simpl int_term; intros.
 
  simpl; unfold V.lams, I.lams, V.shift, I.shift.
  destruct (le_gt_dec k n0); simpl.
-  replace (k+(n+(n0-k))) with (n+n0) by omega.
+  replace (k+(n+(n0-k))) with (n+n0) by lia.
   split; red; auto.
 
   split; red; auto.

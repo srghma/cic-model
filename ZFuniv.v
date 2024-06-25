@@ -29,7 +29,7 @@ Qed.
 Lemma empty_El y : empty ∈ El y.
 apply union2_intro1; apply singl_intro.
 Qed.
-Hint Resolve Elt_El empty_El.
+Hint Resolve Elt_El empty_El : core.
 
 (** * Universes *)
 
@@ -56,7 +56,7 @@ unfold mkTY; rewrite H.
 rewrite (iSAT_morph _ _ (sSAT_morph _ _ H0)).
 reflexivity.
 Qed.
-Hint Resolve sort_repl_morph sort_repl_morph2.
+Hint Resolve sort_repl_morph sort_repl_morph2 : core.
 
 Lemma sn_sort_intro K T A :
   T ∈ K -> mkTY T A ∈ El (sn_sort K).

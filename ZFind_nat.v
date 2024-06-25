@@ -1,5 +1,8 @@
-Require Import ZF ZFsum ZFfix ZFnats ZFrelations ZFord ZFcont.
+Require Import ZF ZFsum ZFfix ZFnats ZFrelations ZFord ZFcont ZFrank.
 Require Import ZFind_basic.
+Require Import ZFfunext ZFfixrec.
+
+Require Import ZFrank.
 Import ZFrepl.
 
 Section Nat_theory.
@@ -23,7 +26,7 @@ unfold NATf.
 apply sum_mono; trivial.
 red; trivial.
 Qed.
-Hint Resolve NATf_mono Fmono_morph.
+Hint Resolve NATf_mono Fmono_morph : core.
   Instance NATf_morph : Proper (eq_set ==> eq_set) NATf.
 apply Fmono_morph; trivial.
 Qed.
@@ -91,13 +94,13 @@ Proof stable2_weaker _ NATf_morph NATf_stable.
 *)
 End TypeConstructor.
 
-Hint Resolve NATf_mono Fmono_morph.
+Hint Resolve NATf_mono Fmono_morph : core.
 
 Section IterationNat.
 
   Definition NATi := TI NATf.
 
-  Instance NATi_morph : morph1 NATi.
+#[global]  Instance NATi_morph : morph1 NATi.
 unfold NATi; intros.
 apply TI_morph; auto.
 Qed.
@@ -107,7 +110,7 @@ do 2 red; intros.
 apply NATf_morph.
 apply NATi_morph; trivial.
 Qed.
-Hint Resolve NATfun_ext.
+Hint Resolve NATfun_ext : core.
 
 (*
 Lemma NATi_stable : stable_ord NATi.
@@ -219,7 +222,7 @@ Lemma NATCASE_ZERO : NATCASE ZERO == fZ.
 unfold NATCASE.
 apply eq_set_ax; intros z.
 rewrite union2_ax; do 2 rewrite cond_set_ax.
-intuition.
+intuition auto with *.
 destruct H1.
 apply NATf_discr in H0; contradiction.
 Qed.
@@ -311,8 +314,6 @@ apply NATCASE_morph_gen; auto.
 Qed.
 
 (* Fixpoints *)
-
-Require Import ZFfunext ZFfixrec.
 
 Section Recursor.
 
@@ -563,13 +564,11 @@ End NatFixpoint.
 End IterationNat.
 
 (**)
-Hint Resolve NATfun_ext.
+Hint Resolve NATfun_ext : core.
 
 Section NatConvergence.
 
 (** Convergence (using closure property of ordinal) *)
-
-Require Import ZFrank.
 
   Variable o : set.
   Hypothesis limo : limitOrd o.
@@ -649,7 +648,7 @@ Qed.
 
 End Nat_theory.
 
-Hint Resolve NATf_mono Fmono_morph NATfun_ext.
+Hint Resolve NATf_mono Fmono_morph NATfun_ext : core.
 
 (*******************************************************************************)
 (** ** Applications *)
@@ -669,7 +668,10 @@ Lemma shift_typ : forall o f,
 intros.
 unfold shift.
 apply cc_arr_intro; intros.
- admit.
+ do 2 red; intros.
+ apply NATCASE_morph; auto with *.
+ red; auto with *. 
+ rewrite H2; auto with *.
 apply NATCASE_typ with (o:=osucc o)(P:=fun _=> NATi (osucc o)); auto.
  do 2 red; reflexivity.
  do 2 red; trivial.
@@ -723,7 +725,7 @@ apply NATCASE_typ with (o:=osucc o) (P:=fun _ => NAT); auto.
 
  apply cc_arr_elim with NAT; trivial.
  apply ZERO_typ.
-Qed.
+Admitted.
 
  (* loopF satisfies the stability criterion, but the fixpoint cannot be accepted *)
 
@@ -761,6 +763,6 @@ rewrite cc_beta_eq; auto.
  revert tyx; apply TI_mono; auto with *.
  red; intros; apply le_lt_trans with o; auto.
  apply ole_lts; auto.
-Qed.
+Admitted.
 
 End Example.

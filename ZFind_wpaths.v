@@ -15,6 +15,9 @@ Parameter Wfst_morph : morph1 Wfst.
 Parameter Wfst_def : forall x f, Wfst (Wsup x f) == x.
 Parameter Wsnd : set -> set -> set.
 Parameter Wsnd_morph : morph2 Wsnd.
+Existing Instance Wsup_morph.
+Existing Instance Wfst_morph.
+Existing Instance Wsnd_morph.
 
 Parameter Wdom : set.
 
@@ -24,7 +27,7 @@ Parameter Wsnd_def : forall x f i,
 
 Parameter Wf : set -> set.
 Parameter Wf_intro :
-  forall X x f, x ∈ A -> f ∈ (Π _ ∈ B x, X) -> Wsup x f ∈ Wf X.
+  forall X x f, x ∈ A -> f ∈ (Π __ ∈ B x, X) -> Wsup x f ∈ Wf X.
 Parameter Wf_elim : forall a X,
   a ∈ Wf X ->
   exists2 x, x ∈ A & exists2 f, f ∈ Π i ∈ B x, X & a == Wsup x f.
@@ -520,8 +523,9 @@ assert (sup o f == sup I f).
     apply osup2_lt; trivial.
     apply osup2_incl1; eauto.
 
-   revert H0; apply fmono; eauto.
+   revert H0; apply fmono.
     apply isOrd_osup2; eauto.
+    apply isOrd_inv with o; trivial.
     apply osup2_incl2; eauto.
 
   apply subset_elim1 in H;eauto.

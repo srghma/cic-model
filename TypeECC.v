@@ -1,7 +1,6 @@
 Require Export ConvECC.
 Require Export EnvECC.
 Require Import Peano_dec.
-Require Import Max.
 
 Section Typage.
 

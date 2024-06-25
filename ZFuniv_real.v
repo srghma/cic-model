@@ -38,7 +38,7 @@ Definition El T := cc_bot (Elt T). (* partial elements *)
 Instance Elt_morph : morph1 Elt.
 Proof fst_morph.
 
-Instance El_morph : morph1 El.
+#[global]Instance El_morph : morph1 El.
 do 2 red; intros; apply cc_bot_morph; auto with *.
 apply fst_morph; trivial.
 Qed.
@@ -63,7 +63,7 @@ Qed.
 Lemma empty_El y : empty ∈ El y.
 unfold El; auto.
 Qed.
-Hint Resolve Elt_El empty_El.
+Hint Resolve Elt_El empty_El : core.
 
 
 (** * Universes *)
@@ -287,13 +287,16 @@ rewrite H,H0 in H1; trivial.
 Qed.
 Definition inclX x y := forall z, inX z x -> inX z y.
 
+Existing Instance eqX_equiv.
+Existing Instance in_ext.
+
 (* Accessing the realizability relation.
    inSAT t (Real T x), means that t is a realizer of x in type T. It
    implicitely requires x ∈ El T. 
  *)
 Definition Real T x := sSAT (cc_app (snd T) x) .
 
-Instance Real_morph : Proper (eq_set==>eq_set==>eqSAT) Real.
+#[global]Instance Real_morph : Proper (eq_set==>eq_set==>eqSAT) Real.
 do 3 red; intros.
 unfold Real.
 apply sSAT_morph.
@@ -470,6 +473,7 @@ apply El_morph; trivial.
 Qed.
 
 Definition app_ext := cc_app_morph.
+Existing Instance app_ext.
 
 Lemma prod_ext :
   forall x1 x2 f1 f2,

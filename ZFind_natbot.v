@@ -388,7 +388,7 @@ intros.
 apply TI_mono_eq; auto with *.
 Qed.
 
-Hint Resolve NATREC_dom_ext NATREC_dom_cont.
+Hint Resolve NATREC_dom_ext NATREC_dom_cont : core.
 
 (** * Universe facts: NAT' belongs to any Grothendieck universes that
       is contains omega.

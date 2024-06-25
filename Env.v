@@ -1,5 +1,5 @@
-Require Export Omega.
-Require Export MyList.
+Require Export Lia.
+Require Export List MyList.
 Require Export Term.
 
   Definition env := list term.
@@ -44,7 +44,7 @@ Qed.
 intros.
 destruct H1.
  subst t.
-unfold lift in |- *;  rewrite simpl_lift_rec; try  omega.
+unfold lift in |- *;  rewrite simpl_lift_rec; try lia.
 exists x; trivial.
 apply ins_item_ge with (1 := H) (2 := H0) (3 := H2).
 Qed.
@@ -61,7 +61,7 @@ induction 1; intros.
   simpl in |- *.
     constructor.
     apply IHins_in_env; auto.
-     omega.
+     lia.
 Qed.
 
   Lemma ins_item_lift_lt :

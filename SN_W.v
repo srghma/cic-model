@@ -42,7 +42,7 @@ Module Type W_PartialModel.
   Parameter W_F_elim : forall A B, morph1 B ->
     forall X x,
     x ∈ W_F A B X ->
-    w1 x ∈ A /\ w2 x ∈ (Π _ ∈ B (w1 x), cc_bot X) /\ x == mkw (w1 x) (w2 x).
+    w1 x ∈ A /\ w2 x ∈ (Π __ ∈ B (w1 x), cc_bot X) /\ x == mkw (w1 x) (w2 x).
   
   Parameter W_ord : set -> (set -> set) -> set.
   Parameter W_ord_ord : forall A B, morph1 B ->
@@ -174,7 +174,7 @@ do 2 red; intros.
 unfold WF.
 apply W_F_mono; auto with *.
 Qed.
-  Hint Resolve WF_mono.
+  Hint Resolve WF_mono : core.
 
 Instance RW_morph : Proper (eq_val ==> eq_set ==> eqSAT) RW.
 do 4 red; intros.
@@ -195,7 +195,7 @@ red; intros.
 apply TI_mono_eq; auto with *.
 Qed.
 
-Hint Resolve WFm WF_cont.
+Hint Resolve WFm WF_cont : core.
 
 
 
@@ -371,7 +371,7 @@ split.
   rewrite Real_prod in Fr; auto with *.
   revert Fr; apply inSAT_morph; auto with *.
   apply piSAT0_morph.
-   red; intros; auto.
+   red; intros; reflexivity.
 
    intros.
    reflexivity.
@@ -392,7 +392,7 @@ Definition mkw_case (b : set -> set -> set) c :=
   cond_set (c == mkw (w1 c) (w2 c)) (b (w1 c) (w2 c)).
 
 Definition W_CASE b w :=
-  mkw_case (fun x f => app (app b x) f) w.
+  mkw_case (fun x f => cc_app (cc_app b x) f) w.
 
 Definition Wcase (b n : term) : term.
 (*begin show*)
@@ -474,7 +474,7 @@ apply and_split; intros.
   specialize cc_prod_elim with (1:=H0) (2:=ty1); clear H0; intro H0.
   rewrite El_int_prod in H0.
   apply eq_elim with (El
-     (app (int (lift 2 P) (V.cons (w2 (int n i)) (V.cons (w1 (int n i)) i)))
+     (cc_app (int (lift 2 P) (V.cons (w2 (int n i)) (V.cons (w1 (int n i)) i)))
         (mkw (w1 (int n i)) (w2 (int n i))))).
    apply El_morph.
    apply app_ext; auto with *.
@@ -495,7 +495,7 @@ apply and_split; intros.
  rewrite TI_mono_succ in H1; auto.
 (* apply W_F_elim in H1*)
  eapply Real_WCASE with (6:=H6)
-    (C:=fun x => Real (app (int P i) x) (mkw_case (fun x f => app (app (int G i) x) f) x));
+    (C:=fun x => Real (cc_app (int P i) x) (mkw_case (fun x f => cc_app (cc_app (int G i) x) f) x));
      auto with *.
   do 2 red; intros.
   unfold mkw_case.
@@ -570,8 +570,8 @@ apply typ_Wcase with O; trivial.
 Qed.
 
 End Wtypes_typing.
-Hint Resolve WFm WF_cont.
-Hint Resolve WF_mono.
+Hint Resolve WFm WF_cont : core.
+Hint Resolve WF_mono : core.
 Existing Instance RW_morph.
 
 Lemma typ_WI_type n eps e A B O :
@@ -758,7 +758,7 @@ Qed.
 do 2 red; intros.
 rewrite H0;reflexivity.
 Qed.
-  Hint Resolve U'morph morph_fix_body ext_fun_ty.
+  Hint Resolve U'morph morph_fix_body ext_fun_ty : core.
 Lemma El_int_W_lift O' n i :
   El (int (WIL n O') i) == cc_bot (TI (WF A B (V.shift n i)) (int O' i)).
 unfold WIL; rewrite El_int_W.
@@ -940,9 +940,7 @@ Qed.
 Proof.
 intros.
 apply val_push_var; auto with *.
- 4:discriminate.
  apply val_push_ord; auto with *.
-  4:discriminate.
   apply val_mono_refl; trivial.
 
   split;[|apply varSAT].
@@ -1153,11 +1151,6 @@ eapply inSAT_morph;[reflexivity| |].
   rewrite <- V.cons_lams; auto with *.
    rewrite V.lams0; reflexivity.
 
-   apply V.cons_morph.
-   reflexivity.
-
- reflexivity.
-
  (**)
  apply WHEN_COUPLE_neutral2.
 
@@ -1227,7 +1220,7 @@ eapply inSAT_morph;[reflexivity| |].
  rewrite Real_int_prod in H9; trivial.
  revert H9; apply piSAT0_morph.
   red; intros.
-  rewrite El_int_W_lift; auto.
+  rewrite El_int_W_lift; reflexivity.
 
   intros.
   rewrite Real_int_W_lift; auto.
@@ -1256,8 +1249,8 @@ intros X G N tyN.
 red; intros.
 unfold eqX.
 change
- (app (WREC (F' i) (int O i)) (int N i) ==
-  app (int (subst O (subst (lift 1 (WFix O M)) M)) i) (int N i)).
+ (cc_app (WREC (F' i) (int O i)) (int N i) ==
+  cc_app (int (subst O (subst (lift 1 (WFix O M)) M)) i) (int N i)).
 do 2 rewrite <- int_subst_eq.
 rewrite int_cons_lift_eq.
 red in tyN; specialize tyN with (1:=H).
@@ -1345,11 +1338,20 @@ eapply typed_bot_rec_ext with (6:=WREC_ok isval) (7:=WREC_ok isval'); auto with 
 
  red; intros.
  do 2 red in stab; eapply stab.
-  apply val_mono_1 with (1:=H); auto with *.
-   transitivity (int O i); trivial.
-
- rewrite El_int_W_lift.
- simpl; auto.
+ apply val_mono_1 with (1:=H).
+  trivial.
+  trivial.
+  trivial.
+  trivial.
+  trivial.
+  trivial.
+  transitivity (int O i); trivial.
+  auto with *.
+  exact H3.
+  exact H4.
+  exact H5.
+  rewrite El_int_W_lift.
+  simpl; auto.
 Qed.
 
 Lemma wfix_equals :
@@ -1450,6 +1452,7 @@ assert (cc_bot (TI (WF A B i) (int O i)) ⊆ cc_bot (TI (WF A B i') (int O i')))
    apply WF_morph; auto with *.
 
    
+ red.
  rewrite Real_int_W; auto.
  split.
   apply H3 in xreal.
@@ -1656,7 +1659,7 @@ Module W_Model : W_PartialModel.
     morph1 B ->
     forall X x,
     x ∈ W_F A B X ->
-    w1 x ∈ A /\ w2 x ∈ (Π _ ∈ B (w1 x), cc_bot X) /\ x == mkw (w1 x) (w2 x).
+    w1 x ∈ A /\ w2 x ∈ (Π __ ∈ B (w1 x), cc_bot X) /\ x == mkw (w1 x) (w2 x).
 intros Bm X x tyx.
 destruct sigma_elim with (2:=tyx) as (eqx,(ty1,ty2)); auto.
 Qed.
@@ -1711,6 +1714,6 @@ End W_Model.
 (** All that remains to do is apply the functor... *)
 Module SN_W := Make(W_Model).
 Export SN_W.
-Let test := (typ_wfix,Wi_sub).
+Definition test := (typ_wfix,Wi_sub).
 Print Assumptions test.
 

@@ -13,6 +13,8 @@ Axiom univ : set_univ.
 Axiom univ_comp : set_univ_comp univ.
 
 Axiom pred_ext : type_predicate_ext.
+Existing Instance fun_ext.
+Existing Instance pred_ext.
 
 (*Instance pred_ext : type_predicate_ext.
 red; intros.
@@ -327,7 +329,7 @@ Qed.
 apply tr_prop.
 Qed.
 
-Hint Resolve isProp_eq_iset isProp_in_set.
+Hint Resolve isProp_eq_iset isProp_in_set : core.
   
   Instance isRel_eq_iset : isRel eq_iset.
 split.
@@ -364,7 +366,7 @@ apply quo_ind_set_nodep with (h:=f) (4:=x); auto with *.
  unfold f.
  apply quo_i_eq.
  red; simpl.
- destruct x0 as (x0); destruct y as (y); simpl in *.
+ destruct x0 as (x0,f0); destruct y as (y,g); simpl in *.
  destruct r as (xy,yx).
  split; intros.
   Tdestruct (xy i) as (j,?).
@@ -397,6 +399,7 @@ Definition Kers (a:set) : map set :=
 
   (* Equality *)
   Definition eq_set (x y:set) := x=y.
+  #[local]Notation "x == y" := (eq_set x y).
 
 Lemma eq_set_intro x y :
   eq_map (Kers x) (Kers y) ->
@@ -443,7 +446,7 @@ Qed.
   (* Membership *)
   Definition in_set (x y:set) : Prop :=
     tr{j:Ker y & x = Kerf y j}.
-  Notation "x ∈ y" := (in_set x y).
+  #[local]Notation "x ∈ y" := (in_set x y).
 
   Lemma in_iset_ax z (X:Ti) f :
       z ∈ mks (Z.isup X f) <->
@@ -603,11 +606,11 @@ exact (sig_proj2(projT2 (Hreck i) (exist (set_cano(Kerf x i)) (f i) (s i)))).
 Qed.
 
 Definition set2iset (x:set) : iset :=
-  proj1_sig (proj1_sig (set2iset_cano x)).
+  proj1_sig (projT1 (set2iset_cano x)).
 
 Definition set2iset_ok x : x = mks (set2iset x).
 apply set_cano_ok.
-apply (proj2_sig (proj1_sig (set2iset_cano x))).
+apply (proj2_sig (projT1 (set2iset_cano x))).
 Qed.
 Print Assumptions set2iset_ok. (* set univalence (+ fun_ext) + truncation *)
 
@@ -900,7 +903,7 @@ Definition set_ind_prop (P:set->Type) (Pp : forall x, isProp(P x))
   transport P (fold_unfold_eq x)
   (quo_ind (X:={X:Ti&X->set}) isRel_eq_fam
               (fun x => P (fold_set x)) (fun _ => Pp _)
-              (fun p:{X:Ti&X->set} => match p with existT X f => h X f end)
+              (fun p:{X:Ti&X->set} => match p with existT _ X f => h X f end)
               (unfold_set x)).
 
 Definition set_comp (P:set->Type) (h:forall X f, P (sup X f)) :=
@@ -933,7 +936,7 @@ Definition set_ind (P:set->Type) (Ps : forall x, isSet(P x))
   transport P (fold_unfold_eq x)
   (quo_ind_set {X:Ti&X->set} eq_map isRel_eq_fam
               (fun x => P (fold_set x)) (fun _ => Ps _)
-              (fun p:{X:Ti&X->set} => match p with existT X f => h X f end)
+              (fun p:{X:Ti&X->set} => match p with existT _ X f => h X f end)
               (mk_comp _ _ hcomp) (unfold_set x)).
 
 Lemma set_ind_eq P Ps h hcomp X f :
@@ -972,7 +975,7 @@ Lemma isProp_in_set x y : isProp (in_set x y).
 apply tr_prop.
 Qed.
 
-Hint Resolve isProp_in_set.
+Hint Resolve isProp_in_set : core.
 
 Lemma in_set_ax X f x :
   in_set x (sup X f) <-> #exists i:X, x = f i.
@@ -1540,6 +1543,8 @@ End TestHIT.
 Module SetsQuoEnd <: IZF_R_sig TrSubThms.
 
 Include SetsQuo.
+Infix "∈" := SetsQuo.in_set.
+Infix "==" := SetsQuo.eq_set.
 
 (** Empty set *)
 

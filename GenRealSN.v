@@ -4,6 +4,7 @@ Require Import basic.
 Require Import Sat.
 Require Import Models.
 Require Import SnModels TypModels.
+Require ObjectSN.
 Module Lc := Lambda.
 
 
@@ -21,7 +22,21 @@ Import M.
    of the value and term interpretation requirements.
    [[x,t]] \real T reads "t is a realizer of x as a value of type T".
  *)
-Notation "[ x , t ] \real A" := (x ∈ A  /\ inSAT t (Real A x)).
+
+Definition real x t A := x ∈ A  /\ inSAT t (Real A x).
+#[global]Instance real_morph : Proper (eqX==>eq==>eqX==>iff) real.
+Proof.
+do 4 red; intros.
+unfold real.
+subst y0; rewrite H, H1; reflexivity.
+Qed.
+
+#[global]Hint Unfold real : core.
+
+Module Notations.
+  Notation "[ x , t ] \real A" := (real x t A).
+End Notations.
+Import Notations.
 
 Lemma real_daimon : forall x t T,
   [x,t] \real T -> [x,SatSet.daimon] \real T.
@@ -118,7 +133,6 @@ Qed.
 
 
 (** The abstract strong normalization proof. *)
-Require ObjectSN.
 Include ObjectSN.MakeObject(M).
 
 
@@ -223,8 +237,8 @@ Lemma in_int_varS : forall i j x t n T,
 intros.
 destruct H as (_,mem); simpl in *.
 red; simpl.
-split; try discriminate.
- revert mem; pattern T at 1 4.
+split; [discriminate|].
+ revert mem; pattern T at 1 3.
  case T; [intros T0|]; simpl; intros; trivial.
   rewrite split_lift.
   rewrite int_cons_lift_eq; trivial.
@@ -291,7 +305,7 @@ Lemma val_ok_shift1 e i j T :
 unfold val_ok; intros.
 destruct (H (S n) _ H0).
 split;[discriminate|].
-destruct T0 as [|T0]; simpl in *.
+destruct T0 as [T0|]; simpl in *.
  rewrite V.lams0 in H2|-*.
  trivial.
 
@@ -512,7 +526,7 @@ assert (forall S, inSAT (Lc.App prf (Lc.Abs (Lc.Ref 0))) S).
   rewrite Real_sort; trivial.
   apply snSAT_intro.
   apply Lc.sn_abs; auto with *.  
-
+  
  rewrite neutr in H0; trivial.
  apply neuSAT_def; trivial.
 destruct (neutral_not_closed _ H).
@@ -1022,7 +1036,7 @@ split.
  destruct M; try discriminate.
  elim M_nk; trivial.
 
- revert inT; pattern T at 1 4; case T; intros; simpl.
+ revert inT; pattern T at 1 3; case T; intros; simpl.
  unfold lift.
  do 2 rewrite int_lift_rec_eq.
  rewrite tm_lift_rec_eq; trivial.
@@ -1134,7 +1148,7 @@ Qed.
 
 Lemma typ_var0 : forall e n T,
   match T, nth_error e n with
-    Some _, value T' => T' <> kind /\ sub_typ e (lift (S n) T') T
+    Some _, Some T' => T' <> kind /\ sub_typ e (lift (S n) T') T
   | _,_ => False end ->
   typ e (Ref n) T.
 intros.
@@ -1146,7 +1160,7 @@ case_eq (nth_error e n); intros.
  apply typ_subsumption with (lift (S n) t); auto.
   apply typ_var; trivial.
 
-  destruct t as [(t,tm)|]; simpl; try discriminate.
+  destruct t as [(t,tm,?,?,?,?)|]; simpl; try discriminate.
   elim H; trivial.
 
   discriminate.

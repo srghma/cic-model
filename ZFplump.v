@@ -1,4 +1,4 @@
-Require Export basic ZF.
+Require Export Lia basic ZF.
 Require Import ZFnats.
 
 (* Directed set (finite union) *)
@@ -68,8 +68,8 @@ Definition isOrd x :=
 Lemma isOrd_ext : forall x y, x == y -> isOrd x -> isOrd y.
 destruct 2.
 generalize x0; rewrite H; intro.
-exists H0.
-rewrite <- (plump_morph x y x0 H0 x y); trivial.
+exists x1.
+rewrite <- (plump_morph x y x0 x1 x y); trivial.
 Qed.
 
 Instance isOrd_morph : Proper (eq_set ==> iff) isOrd.
@@ -864,7 +864,7 @@ Qed.
   Instance TR_morph : forall F, morph1 (TR F).
 do 2 red; intros.
 unfold TR.
-apply uchoice_morph_raw.
+apply ZFrepl.uchoice_morph_raw.
 red; intros.
 transitivity (TR_rel F x y y0).
  apply TR_rel_morph; trivial. 
@@ -878,7 +878,7 @@ Qed.
     (forall x x' f f', isOrd x -> x ⊆ o -> x == x' -> eq_fun x f f' -> F f x == F' f' x') ->
     o == o' -> TR F o == TR F' o'.
 unfold TR; intros.
-apply uchoice_morph_raw.
+apply ZFrepl.uchoice_morph_raw.
 red; intros.
 split; intros.
  red; intros.
@@ -922,7 +922,7 @@ intros.
 unfold TR; rewrite TR_eqn0; eauto with *.
 apply H0; auto with *.
 red; intros.
-apply uchoice_morph_raw.
+apply ZFrepl.uchoice_morph_raw.
 red; intros.
 transitivity (TR_rel F o x' y).
  apply TR_rel_morph; trivial.
@@ -1232,7 +1232,9 @@ exists (nat2ordset (Peano.max x0 x1)).
    rewrite Peano.max_l; auto with arith.
    apply isOrd_trans with y; trivial.
    clear H1; revert y H0.
-   elimtype (x1 <= x0)%nat; simpl; intros; auto with arith.
+   assert (x1 <= x0)%nat.
+     simpl; intros; auto with arith.
+   clear g H; induction H0; intros; auto with *.
    apply isOrd_trans with (nat2ordset m); auto.
 Qed.
 

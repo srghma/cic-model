@@ -157,8 +157,6 @@ apply eq_intro; intros.
  rewrite sup_ax in H1; trivial.
  destruct H1.
  revert H2; apply Fmono; auto with *.
-  apply TIF_morph; auto with *.
-  apply TIF_morph; auto with *.
  red; intros.
  apply TIF_mono; trivial.
   apply isOrd_inv with (osucc o); auto.
@@ -197,7 +195,6 @@ transitivity (F fx a); auto with *.
 red; intros.
 elim TIF_elim with (3:=H5); intros; auto with *.
 revert H7; apply Fmono; auto with *.
-apply TIF_morph; auto with *.
 Qed.
 
 

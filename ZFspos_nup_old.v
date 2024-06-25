@@ -447,6 +447,8 @@ Lemma dINDi_dIND : forall p o,
 intros.
 unfold dIND, dINDi.
 apply TIF_pre_fix; auto with *.
+ do 2 red; intros.
+ apply TIF_morph; auto with *.
 red; intros.
 change (dp_oper p (dIND p) a0 ⊆ dIND p a0).
 rewrite <- dIND_eq; trivial.
@@ -532,7 +534,7 @@ Qed.
 *)
 *)
 Definition trad_cst :=
-  sigma_1r_iso (fun _ => λ _ ∈ empty, empty).
+  sigma_1r_iso (fun _ => λ __ ∈ empty, empty).
 
 Lemma iso_cst : forall A X i,
   iso_fun (A i) (W0.W_Fd A (fun _ _ => empty) (fun i _ _ => i) X i) trad_cst.
@@ -606,7 +608,7 @@ Qed.
 
 
 Definition trad_reccall :=
-  comp_iso (fun x => λ _ ∈ singl empty, x) (couple empty).
+  comp_iso (fun x => λ __ ∈ singl empty, x) (couple empty).
 
 Lemma iso_reccall : forall X j i,
   morph1 X ->
@@ -1538,7 +1540,7 @@ Lemma nil_typ A X :
   nil ∈ dp_oper (vect A) X zero.
 simpl; intros.
 apply inl_typ.
-unfold P2p.
+unfold ZFcoc.P2p.
 rewrite cond_set_ax; split.
  apply singl_intro.
  reflexivity.
@@ -1557,11 +1559,14 @@ simpl; intros.
 apply inr_typ.
 apply couple_intro_sigma; trivial.
  do 2 red; intros.
+ apply prodcart_morph; auto with *.
+ apply prodcart_morph; auto with *.
+ apply ZFcoc.P2p_morph.
  rewrite H4; reflexivity.
 
  apply couple_intro; trivial.
  apply couple_intro; trivial.
- unfold P2p.
+ unfold ZFcoc.P2p.
  rewrite cond_set_ax; split.
   apply singl_intro.
   reflexivity.

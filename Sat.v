@@ -88,7 +88,7 @@ Module SatSet <: SAT.
 reflexivity.
 Qed.
 
-  Instance inSAT_morph : Proper ((@eq term) ==> eqSAT ==> iff) inSAT.
+#[global]  Instance inSAT_morph : Proper ((@eq term) ==> eqSAT ==> iff) inSAT.
 do 3 red; intros; unfold inSAT.
 rewrite H.
 exact (H0 y).

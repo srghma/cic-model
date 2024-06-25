@@ -1,6 +1,4 @@
-Require Import Le.
-Require Import Gt.
-Require Export List.
+Require Import Arith List.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

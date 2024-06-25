@@ -80,7 +80,7 @@ Qed.
 
 Lemma f_equal_qid {A} (f:A->A) (h:forall x, f x = x) {x y:A} (e:x=y) :
   f_equal f e =  h x * (e * eq_sym (h y)).
-rewrite f_eq with (h0:=h) (e0:=e).
+rewrite f_eq with (h:=h) (e:=e).
 rewrite f_equal_id.
 rewrite !eq_trans_assoc.
 rewrite <-eq_trans_assoc with (e1:=eq_sym e), eq_sym_invl, eq_trans_idl.
@@ -89,7 +89,7 @@ Qed.
 
 Lemma f_equal_qid' {A} (f:A->A) (h:forall x, f x = x) x :
    f_equal f (h x) = h (f x).
-rewrite f_equal_qid with (h0:=h).
+rewrite f_equal_qid with (h:=h).
 rewrite eq_sym_invr; trivial.
 Qed.
 
@@ -175,8 +175,8 @@ intros a.
 destruct E as (f,g,gf,fg).
 simpl.
 unfold efg', eqv_loop; simpl.
-specialize f_eq with (h:=fun a=>fg(f a)) (e:=gf a); intros e.
-rewrite <- f_equal_compose with (f0:=f) (g0:=fun a=>g(f a)) in e.
+specialize @f_eq with (h:=fun a:A=>fg(f a)) (e:=gf a); intros e.
+rewrite <- f_equal_compose with (f:=f) (g:=fun a=>g(f a)) in e.
 rewrite f_equal_qid' with (h:=gf) (x:=a) in e.
 rewrite <- eq_trans_assoc in e.
 apply eq_trans_rr2l in e.

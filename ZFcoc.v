@@ -15,7 +15,7 @@ Qed.
 Lemma one_in_props : singl prf_trm ∈ props.
 apply power_intro; auto.
 Qed.
-Hint Resolve empty_in_props one_in_props.
+Hint Resolve empty_in_props one_in_props : core.
 
 Lemma props_proof_irrelevance x P :
   P ∈ props -> x ∈ P -> x == empty.
@@ -79,7 +79,7 @@ setoid_replace empty with (cc_app empty x).
 Qed.
 
 Definition cc_exists := sup. 
-Hint Unfold cc_exists.
+Hint Unfold cc_exists : core.
 
 
 Lemma cc_exists_typ A B :
@@ -327,7 +327,7 @@ Lemma cc_bot_intro x z : z ∈ x -> z ∈ cc_bot x.
 red; intros.
 apply union2_intro2; trivial.
 Qed.
-Hint Resolve cc_bot_bot cc_bot_intro.
+Hint Resolve cc_bot_bot cc_bot_intro : core.
 
 Instance cc_bot_mono : Proper (incl_set==>incl_set) cc_bot.
 do 3 red; intros.
@@ -663,7 +663,7 @@ Lemma cc_ttcoll A R :
     forall x, x ∈ A ->
     (exists2 w, w ∈ sets & R x w) -> exists2 i, i ∈ X & R x (cc_app f i).
 intros.
-destruct coll_axU with (A:=A) (R:=fun x y => y ∈ sets /\ R x y) as (B,HB);
+destruct coll_axU with (A:=A) (R:=fun x y => y ∈ sets /\ R x y) as (B,HB,?);
   trivial.
  intros.
  rewrite <- H2; rewrite <- H3; trivial.
@@ -823,7 +823,7 @@ apply sup_ax in H.
  destruct H0; trivial.
 
  do 2 red; intros.
- rewrite H1; reflexivity.
+ rewrite H2; reflexivity.
 Qed.
 
 End ChoicesImpliesDescription.

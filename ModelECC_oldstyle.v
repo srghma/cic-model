@@ -1,8 +1,8 @@
-
+Require Import Setoid.
 Require Import IntMap.
 Require Import TypeECC.
 Require Import Models.
-Require Import Max.
+Require Import TypeJudgeECC.
 
 (** Model construction for ECC, in the standard style:
     - syntax first
@@ -47,7 +47,6 @@ split.
    transitivity (y i); trivial.
 Qed.
 
-Require Import Setoid.
 
 Instance int_morph : Proper (eq_int ==> @eq _ ==> eqX) int.
 do 3 red; intros.
@@ -274,7 +273,7 @@ unfold judge in |- *; intros.
 red in |- *; destruct s2; simpl in |- *.
  destruct s1; destruct s3; simpl in H, H0, H1 |- *; try discriminate.
   (* Type, Type *)
-  destruct (eq_nat_dec (Max.max n n0) n1); simpl in H1; intros; try discriminate.
+  destruct (eq_nat_dec (max n n0) n1); simpl in H1; intros; try discriminate.
   subst n1.
   apply u_card_prod; intros.
    red; intros.
@@ -283,11 +282,11 @@ red in |- *; destruct s2; simpl in |- *.
 
    red in H; simpl in H.
    apply u_card_incl_le with n0; auto.
-   apply le_max_r.
+   auto with arith.
 
    red in H0; simpl in H0.
    apply u_card_incl_le with n.
-    apply le_max_l.
+   auto with arith.
 
     apply H0.
     apply int_env_cons; auto.
@@ -378,7 +377,6 @@ apply in_reg_r with (int i T); auto.
 apply (H _ H1).
 Qed.
 
-Require Import TypeJudgeECC.
 
 Lemma int_sound : forall e M M' T,
   eq_typ e M M' T ->

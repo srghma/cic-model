@@ -1,6 +1,6 @@
 
 Require Import Setoid Morphisms.
-Require Import Omega.
+Require Import Arith Compare_dec Lia.
 
 Module Type Eqv.
   Parameter Inline t : Type.
@@ -27,23 +27,23 @@ Definition shift (n:nat) (i:map) : map := fun k => i (n+k).
 Definition lams n (f:map -> map) (i:map) : map :=
   fun k => if le_gt_dec n k then f (shift n i) (k-n) else i k.
 
-Instance cons_morph : Proper (eq ==> eq_map ==> eq_map) cons.
+#[global]Instance cons_morph : Proper (eq ==> eq_map ==> eq_map) cons.
 do 5 red; intros.
 destruct a; simpl; trivial.
 Qed.
-Instance cons_morph' :
+#[global]Instance cons_morph' :
   Proper (eq ==> eq_map ==> @Logic.eq _ ==> eq) cons.
 do 4 red; intros.
 subst y1; destruct x1; simpl; trivial.
 Qed.
 
-Instance shift_morph : Proper (@Logic.eq _ ==> eq_map ==> eq_map) shift.
+#[global]Instance shift_morph : Proper (@Logic.eq _ ==> eq_map ==> eq_map) shift.
 do 5 red; intros.
 subst y.
 unfold shift; apply H0.
 Qed.
 
-Instance lams_morph :
+#[global]Instance lams_morph :
   Proper (@Logic.eq _ ==> (eq_map ==> eq_map) ==> eq_map ==> eq_map) lams.
 do 6 red; intros.
 subst y.
@@ -60,7 +60,6 @@ Lemma cons_ext (x:t) i i' :
   eq_map (cons x i) i'.
 do 2 red; intros.
 destruct a; simpl; auto.
-apply H0.
 Qed.
 
 Lemma surj_pair i :
@@ -76,7 +75,7 @@ Lemma shift_split m n i :
   eq_map (shift (m+n) i) (shift n (shift m i)).
 intros k.
 unfold shift; simpl.
-rewrite plus_assoc; reflexivity.
+rewrite Nat.add_assoc; reflexivity.
 Qed.
 
 Lemma shiftS_split n i :
@@ -103,16 +102,16 @@ Lemma lams_split k k' f i :
   eq_map (lams (k+k') f i) (lams k (lams k' f) i).
 intros fm n; unfold lams; simpl.
 destruct (le_gt_dec k n).
- destruct (le_gt_dec k' (n-k)); destruct (le_gt_dec (k+k') n); try (exfalso; omega).
-  replace (n-k-k') with (n-(k+k')) by omega.
+ destruct (le_gt_dec k' (n-k)); destruct (le_gt_dec (k+k') n); try (exfalso; lia).
+  replace (n-k-k') with (n-(k+k')) by lia.
   apply fm.
   rewrite shift_split; reflexivity.
 
   unfold shift; simpl.
-  replace (k+(n-k)) with n by omega; reflexivity.
+  replace (k+(n-k)) with n by lia; reflexivity.
 
  destruct (le_gt_dec (k+k') n).
-  exfalso; omega.
+  exfalso; lia.
  reflexivity.
 Qed.
 
@@ -120,7 +119,7 @@ Lemma lams_bv m f i k :
   k < m -> eq (lams m f i k) (i k).
 unfold lams; intros.
 destruct (le_gt_dec m k).
- apply False_ind; omega.
+ apply False_ind; lia.
  reflexivity.
 Qed.
 
@@ -128,9 +127,9 @@ Lemma lams_shift : forall m f i,
   eq_map (shift m (lams m f i)) (f (shift m i)).
 unfold lams, shift; do 2 red; intros.
 destruct (le_gt_dec m (m+a)).
- replace (m+a-m) with a by omega.
+ replace (m+a-m) with a by lia.
  reflexivity.
-apply False_ind; omega.
+apply False_ind; lia.
 Qed.
 
 Lemma lams0 f i : eq_map (lams 0 f i) (f i).

@@ -1,0 +1,4 @@
+Ens0.v: Ens.v
+	cp Ens.v Ens0.v
+EnsEm0.v: EnsEm.v
+	cp EnsEm.v EnsEm0.v

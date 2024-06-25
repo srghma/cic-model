@@ -1,6 +1,9 @@
 
 Require Import ZF ZFpairs ZFsum Sat.
+Require Import ZFrelations ZFfixrec ZFrecbot.
 Require Import ZFlambda.
+Require Import ZFord.
+(*Require Import ZFcoc.*)
 Require Import Lambda.
 
 Set Implicit Arguments.
@@ -671,10 +674,9 @@ Lemma fixSAT_lower_bound A X :
   inclFam (A X) X ->
   inclFam (fixSAT A) X.
 do 2 red; intros.
-apply interSAT_elim with
-  (x:=existT (fun X=>Proper (eq_set==>eqSAT) X /\ inclFam (A X) X)
-         X (conj H H0)) in H1; simpl in H1.
-trivial.
+pose (X':=exist (fun X=>Proper (eq_set==>eqSAT) X /\ inclFam (A X) X)
+         X (conj H H0)).
+apply interSAT_elim with (1:=H1)(x:=X').
 Qed.
 
 Lemma post_fix_lfp A :
@@ -897,9 +899,6 @@ apply neuSAT_def; trivial.
 Qed.
 
 
-Require Import ZFord.
-(*Require Import ZFcoc.*)
-
 Section FIXP_Reducibility.
 
   Variable G : term.
@@ -1038,8 +1037,6 @@ Qed.
 
   End NonDependent.
 
-  Require Import ZFrelations ZFfixrec ZFrecbot.
-  
   Section Dependent.
 
     Variable U : set -> set -> set.

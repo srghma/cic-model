@@ -1,5 +1,5 @@
 
-Require Import Omega.
+Require Import Arith Lia.
 Require Export basic.
 
 (** Pure lambda terms *)
@@ -88,7 +88,7 @@ Definition ilift (j:intt) : intt :=
   | S n => lift 1 (j n)
   end.
 
-Instance ilift_morph : Proper (eq_intt ==> eq_intt) ilift.
+#[global]Instance ilift_morph : Proper (eq_intt ==> eq_intt) ilift.
 do 4 red; intros.
 unfold ilift.
 destruct a; simpl; auto.
@@ -132,7 +132,7 @@ Lemma sub_all_ext s s' t :
 intros; apply sub_all_morph; trivial.
 Qed.
 
-  Hint Constructors subterm occur.
+  Hint Constructors subterm occur : core.
 
 Section Beta_Reduction.
 
@@ -157,7 +157,7 @@ Section Beta_Reduction.
 
 End Beta_Reduction.
 
-  Hint Constructors red red1 conv : coc.
+  Hint Constructors red red1 conv : core.
 
 
 Section StrongNormalisation.
@@ -168,7 +168,7 @@ Section StrongNormalisation.
 
 End StrongNormalisation.
 
-  Hint Unfold sn: coc.
+  Hint Unfold sn: core.
 
   Lemma eqterm : forall u v : term, {u = v} + {u <> v}.
 Proof.
@@ -199,7 +199,7 @@ elim a; intros.
 absurd (k <= n); auto with arith.
 
 inversion_clear b in H.
-elim gt_irrefl with n; auto with arith.
+exfalso; lia.
 Qed.
 
 
@@ -209,7 +209,7 @@ simpl in |- *; intros.
 elim (lt_eq_lt_dec k n); intros.
 elim a; intros; auto with arith.
 inversion_clear b in H.
-elim gt_irrefl with n; auto with arith.
+lia.
 
 absurd (k <= n); auto with arith.
 Qed.
@@ -217,28 +217,25 @@ Qed.
 
   Lemma subst_ref_eq : forall u n, subst_rec u (Ref n) n = lift n u.
 intros; simpl in |- *.
-elim (lt_eq_lt_dec n n); intros.
-elim a; intros; auto with coc.
-elim lt_irrefl with n; auto with coc.
-
-elim gt_irrefl with n; auto with coc.
+elim (lt_eq_lt_dec n n); [intros|lia].
+elim a; auto; lia.
 Qed.
 
 
 
   Lemma lift_rec0 : forall M k, lift_rec 0 M k = M.
-simple induction M; simpl in |- *; intros; auto with coc.
-elim (le_gt_dec k n); auto with coc.
+simple induction M; simpl in |- *; intros; auto.
+elim (le_gt_dec k n); auto.
 
-rewrite H; auto with coc.
+rewrite H; auto.
 
-rewrite H; rewrite H0; auto with coc.
+rewrite H; rewrite H0; auto.
 Qed.
 
 
   Lemma lift0 : forall M, lift 0 M = M.
 intros; unfold lift in |- *.
-apply lift_rec0; auto with coc.
+apply lift_rec0; auto.
 Qed.
 
 
@@ -246,16 +243,15 @@ Qed.
    forall M n k p i,
    i <= k + n ->
    k <= i -> lift_rec p (lift_rec n M k) i = lift_rec (p + n) M k.
-simple induction M; simpl in |- *; intros; auto with coc.
+simple induction M; simpl in |- *; intros; auto.
 elim (le_gt_dec k n); intros.
-rewrite lift_ref_ge; auto with coc.
-rewrite plus_assoc; auto with coc.
+rewrite lift_ref_ge; auto.
+rewrite Nat.add_assoc; auto.
 
-rewrite plus_comm.
-apply le_trans with (k + n0); auto with arith.
+lia.
 
 rewrite lift_ref_lt; auto with arith.
-apply le_gt_trans with k; auto with arith.
+lia.
 
 rewrite H; simpl in |- *; auto with arith.
 
@@ -273,25 +269,22 @@ Qed.
    forall M n k p i,
    i <= k ->
    lift_rec p (lift_rec n M k) i = lift_rec n (lift_rec p M i) (p + k).
-simple induction M; simpl in |- *; intros; auto with coc.
+simple induction M; simpl in |- *; intros; auto.
 elim (le_gt_dec k n); elim (le_gt_dec i n); intros.
 rewrite lift_ref_ge; auto with arith.
 rewrite lift_ref_ge; auto with arith.
-elim plus_assoc_reverse with p n0 n.
-elim plus_assoc_reverse with n0 p n.
-elim plus_comm with p n0; auto with arith.
+f_equal; lia.
 
-apply le_trans with n; auto with arith.
+lia.
 
-absurd (i <= n); auto with arith.
-apply le_trans with k; auto with arith.
+lia.
 
 rewrite lift_ref_ge; auto with arith.
 rewrite lift_ref_lt; auto with arith.
 
 rewrite lift_ref_lt; auto with arith.
 rewrite lift_ref_lt; auto with arith.
-apply le_gt_trans with k; auto with arith.
+lia.
 
 rewrite H; auto with arith.
 rewrite plus_n_Sm; auto with arith.
@@ -317,10 +310,10 @@ simple induction M; simpl in |- *; intros; auto with arith.
 elim (le_gt_dec k n); intros.
 rewrite subst_ref_gt; auto with arith.
 red in |- *; red in |- *.
-apply le_trans with (S (n0 + k)); auto with arith.
+lia.
 
 rewrite subst_ref_lt; auto with arith.
-apply le_gt_trans with k; auto with arith.
+lia.
 
 rewrite H; auto with arith.
 elim plus_n_Sm with n k; auto with arith.
@@ -353,7 +346,7 @@ rewrite subst_ref_gt; auto with arith.
 elim plus_n_Sm with n0 n1.
 auto with arith.
 
-apply le_trans with p; auto with arith.
+lia.
 
 simple induction 1.
 rewrite subst_ref_eq.
@@ -361,7 +354,7 @@ unfold lift in |- *.
 rewrite simpl_lift_rec; auto with arith.
 
 absurd (k <= n); auto with arith.
-apply le_trans with p; auto with arith.
+apply Nat.le_trans with p; auto with arith.
 elim a; auto with arith.
 simple induction 1; auto with arith.
 
@@ -370,7 +363,7 @@ rewrite subst_ref_lt; auto with arith.
 
 rewrite lift_ref_lt; auto with arith.
 rewrite subst_ref_lt; auto with arith.
-apply le_gt_trans with p; auto with arith.
+lia.
 
 simpl in |- *.
 rewrite plus_n_Sm.
@@ -404,8 +397,7 @@ rewrite lift_ref_ge; auto with arith.
 elim plus_n_Sm with n0 n1.
 rewrite subst_ref_gt; auto with arith.
 red in |- *; red in |- *; apply le_n_S.
-apply le_trans with (n0 + (p + k)); auto with arith.
-apply le_trans with (p + k); auto with arith.
+lia.
 
 rewrite lift_ref_lt; auto with arith.
 rewrite subst_ref_gt; auto with arith.
@@ -456,7 +448,7 @@ inversion_clear a2.
 
 rewrite subst_ref_gt; auto with arith.
 rewrite subst_ref_gt; auto with arith.
-apply gt_le_trans with (p + n0); auto with arith.
+lia.
 
 simple induction 1.
 rewrite subst_ref_eq; auto with arith.
@@ -496,11 +488,11 @@ Qed.
 split; intros.
  induction H; simpl; intros.
   destruct (lt_eq_lt_dec n n) as [[?|_]|?].
-   elim (Lt.lt_irrefl n); trivial.
+   lia.
 
    discriminate.
 
-   elim (Lt.lt_irrefl n); trivial.
+   lia.
 
   red; intros.
   injection H0; clear H0; intros; auto.
@@ -518,17 +510,16 @@ split; intros.
     destruct n; simpl; trivial.
     inversion l.
 
-    do 2 red in g; rewrite <- S_pred with (m:=k) in g; trivial.
-    elim (Lt.lt_irrefl n).
-    apply Lt.le_lt_trans with k; trivial.
+    assert (k=n) by lia.
+    subst k; constructor.
 
-   subst k; auto.
+   subst k; constructor.
 
    destruct (le_gt_dec k n).
-    elim (Lt.lt_irrefl n).
-    apply Lt.lt_le_trans with k; trivial.
+   replace k with n by lia.
+   constructor.
 
-    elim H; trivial.
+   elim H; trivial.
 
   constructor; apply IHt.
   red; intros; apply H.
@@ -556,25 +547,25 @@ Qed.
 
   Lemma red1_lift :
    forall n u v, red1 u v -> forall k, red1 (lift_rec n u k) (lift_rec n v k).
-simple induction 1; simpl in |- *; intros; auto with coc.
-rewrite distr_lift_subst; auto with coc.
+simple induction 1; simpl in |- *; intros; auto.
+rewrite distr_lift_subst; auto.
 Qed.
 
   Lemma red1_subst_r :
    forall a t u,
    red1 t u -> forall k, red1 (subst_rec a t k) (subst_rec a u k).
-simple induction 1; simpl in |- *; intros; auto with coc.
-rewrite distr_subst; auto with coc.
+simple induction 1; simpl in |- *; intros; auto.
+rewrite distr_subst; auto.
 Qed.
-  Hint Resolve red1_lift red1_subst_r : coc.
+  Hint Resolve red1_lift red1_subst_r : core.
 
 (* Reflexive transitive closure *)
 
-  Instance red_refl : Reflexive red.
-red; auto with coc.
+#[global]  Instance red_refl : Reflexive red.
+red; auto.
 Qed.
 
-  Instance red_trans : Transitive red.
+#[global]  Instance red_trans : Transitive red.
 red.
 induction 2; trivial.
 apply trans_red with P; trivial.
@@ -582,16 +573,16 @@ Qed.
 
   Lemma one_step_red : forall M N, red1 M N -> red M N.
 intros.
-apply trans_red with M; auto with coc.
+apply trans_red with M; auto.
 Qed.
-  Hint Resolve one_step_red: coc.
+  Hint Resolve one_step_red: core.
 
-  Instance app_red_morph : Proper (red ==> red ==> red) App.
+#[global]  Instance app_red_morph : Proper (red ==> red ==> red) App.
 do 3 red; induction 1; intros.
- induction H; intros; auto with coc.
- transitivity (App x P); auto with coc.
+ induction H; intros; auto.
+ transitivity (App x P); auto.
 
- transitivity (App P y); auto with coc.
+ transitivity (App P y); auto.
 Qed.
 
   Lemma red_red_app :
@@ -599,65 +590,71 @@ Qed.
     forall v v0, red v v0 ->
     red (App u v) (App u0 v0).
 Proof app_red_morph.
-Hint Resolve red_red_app : coc.
+Hint Resolve red_red_app : core.
 
-  Instance abs_red_morph : Proper (red ==> red) Abs.
-do 2 red; induction 1; intros; auto with coc.
-transitivity (Abs P); auto with coc.
+#[global]  Instance abs_red_morph : Proper (red ==> red) Abs.
+do 2 red; induction 1; intros; auto.
+transitivity (Abs P); auto.
 Qed.
 
   Lemma red_red_abs :
     forall u u0, red u u0 -> red (Abs u) (Abs u0).
 Proof abs_red_morph.
-Hint Resolve red_red_abs : coc.
+Hint Resolve red_red_abs : core.
 
   Lemma red1_subst_l :
    forall t u,
    red1 t u -> forall a k, red (subst_rec t a k) (subst_rec u a k).
-simple induction a; simpl in |- *; auto with coc.
+simple induction a; simpl in |- *; auto.
 intros.
-elim (lt_eq_lt_dec k n); intros; auto with coc.
-elim a0; auto with coc.
-unfold lift in |- *; auto with coc.
+elim (lt_eq_lt_dec k n); intros; auto.
+elim a0; auto.
+unfold lift in |- *; auto.
 Qed.
-  Hint Resolve red1_subst_l: coc.
+  Hint Resolve red1_subst_l: core.
 
 (* Conversion *)
 
   Lemma red_conv : forall M N, red M N -> conv M N.
-induction 1; auto with coc.
-intros; apply trans_conv_red with P; auto with coc.
+induction 1; auto.
+intros; apply trans_conv_red with P; auto.
 Qed.
-Hint Resolve red_conv: coc.
+Hint Resolve red_conv: core.
 
-  Lemma trans_conv_conv : forall M N P, conv M N -> conv N P -> conv M P.
-intros.
-generalize M H; elim H0; intros; auto with coc.
-apply trans_conv_red with P0; auto with coc.
+#[global] Instance trans_conv_conv : Transitive conv.
+(*  Instance trans_conv_conv : forall M N P, conv M N -> conv N P -> conv M P.*)
+red; intros M N P ? ?.
+generalize M H; elim H0; intros; auto.
+apply trans_conv_red with P0; auto.
 
-apply trans_conv_exp with P0; auto with coc.
+apply trans_conv_exp with P0; auto.
 Qed.
 
-  Instance conv_refl : Equivalence conv.
+#[global] Instance conv_sym : Symmetric conv.
+red; induction 1; intros; auto.
+ apply trans_conv_conv with P; auto.
+ apply trans_conv_exp with N; auto.
+
+ apply trans_conv_conv with P; auto.
+Qed.
+
+  
+#[global]  Instance conv_refl : Equivalence conv.
 split.
  constructor.
 
- red; induction 1; intros; auto with coc.
-  apply trans_conv_conv with P; auto with coc.
-  apply trans_conv_exp with N; auto with coc.
-
-  apply trans_conv_conv with P; auto with coc.
+ exact conv_sym.
 
  exact trans_conv_conv.
 Qed.
 
   Lemma red_sym_conv : forall M N, red M N -> conv N M.
-intros; symmetry; auto with coc.
+intros; symmetry; auto.
 Qed.
-  Hint Resolve red_sym_conv : coc.
+  Hint Resolve red_sym_conv : core.
 
 
-  Instance conv_conv_app : Proper (conv ==> conv ==> conv) App.
+#[global]  Instance conv_conv_app : Proper (conv ==> conv ==> conv) App.
 do 3 red; intros.
 transitivity (App y x0).
  induction H; intros; auto with *.
@@ -669,7 +666,7 @@ transitivity (App y x0).
   constructor 3 with (App y P); auto with *.
 Qed.
 
-  Instance conv_conv_abs : Proper (conv ==> conv) Abs. 
+#[global]  Instance conv_conv_abs : Proper (conv ==> conv) Abs. 
 do 2 red; intros.
 induction H; intros; auto with *.
  constructor 2 with (Abs P); auto with *.
@@ -679,10 +676,10 @@ Qed.
   Lemma conv_conv_lift :
    forall a b n k, conv a b -> conv (lift_rec n a k) (lift_rec n b k).
 intros.
-elim H; intros; auto with coc.
-apply trans_conv_red with (lift_rec n P k); auto with coc.
+elim H; intros; auto.
+apply trans_conv_red with (lift_rec n P k); auto.
 
-apply trans_conv_exp with (lift_rec n P k); auto with coc.
+apply trans_conv_exp with (lift_rec n P k); auto.
 Qed.
  
 
@@ -691,15 +688,15 @@ Qed.
    conv a b -> conv c d -> conv (subst_rec a c k) (subst_rec b d k).
 intros.
 transitivity (subst_rec a d k).
- elim H0; intros; auto with coc.
-  transitivity (subst_rec a P k); auto with coc.
+ elim H0; intros; auto.
+  transitivity (subst_rec a P k); auto.
 
-  transitivity (subst_rec a P k); auto with coc.
+  transitivity (subst_rec a P k); auto.
 
- elim H; intros; auto with coc.
-  transitivity (subst_rec P d k); auto with coc.
+ elim H; intros; auto.
+  transitivity (subst_rec P d k); auto.
 
-  transitivity (subst_rec P d k); auto with coc.
+  transitivity (subst_rec P d k); auto.
 Qed.
 
 (* One or more steps *)
@@ -724,7 +721,7 @@ Qed.
     redp M M' -> forall k, redp (lift_rec n M k) (lift_rec n M' k).
 unfold redp.
 induction 1; intros.
- apply t_step; auto with coc.
+ apply t_step; auto.
  apply t_trans with (lift_rec n y k); trivial.
 Qed.
 
@@ -748,7 +745,7 @@ induction 1.
  apply t_trans with (App M1 y); trivial.
 Qed.
 
-  Hint Resolve redp_abs redp_app_l redp_app_r : coc.
+  Hint Resolve redp_abs redp_app_l redp_app_r : core.
 
   Lemma redp_app_l' :
     forall M1 N1 M2 N2, redp M1 N1 -> red M2 N2 -> redp (App M1 M2) (App N1 N2).
@@ -773,12 +770,12 @@ Lemma red1_subst_l_occur :
    red1 t u -> forall a k, boccur k a = true -> redp (subst_rec t a k) (subst_rec u a k).
 induction a; simpl; intros.
  destruct (lt_eq_lt_dec k n) as [[?|?]|?].
-  destruct (eq_nat_dec k n);[omega|discriminate].
+  destruct (eq_nat_dec k n);[lia|discriminate].
 
   apply t_step.
   apply red1_lift; trivial.
 
-  destruct (eq_nat_dec k n);[omega|discriminate].
+  destruct (eq_nat_dec k n);[lia|discriminate].
 
  apply redp_abs; auto.
 
@@ -787,10 +784,8 @@ induction a; simpl; intros.
 
 
  apply redp_app_l'; auto.
- apply red1_subst_l; trivial.
 
  apply redp_app_r'; auto.
- apply red1_subst_l; trivial.
 Qed.
 
   Lemma redp_K : forall M T, redp (App2 K M T) M.
@@ -886,19 +881,19 @@ Qed.
   Lemma commut_red1_subterm : commut _ subterm (transp _ red1).
 red in |- *.
 simple induction 1; intros.
-exists (Abs z); auto with coc.
+exists (Abs z); auto.
 
-exists (App z B); auto with coc.
+exists (App z B); auto.
 
-exists (App A z); auto with coc.
+exists (App A z); auto.
 Qed.
 
   Lemma subterm_sn : forall a, sn a -> forall b, subterm b a -> sn b.
 unfold sn in |- *.
 simple induction 1; intros.
 apply Acc_intro; intros.
-elim commut_red1_subterm with x b y; intros; auto with coc.
-apply H1 with x0; auto with coc.
+elim commut_red1_subterm with x b y; intros; auto.
+apply H1 with x0; auto.
 Qed.
 
   Lemma sn_red_sn : forall x y, sn x -> red x y -> sn y.
@@ -917,7 +912,7 @@ Qed.
 unfold sn in |- *.
 induction 1; intros.
 apply Acc_intro; intros.
-inversion_clear H1; auto with coc.
+inversion_clear H1; auto.
 Qed.
 
   Lemma sn_abs_inv t:
@@ -941,7 +936,7 @@ induction 1; intros.
 constructor; intros.
 red in H1.
 apply red_lift_inv with (2:=eq_refl _) in H1.
-destruct H1; subst y; auto with coc.
+destruct H1; subst y; auto.
 apply H0; trivial.
 Qed.
 
@@ -1043,25 +1038,25 @@ Qed.
 intros.
 cut (forall t, sn t -> forall m, t = subst T m -> sn m).
 intros.
-apply H0 with (subst T M); auto with coc.
+apply H0 with (subst T M); auto.
 
 unfold sn in |- *.
 simple induction 1; intros.
 apply Acc_intro; intros.
-apply H2 with (subst T y); auto with coc.
+apply H2 with (subst T y); auto.
 rewrite H3.
-unfold subst in |- *; auto with coc.
+unfold subst in |- *; auto.
 Qed.
 
-Hint Resolve sn_abs sn_var sn_lift.
+#[global]Hint Resolve sn_abs sn_var sn_lift : core.
 
 Lemma omega_not_sn :
   let delta := Abs (App (Ref 0) (Ref 0)) in
   ~ sn (App delta delta).
 intros delta.
-red; fix 1.
+red; fix abs 1.
 destruct 1.
-apply omega_not_sn; apply H.
+apply abs; apply H.
 red.
 unfold delta at 1.
 replace (App delta delta) with (subst delta (App (Ref 0) (Ref 0))).
@@ -1084,7 +1079,7 @@ Inductive nf : term -> Prop :=
 | Nf_app : forall u v, neutral u -> nf u -> nf v -> nf (App u v)
 | Nf_abs : forall t, nf t -> nf (Abs t).
 
-Hint Constructors nf.
+Hint Constructors nf : core.
 
 Lemma nf_norm : forall t, nf t -> forall u, ~ red1 t u.
 red; intros.
@@ -1126,7 +1121,7 @@ Lemma nf_neutral_open : forall t,
   neutral t ->
   exists k, occur k t.
 induction 1; intros.
- exists n; auto with coc.
+ exists n; auto.
 
  destruct (IHnf1 H).
  exists x; apply occ_app_l; trivial.
@@ -1145,7 +1140,7 @@ induction M; simpl; intros.
   replace (m+n-m) with n; auto with arith.
 
   inversion H0; subst n0.
-  elim (Lt.lt_irrefl n); apply Lt.lt_le_trans with k; trivial.
+  exfalso; lia.
 
  inversion_clear H0.
  apply IHM in H1; auto with arith.
@@ -1153,8 +1148,8 @@ induction M; simpl; intros.
  rewrite <- plus_n_Sm in H0.
  split; auto with arith.
  constructor.
- rewrite <- NPeano.Nat.sub_succ_l; trivial.
- apply Le.le_trans with (m+k); auto with arith.
+ rewrite <- Nat.sub_succ_l; trivial.
+ lia.
 
  inversion_clear H0.
   apply IHM1 in H1; destruct H1; auto with *.
@@ -1176,12 +1171,12 @@ induction M; simpl; intros.
   apply lift_closed with (k:=0); auto with arith.
 
   inversion H0; subst n0.
-  elim (Lt.lt_irrefl n); apply Lt.lt_le_trans with k; trivial.
+  lia.
 
  inversion_clear H0.
  apply IHM in H1.
  destruct H1; auto with *.
- apply Le.le_n_S; trivial.
+ auto with arith.
 
  inversion_clear H0.
   apply IHM1 in H1; trivial.
@@ -1226,21 +1221,21 @@ induction t; intros.
 
  destruct IHt.
   destruct s.
-  left; exists (Abs x); auto with coc.
+  left; exists (Abs x); auto.
 
   right; simpl; auto.
 
  destruct IHt1.
   destruct s.
-  left; exists (App x t2); auto with coc.
+  left; exists (App x t2); auto.
 
   destruct IHt2.
    destruct s.
-   left; exists (App t1 x); auto with coc.
+   left; exists (App t1 x); auto.
 
    destruct t1;[right;simpl;auto|left|right;simpl;auto].
 repeat constructor; trivial.
-   exists (subst t2 t1); auto with coc.
+   exists (subst t2 t1); auto.
 constructor; trivial.
 simpl; trivial.
 Qed.
@@ -1252,9 +1247,9 @@ destruct (red1_dec x).
  destruct (H0 x0); trivial.
  destruct a.
  exists x1; split; trivial.
- transitivity x0; auto with coc.
+ transitivity x0; auto.
 
- exists x; auto with coc.
+ exists x; auto.
 Qed.
 
 (* Confluence *)
@@ -1454,7 +1449,7 @@ revert k j; induction M; simpl; intros.
  unfold I.lams.
  destruct (le_gt_dec k n0); simpl; trivial.
  unfold I.shift.
- apply f_equal with (f:=j); omega.
+ apply f_equal with (f:=j); lia.
 
  f_equal.
  rewrite IHM.
@@ -1472,13 +1467,13 @@ Lemma sub_all_subst_rr k N M j:
 revert k j; induction M; simpl; intros.
  unfold I.lams.
  destruct (lt_eq_lt_dec k n) as [[?|?]|?]; destruct (le_gt_dec k n);
-   simpl; trivial; try (exfalso; omega).
+   simpl; trivial; try (exfalso; lia).
   unfold I.cons.
   destruct n as[|n];[inversion l|].
-  replace (S n - k) with (S(n-k)) by omega; simpl.
-  unfold I.shift; apply f_equal with (f:=j); omega.
+  replace (S n - k) with (S(n-k)) by lia; simpl.
+  unfold I.shift; apply f_equal with (f:=j); lia.
 
-  subst k; replace (n-n) with 0 by omega; simpl.
+  subst k; replace (n-n) with 0 by lia; simpl.
   unfold lift; rewrite sub_all_lift_r.
   apply sub_all_ext.
   apply I.lams0.
@@ -1527,7 +1522,7 @@ revert j s; induction t; simpl; intros; trivial.
  unfold lift at 1; rewrite <- sub_all_lift_rec.
  apply sub_all_ext; intros i'; simpl.
  unfold I.lams,I.shift; simpl.
- replace (i'-0) with i' by omega; trivial. 
+ replace (i'-0) with i' by lia; trivial. 
 
  f_equal; trivial.
 Qed.
@@ -1540,15 +1535,10 @@ induction 1; simpl; intros; auto.
  rewrite sub_all_subst_r.
  constructor.
 
- constructor; trivial.
- constructor; trivial.
- constructor; trivial.
-
  apply t_trans with (sub_all j y); trivial.
   apply IHclos_trans1.
   apply IHclos_trans2.
 Qed.
-
 
 
 Lemma ilift_binder : forall u j k,

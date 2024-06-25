@@ -7,6 +7,7 @@ Require Import basic Models.
 Require SN_ECC_Real.
 Import ZFgrothendieck.
 Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix.
+Require Import ZFind_natbot.
 Require Import ZFfunext ZFcoc ZFecc SATtypes SATnat_real.
 Require Import ZFrecbot.
 
@@ -26,7 +27,7 @@ split; simpl; auto.
 exact Lc.sn_K.
 Qed.
 
-Hint Resolve typ_infty.
+Hint Resolve typ_infty : core.
 
 (** Judgments with variance *)
 
@@ -95,7 +96,7 @@ apply isNat_nmt in Hmt.
 apply Hmt; reflexivity.
 Qed.
 
-Hint Resolve NATf'm NATf'_cont NATf'_nmt.
+Hint Resolve NATf'm NATf'_cont NATf'_nmt : core.
 
 (** NAT *)
 
@@ -620,7 +621,7 @@ apply and_split; intros.
    exact satBS.
 
   (* regular case *)
-  apply Real_NATCASE with (X:=TI NATf' (int O i))(C:=fun k =>Real (app (int P i) k)
+  apply Real_NATCASE with (X:=TI NATf' (int O i))(C:=fun k =>Real (cc_app (int P i) k)
     (natcase (int B0 i) (fun x => int BS (V.cons x i)) k)); auto.
    do 2 red; intros.
    apply Real_morph.
@@ -744,7 +745,7 @@ apply typ_impl_subsumption with (App (Abs (NatI (OSucc O0)) P) n).
 3:discriminate.
 3:destruct P;[discriminate|elim Pnk; trivial].
  
- apply impl_NatCase with (O0:=O0); trivial.
+ apply impl_NatCase with (O:=O0); trivial.
   apply typ_impl_subsumption with (subst Zero P); trivial.
   2:destruct P;[discriminate|elim Pnk; trivial].
   2:discriminate.
@@ -922,7 +923,7 @@ Qed.
 do 2 red; intros.
 rewrite H0;reflexivity.
 Qed.
-  Hint Resolve U'morph morph_fix_body ext_fun_ty.
+  Hint Resolve U'morph morph_fix_body ext_fun_ty : core.
 
   Lemma val_ok_1 i j o ot f u :
     val_ok e i j ->
@@ -1030,9 +1031,7 @@ Qed.
 Proof.
 intros.
 apply val_push_var; auto with *.
- 4:discriminate.
  apply val_push_ord; auto with *.
-  4:discriminate.
   apply val_mono_refl; trivial.
 
   split;[|apply varSAT].
@@ -1315,7 +1314,8 @@ eapply recursor_sat with (6:=Mok H)
  revert sat_M'; apply piSAT0_morph.
   red; intros.
   rewrite El_int_NatI; auto.
-
+  reflexivity.
+  
   intros.
   symmetry; apply Real_int_NatI; auto.
 
@@ -1343,8 +1343,8 @@ red; intros.
 destruct ty_O with (1:=H).
 
 change
- (app (natfix (F' i) (int O i)) (int N i) ==
-  app (int (subst O (subst (lift 1 (NatFix O M)) M)) i) (int N i)).
+ (cc_app (natfix (F' i) (int O i)) (int N i) ==
+  cc_app (int (subst O (subst (lift 1 (NatFix O M)) M)) i) (int N i)).
 do 2 rewrite <- int_subst_eq.
 rewrite int_cons_lift_eq.
 apply typed_bot_rec_eqn with (1:=Mok H); eauto with *.
@@ -1368,8 +1368,8 @@ intros X N tyX tyN.
 red; intros.
 destruct ty_O with (1:=H).
 change
- (app (natfix (F' i) (int O i)) (int N i) ==
-  app (int (subst O (subst (lift 1 (NatFix O M)) M)) i) (int N i)).
+ (cc_app (natfix (F' i) (int O i)) (int N i) ==
+  cc_app (int (subst O (subst (lift 1 (NatFix O M)) M)) i) (int N i)).
 do 2 rewrite <- int_subst_eq.
 rewrite int_cons_lift_eq.
 apply typed_bot_rec_eqn with (1:=Mok H); auto with *.
@@ -1746,7 +1746,7 @@ rewrite red_lift_app.
 rewrite eq_term_lift_ref_fv; auto with arith.
 rewrite red_lift_ref_bound; auto with arith.
 
-  apply impl_NatCase with (O0:=Ref 2); auto.
+  apply impl_NatCase with (O:=Ref 2); auto.
    split.
     apply var_sub; simpl; trivial.
    apply typ_ord_varS.
@@ -2402,8 +2402,6 @@ End Make.
 
 (** Create an instance of SizedNats based on ZFind_natbot *)
 Module NATM <: PartialNats.
-
-Require Import ZFind_natbot.
 
 Definition NATf' := NATf'.
 Definition NATf'_mono := NATf'_mono.
