@@ -1,6 +1,9 @@
+Require Import Inverse_Image.
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFlist ZFfixfun.
+Require Import ZFiso.
+Require Import ZFlimit.
 Import ZFrepl.
 Existing Instance TIF_morph.
 
@@ -10,7 +13,7 @@ Existing Instance TIF_morph.
 Require ZFind_w.
 Module W0 := ZFind_w.
 
-Hint Resolve W0.W_F_mono Fmono_morph.
+Hint Resolve W0.W_F_mono Fmono_morph : core.
 
 Section W_theory.
 
@@ -73,7 +76,7 @@ apply sigma_mono; intros; auto with *.
   rewrite <- H4.
   auto.
 Qed.
-Hint Resolve W_Fd_mono.
+Hint Resolve W_Fd_mono : core.
 
 Lemma W_Fd_eta w X a :
   morph1 X ->
@@ -249,7 +252,6 @@ apply cc_prod_ext.
  apply Xm; apply fm; auto with *.
 Qed.
 
-Require Import ZFiso.
 Lemma W_Fd_map_surj X Y g :
   morph1 X ->
   morph1 Y ->
@@ -347,7 +349,7 @@ Definition B' a' := B (fst a') (snd a').
 Global Instance B'_morph : morph1 B'.
 do 2 red; intros; apply Bm; [apply fst_morph|apply snd_morph]; trivial.
 Qed.
-Hint Resolve B'_morph.
+Hint Resolve B'_morph : core.
 Let B'ext : ext_fun A' B'.
 auto with *.
 Qed.
@@ -444,8 +446,6 @@ apply couple_morph.
 
    rewrite H2; rewrite H4; reflexivity.
 Qed.
-
-Require Import ZFiso.
 
 (** Isomorphism result for the step function.
     - the parameter constraint on subterms (of type X) is modelled by P *)
@@ -547,11 +547,11 @@ constructor; intros.
  specialize fst_typ_sigma with (1:=H2); intros ty1.
  assert (eqy := surj_pair _ _ _ (subset_elim1 _ _ _ H2)).
  apply snd_typ_sigma with (y:=fst y) in H2; auto with *.
-Focus 2.
+2:{
 do 2 red; intros; apply cc_prod_morph.
  rewrite H4; reflexivity.
  red; intros.
- rewrite H4; rewrite H5; reflexivity.
+ rewrite H4; rewrite H5; reflexivity. }
 
  assert (bm : ext_fun (B' (couple a (fst y)))
     (fun i => iso_inv (subset X (P (f a (fst y) i))) g (cc_app (snd y) i))).
@@ -613,7 +613,6 @@ do 2 red; intros; apply cc_prod_morph.
      unfold B'; rewrite fst_def; rewrite snd_def; trivial.
 Qed.
 
-Require Import ZFlimit.
 
 Lemma tr_iso_it a o :
   isOrd o ->
@@ -723,7 +722,7 @@ Definition W_ord := W0.W_ord A' B'.
 Lemma W_o_o : isOrd W_ord.
 apply W0.W_o_o; trivial.
 Qed.
-Hint Resolve W_o_o.
+Hint Resolve W_o_o : core.
 
 Definition W := Wi W_ord.
 
@@ -772,8 +771,6 @@ rewrite W_eqn; trivial.
 Qed.
 
 (** * Universe facts *)
-
-Require Import ZFgrothendieck.
 
 Section W_Univ.
 
@@ -871,7 +868,7 @@ End W_theory.
 
 (* More on W_Fd: *)
 
-Hint Resolve B'_morph.
+Hint Resolve B'_morph : core.
 
 Section MoreMorph.
 
@@ -1459,7 +1456,7 @@ apply sigma_morph.
  red; intros.
  apply H; apply fm; trivial.
 Qed.
-Hint Resolve Lmorph.
+Hint Resolve Lmorph : core.
 
 Lemma L_intro1 X a : empty ∈ L X a.
 apply union2_intro1.
@@ -1555,7 +1552,7 @@ destruct L_elim with (3:=H3) as [znil|(x,xty,(y,yty,(q,qty,zcons)))]; trivial.
  revert qty; apply H1.
  apply ftyp; auto.
 Qed.
-Hint Resolve Lmono.
+Hint Resolve Lmono : core.
 
 (** The fixpoint: paths
     Arg' a == 1 + { x : A a ; y : B a x ; l : Arg' (f a x y) } *)
@@ -1646,8 +1643,6 @@ rewrite Arg'_eqn; trivial.
 apply L_intro2; trivial with *.
 Qed.
 
-Require Import Inverse_Image.
-
 (** Auxiliary result to build recursive function over an Arg' *)
 
 Definition Arg'lt q q' :=
@@ -1687,7 +1682,7 @@ pattern a, q; apply Arg'_ind with (a:=a) (q:=q); trivial.
  rewrite <- h; trivial.
 Qed.
 
-Hint Resolve Arg'ltm Arg'Km Arg'K_intro.
+Hint Resolve Arg'ltm Arg'Km Arg'K_intro : core.
      
 Section DecodePath.
 
@@ -1761,7 +1756,7 @@ apply Arg'K_intro in H0; trivial.
 exists a; exists q; split;[reflexivity|trivial].
 Qed.
 
-  Hint Resolve Km Rm AccR Fm Fext.
+  Hint Resolve Km Rm AccR Fm Fext : core.
 
 
   Global Instance Dec_morph : morph2 Dec.
@@ -2046,7 +2041,7 @@ unfold W_ord_a.
 apply W_o_o.
 apply B''_morph'.
 Qed.
-Hint Resolve isOrd_W_ord_a.
+Hint Resolve isOrd_W_ord_a : core.
 
 Lemma W_ord_a_smaller a :
   a ∈ Arg -> W_ord_a a ⊆ W_ord Arg A B.

@@ -1,5 +1,6 @@
 Require Export basic ZF.
 Require Import ZFnats.
+Require Import ZFrepl.
 
 (* This file is the same as ZFord, but defines regular plump
    ordinals (whereas ZFord defines directed plump ordinals).
@@ -194,7 +195,7 @@ apply subset_intro; trivial.
 apply power_intro; auto.
 Qed.
 
-Hint Resolve isOrd_zero lt_osucc.
+Hint Resolve isOrd_zero lt_osucc : core.
 
 Lemma olts_le : forall x y, lt x (osucc y) -> x ⊆ y.
 red; intros.
@@ -240,7 +241,7 @@ apply isOrd_intro; intros.
  destruct H0.
  rewrite H0; trivial.
 Qed.
-Hint Resolve isOrd_succ.
+Hint Resolve isOrd_succ : core.
 
 Lemma lt_osucc_compat : forall n m, isOrd m -> lt n m -> lt (osucc n) (osucc m).
 intros.
@@ -466,7 +467,7 @@ Definition limitOrd o := isOrd o /\ (forall x, lt x o -> lt (osucc x) o).
 Lemma limit_is_ord : forall o, limitOrd o -> isOrd o.
 destruct 1; trivial.
 Qed.
-Hint Resolve limit_is_ord.
+Hint Resolve limit_is_ord : core.
 
 Lemma limit_union : forall o, limitOrd o -> union o == o.
 destruct 1.
@@ -750,7 +751,6 @@ apply H3; trivial.
 rewrite H7 in H5|-*; auto.
 Qed.
 
-Require Import ZFrepl.
 
   Lemma TR_rel_repl_rel :
     forall x, repl_rel x TR_rel.
@@ -981,7 +981,7 @@ unfold G; intros.
 apply sup_morph; trivial.
 red; auto.
 Qed.
-Hint Resolve Gmorph.
+Hint Resolve Gmorph : core.
 
   Definition TI := TR G.
 
@@ -1010,7 +1010,7 @@ apply TI_morph; trivial.
 apply isOrd_inv with x; trivial.
 Qed.
 *)
-Hint Resolve TI_fun_ext.
+Hint Resolve TI_fun_ext : core.
 
   Lemma TI_eq : forall o,
     isOrd o ->
@@ -1068,12 +1068,10 @@ apply isOrd_trans with x; trivial.
 Qed.
 
 End TransfiniteIteration.
-Hint Resolve TI_fun_ext.
+Hint Resolve TI_fun_ext : core.
 
 
 (********************************************************************)
-
-Require Import ZFrepl.
 
 Section LimOrd.
 
@@ -1171,7 +1169,7 @@ induction n; simpl; intros.
  apply isOrd_zero.
  apply isOrd_succ; trivial.
 Qed.
-Hint Resolve nat2ordset_typ.
+Hint Resolve nat2ordset_typ : core.
 
 (* Ordinal omega *)
 
@@ -1180,13 +1178,13 @@ Definition omega := ord_sup nat2ordset.
 Lemma isOrd_omega : isOrd omega.
 apply isOrd_sup; trivial.
 Qed.
-Hint Resolve isOrd_omega.
+Hint Resolve isOrd_omega : core.
 
 Lemma zero_omega : lt zero omega.
 apply isOrd_sup_intro with 1; simpl.
 apply lt_osucc; trivial.
 Qed.
-Hint Resolve zero_omega.
+Hint Resolve zero_omega : core.
 
 Lemma osucc_omega : forall n, lt n omega -> lt (osucc n) omega.
 intros.
@@ -1194,12 +1192,12 @@ apply isOrd_sup_elim in H; destruct H.
 apply isOrd_sup_intro with (S x); simpl.
 apply lt_osucc_compat; auto.
 Qed.
-Hint Resolve osucc_omega.
+Hint Resolve osucc_omega : core.
 
 Lemma omega_limit_ord : limitOrd omega.
 split; auto.
 Qed.
-Hint Resolve omega_limit_ord.
+Hint Resolve omega_limit_ord : core.
 
 
 Definition isDir o := forall x y,
@@ -1241,7 +1239,7 @@ exists (nat2ordset (Peano.max x0 x1)).
    apply isOrd_trans with (nat2ordset m); auto.
 Qed.
 
-Hint Resolve isDir_omega.
+Hint Resolve isDir_omega : core.
 
 (* Higher ordinals *)
 
@@ -1260,7 +1258,7 @@ induction o; simpl; intros.
  apply isOrd_succ; trivial.
  apply isOrd_sup; trivial.
 Qed.
-Hint Resolve ord2set_typ.
+Hint Resolve ord2set_typ : core.
 
 (* f^w(o) *)
 Definition iter_w (f:set->set) o :=

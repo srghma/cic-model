@@ -863,7 +863,14 @@ Module SetsHit <: IZF_R_sig TrSubThms.
 (** We assume we can build an type "set" equivalent
     to the quotiented indexed families of sets *)
 Parameter set : Type.
-Parameter set_def : eqv set (fam set). (* missing: well-foundation *)
+Parameter set_def : eqv set (fam set).
+Parameter well_foundation :
+  well_founded (fun y x =>
+                  exists2 m:map set, ef set_def x = quo_i _ m &
+                  exists i, y = projT2 m i).
+(* we could avoid requiring the existence of an arbitrary map but use
+   the one given by decompsition. Shouldn't matter much *)
+
 Definition unfold_set := ef set_def.
 Definition fold_set := eg set_def.
 Lemma fold_unfold_eq x : fold_set (unfold_set x) = x.
@@ -1028,7 +1035,19 @@ Qed.
   Lemma wf_ax :
   forall (P:set->Prop),
   (forall x, (forall y, in_set y x -> #P y) -> #P x) -> forall x, #P x.
-Admitted.
+intros P Hsup x.
+induction (well_foundation x).
+clear H.
+apply Hsup.
+intros y y_in_x.
+Telim y_in_x. intros (X,(f,xdef,(i,imgi))).
+apply H0.
+exists (mkm X f); simpl; [|exists i;trivial].
+subst x.
+unfold sup, fold_set.
+rewrite efg.
+reflexivity.
+Qed.
 
 (** Empty set *)
 Definition empty :=

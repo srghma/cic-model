@@ -28,7 +28,7 @@ Lemma interp_nk : forall T, interp T <> kind.
 induction T; simpl; intros; try discriminate.
 destruct s; discriminate.
 Qed.
-Hint Resolve interp_nk.
+Hint Resolve interp_nk : core.
 
 Section LiftAndSubstEquiv.
 (* Proof that lift and subst at both levels (SN and Tm) are equivalent. *)

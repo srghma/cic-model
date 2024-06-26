@@ -81,16 +81,13 @@ Definition rW (RX:set->SAT) (w:set) : SAT :=
 
 Instance rW_morph :
    Proper (eq_set ==> (eq_set ==> eqSAT) ==> eq_set ==> eqSAT) rW.
-Admitted.
 
 Hint Resolve rW_morph.
 
 Lemma rW_mono X : monoFam (rW.
-Admitted.
 
 Lemma rW_neutral X :
   eqSAT (rW X empty) neuSAT.
-Admitted.
 *)
 
 Definition rW (X:set->SAT) (w:set) : SAT :=

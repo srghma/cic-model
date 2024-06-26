@@ -107,10 +107,10 @@ Fixpoint pos_oper p X :=
   | P_Param A p => cc_prod A (fun x => pos_oper (p x) X)
   end.
 
-Let eqfcst : forall X Y, eq_fun X (fun _ => Y) (fun _ => Y).
+#[local]Definition eqfcst : forall X Y, eq_fun X (fun _ => Y) (fun _ => Y).
 red; reflexivity.
 Qed.
-Hint Resolve eqfcst.
+Hint Resolve eqfcst : core.
 
 
 Lemma pos_oper_morph :
@@ -173,7 +173,7 @@ apply Fmono_morph.
 apply sp_mono; trivial.
 Qed.
 
-Hint Resolve sp_morph.
+Hint Resolve sp_morph : core.
 
 Lemma sp_stable : forall p, eq_pos p p -> stable (pos_oper p).
 intros.

@@ -38,12 +38,12 @@ Require Import SN_variance.
 Lemma val_mono_shift1 e i j i' j' T  o dom :
   val_mono (push e T o dom) i j i' j' ->
   val_mono e (V.shift 1 i) (I.shift 1 j) (V.shift 1 i') (I.shift 1 j').
-Admitted.*)
+*)
 (*Lemma typ_impl_varS e n T o dom U U' :
   typ_impl e (Ref n) U ->
   eq_term (lift 1 U) U' ->
   typ_impl (push e T o dom) (Ref (S n)) U'.
-Admitted.*)
+*)
 
 Module Type PartialNats.
   Include Nats.

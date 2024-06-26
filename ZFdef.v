@@ -4,9 +4,9 @@ Require Import Sublogic.
 (** This module defines interfaces implementing various flavour
    of set theory, from Zermelo to IZF_R and IZF_C (ZF)
  *)
-Reserved Notation "x ∈ y" (at level 60).
-Reserved Notation "x == y" (at level 70).
-Reserved Notation "x ⊆ y" (at level 70).
+Reserved Infix "∈" (at level 60).
+Reserved Infix "==" (at level 70).
+Reserved Infix "⊆" (at level 70).
 Reserved Infix "∪" (at level 50).
 Reserved Infix "∩" (at level 40).
 

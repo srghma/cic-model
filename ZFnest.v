@@ -411,10 +411,10 @@ Lemma B'case_ext a' f g :
   (forall i i' b b', i ∈ C (fst a') -> i==i' -> b ∈ B' (cc_app (snd a') i) -> b==b' ->
    g i b == g i' b') ->
   ext_fun (B' a') (B'case f g).
-Admitted.
+Qed.
 
 Instance B'case_morph : Proper ((eq_set==>eq_set)==>(eq_set==>eq_set==>eq_set)==>eq_set==>eq_set) B'case.
-Admitted.
+Qed.
 
 Parameter B'case_typ : forall P f g o x' b,
   isOrd o ->
@@ -559,7 +559,7 @@ apply cmorph; intros.
    rewrite H0 ;rewrite H1; reflexivity.
 Qed.
 
-Hint Resolve W_F_mono.
+Hint Resolve W_F_mono : core.
 
 
 Lemma giso Y X f o:

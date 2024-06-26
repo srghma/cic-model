@@ -1,5 +1,6 @@
-
 Require Import ZF ZFpairs ZFrelations ZFord ZFstable ZFfixfun.
+Require Import ZFfixrec.
+Require Import ZFgrothendieck.
 
 Require ZFind_wnup.
 Module W0 := ZFind_wnup.
@@ -92,7 +93,7 @@ Proof.
 
    apply ftyp; trivial.
 Qed.
-Hint Resolve A'm B'm f'm f'typ.
+Hint Resolve A'm B'm f'm f'typ : core.
   
   Definition Wi o ia := W0.Wi Arg' A' B' f' o ia.
 
@@ -197,8 +198,6 @@ do 2 red; intros.
 auto.
 Qed.
 
-  Require Import ZFfixrec.
-
   Section Recursor.
 
     Hypothesis F : set -> set -> set -> set -> set -> set.
@@ -219,7 +218,7 @@ Qed.
 do 2 red; intros.
 apply Wi_morph; auto with *.
 Qed.
-Hint Resolve wim1.
+Hint Resolve wim1 : core.
 
     Let WF o fct :=
       λ p ∈ (Σ ia ∈ Arg', Wi (osucc o) ia),
@@ -576,7 +575,6 @@ Qed.
 
   End Recursor.
 
-  Require Import ZFgrothendieck.
   Section UniverseFacts.
 
     Variable U : set.

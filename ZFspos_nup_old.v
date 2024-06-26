@@ -1,5 +1,8 @@
 Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix ZFfixfun.
 Require Import ZFstable ZFiso ZFind_w ZFspos.
+Require Import ZFcoc.
+Require Import ZFgrothendieck.
+
 
 (** Inductive families. Indexes are modelled as a constraint over an inductive
     type defined without considering the index values.
@@ -58,7 +61,7 @@ Class isDPositive (p:dpositive) := {
   }.
 
 Existing Instance  eqdpos_refl.
-Hint Resolve dpmono.
+Hint Resolve dpmono : core.
 
 Section Instances.
 
@@ -151,7 +154,7 @@ intros.
 unfold dIND_clos_ord.
 apply W0.W_o_o; auto with *.
 Qed.
-Hint Resolve isOrd_clos_ord.
+Hint Resolve isOrd_clos_ord : core.
 
 Definition dIND (p:dpositive) a := dINDi p (dIND_clos_ord p) a.
 
@@ -458,8 +461,6 @@ Qed.
 
 (** * Universe constraints: predicativity *)
 
-Require Import ZFgrothendieck.
-
 (*Section Universe.*)
 
   Variable U : set.
@@ -512,7 +513,6 @@ Qed.
 (** Library of dependent positive operators *)
 
 (** Constraint on the index: corresponds to the conclusion of the constructor *)
-Require Import ZFcoc.
 (*Definition dpos_inst (i:set->set) :=
   mkDPositive (fun a => pos_cst (P2p (i a == a))) (fun _ a => P2p (i a == a))
     (fun a _ _ => a).
@@ -649,7 +649,6 @@ split; simpl; intros; auto.
  apply G_singl; auto.
 Qed.
 
-Require Import ZFsum.
 
 Lemma cc_prod_sum_case_commut A1 A2 B1 B2 Y1 Y2 x:
   morph2 Y1 ->
@@ -1491,9 +1490,8 @@ Qed.
 
 (** Examples *)
 
-Module Vectors.
-
 Require Import ZFnats.
+Module Vectors.
 
 Definition vect A :=
   dpos_sum

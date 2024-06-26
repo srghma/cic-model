@@ -1,5 +1,9 @@
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck.
+Require Import ZFtarski.
+Require Import ZFord ZFcofix.
+Require Import ZFfix.
+Require Import ZFfixfun.
 
 (** Abstract model of W and COW *)
 
@@ -78,8 +82,8 @@ revert tyf; apply cc_prod_covariant; auto with *.
 Qed.
 Instance Wf_morph : morph1 Wf := Fmono_morph _ Wf_mono.
 
-Hint Resolve Wf_mono Wf_morph.
-Hint Resolve Wf_typ.
+Hint Resolve Wf_mono Wf_morph : core.
+Hint Resolve Wf_typ : core.
 
 Lemma Wsup_inj : forall x x' f f',
   x ∈ A ->
@@ -189,7 +193,7 @@ apply Wsup_inj in eqz'; trivial; intros.
 Qed.
 
 (** Inductive type least fixpoint of Wf *)
-Require Import ZFtarski.
+Import ZFtarski.
 
 Definition W := FIX incl_set inter Wdom (power Wdom) Wf.
 
@@ -248,7 +252,6 @@ Qed.
 
 (** Coinductive *)
 (* Co-Iteration of Wf *)
-Require Import ZFord ZFcofix.
 
 Definition COWi := COTI Wdom Wf.
 
@@ -320,13 +323,13 @@ Opaque co_ord.
 Parameter co_ord : set.
 Parameter co_ordo : isOrd co_ord. 
 Parameter COWi_closure : COWi co_ord ⊆ Wf (COWi co_ord).*)
-Hint Resolve co_ordo.
+Hint Resolve co_ordo : core.
 
 Lemma COW_Wf1 : COW ⊆ Wf Wdom.
 rewrite COW_eqn; apply Wf_mono; trivial.
 apply COW_typ.  
 Qed.
-Hint Resolve COW_typ COW_eqn COW_Wf1.
+Hint Resolve COW_typ COW_eqn COW_Wf1 : core.
 
 Lemma COW_COWi o : isOrd o -> COW ⊆ COWi o.
 intros; apply COTI_post_fix; auto with *.
@@ -562,8 +565,7 @@ Hypothesis Fm:morph1 F.
 Hypothesis Fty :
   forall X w, COW ⊆ Wf X -> Wf X ⊆ X ->
             w ∈ X -> F w ∈ Wf X.
-(*Hint Resolve Fm.*)
-Require Import ZFfix.
+(*Hint Resolve Fm : core.*)
 
 Lemma TI_WF_dom o :
   isOrd o ->
@@ -695,8 +697,9 @@ Qed.
 
 End SimpleCorecursion.
 
-Let test := (COREC_typ,COREC_eqn,COREC_unique).
-Print Assumptions test.
+(*
+#[local]Definition test := (COREC_typ,COREC_eqn,COREC_unique).
+Print Assumptions test.*)
 
 
 (* Productive functions : includes constructors *)
@@ -730,8 +733,6 @@ Qed.
 
 (* Indexed-corec *)
 
-Require Import ZFfixfun.
-
 Parameter I:set.
 Parameter F:(set->set)->set->set.
 Parameter Fm:Proper((eq_set==>eq_set)==>eq_set==>eq_set) F.
@@ -741,7 +742,7 @@ Parameter Fty :
   morph1 f ->
   typ_fun f I X ->
   typ_fun (F f) I (Wf X).
-Hint Resolve Fm.
+Hint Resolve Fm : core.
 
 Definition iproductive I X F :=
   forall w w0,
@@ -909,6 +910,7 @@ apply pre_incl_eq with (X:=COW); auto.
 
   red; intros; apply H3; trivial.
 Qed.
-
-Definition itest := (ICOREC_typ,ICOREC_eqn,COREC_unique).
+(*
+#[local]Definition itest := (ICOREC_typ,ICOREC_eqn,COREC_unique).
 Print Assumptions itest.
+*)

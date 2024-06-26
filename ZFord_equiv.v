@@ -122,4 +122,4 @@ apply eq_intro; intros.
    apply ZFplump.nat2ordset_typ.
 Qed.
 
-Hint Resolve isOrd_eqv1.
+Hint Resolve isOrd_eqv1 : core.

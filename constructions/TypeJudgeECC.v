@@ -1,4 +1,5 @@
 
+Require Import Relation_Operators.
 Require Import TypeECC.
 
 Section Typage.
@@ -425,7 +426,6 @@ simple induction 1; intros; auto with coc.
 Qed.
 
 
-Require Import Relation_Operators.
 
   Definition eq_typ_eq e :=
     clos_refl_sym_trans _ (fun x y => exists s, eq_typ e x y (Srt s)).

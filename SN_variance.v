@@ -579,7 +579,7 @@ simpl.
 apply osucc_mono; trivial.
 Qed.
 
-Hint Resolve OSucc_subval.
+Hint Resolve OSucc_subval : core.
 
   Lemma typ_Ordt_ord e O o :
     isOrd o ->

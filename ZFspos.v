@@ -76,7 +76,7 @@ do 2 red; intros.
 apply Fmono_morph; trivial.
 apply pos_mono; trivial.
 Qed.
-Hint Resolve w2_morph' pos_oper_morph0.
+Hint Resolve w2_morph' pos_oper_morph0 : core.
 
 (* pos_oper is stable by isomorphism with W_F *)
 Lemma pos_oper_stable : forall p, isPositive p ->
@@ -318,6 +318,12 @@ End InductiveFixpoint.
 Definition trad_cst :=
   sigma_1r_iso (fun _ => cc_lam empty (fun _ => empty)).
 
+Instance trad_cst_morph : morph1 trad_cst.
+do 2 red; intros.
+apply sigma_1r_iso_morph; trivial.
+red; intros; reflexivity.
+Qed.
+
 Lemma iso_cst : forall A X,
   iso_fun A (W_F A (fun _ => empty) X) trad_cst.
 intros.
@@ -331,6 +337,14 @@ Qed.
 Definition pos_cst A :=
   mkPositive (fun _ => A) A (fun _ => empty) trad_cst.
 
+Instance pos_cst_morph : Proper (eq_set==>eqpos) pos_cst.
+do 2 red; intros.
+split;[|split;[|split]]; simpl; trivial.
++red; intros; trivial.
++red; reflexivity.
++apply trad_cst_morph.
+Qed.
+ 
 Lemma isPos_cst A : isPositive (pos_cst A).
 unfold pos_cst; constructor; simpl.
  do 3 red; auto.
@@ -345,6 +359,15 @@ Qed.
 Definition trad_reccall :=
   comp_iso (fun x => cc_lam (singl empty) (fun _ => x)) (couple empty).
 
+Instance trad_reccall_morph : morph1 trad_reccall.
+do 2 red; intros.
+unfold trad_reccall.
+unfold comp_iso.
+apply couple_morph;[reflexivity|].
+apply cc_lam_ext;[reflexivity|].
+red; intros; trivial.
+Qed.
+
 Lemma iso_reccall : forall X,
   iso_fun X (W_F (singl empty) (fun _ => singl empty) X) trad_reccall.
 intros.
@@ -358,6 +381,14 @@ Qed.
 
 Definition pos_rec :=
   mkPositive (fun X => X) (singl empty) (fun _ => singl empty) trad_reccall.
+
+Lemma pos_rec_morph : eqpos pos_rec pos_rec.
+split;[|split;[|split]]; simpl; intros; auto with *.
++red; intros; auto.
++red; reflexivity.
++red; intros.
+ apply trad_reccall_morph; trivial.
+Qed.
 
 Lemma isPos_rec : isPositive pos_rec.
 unfold pos_rec; constructor; simpl.
@@ -454,7 +485,25 @@ Definition trad_prodcart B1 B2 f g :=
            (sigma_isomap (fun x => x)
               (fun x => prodcart_cc_prod_iso (sum (B1 (fst x)) (B2 (snd x)))))).
 
-Lemma iso_prodcart : forall X1 X2 A1 A2 B1 B2 Y f g,
+Instance trad_prodcart_morph :
+  Proper ((eq_set==>eq_set)==>(eq_set==>eq_set)==>(eq_set==>eq_set)==>(eq_set==>eq_set)==>
+            eq_set==>eq_set) trad_prodcart.
+do 6 red; intros.
+unfold trad_prodcart.
+unfold comp_iso.
+apply sigma_isomap_morph; auto with *.
++red; trivial.
++do 2 red; intros.
+ apply prodcart_cc_prod_iso_morph; trivial.
+ apply sum_morph.
+  apply H; apply fst_morph; trivial.
+  apply H0; apply snd_morph; trivial.
++apply prodcart_sigma_iso_morph.
+ apply sigma_isomap_morph; auto with *.
+ do 2 red; intros; apply H2; trivial.
+Qed.
+
+ Lemma iso_prodcart : forall X1 X2 A1 A2 B1 B2 Y f g,
    morph1 B1 ->
    morph1 B2 ->
    iso_fun X1 (W_F A1 B1 Y) f ->
@@ -518,6 +567,20 @@ Definition pos_consrec F G :=
     (prodcart (w1 F) (w1 G))
     (fun c => sum (w2 F (fst c)) (w2 G (snd c)))
     (trad_prodcart (w2 F) (w2 G) (wf F) (wf G)).
+
+Instance pos_consrec_morph : Proper (eqpos==>eqpos==>eqpos) pos_consrec.
+do 3 red; intros.
+destruct H as (?&?&?&?); destruct H0 as (?&?&?&?).
+unfold pos_consrec; split;[|split;[|split]]; simpl; intros.
++red; intros; apply prodcart_morph; auto with *.
++apply prodcart_morph; auto with *.
++red; intros.
+ apply sum_morph.
+ {apply H2; apply fst_morph; trivial. }
+ {apply H5; apply snd_morph; trivial. }
++red; intros.
+ apply trad_prodcart_morph; trivial.
+Qed.
 
 Lemma isPos_consrec F G :
   isPositive F ->

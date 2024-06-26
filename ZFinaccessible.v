@@ -54,7 +54,7 @@ intros.
 apply subset_elim2 in H; destruct H.
 rewrite H; trivial.
 Qed.
-Hint Resolve isOrd_grot.
+Hint Resolve isOrd_grot : core.
 
   Lemma grot_ord_inv : forall x, isOrd x -> x ∈ U -> lt x grot_ord.
 intros.
@@ -82,7 +82,7 @@ apply isOrd_intro; intros.
 
  apply isOrd_grot; trivial.
 Qed.
-Hint Resolve isOrd_grot_ord.
+Hint Resolve isOrd_grot_ord : core.
 
  Lemma G_limit : forall x, lt x grot_ord -> lt (osucc x) grot_ord.
 intros.
@@ -248,5 +248,5 @@ Qed.
 
 End Grothendieck_Universe.
 
-Hint Resolve grot_ord_intro isOrd_grot_ord isOrd_grot.
-Hint Resolve G_VN_is_grot.
+Hint Resolve grot_ord_intro isOrd_grot_ord isOrd_grot : core.
+Hint Resolve G_VN_is_grot : core.

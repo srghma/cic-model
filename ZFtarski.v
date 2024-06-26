@@ -1,4 +1,5 @@
 Require Import ZF.
+Reserved Infix "≤" (at level 70).
 
 (** Fixpoint theorem about monotonic operators
  *)
@@ -43,14 +44,14 @@ Section KnasterTarski.
 Variable le : set -> set -> Prop.
 Variable inf : set -> set.
 Hypothesis ilat : inf_lattice le inf.
-Infix "⊆" := le.
+Infix "≤" := le.
 
 Variable A : set.
 Variable pA : set.
 Hypothesis topA : rel_with_top A pA le.
 
-Let pA' := subset pA (fun x => x ⊆ A).
-Let is_powerA' x : x ⊆ A <-> x ∈ pA'.
+Let pA' := subset pA (fun x => x ≤ A).
+Let is_powerA' x : x ≤ A <-> x ∈ pA'.
 split; intros.
  apply subset_intro; trivial.
  apply is_powerA; trivial.
@@ -66,7 +67,7 @@ Qed.
 Variable F : set -> set.
 
 Hypothesis Fmono : Proper (le==>le) F.
-Hypothesis Ftyp : forall x, x ⊆ A -> F x ⊆ A.
+Hypothesis Ftyp : forall x, x ≤ A -> F x ≤ A.
 
 Instance Fm : morph1 F.
 do 2 red; intros.
@@ -74,7 +75,7 @@ apply le_anti; apply Fmono; rewrite H; reflexivity.
 Qed.
 
 Definition is_lfp x :=
-  F x == x /\ forall y, (*y ⊆ A ->*) F y ⊆ y -> x ⊆ y.
+  F x == x /\ forall y, (*y ≤ A ->*) F y ≤ y -> x ≤ y.
 
 Lemma lfp_elim x : is_lfp x -> F x == x.
 intros h; apply h.
@@ -91,8 +92,8 @@ apply le_anti.
  rewrite lfp_elim with (1:=H); reflexivity.
 Qed.
 
-Definition pre_fix x := x ⊆ F x.
-Definition post_fix x := F x ⊆ x.
+Definition pre_fix x := x ≤ F x.
+Definition post_fix x := F x ≤ x.
 
 Lemma post_fix_A : post_fix A.
 red; intros.
@@ -107,7 +108,7 @@ apply subset_intro; trivial.
 apply post_fix_A.
 Qed.
 
-Lemma post_fix1 x : x ∈ M' -> F x ⊆ x.
+Lemma post_fix1 x : x ∈ M' -> F x ≤ x.
 unfold M'; intros.
 elim subset_elim2 with (1:=H); intros.
 rewrite H0; trivial.
@@ -115,17 +116,17 @@ Qed.
 
 Definition FIX := inf M'.
 
-Lemma lower_bound x : x ∈ M' -> FIX ⊆ x.
+Lemma lower_bound x : x ∈ M' -> FIX ≤ x.
 unfold FIX, M'; intros.
 apply inf_le; trivial.
 Qed.
 
-Lemma lfp_typ : FIX ⊆ A.
+Lemma lfp_typ : FIX ≤ A.
 apply lower_bound.
 apply member_A.
 Qed.
 
-Lemma post_fix2 x : x ∈ M' -> F FIX ⊆ F x.
+Lemma post_fix2 x : x ∈ M' -> F FIX ≤ F x.
 intros.
 apply Fmono.
 apply lower_bound; trivial.
@@ -188,8 +189,8 @@ split.
 Qed.
 
 Lemma FIX_ind : forall P,
-  (forall X, X ⊆ FIX -> X ⊆ P -> F X ⊆ P) ->
-  FIX ⊆ P.
+  (forall X, X ≤ FIX -> X ≤ P -> F X ≤ P) ->
+  FIX ≤ P.
 intros.
 transitivity (inf (pair P FIX)).
  apply knaster_tarski.

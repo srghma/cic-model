@@ -40,7 +40,7 @@ Qed.
 Lemma Wsup_ext' : forall X, ext_fun (W_F' X) (Wsup B).
 intros; unfold W_F'; apply Wsup_ext; trivial.
 Qed.
-Hint Resolve Wsup_ext'.
+Hint Resolve Wsup_ext' : core.
 
 Definition Wf' X := Wf A B (cc_bot X).
 
@@ -53,7 +53,7 @@ Qed.
 Instance Wf_morph' : morph1 Wf'.
 apply Fmono_morph; auto with *.
 Qed.
-Hint Resolve Wf_mono' Wf_morph'.
+Hint Resolve Wf_mono' Wf_morph' : core.
 
 Lemma Wsup_inj' : forall X Y x x',
   X ⊆ Wd ->
@@ -82,7 +82,7 @@ intros.
 unfold Wf'; apply Wf_typ; trivial.
 apply Wdom_cc_bot; trivial.
 Qed.
-Hint Resolve Wf_typ'.
+Hint Resolve Wf_typ' : core.
 
 Lemma W_F_Wf_iso'' X :
   X ⊆ Wd ->

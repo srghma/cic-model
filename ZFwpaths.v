@@ -1,6 +1,11 @@
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFtarski ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFlist.
+Require Import ZFcoc.
+Require Import ZFord ZFcofix.
+Require Import ZFfix.
+Require Import ZFfixfun.
+
 Import ZFrepl.
 
 (** In this file we develop the theory of W-types as a type of trees encoded
@@ -569,7 +574,7 @@ Qed.
 Definition Wf X :=
   sup A (fun x => replf (Π __ ∈ B x, X) (fun f => Wsup x f)). 
 
-Hint Resolve Wsup_morph.
+Hint Resolve Wsup_morph : core.
 
 Lemma Wf_intro X x f :
   x ∈ A ->
@@ -644,7 +649,7 @@ Qed.
 Instance Wf_morph : morph1 Wf.
 apply Fmono_morph; auto with *.
 Qed.
-Hint Resolve Wf_mono Wf_morph.
+Hint Resolve Wf_mono Wf_morph : core.
 
 Lemma mt_not_in_Wf X : ~ empty ∈ Wf X.
 intro.
@@ -664,7 +669,7 @@ revert tyf; apply cc_prod_covariant; auto with *.
 apply H.
 apply cc_prod_elim with (1:=tyf); trivial.*)
 Qed.
-Hint Resolve Wf_typ.
+Hint Resolve Wf_typ : core.
 
 Lemma Wfst_typ_gen X w :
   w ∈ Wf X ->
@@ -737,8 +742,6 @@ eapply eq_elim.
  red; reflexivity.
 Qed.
 
-Require Import ZFstable.
-
 Lemma Wf_stable0 (K:set->Prop) :
   (forall X, K X -> X ⊆ Wdom) ->
  stable_class K Wf.
@@ -785,6 +788,8 @@ intros.
 rewrite H; apply Ffix_inA.
 Qed.
 *)
+
+Import ZFtarski.
 
 (* Using the impredicative construction of the fixpoint of a monotonic
    operator (Tarski), we get the type W. *)
@@ -958,9 +963,8 @@ Lemma mt_Wdom : empty ∈ Wdom.
 apply power_intro; intros.
 apply empty_ax in H; contradiction.
 Qed.
-Hint Resolve mt_Wdom.
+Hint Resolve mt_Wdom : core.
 
-Require Import ZFcoc.
 Definition Wfbot X := Wf (cc_bot X).
 
 Instance Wfbot_mono : Proper (incl_set ==> incl_set) Wfbot.
@@ -976,7 +980,7 @@ apply cc_bot_ax in H0; destruct H0; auto.
 rewrite H0; auto.
 Qed.
 
-Hint Resolve Wfbot_mono Wfbot_typ.
+Hint Resolve Wfbot_mono Wfbot_typ : core.
 
 Definition Wbot := FIX incl_set inter Wdom (power Wdom) Wfbot.
 
@@ -1092,7 +1096,6 @@ Qed.
 (** Coinductive *)
 
 (* Co-Iteration of Wf *)
-Require Import ZFord ZFcofix.
 
 Definition COWi := COTI Wdom Wf.
 
@@ -1164,13 +1167,13 @@ Opaque co_ord.
 Parameter co_ord : set.
 Parameter co_ordo : isOrd co_ord. 
 Parameter COWi_closure : COWi co_ord ⊆ Wf (COWi co_ord).*)
-Hint Resolve co_ordo.
+Hint Resolve co_ordo : core.
 
 Lemma COW_Wf1 : COW ⊆ Wf Wdom.
 rewrite COW_eqn; apply Wf_mono; trivial.
 apply COW_typ.  
 Qed.
-Hint Resolve COW_typ COW_eqn COW_Wf1.
+Hint Resolve COW_typ COW_eqn COW_Wf1 : core.
 
 Lemma COW_COWi o : isOrd o -> COW ⊆ COWi o.
 intros; apply COTI_post_fix; auto with *.
@@ -1805,7 +1808,6 @@ Hypothesis Fty :
   forall X w, COW ⊆ Wf X -> Wf X ⊆ X ->
             w ∈ X -> F w ∈ Wf X.
 (*Hint Resolve Fm.*)
-Require Import ZFfix.
 
 Lemma TI_WF_dom o :
   isOrd o ->
@@ -1961,7 +1963,6 @@ apply infb_bound.
 
 apply 
 
-Admitted.
 *)
 (*Lemma cfx_typ : cfx ⊆ COW.
 apply COW_gfp.
@@ -2111,8 +2112,6 @@ End SimpleCorecursion.
 
 (* Indexed-corec *)
 
-Require Import ZFfixfun.
-
 Parameter I:set.
 Parameter F:(set->set)->set->set.
 Parameter Fm:Proper((eq_set==>eq_set)==>eq_set==>eq_set) F.
@@ -2122,7 +2121,7 @@ Parameter Fty :
   morph1 f ->
   typ_fun f I X ->
   typ_fun (F f) I (Wf X).
-Hint Resolve Fm.
+Hint Resolve Fm : core.
 
 Definition iproductive I X F :=
   forall w w0,
@@ -3129,7 +3128,7 @@ Variable K : set -> Prop.
 Hypothesis Km : Proper (eq_set==>iff) K.
 Hypothesis Ksc : subtermClass K.
 
-Hint Resolve KW Ktrans.
+Hint Resolve KW Ktrans : core.
 Let KW' := KW. 
 
 Definition fsub w :=
@@ -3426,7 +3425,7 @@ apply Fm; trivial.
 
   red; intros;auto.
 Qed.  
-Hint Resolve Rm Gm.
+Hint Resolve Rm Gm : core.
 
 Let Gext x f f' :
    Acc R x ->
@@ -3472,7 +3471,7 @@ apply KW' in H; trivial.
 apply Wacc with w; trivial.
 apply fsub'_intro; auto.
 Qed.
-Hint Resolve Gext Oacc.
+Hint Resolve Gext Oacc : core.
 
 Lemma WSREC_eqn0' w :
   w ∈ O ->
@@ -3725,7 +3724,7 @@ Qed.
 Lemma fsub_trans w :
   w ∈ W ->
   fsub w ⊆ Wf (fsub w).
-Admitted.
+Qed.
 
 Lemma Wsrec_ex' w :
   w ∈ W ->

@@ -2,6 +2,8 @@ Require Import basic.
 Require Import Sublogic.
 Require Import Models GenModelSyntax.
 Require Import ZF ZFrelations ZFcoc ModelZF.
+Require ZFrepl.
+Require Term Env TypeJudge.
 
 (** Set-theoretical model of the Calculus of Constructions in IZF *)
 
@@ -60,8 +62,7 @@ Qed.
 
 (** The model in ZF implies the consistency of CC *)
 
-Require Import Term Env.
-Require Import TypeJudge.
+Import Term Env TypeJudge.
 Load "template/Library.v".
 
 Lemma cc_consistency : forall M M', ~ eq_typ nil M M' FALSE.
@@ -85,7 +86,7 @@ Import BuildModel.
 Import CCM.
 Import T J R.
 
-Require Import ZFrepl.
+Import ZFrepl.
 
 Definition CH_spec a f1 f2 z :=
      a == empty /\ z == app f2 (lam empty (fun _ => empty))
@@ -121,7 +122,7 @@ apply uchoice_morph.
 Defined.
 
 (* forall X, X + (X->False) is inhabited *)
-Lemma typ_choice :
+#[local]Lemma typ_choice :
   typ
     ((*f1*)Prod (Prod (*X*)(Ref 2) (Prod prop (Ref 0))) (*P*)(Ref 2) ::
      (*f2*)Prod (*X*)(Ref 1) (*P*)(Ref 1) ::
@@ -156,7 +157,7 @@ destruct H.
  refine (prod_elim _ _ _ _ _ H1 _).
   admit.
  apply choose_ax; trivial.
-Admitted.
+Admitted. (* typ_choice hidden *)
 
 End TypChoice.
 (*end hide*)

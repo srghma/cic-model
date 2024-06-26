@@ -82,7 +82,7 @@ apply sigma_mono.
   intros.
   rewrite <- H4; apply H1; auto.
 Qed.
-Hint Resolve W_Fd_mono.
+Hint Resolve W_Fd_mono : core.
 
 Lemma W_Fd_incl_W_F X Y :
   ext_fun Arg X ->

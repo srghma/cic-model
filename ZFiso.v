@@ -748,6 +748,12 @@ Qed.
 
 Definition sigma_1r_iso f x := couple x (f x).
 
+Instance sigma_1r_iso_morph : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) sigma_1r_iso.
+do 3 red; intros.
+unfold sigma_1r_iso.
+apply couple_morph; auto with *.
+Qed.
+
 Lemma sigma_1r_iso_typ A B f :
   ext_fun A B ->
   (forall x, x ∈ A -> f x ∈ B x) ->
@@ -1107,6 +1113,12 @@ cut (iso_fun (sigma (sigma X (fun _ => Y)) (fun _ => Z))
 Definition prodcart_sigma_iso q :=
   couple (couple (fst (fst q)) (fst (snd q)))
          (couple (snd (fst q)) (snd (snd q))).
+
+Instance prodcart_sigma_iso_morph : morph1 prodcart_sigma_iso.
+do 2 red; intros.
+unfold prodcart_sigma_iso.
+rewrite H; reflexivity.
+Qed.
 
 Lemma prodcart_sigma_iso_typ A1 A2 B1 B2 :
   ext_fun A1 B1 ->

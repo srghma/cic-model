@@ -7,7 +7,7 @@ Require Export ZFcoc.
 Instance succ_m2 : morph2 (fun _ => succ).
 intros _ _ _; apply succ_morph.
 Qed.
-Hint Resolve succ_m2.
+Hint Resolve succ_m2 : core.
 (*
 Lemma natrec_typ : forall x y, x ∈ N -> y ∈ N ->
   natrec x (fun _ => succ) y ∈ N.

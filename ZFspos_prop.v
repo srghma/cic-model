@@ -1,5 +1,6 @@
 Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix.
 Require Import ZFstable ZFiso ZFind_w.
+Require Import ZFgrothendieck.
 
 (** Here we define the (semantic) notion of strictly positiveness.
    We then show that it fulfills all the requirements for the existence
@@ -66,7 +67,7 @@ do 2 red; intros.
 apply Fmono_morph; trivial.
 apply pos_mono; trivial.
 Qed.
-Hint Resolve w2_morph' pos_oper_morph0.
+Hint Resolve w2_morph' pos_oper_morph0 : core.
 
 (* pos_oper is stable by isomorphism with W_F *)
 Lemma pos_oper_stable : forall p, isPositive p ->
@@ -696,8 +697,6 @@ Qed.
 
 
 (** * Universe constraints: predicativity *)
-
-Require Import ZFgrothendieck.
 
 Section InductiveUniverse.
 

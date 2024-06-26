@@ -122,7 +122,7 @@ do 2 red; intros.
 apply Fmorph.
 apply COTI_morph; trivial.
 Qed.
-Hint Resolve COTI_fun_ext.
+Hint Resolve COTI_fun_ext : core.
 
   Lemma COTI_eq : forall o,
     isOrd o ->
@@ -169,7 +169,7 @@ apply incl_eq.
 Qed.
 
 End CoTransfiniteIteration.
-Local Hint Resolve COTI_fun_ext.
+Local Hint Resolve COTI_fun_ext : core.
 
 Global Instance COTI_morph_gen :
   Proper (eq_set==>(eq_set==>eq_set)==>eq_set==>eq_set) COTI.
@@ -567,14 +567,14 @@ apply osup_morph.
  red; intros.
  apply osucc_morph; apply H; trivial.
 Qed.
-Hint Resolve F_a_morph.
+Hint Resolve F_a_morph : core.
 
 
   Lemma Fe1 : forall X, ext_fun X (fun b => osucc (Fix_rec F_a b)).
 red; red; intros.
 rewrite H0; reflexivity.
 Qed.
-Hint Resolve Fe1.
+Hint Resolve Fe1 : core.
 
   Lemma F_a_ord : forall a, a ∈ Ffix -> isOrd (Fix_rec F_a a).
 intros.
@@ -588,7 +588,7 @@ destruct fsub_elim with (2:=H3) (3:=H4); trivial.
 eauto.
 Qed.
 
-Hint Resolve F_a_ord.
+Hint Resolve F_a_ord : core.
 
 (** We need stability to prove that Ffix is a fixpoint *)
   Hypothesis Fstab : stable_class (fun X => X ⊆ Ffix) F.
@@ -691,7 +691,7 @@ Qed.
   Lemma Ffix_o_o : isOrd Ffix_ord.
 apply isOrd_osup; auto.
 Qed.
-Hint Resolve Ffix_o_o.
+Hint Resolve Ffix_o_o : core.
 
   Lemma Ffix_post : forall a,
    a ∈ Ffix ->
@@ -864,7 +864,7 @@ End Iter2.
 red; red; intros.
 rewrite H0; reflexivity.
 Qed.
-Hint Resolve Fe1'.
+Hint Resolve Fe1' : core.
 
   Lemma F_a_ord' : forall a, a ∈ Ffix -> isOrd (Fix_rec' F_a a).
 intros.
@@ -878,7 +878,7 @@ destruct fsub_elim with (2:=H3) (3:=H4); trivial.
 eauto.
 Qed.
 
-Hint Resolve F_a_ord'.
+Hint Resolve F_a_ord' : core.
 
   Lemma F_a_tot' : forall a,
    a ∈ Ffix ->
@@ -914,7 +914,7 @@ Qed.
   Lemma Ffix_o_o' : isOrd Ffix_ord'.
 apply isOrd_osup; auto.
 Qed.
-Hint Resolve Ffix_o_o'.
+Hint Resolve Ffix_o_o' : core.
 
   Lemma Ffix_post' : forall a,
    a ∈ Ffix ->

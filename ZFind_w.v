@@ -2,6 +2,8 @@ Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFlist.
 Require Import ZFiso.
+Require Import ZFfunext ZFfixrec.
+
 Import ZFrepl.
 
 (** In this file we develop the theory of W-types:
@@ -692,8 +694,6 @@ apply surj_pair with (1:=subset_elim1 _ _ _ H).
 Qed.
 
 (** Recursor on W *)
-
-Require Import ZFfunext ZFfixrec.
 
 Section Recursor.
 

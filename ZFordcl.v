@@ -275,7 +275,7 @@ apply isOrd_inv with N; trivial.
 apply isOrd_N.
 Qed.
 
-Hint Resolve natOrd isOrd_N.
+Hint Resolve natOrd isOrd_N : core.
 
 
 Definition succOrd o := exists2 o', isOrd o' & o == succ o'.
@@ -305,11 +305,11 @@ Qed.
 Lemma limit_is_ord : forall o, limitOrd o -> isOrd o.
 destruct 1; trivial.
 Qed.
-Hint Resolve limit_is_ord.
+Hint Resolve limit_is_ord : core.
 Lemma limit'_is_ord : forall o, limitOrd' o -> isOrd o.
 destruct 1; trivial.
 Qed.
-Hint Resolve limit'_is_ord.
+Hint Resolve limit'_is_ord : core.
 
 Lemma discr_lim_succ : forall o, limitOrd o -> succOrd o -> False.
 destruct 1; destruct 1.
@@ -853,7 +853,7 @@ unfold G; intros.
 apply sup_morph; trivial.
 red; auto.
 Qed.
-Hint Resolve Gmorph.
+Hint Resolve Gmorph : core.
 
   Definition TI := TR G.
 
@@ -868,7 +868,7 @@ apply Fmorph.
 apply TI_morph; trivial.
 apply isOrd_inv with x; trivial.
 Qed.
-Hint Resolve TI_fun_ext.
+Hint Resolve TI_fun_ext : core.
 
   Lemma TI_eq : forall o,
     isOrd o ->
@@ -925,4 +925,4 @@ apply le_lt_trans with x; trivial.
 Qed.
 
 End TransfiniteIteration.
-Hint Resolve TI_fun_ext.
+Hint Resolve TI_fun_ext : core.

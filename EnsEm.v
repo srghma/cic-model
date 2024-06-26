@@ -83,7 +83,7 @@ destruct (H X' Y (fun y => projT1 y)) as (C,(f,Hf)).
 Qed.
 
 (* begin hide *)
-Lemma ttcoll_impl2 :
+#[local]Lemma ttcoll_impl2 :
   ttcoll (fun _ _ => False) -> streicher_ttcoll.
 red; intros.
 red in H.
@@ -109,8 +109,7 @@ destruct (H1 a) as (j,?).
 
  refine (ex_intro _ (existT _ a (exist (fun y=>R a (g y)) j H2)) _); simpl.
  reflexivity.
-(*Fail idtac. Admitted.*)
-Admitted.
+Admitted. (* ttcoll_impl2 hidden *)
 (* end hide *)
 
 Definition miquel_dom A (P:A->Prop) (R:A->Type->Prop) :=
@@ -891,7 +890,7 @@ Qed.
 
 (* begin hide *)
 (** ttrepl_needed_for_replacement proof not completed *)
-Lemma ttrepl_needed_for_replacement : ttrepl eq_set.
+#[local]Lemma ttrepl_needed_for_replacement : ttrepl eq_set.
 red; red; intros.
 (* Not quite: we need a set [a] with an injection from X to elements of a *)
 assert (exists2 a, X = idx a & forall i i', elts a i == elts a i' -> i=i') by admit.
@@ -946,7 +945,7 @@ apply eq_set_ax; split; intros.
  apply eq_elim with x2; trivial.
  apply eq_set_trans with x3; trivial.
  apply H0 with x0; trivial.
-Admitted. (*Qed.*)
+Admitted. (* ttrepl_needed_for_replacement hidden *)
 (* end hide *)
 
 (* Deriving the existentially quantified sets *)

@@ -173,7 +173,7 @@ apply ex_morph; intros o.
 apply ex_morph; intros x'.
 rewrite H; reflexivity.
 Qed.
-Hint Resolve Km.
+Hint Resolve Km : core.
 
 Let R ox ox' := exists o x, ox == couple o x /\ o < fst ox'.
 Let Rm : Proper (eq_set==>eq_set==>iff) R.
@@ -182,7 +182,7 @@ apply ex_morph; intros o.
 apply ex_morph; intros x'.
 rewrite H,H0; reflexivity.
 Qed.
-Hint Resolve Rm.
+Hint Resolve Rm : core.
 
 Let AccR ox : K ox -> Acc R ox.
 intros (o,(x,(eqox,oo))).
@@ -193,7 +193,7 @@ destruct H2 as (o',(x',(eqox',lt))).
 apply H1 with o' x'; trivial.
 rewrite eqox,fst_def in lt; trivial.
 Qed.
-Hint Resolve AccR.
+Hint Resolve AccR : core.
 
    Let G f ox :=
      F (fun y => lim (fst ox) (fun o' => f (couple o' y))) (snd ox).
@@ -210,7 +210,7 @@ apply Fm.
 
  rewrite H0; reflexivity.
 Qed.
-Hint Resolve Gm.
+Hint Resolve Gm : core.
 
   Definition TRF o x := WFR R G (couple o x).
 

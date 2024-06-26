@@ -84,20 +84,20 @@ Fixpoint ecc (n:nat) : set :=
   end.
 
 
-Let prop_univ : ZFrepl.uchoice_pred (grot_succ_pred empty).
+Lemma prop_univ : ZFrepl.uchoice_pred (grot_succ_pred empty).
 destruct (proj2_sig infinite_seq_of_grot_univ) as (mtU, nextU).
 apply nextU in mtU; destruct mtU as (V,(VU,(gV,xV))).
 specialize grot_succ_from_U with (1:=gV) (2:=xV); intro.
 apply grot_succ_ex in H; trivial.
 Qed.
 
-Let prop_grot : grot_univ (grot_succ props).
+Lemma prop_grot : grot_univ (grot_succ props).
 rewrite <- grot_succ_hf.
 apply grot_succ_U_typ.
 apply prop_univ.
 Qed.
 
-Let prop_in : props ∈ grot_succ props.
+Lemma prop_in : props ∈ grot_succ props.
 assert (h := prop_grot).
 apply G_power; trivial.
 apply G_singl; trivial.
@@ -106,7 +106,7 @@ apply grot_succ_U_in.
 apply prop_univ.
 Qed.
 
-Let U := proj1_sig infinite_seq_of_grot_univ.
+Definition U := proj1_sig infinite_seq_of_grot_univ.
 
 Lemma grot_ecc_U : forall n, exists V, V ∈ U /\ grot_univ V /\ ecc n ∈ V.
 destruct (proj2_sig infinite_seq_of_grot_univ) as (mtU, nextU); fold U in *.
@@ -142,7 +142,7 @@ destruct n; simpl.
  apply grot_succ_U_typ.
  apply ecc_defined.
 Qed.
-Hint Resolve ecc_grot.
+Hint Resolve ecc_grot : core.
 
 Lemma ecc_in2 : forall n, ecc n ∈ ecc (S n).
 simpl; intros.
@@ -277,4 +277,4 @@ apply G_N; trivial.
 apply omega_in_ecc.
 Qed.
 
-Hint Resolve empty_in_ecc one_in_ecc omega_in_ecc N_in_ecc.
+Hint Resolve empty_in_ecc one_in_ecc omega_in_ecc N_in_ecc : core.

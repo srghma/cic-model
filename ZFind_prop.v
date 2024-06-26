@@ -1,6 +1,7 @@
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck ZFcoc.
 Require Import ZFlist.
+Require Import ZFfunext ZFfixrec.
 Import ZFrepl.
 
 (** In this file we develop the theory of W-types in Prop:
@@ -24,7 +25,7 @@ Lemma wfm1 : forall X, ext_fun A (fun x => cc_arr (B x) X).
 do 2 red; intros.
 apply cc_arr_morph; auto with *.
 Qed.
-Hint Resolve wfm1.
+Hint Resolve wfm1 : core.
 
 Lemma W_F_intro X a f :
   ext_fun (B a) f ->
@@ -286,11 +287,9 @@ End WindColl.
 
 (** Recursor on W *)
 
-Require Import ZFfunext ZFfixrec.
-
 Section Recursor.
 
-  Hint Resolve W_F_mono.
+  Hint Resolve W_F_mono : core.
 
   Lemma Wi_fix :
     forall (P:set->Prop) o,
@@ -376,7 +375,7 @@ apply typed_recursor; trivial.
 apply WREC_recursor_hyps.
 Qed.
 
-  Hint Resolve WREC_recursor.
+  Hint Resolve WREC_recursor : core.
 
   (* Main properties of WREC: typing and equation *)
   Lemma WREC_wt : WREC ord ∈ Ty ord.

@@ -326,8 +326,8 @@ Section ReplImpliesCollFromExcludedMiddleAndWellFoundation.
 
 Parameter rk : set -> set.
 
-Instance rk_morph : morph1 rk.
-Admitted.
+Parameter rk_morph : morph1 rk.
+Existing Instance rk_morph.
 
 Parameter rk_def : forall x z,
   z ∈ rk x <-> exists y, y ∈ x /\ z ∈ power (rk y).

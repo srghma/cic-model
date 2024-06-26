@@ -223,7 +223,6 @@ Qed.
   Definition Neutral := InterSubset _ is_cand (fun C => C).
 
   Lemma is_cand_neutral : is_cand Neutral.
-Admitted.
 *)
 
 (* Explicit definition of the CR of neutral terms *)

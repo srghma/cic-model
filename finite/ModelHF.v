@@ -22,9 +22,6 @@ split.
 Qed.
 Definition inclX := Incl_hf.
 
-Notation "x ∈ y" := (inX x y).
-Notation "x == y" := (eqX x y).
-
 Lemma in_ext: Proper (eqX ==> eqX ==> iff) inX.
 Proof In_hf_morph.
 
