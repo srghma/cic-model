@@ -224,6 +224,35 @@ destruct H1 as (a, inA, (b, inB, eqp)).
  rewrite snd_def; reflexivity.
 Qed.
 
+Lemma subset_prodcart A B P Q :
+  prodcart (subset A P) (subset B Q) ==
+    subset (prodcart A B)
+      (fun p => (exists2 x', fst p == x' & (exists2 y', snd p == y' & P x' /\ Q y'))).
+apply eq_set_ax; intros z.
+rewrite subset_ax.
+split; intros.
++split.
+ {revert z H; apply prodcart_mono.
+   intro; apply subset_elim1. 
+   intro; apply subset_elim1. }
+ {exists z; [reflexivity|].
+  specialize fst_typ with (1:=H) as tyx.
+  specialize snd_typ with (1:=H) as tyy.
+  destruct subset_elim2 with (1:=tyx) as (x',?,?).
+  destruct subset_elim2 with (1:=tyy) as (y',?,?).
+  eauto. }
++destruct H as (tyz,(z',eqz,(x',eqx,(y',eqy,(?,?))))).
+ rewrite <- eqz in eqx,eqy.
+ rewrite surj_pair with (1:=tyz).
+ apply couple_intro.
+ rewrite eqx; apply subset_intro; trivial.
+ apply fst_typ in tyz.
+ rewrite <- eqx; trivial.
+ rewrite eqy; apply subset_intro; trivial.
+ apply snd_typ in tyz.
+ rewrite <- eqy; trivial.
+Qed.
+
 Lemma prodcart_stable_class : forall K F G,
   morph1 F ->
   morph1 G ->
@@ -406,6 +435,80 @@ split.
  apply fst_typ_sigma in H0; trivial.
 
  apply snd_typ_sigma with (2:=H0); auto with *.
+Qed.
+
+(*
+Lemma snd_typ_sigma' : forall p y A B,
+  p ∈ sigma A B -> y == fst p -> exists2 y', y==y' & snd p ∈ B y'.
+intros.
+unfold sigma in H.
+elim subset_elim2 with (1:=H); intros.
+exists (fst x).
+ rewrite <-H1; trivial.
+ rewrite H1; trivial.
+Qed.
+
+Lemma sigma_elim' A B p :
+  p ∈ sigma A B ->
+  p == couple (fst p) (snd p) /\
+  fst p ∈ A /\
+  exists2 x, fst p == x & snd p ∈ B x.
+intros.
+split.
+ apply subset_elim1 in H.
+ apply surj_pair in H; trivial.
+
+ split.
+ apply fst_typ_sigma in H; trivial.
+
+ apply snd_typ_sigma' with (1:=H); auto with *.
+Qed.
+*)
+
+Lemma currify_sigma A B P :
+  ext_fun A B -> 
+  (forall x x', x ∈ sigma A B -> x==x' -> P x -> P x') ->
+  (forall i, i ∈ sigma A B -> P i) <->
+  (forall x, x ∈ A -> forall y, y ∈ B x -> P (couple x y)).
+split; intros.
++apply H1.
+ apply couple_intro_sigma; trivial.
++destruct sigma_elim with (2:=H2) as (?&?&?); trivial.
+ apply H0 with (2:=symmetry H3); auto.
+ rewrite <- H3; trivial.
+Qed.
+
+
+Lemma subset_sigma A B P :
+  ext_fun A B ->
+  subset (sigma A B) P ==
+    sigma A (fun x => subset (B x) (fun y => exists2 p, couple x y == p & P p)).
+intros Bm.
+assert (B'm : ext_fun A (fun x => subset (B x) (fun y => exists2 p, couple x y == p & P p))).
+{do 2 red; intros.
+ apply subset_morph; auto with *. 
+ red; intros.
+ split; intros (p,?,?); exists p; trivial.
+  rewrite <- H0; trivial.
+  rewrite H0; trivial. }
+apply eq_set_ax; intros z.
+rewrite subset_ax.
+split; intros.
++destruct H as (tyz,(z',eqz,?)).
+ apply sigma_elim in tyz; trivial.
+ destruct tyz as (eqc&tyx&tyy).
+ rewrite eqc.
+ apply couple_intro_sigma; trivial. 
+ apply subset_intro; trivial.
+ exists z'; trivial.
+ rewrite <- eqc; trivial.
++apply sigma_elim in H; trivial.
+ destruct H as (eqz & tyx & tyy).
+ rewrite subset_ax in tyy. 
+ destruct tyy as (tyy,(y',eqy,(z',eqc,?))).
+ rewrite <- eqy, <-eqz in eqc.
+ split;[|eauto].
+ rewrite eqz; apply couple_intro_sigma; trivial.
 Qed.
 
 Definition sigma_case b c :=

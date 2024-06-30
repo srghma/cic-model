@@ -322,6 +322,26 @@ apply sum_case_ext.
  red; intros; apply inr_morph; auto.
 Qed.
 
+Lemma sum_isomap_inl f g x a :
+  (forall a', a==a' -> f a == f a') ->
+  x == inl a -> sum_isomap f g x == inl (f a).
+intros.
+unfold sum_isomap.
+rewrite sum_case_inl0; [|eauto].
+rewrite <- (H (dest_sum x));[reflexivity|].
+rewrite H0, dest_sum_inl; reflexivity.
+Qed.
+
+Lemma sum_isomap_inr f g x b :
+  (forall b', b==b' -> g b == g b') ->
+  x == inr b -> sum_isomap f g x == inr (g b).
+intros.
+unfold sum_isomap.
+rewrite sum_case_inr0; [|eauto].
+rewrite <- (H (dest_sum x));[reflexivity|].
+rewrite H0, dest_sum_inr; reflexivity.
+Qed.
+
 Lemma sum_isomap_typ X X' Y Y' f g :
   typ_fun f X X' ->
   typ_fun g Y Y' ->
@@ -338,7 +358,6 @@ apply sum_ind with (3:=tyx); intros.
  apply tyg.
  rewrite H0; rewrite dest_sum_inr; trivial.
 Qed.
-
 
 Lemma sum_iso_fun_morph : forall X X' Y Y' f g,
   iso_fun X X' f -> iso_fun Y Y' g ->
@@ -919,6 +938,20 @@ Qed.
 Instance cpl_inr_morph : morph1 (fun p2 => couple (inr (fst p2)) (snd p2)).
  do 2 red; intros.
  rewrite H; reflexivity.
+Qed.
+
+Lemma sum_sigma_iso_inl x p :
+  x == inl p -> sum_sigma_iso x == couple (inl (fst p)) (snd p).
+unfold sum_sigma_iso; intros.
+rewrite sum_case_inl0; [|eauto].
+rewrite H, dest_sum_inl; reflexivity.
+Qed.
+
+Lemma sum_sigma_iso_inr x p :
+  x == inr p -> sum_sigma_iso x == couple (inr (fst p)) (snd p).
+unfold sum_sigma_iso; intros.
+rewrite sum_case_inr0; [|eauto].
+rewrite H, dest_sum_inr; reflexivity.
 Qed.
 
 Lemma sum_sigma_iso_typ A1 A2 B1 B2 :

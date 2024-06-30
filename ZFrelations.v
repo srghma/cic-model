@@ -1115,6 +1115,44 @@ apply H0; trivial.
 rewrite <- H1; trivial.
 Qed.
 
+Lemma subset_cc_prod A B B' P :
+  ext_fun A B ->
+  (forall x x', x ∈ A -> x==x' -> B' x == subset (B x') (P x')) ->
+  subset (cc_prod A B) (fun f => forall x, x ∈ A -> exists2 y, cc_app f x == y & P x y) ==
+    cc_prod A B'.
+intros Bm eqB.
+assert (B'm : ext_fun A B').
+{do 2 red; intros.
+ rewrite eqB with (x:=x)(x':=x); auto with *.
+ rewrite eqB with (x:=x')(x':=x); auto with *.
+ rewrite <- H0; trivial. }
+apply eq_set_ax; intros z.
+rewrite subset_ax.
+split; intros.
++destruct H as (tyz,(z',eqz,?)).
+ rewrite cc_eta_eq with (1:=tyz).
+ apply cc_prod_intro; trivial. 
+  do 2 red; intros; apply cc_app_morph; auto with *.
+  intros.
+  destruct H with (1:=H0) as (y,eqy,?).  
+  rewrite eqB with (x':=x); auto with *.
+  rewrite eqz,eqy.
+  apply subset_intro; trivial.
+  rewrite <-eqy,<-eqz.
+  apply cc_prod_elim with (1:=tyz); trivial.
++split.
+ {revert H; apply cc_prod_covariant; auto with *.
+  intros.  
+  rewrite eqB with (x':=x); auto with *.
+  intros w; apply subset_elim1. }
+ {exists z;[reflexivity|].
+  intros.
+  specialize cc_prod_elim with (1:=H)(2:=H0).
+  rewrite eqB with (x':=x); auto with *.
+  intros.
+  apply subset_elim2 in H1; trivial.  }
+Qed.
+
 Lemma cc_prod_stable_class : forall K dom F,
   (forall y y' x x', y == y' -> x ∈ dom -> x == x' -> F y x == F y' x') ->
   (forall x, x ∈ dom -> stable_class K (fun y => F y x)) ->

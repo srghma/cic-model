@@ -24,6 +24,25 @@ Lemma eq_set_morph : Proper (eq_set ==> eq_set ==> iff) eq_set.
 auto with *.
 Qed.
 
+Lemma forall_eq_intro x (P:set->Prop) Q :
+  (forall x', x'==x -> P x' <-> Q) ->
+  (forall x', x'==x -> P x') <-> Q .
+split; intros.
++apply (H x); [reflexivity|].
+ apply H0; reflexivity.
++apply (H x'); trivial.
+Qed.
+
+Lemma exists_eq_intro x (P:set->Prop) Q :
+  (forall x', x==x' -> P x' <-> Q) ->
+  (exists2 x', x==x' & P x') <-> Q .
+split; intros.
++destruct H0.
+ apply (H x0); trivial.
++exists x; [reflexivity|].
+ rewrite H; [trivial|reflexivity].
+Qed.
+
 Lemma eq_intro : forall x y,
   (forall z, z ∈ x -> z ∈ y) ->
   (forall z, z ∈ y -> z ∈ x) ->

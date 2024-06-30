@@ -404,6 +404,26 @@ Qed.
 Definition trad_sum f g :=
   comp_iso (sum_isomap f g) sum_sigma_iso.
 
+Lemma trad_sum_inl f g p x :
+  (forall p', p == p' -> f p == f p') ->
+  x == inl p ->
+  trad_sum f g x == couple (inl (fst (f p))) (snd (f p)). 
+intros.
+unfold trad_sum, comp_iso.  
+rewrite sum_sigma_iso_inl with (p:=f p);[reflexivity|].
+apply sum_isomap_inl; trivial.
+Qed.
+
+Lemma trad_sum_inr f g p x :
+  (forall p', p == p' -> g p == g p') ->
+  x == inr p ->
+  trad_sum f g x == couple (inr (fst (g p))) (snd (g p)). 
+intros.
+unfold trad_sum, comp_iso.  
+rewrite sum_sigma_iso_inr with (p:=g p);[reflexivity|].
+apply sum_isomap_inr; trivial.
+Qed.
+
 Lemma cc_prod_sum_case_commut A1 A2 B1 B2 Y x x':
   ext_fun A1 B1 ->
   ext_fun A2 B2 ->
@@ -503,7 +523,76 @@ apply sigma_isomap_morph; auto with *.
  do 2 red; intros; apply H2; trivial.
 Qed.
 
- Lemma iso_prodcart : forall X1 X2 A1 A2 B1 B2 Y f g,
+Lemma trad_prodcart_eq Bf Bg f g z x y :
+  morph1 Bf ->
+  morph1 Bg ->
+  morph1 f ->
+  morph1 g ->
+  fst z == x ->
+  snd z == y ->
+  trad_prodcart Bf Bg f g z ==
+    couple (couple (fst (f x)) (fst (g y)))
+      (cc_lam (sum (Bf (fst (f x))) (Bg (fst (g y))))
+         (fun i => sum_case (cc_app (snd (f x))) (cc_app (snd (g y))) i)).
+intros Bfm Bgm fm gm eqx eqy.
+unfold trad_prodcart, comp_iso.
+unfold sigma_isomap.
+apply couple_morph.  
++unfold prodcart_sigma_iso; rewrite !fst_def, snd_def, eqx, eqy.
+ reflexivity.
++unfold prodcart_cc_prod_iso.
+ apply cc_lam_ext.
+ {unfold prodcart_sigma_iso; rewrite !fst_def, !snd_def, eqx, eqy.
+  reflexivity. }
+ {red; intros.
+  apply sum_case_morph; trivial.
+  red; intros.
+  apply cc_app_morph; trivial.    
+  unfold prodcart_sigma_iso; rewrite !fst_def, !snd_def, !fst_def, eqx; reflexivity.
+  red; intros.
+  apply cc_app_morph; trivial.    
+  unfold prodcart_sigma_iso; rewrite !fst_def, !snd_def, eqy; reflexivity. }
+Qed.
+
+Lemma trad_prodcart_snd_inl_eq Bf Bg f g z x i j :
+  morph1 Bf ->
+  morph1 Bg ->
+  morph1 f ->
+  morph1 g ->
+  fst z == x ->
+  j ∈ Bf (fst (f x)) ->
+  i == inl j ->
+  cc_app (snd (trad_prodcart Bf Bg f g z)) i == cc_app (snd (f x)) j.
+intros.
+rewrite trad_prodcart_eq with (x:=x)(y:=snd z); trivial; [|reflexivity].
+rewrite snd_def, cc_beta_eq.
++rewrite sum_case_inl0;[|eauto].
+ rewrite H5,dest_sum_inl; reflexivity.
++do 2 red; intros.  
+ rewrite H7; reflexivity.
++rewrite H5; apply inl_typ; trivial.
+Qed.
+
+Lemma trad_prodcart_snd_inr_eq Bf Bg f g z y i j :
+  morph1 Bf ->
+  morph1 Bg ->
+  morph1 f ->
+  morph1 g ->
+  snd z == y ->
+  j ∈ Bg (fst (g y)) ->
+  i == inr j ->
+  cc_app (snd (trad_prodcart Bf Bg f g z)) i == cc_app (snd (g y)) j.
+intros.
+rewrite trad_prodcart_eq with (y:=y)(x:=fst z); trivial; [|reflexivity].
+rewrite snd_def, cc_beta_eq.
++rewrite sum_case_inr0;[|eauto].
+ rewrite H5,dest_sum_inr; reflexivity.
++do 2 red; intros.  
+ rewrite H7; reflexivity.
++rewrite H5; apply inr_typ; trivial.
+Qed.
+  
+Lemma iso_prodcart : forall X1 X2 A1 A2 B1 B2 Y f g,
    morph1 B1 ->
    morph1 B2 ->
    iso_fun X1 (W_F A1 B1 Y) f ->
@@ -602,6 +691,16 @@ Qed.
 Definition trad_sigma f :=
   comp_iso (sigma_isomap (fun x => x) f) sigma_isoassoc.
 
+Lemma trad_sigma_eq F x y z :
+  morph2 F ->
+  z == couple x y ->
+  trad_sigma F z == couple (couple x (fst (F x y))) (snd (F x y)).
+intros Fm eqz.
+unfold trad_sigma.
+unfold comp_iso, sigma_isomap, sigma_isoassoc.
+rewrite eqz; rewrite !fst_def, !snd_def; reflexivity.
+Qed.
+
 Definition pos_norec A F :=
   mkPositive
     (fun X => sigma A (fun x => pos_oper (F x) X))
@@ -674,6 +773,90 @@ Definition trad_cc_prod P B f :=
   (comp_iso (cc_prod_sigma_iso P)
       (sigma_isomap (fun x => x)
                     (fun x => cc_prod_isocurry P (fun y => B y (cc_app x y))))).
+
+Lemma trad_cc_prod_eq A Bf w f :
+  morph2 Bf ->
+  morph2 w ->
+  trad_cc_prod A Bf w f ==
+  couple (cc_lam A (fun x => fst (w x (cc_app f x))))
+         (cc_lam (Σ x∈A, Bf x (fst (w x (cc_app f x))))
+            (fun p => cc_app (snd (w (fst p) (cc_app f (fst p)))) (snd p))).
+intros Bfm wm.
+unfold trad_cc_prod.
+unfold comp_iso, cc_prod_isomap, cc_prod_sigma_iso, cc_prod_isocurry, sigma_isomap.
+rewrite !fst_def.
+apply couple_morph.
+ apply cc_lam_ext;[reflexivity|].
+ red; intros.
+ rewrite cc_beta_eq; trivial.
+ apply fst_morph.
+ apply wm; trivial.
+apply cc_app_morph; trivial.
+reflexivity.
+do 2 red; intros; apply wm; auto with *.
+rewrite H2; reflexivity.
+
+symmetry; apply cc_lam_ext.
+ apply sigma_ext;[reflexivity|].
+ intros.
+ apply Bfm; trivial.
+ rewrite fst_def.
+ rewrite H0 in H.
+ rewrite cc_beta_eq; trivial.
+  rewrite cc_beta_eq; trivial.
+   rewrite <- H0; reflexivity.
+do 2 red; intros.
+apply wm; trivial.   
+rewrite H2; reflexivity. 
+do 2 red; intros.
+rewrite H2; reflexivity. 
+
+red; intros.
+rewrite snd_def.
+apply fst_typ_sigma in H.
+rewrite H0 in H.
+rewrite cc_beta_eq; trivial.
+rewrite cc_beta_eq; trivial.
+rewrite H0; reflexivity.
+do 2 red; intros.
+apply wm; trivial.   
+rewrite H2; reflexivity. 
+do 2 red; intros.
+rewrite H2; reflexivity. 
+Qed.
+
+Lemma trad_cc_prod_fst_eq A Bf w f x y :
+  morph2 Bf ->
+  morph2 w ->
+  x ∈ A ->
+  cc_app f x == y ->
+  cc_app (fst (trad_cc_prod A Bf w f)) x == fst (w x y).
+intros.
+rewrite trad_cc_prod_eq,fst_def; trivial.
+rewrite cc_beta_eq; trivial.
+rewrite H2; reflexivity.
+do 2 red; intros.
+rewrite H4; reflexivity.
+Qed.
+
+Lemma trad_cc_prod_snd_eq A Bf w f x i y :
+  morph2 Bf ->
+  morph2 w ->
+  x ∈ A ->
+  i ∈ Bf x (fst (w x y)) ->
+  cc_app f x == y ->
+  cc_app (snd (trad_cc_prod A Bf w f)) (couple x i) == cc_app (snd (w x y)) i.
+intros.
+rewrite trad_cc_prod_eq,snd_def; trivial.
+rewrite cc_beta_eq, fst_def, snd_def; trivial.
+rewrite H3; reflexivity.
+do 2 red; intros.
+rewrite H5; reflexivity.
+apply couple_intro_sigma; trivial.
+do 2 red; intros.
+rewrite H5; reflexivity.
+rewrite H3; trivial.
+Qed.
 
 Lemma iso_param : forall P X A B Y f,
   ext_fun P X -> 

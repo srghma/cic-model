@@ -124,6 +124,50 @@ apply sum_ind with (3:=H); intros.
  rewrite H2; trivial.
 Qed.
 
+Lemma currify_sum A B Q :
+  (forall i, i ∈ sum A B -> Q i) <->
+  (forall x, x ∈ A -> forall i, i == inl x -> Q i) /\
+  (forall y, y ∈ B -> forall i, i == inr y -> Q i).
+split; intros.
++split; intros.
+ *apply H;rewrite H1;apply inl_typ; trivial.
+ *apply H;rewrite H1;apply inr_typ; trivial.
++destruct H.
+ apply sum_ind with (3:=H0); eauto with *.
+Qed.
+
+Lemma subset_sum A B P :
+  let P' x := exists2 x', x==x' & P x' in
+  subset (sum A B) P ==
+  sum (subset A (fun a => P' (inl a)))
+      (subset B (fun b => P' (inr b))).
+apply eq_set_ax; intros z.
+rewrite subset_ax.
+split; intros.
++destruct H as (tyz,(z',eqz,?)).
+ apply sum_ind with (3:=tyz); intros.
+ {rewrite H1; apply inl_typ.
+  apply subset_intro; trivial.
+  exists z'; trivial.
+  rewrite <- H1; trivial. }
+ {rewrite H1; apply inr_typ.
+  apply subset_intro; trivial.
+  exists z'; trivial.
+  rewrite <- H1; trivial. }
++apply sum_ind with (3:=H); intros.
+ {rewrite subset_ax in H0.
+  destruct H0 as (tyx,(x',?,(z',?,?))).
+  split; [rewrite H1;apply inl_typ;trivial|].
+  exists z'; trivial.
+  rewrite H1,<-H2; apply inl_morph; trivial. }
+ {rewrite subset_ax in H0.
+  destruct H0 as (tyx,(x',?,(z',?,?))).
+  split; [rewrite H1;apply inr_typ;trivial|].
+  exists z'; trivial.
+  rewrite H1,<-H2; apply inr_morph; trivial. }
+Qed.
+
+
   Definition sum_case f g x :=
     cond_set (fst x == zero) (f (dest_sum x)) ∪
     cond_set (fst x == succ zero) (g (dest_sum x)).

@@ -42,6 +42,13 @@ Lemma and_iff_morphisml A A' B B' :
 firstorder.
 Qed.
 
+Lemma and_forall_commut A (P Q:A->Prop):
+  (forall x, P x) /\ (forall x, Q x) <-> forall x, P x /\ Q x.
+split; intros.
++destruct H; auto.
++split; intros x; destruct (H x); trivial.
+Qed.
+
 Lemma impl_morph A A' B B' :
   (A <-> A') ->
   (A -> (B <-> B')) ->
