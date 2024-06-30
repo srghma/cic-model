@@ -1,49 +1,5 @@
 Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix ZFfixfun.
 Require Import ZFstable ZFiso ZFind_w ZFspos.
-(*
-Lemma subset_cc_prod A B P :
-  ext_fun A B ->
-  (forall x x' y, x ∈ A -> x==x' -> P x y -> P x' y) ->
-  subset (cc_prod A B) (fun f => forall x, x ∈ A -> exists2 y, cc_app f x == y & P x y) ==
-    cc_prod A (fun x => subset (B x) (P x)).
-intros Bm Pm.
-assert (B'm : ext_fun A (fun x => subset (B x) (P x))).
-{do 2 red; intros.
- apply subset_ext; intros.
-  apply subset_intro.
-   apply eq_elim with (B x'); trivial.
-   symmetry; apply Bm; trivial.  
-   apply Pm with x'; trivial.
-    rewrite <-H0; trivial.
-    symmetry; trivial.   
-  apply subset_elim1 in H1.
-   apply eq_elim with (B x); trivial.
-   apply Bm; trivial.  
-
- destruct subset_elim2 with (1:=H1) as (y,?,?).
- exists y; trivial.
- apply Pm with x; trivial. }
-apply eq_intro; intros.
-+apply subset_ax in H.
- destruct H as (tyz,(z',eqz,?)).
- rewrite cc_eta_eq with (1:=tyz).
- apply cc_prod_intro; trivial.
- do 2 red; intros; apply cc_app_morph; auto with *.
- intros.
- destruct H with (1:=H0) as (y,eqy,?).
- rewrite eqz,eqy.
- apply subset_intro; trivial.
- rewrite <-eqy,<-eqz.
- apply cc_prod_elim with (1:=tyz); trivial.
-+apply subset_intro.
- revert H; apply cc_prod_covariant; trivial.
- reflexivity.
- intros. intro; apply subset_elim1.
- intros.
- apply cc_prod_elim with (2:=H0) in H.
- apply subset_elim2 with (1:=H).
-Qed.
- *)
 
 (** Inductive families. Indexes are modelled as a constraint over an inductive
     type defined without considering the index values.
@@ -141,64 +97,130 @@ Qed.
 
 Definition dIND (p:dpositive) := dINDi p (IND_clos_ord p).
 
+Lemma dINDi_INDi p o :
+  isDPositive p ->
+  isOrd o ->
+  forall a, a ∈ Arg ->
+  dINDi p o a ⊆ INDi p o .
+intros dp oo.
+elim oo using isOrd_ind; intros.
+red; intros.
+apply TIF_elim in H3; auto.
+2:apply dp.
+destruct H3 as (y',?,?).
+rewrite (dpm_iso _ dp) in H4; auto with *.
+2:do 2 red; intros; apply TIF_morph; auto with *.
+apply subset_elim1 in H4.
+apply TI_intro with y'; trivial.
+ apply Fmono_morph; apply dp.
+revert H4; apply dp.
+apply sup_lub.
+do 2 red; intros; apply TIF_morph; auto with *.
+intros.
+apply H1; trivial.
+Qed.
+
+Lemma dINDi_inter_INDi p o :
+  isDPositive p ->
+  isOrd o ->
+  forall x a o',
+  isOrd o' ->
+  a ∈ Arg ->
+  x ∈ dINDi p o a ->
+  x ∈ INDi p o' ->             
+  x ∈ dINDi p o' a.
+intros dp oo.
+elim oo using isOrd_ind; intros.
+apply TI_elim in H5; auto.
+2:apply Fmono_morph; apply dp.
+destruct H5 as (o'',?,?).
+apply TIF_elim in H4; auto.
+2:apply dp.
+destruct H4 as (y',?,?).
+apply TIF_intro with o''; auto with *.
+rewrite (dpm_iso _ dp) in H7; trivial.
+2:do 2 red; intros; apply TIF_morph; auto with *.
+rewrite subset_ax in H7.
+destruct H7 as (?,(x',eqx,(?,?))).
+rewrite eqx in H7,H6 |- *.
+clear eqx x.
+assert (x_wf := H6).
+apply dp in x_wf.
+apply W_F_elim in x_wf.
+2:apply dp.
+assert (forall i, i ∈ w2 p (fst (wf p x')) ->
+                      cc_app (snd (wf p x')) i ∈ TIF Arg (dpos_oper p) o'' (w3 p (fst (wf p x')) i)).
+{intros.
+ apply dp in H7.
+ apply H1 with (z:=y'); trivial.
+ +apply isOrd_inv with o'; trivial.
+ +apply dp; trivial.
+  apply fst_typ_sigma in H7; trivial.
+ +apply H9; trivial.
+ +apply x_wf; trivial. }
+clear H9 H1.
+rewrite (dpm_iso _ dp); trivial.
+2:do 2 red; intros; apply TIF_morph; auto with *.
+apply subset_intro; [|split; trivial].
+assert (iso1 := w_iso _ (dpos_pos _ dp) (sup Arg (TIF Arg (dpos_oper p) o''))).
+assert (iso2 := w_iso _ (dpos_pos _ dp) (TI (pos_oper p) o'')).
+apply iso_fun_narrow with (1:=iso1)(2:=iso2); trivial.
++apply dp.
+ apply sup_lub.
+ do 2 red; intros; apply TIF_morph; auto with *.
+ intros.
+ apply dINDi_INDi; trivial.
+ apply isOrd_inv with o'; trivial.
++destruct x_wf as (?&?&?).
+ rewrite H11.
+ apply W_F_intro; auto with *.
+ apply dp.
+ do 2 red; intros; apply cc_app_morph; auto with *.
+ intros.
+ rewrite sup_ax; auto with *.
+ 2:do 2 red; intros; apply TIF_morph; auto with *.
+ exists (w3 p (fst (wf p x')) i).
+ apply dp; auto.
+ apply H10; trivial.
+Qed.
+ 
 Lemma dIND_eq : forall p a, isDPositive p -> a ∈ Arg -> dIND p a == dpos_oper p (dIND p) a.
-unfold dIND; intros.
-(*rewrite <- dINDi_succ_eq; trivial.
-2:{unfold IND_clos_ord.
-   apply W_o_o.
-   apply dpos_pos; trivial. }
-apply incl_eq.
-+apply w3m.
-auto with *.*)
-unfold dINDi.
+intros p a dp tya.
 assert (oo : isOrd (IND_clos_ord p)).
- unfold IND_clos_ord.
+{unfold IND_clos_ord.
  apply W_o_o.
- apply H.
-(**)
-rewrite TIF_eq; auto with *.
-apply eq_set_ax; intros z.
-rewrite sup_ax.
-2:{do 2 red; intros.
-   apply dpm; auto with *.
-   red; intros.
-   apply TIF_morph; trivial. }
-split; intro.
-+destruct H1.
- revert H2; apply (dpmono _ H); auto with *.
- *apply TIF_morph; reflexivity.
- *apply TIF_morph; reflexivity.
- *red; intros.
-  apply TIF_incl; auto with *.
-+rewrite (dpm_iso _ H) in H1; trivial.
- assert (H1' := subset_elim1 _ _ _ H1).
- admit.
-Admitted. (* TODO *)
+ apply dp. }
+apply incl_eq.
++unfold dIND; rewrite <- dINDi_succ_eq; trivial.
+ apply INDi_mono; auto with *.
+ red; intros; apply isOrd_trans with (IND_clos_ord p); auto.
++intros z tyz.
+ apply dINDi_inter_INDi with (osucc(IND_clos_ord p)); auto.
+ *rewrite dINDi_succ_eq; trivial. 
+ *rewrite (dpm_iso _ dp) in tyz; trivial.
+  2:do 2 red; intros; apply TIF_morph; auto with *.
+  apply subset_elim1 in tyz.
+  fold (IND p).
+  rewrite IND_eq; [|apply dp].
+  revert tyz; apply dp.
+  apply sup_lub.
+  do 2 red; intros; apply TIF_morph; auto with *.
+  intros.
+  apply dINDi_INDi; trivial.
+Qed.
 
 Lemma dINDi_dIND : forall p o,
   isDPositive p ->
   isOrd o ->
   forall a, a ∈ Arg ->
   dINDi p o a ⊆ dIND p a.
-induction 2 using isOrd_ind; intros.
-unfold dINDi.
-rewrite TIF_eq; auto with *.
-red; intros.
-rewrite sup_ax in H4.
- destruct H4.
- rewrite dIND_eq; trivial.
- revert H5; apply H; auto.
-  apply TIF_morph; reflexivity.
-
-  unfold dIND, dINDi.
-  do 2 red; intros; apply TIF_morph; auto with *.
-
-  red; intros.
-  apply H2; trivial.
-
- do 2 red; intros; apply dpm; auto with *.
- red; intros.
- apply TIF_morph; auto with *.
+intros.
+apply TIF_pre_fix; auto.
+ apply H.
+apply TIF_morph; reflexivity.
+clear a H1; red; intros.
+rewrite <- dIND_eq; trivial.
+reflexivity.
 Qed.
 
 (** Library of dependent positive operators *)
