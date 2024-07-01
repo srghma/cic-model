@@ -901,6 +901,107 @@ Qed.
 End InductiveFamily.
 
 
+(** * Universe constraints: predicativity *)
+
+Require Import ZFgrothendieck.
+
+Section InductiveUniverse.
+
+  Variable U : set.
+  Hypothesis Ugrot : grot_univ U.
+  Hypothesis Unontriv : omega ∈ U.
+
+  Let Unonmt : empty ∈ U.
+apply G_trans with omega; trivial.
+apply zero_omega.
+Qed.
+
+  Variable Arg : set.
+    (* Here the universe of Arg matters... but we should be able
+     to avoid it (same argument as non-uniform parameters *)
+  Hypothesis G_arg : Arg ∈ U.
+
+  Definition dpos_universe (p:dpositive) := pos_universe U (carrier p).
+  
+  Variable p : dpositive.
+  Hypothesis p_ok : isDPositive Arg p.
+  Hypothesis p_univ : dpos_universe p.
+
+  Variable a : set.
+  Hypothesis tya : a ∈ Arg.
+  
+  Lemma G_dIND : dIND Arg p a ∈ U.
+unfold dIND, dINDi.
+apply G_TIF; trivial; try apply p_ok.
++clear a tya; intros.
+ rewrite (dpm_iso _ _ p_ok); auto.
+ apply G_subset; trivial.
+ apply p_univ.
+ apply G_sup; auto.
+ 
++unfold IND_clos_ord.
+ apply W_o_o; apply p_ok.
+
++unfold IND_clos_ord; apply G_W_ord; trivial.
+  apply p_ok.
+  apply p_univ.
+  apply p_univ.
+Qed.
+
+  Lemma G_dINDi o : isOrd o -> dINDi Arg p o a ∈ U.
+intros.
+apply G_incl with (dIND Arg p a); trivial.
+ apply G_dIND; trivial.
+
+ apply dINDi_dIND; trivial.
+Qed.
+
+  (* In a univalent model, Arg definitely should be in U to prove [dpos_univ_inst]:
+     "indices matter" *)
+  Lemma dpos_univ_inst i : dpos_universe (dpos_inst i).
+apply pos_univ_cst; trivial.
+apply G_singl; trivial.
+Qed.
+  
+  Lemma dpos_univ_cst A : A ∈ U -> dpos_universe (dpos_cst A).
+apply pos_univ_cst; trivial.
+Qed.
+
+  Lemma dpos_univ_rec j : dpos_universe (dpos_rec j).
+apply pos_univ_rec; trivial.
+Qed.
+
+  Lemma dpos_univ_sum p1 p2 :
+    dpos_universe p1 -> dpos_universe p2 -> dpos_universe (dpos_sum p1 p2).
+apply pos_univ_sum; trivial.
+Qed.
+
+  Lemma dpos_univ_prodcart p1 p2 :
+    dpos_universe p1 -> dpos_universe p2 -> dpos_universe (dpos_consrec p1 p2).
+apply pos_univ_prodcart; trivial.
+Qed.
+
+  Lemma dpos_univ_norec A p' :
+    Proper (eq_set==>eqdpos) p' ->
+    A ∈ U -> (forall x, x ∈ A -> dpos_universe (p' x)) ->
+       dpos_universe (dpos_norec A p').
+intros; apply pos_univ_norec; trivial.
+do 2 red; intros; apply H; trivial.
+Qed.
+
+  Lemma dpos_univ_param A p' :
+    Proper (eq_set==>eqdpos) p' ->
+    A ∈ U -> (forall x, x ∈ A -> dpos_universe (p' x)) ->
+       dpos_universe (dpos_param A p').
+intros; apply pos_univ_param; trivial.
+do 2 red; intros; apply H; trivial.
+Qed.
+
+End InductiveUniverse.
+
+(******************************************************************************)
+(* Summary of what has been constructed here *)
+
 Module Wd.
 
 Section Wd.
@@ -954,3 +1055,4 @@ Qed.
 
 End Wd.
 End Wd.
+  
