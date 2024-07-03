@@ -180,9 +180,6 @@ Section InductiveFixpoint.
 
   Let Wpf := pos_oper p.
   Let Wp := W (w1 p) (w2 p).
-  Let Wff := Wf (w1 p) (w2 p).
-
-  Let Wd := Wdom (w1 p) (w2 p).
 
   Let Bm : morph1 (w2 p).
 apply p_ok.
@@ -190,13 +187,6 @@ Qed.
 (*  Let Bext : ext_fun (w1 p) (w2 p).
 apply p_ok.
 Qed.*)
-  Let Wff_mono : Proper (incl_set ==> incl_set) Wff.
-apply Wf_mono; trivial.
-Qed.
-  Let Wff_typ : forall X, X ⊆ Wd -> Wff X ⊆ Wd.
-intros.
-apply Wf_typ; trivial.
-Qed.
 
   (** The closure ordinal *)
   Definition IND_clos_ord := W_ord (w1 p) (w2 p).

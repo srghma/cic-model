@@ -4,12 +4,12 @@ Require Import ZFgrothendieck.
 Require Import ZFlist ZFfixfun.
 Require Import ZFiso.
 Require Import ZFlimit.
-Import ZFrepl.
 Existing Instance TIF_morph.
 
 (** A dependent version of ZFind_w: Arg is the type of indexes
    This should support non-uniform parameters.
  *)
+Require Import ZFwdom.
 Require ZFind_w.
 Module W0 := ZFind_w.
 
@@ -1081,32 +1081,31 @@ rewrite H1; reflexivity.
 Qed.
 Existing Instance cswm.
 
-Notation Fa := (W0.Wf (A' Arg A) (B' B)).
-Notation dom_a := (W0.Wdom (A' Arg A) (B' B)).
-Notation Fa0 := (W0.Wf (A' Arg0 A0) (B' B0)).
-Notation dom_a0 := (W0.Wdom (A' Arg0 A0) (B' B0)).
+Notation Fa := (ZFwdom.Wf (A' Arg A) (B' B)).
+Notation dom_a := (Wdom (A' Arg A) (B' B)).
+Notation Fa0 := (Wf (A' Arg0 A0) (B' B0)).
+Notation dom_a0 := (Wdom (A' Arg0 A0) (B' B0)).
 
 Let Fam : morph1 Fa.
-apply W0.Wf_morph; auto.
+apply Wf_morph; auto.
 Qed.
 Let Famono : Proper (incl_set ==> incl_set) Fa.
-apply W0.Wf_mono; auto.
+apply Wf_mono; auto.
 Qed.
 Let fadom : forall X, X ⊆ dom_a -> Fa X ⊆ dom_a.
-apply W0.Wf_typ; auto.
+apply Wf_typ; auto.
 Qed.
 Let Fam0 : morph1 Fa0.
-apply W0.Wf_morph; auto.
+apply Wf_morph; auto.
 Qed.
 Let Famono0 : Proper (incl_set ==> incl_set) Fa0.
-apply W0.Wf_mono; auto.
+apply Wf_mono; auto.
 Qed.
 Let fadom0 : forall X, X ⊆ dom_a0 -> Fa0 X ⊆ dom_a0.
-apply W0.Wf_typ; auto.
+apply Wf_typ; auto.
 Qed.
 
 Let dom_incl : typ_fun csw dom_a dom_a0.
-unfold W0.Wdom.
 red; intros.
 apply power_intro; intros.
 unfold csw in H0; rewrite replf_ax in H0; trivial.
@@ -1125,80 +1124,100 @@ do 2 red; intros.
 rewrite H0; reflexivity.
 Qed.
 
-Let csw_sup : forall w X,
+Let csw_sup w X :
+  X ⊆ dom_a ->
   w ∈ W0.W_F (A' Arg A) (B' B) X ->
-  csw (W0.Wsup (B' B) w) ==
-  W0.Wsup (B' B0) (couple (csa (fst w))
+  csw (W0.Wintro w) ==
+  W0.Wintro (couple (csa (fst w))
      (cc_lam (B' B0 (csa (fst w))) (fun i => csw (cc_app (snd w) i)))).
- intros.
- assert (fst (fst w) ∈ Arg).
-  apply fst_typ_sigma in H.
-  apply fst_typ_sigma in H; trivial.
- assert (aty : snd (fst w) ∈ A (fst (fst w))).
-  apply fst_typ_sigma in H.
-  eapply snd_typ_sigma with (2:=H); auto with *.
- apply eq_set_ax; intros z.
- unfold csw at 1.
- rewrite replf_ax; trivial.
- split; intros.
-  destruct H1.
-  rewrite W0.Wsup_def in H1|-*.
-   rewrite fst_def.
-   destruct H1; [left|right].
-    rewrite H2; rewrite H1; rewrite fst_def; rewrite snd_def; reflexivity.
-
-    destruct H1 as (i,?,(q,?,?)).
-    rewrite H4 in H2; rewrite fst_def in H2; rewrite snd_def in H2.
-    exists i.
-     unfold B'.
-     rewrite fst_def.
-     unfold csa; rewrite fst_def; rewrite snd_def.
-     rewrite <- Bsim; trivial.
-    exists (couple (fst q) (csa(snd q))).
-     rewrite snd_def.
-     rewrite cc_beta_eq; trivial.
-      unfold csw; rewrite replf_ax; auto with *.
-      exists q; auto with *.
-     unfold B'.
-     unfold csa; rewrite fst_def; rewrite snd_def.
-     rewrite <- Bsim; trivial.
-
-    rewrite fst_def; rewrite snd_def; trivial.
-
-  rewrite W0.Wsup_def in H1.
-   destruct H1.
-   rewrite fst_def in H1.
-   exists (couple Nil (fst w)).
-    rewrite W0.Wsup_def; left; reflexivity.
-
-    rewrite fst_def; rewrite snd_def; trivial.
-
-   destruct H1 as (i,?,(q,?,?)).
-    rewrite snd_def in H2.
-    unfold B' in H1; rewrite fst_def in H1.
-    rewrite cc_beta_eq in H2; auto.
-    unfold csw in H2; rewrite replf_ax in H2; trivial.
-    destruct H2.
-    exists (couple (Cons i (fst q)) (snd x)).
-     rewrite W0.Wsup_def; right.
-     exists i.
-      unfold csa in H1; rewrite fst_def in H1; rewrite snd_def in H1.
-      rewrite <- Bsim in H1; trivial.
-     exists x; trivial.
-     rewrite H4; rewrite fst_def; reflexivity.
-
-     rewrite H3; rewrite H4; do 2 rewrite fst_def; do 2 rewrite snd_def.
-     reflexivity.
+intros tyX; intros.
+unfold W0.Wintro.
+rewrite fst_def, snd_def.
+apply W0.W_F_elim in H; [|auto].
+destruct H as (ty1,(ty2,eqw)).
+assert (argty : fst (fst w) ∈ Arg).
+{apply fst_typ_sigma in ty1; trivial. }
+assert (aty : snd (fst w) ∈ A (fst (fst w))).
+{eapply snd_typ_sigma with (2:=ty1); auto with *. }
+apply eq_set_ax; intros z.
+unfold csw at 1.
+rewrite replf_ax; trivial.
+split; intros.
+*destruct H.
+ unfold W0.Wintro in H|-*; rewrite Wsup_def in H|-*.
+ destruct H; [left|right].
+  rewrite H0; rewrite H; rewrite fst_def; rewrite snd_def; reflexivity.
+ destruct H as (i&l&y&?&?).
+ rewrite H1 in H0; rewrite fst_def,snd_def in H0.
+ exists i; exists l; exists (csa y); split;[|trivial].
+ rewrite cc_lam_def;[|trivial].
+ rewrite eqw, snd_def in H.
+ rewrite cc_lam_def in H.
+ 2:{do 2 red; intros. rewrite H3; reflexivity. }
+ destruct H as (i',tyi,(y',tyy,e)).
+ apply couple_injection in e; destruct e as (e1,e2).
+ rewrite <- e1 in tyi,tyy.
+ rewrite <- e2 in tyy.
+ exists i.
+ +unfold B', csa.
+  rewrite fst_def, snd_def.
+  rewrite <- Bsim; trivial.
+ +exists (couple l (csa y));[|reflexivity].
+  unfold csw.
+  rewrite replf_ax; trivial.
+  exists (couple l y); trivial.
+  rewrite fst_def, snd_def; reflexivity.
+*rewrite Wsup_def in H.
+ destruct H.
+ {exists (couple Nil (fst w)).
+   rewrite Wsup_def; left; auto with *.
+   rewrite fst_def,snd_def; trivial. }
+ destruct H as (i&l&y&?&?).
+ rewrite cc_lam_def in H;[|trivial].
+ destruct H as (i',tyi,(y',tyy,e)).
+ apply couple_injection in e; destruct e as (e1,e2).
+ rewrite <- e2 in tyy.
+ rewrite <- e1 in tyi,tyy.
+ clear i' e1 y' e2.
+ unfold csw in tyy; rewrite replf_ax in tyy; trivial.
+ destruct tyy as (z',tyz',e).
+ apply couple_injection in e; destruct e as (e1,e2).
+ exists (couple (Cons i l) (snd z')).
+ 2:{rewrite fst_def, snd_def.
+    rewrite e2 in H0; trivial. }
+ rewrite Wsup_def; right.
+ exists i; exists l; exists (snd z');split;[|reflexivity].
+ rewrite eqw,snd_def in tyz'.
+ apply couple_in_app in tyz'.
+ apply cc_lam_def in tyz'.
+ 2:{do 2 red; intros. rewrite H2; reflexivity. }
+ destruct tyz' as (i',tyi',(y',tyy,e)).
+ apply couple_injection in e; destruct e as (e3,e4).
+ rewrite <- e4 in tyy.
+ rewrite <- e3 in tyy.
+ rewrite eqw, snd_def, cc_lam_def.
+ 2:{do 2 red; intros. rewrite H1; reflexivity. }
+ unfold B' in tyi.
+ unfold csa in tyi; rewrite fst_def,snd_def in tyi.
+ rewrite <- Bsim in tyi; auto with *.
+ exists i; [trivial|].
+ exists (couple l (snd z')); [|reflexivity].
+ apply ty2 in tyi.
+ apply tyX in tyi.
+ apply rel_is_relation in tyi.
+ rewrite (tyi _ tyy) in tyy.
+ rewrite e1; trivial.
 Qed.
 
-Let Fa_typ : forall X Y,
-  typ_fun csw X Y ->
-  typ_fun csw (Fa X) (Fa0 Y).
-red; intros.
+Let Fa_typ X Y :
+    X ⊆ dom_a ->
+    typ_fun csw X Y ->
+    typ_fun csw (Fa X) (Fa0 Y).
+intros tyX; red; intros.
 apply W0.Wf_elim in H0; auto with *.
 destruct H0 as (w,?,?).
 rewrite H1; clear x H1.
-rewrite csw_sup with (1:=H0).
+rewrite csw_sup with (2:=H0);[|assumption].
 apply W0.Wf_intro; auto.
 apply W0.W_F_elim in H0; auto.
 destruct H0 as (?,(?,_)).
@@ -1221,7 +1240,10 @@ Let dom_ti_incl : forall o, isOrd o -> typ_fun csw (TI Fa o) (TI Fa0 o).
  destruct H2.
  specialize H1 with (1:=H2).
  apply TI_intro with x0; auto with *.
- apply Fa_typ with (1:=H1); trivial.
+ apply Fa_typ with (2:=H1); trivial.
+ apply ZFw.Wi_typ; trivial.
+ apply B'_morph; trivial.
+apply isOrd_inv with y; trivial.
 Qed.
 
 Let fix_incl : typ_fun csw (Ffix Fa dom_a) (Ffix Fa0 dom_a0).
@@ -1234,8 +1256,8 @@ Qed.
 
 Lemma wsup_fsub A_ B_ (bm : morph1 B_) o w :
   isOrd o ->
-  w ∈ W0.W_F A_ B_ (TI (W0.Wf A_ B_) o) ->
-  fsub (W0.Wf A_ B_) (W0.Wdom A_ B_) (W0.Wsup B_ w) == replf (B_ (fst w)) (fun i => cc_app (snd w) i).
+  w ∈ W0.W_F A_ B_ (TI (Wf A_ B_) o) ->
+  fsub (Wf A_ B_) (Wdom A_ B_) (W0.Wintro w) == replf (B_ (fst w)) (fun i => cc_app (snd w) i).
 intros.
 assert (tyw :=H0).
 apply W0.W_F_elim in H0; trivial.
@@ -1244,46 +1266,46 @@ rewrite eq_set_ax; intros z.
 unfold fsub.
 rewrite subset_ax.
 split; intros.
- destruct H0 as (?,(z',eqz,?)).
++destruct H0 as (?,(z',eqz,?)).
  rewrite eqz in H0|-*; clear z eqz. 
  apply H1.
-  red; intros ? h.
+ {red; intros ? h.
   rewrite replf_ax in h.
   2:do 2 red; intros; apply cc_app_morph; auto with *.
   destruct h.
   rewrite H3.
   generalize (ty2 _ H2).
-  apply W0.Wi_W'; auto.
-
-  apply W0.Wf_intro; trivial.
+  rewrite <- W0.same_fix; trivial.
+  apply ZFw.Wi_W; auto. }
+ {apply W0.Wf_intro; trivial.
   apply in_reg with (1:=symmetry eqw).
   apply W0.W_F_intro; trivial.
    do 2 red; intros; apply cc_app_morph; auto with *.
   intros.
   rewrite replf_ax.
   2:do 2 red; intros; apply cc_app_morph; auto with *.
-  exists i; auto with *.
+  exists i; auto with *. }
 
- rewrite replf_ax in H0.
++rewrite replf_ax in H0.
  2:do 2 red; intros; apply cc_app_morph; auto with *.
  destruct H0 as (i,?,?).
  split.
-  rewrite H1.
+ {rewrite H1.
   generalize (ty2 _ H0).
-  apply W0.Wi_W'; trivial.
-
-  exists z;[reflexivity|].
-  intros.
-  rewrite H1.
-  apply W0.Wf_elim in H3; trivial.
-  destruct H3 as (w',?,?).
-  apply W0.Wsup_inj with (4:=tyw) (5:=H3) in H4; trivial.
+  rewrite <- W0.same_fix; trivial.
+  apply ZFw.Wi_W; auto. }
+{exists z;[reflexivity|].
+ intros.
+ rewrite H1.
+ apply W0.Wf_elim in H3; trivial.
+ destruct H3 as (w',?,?).
+ apply W0.Wintro_inj with (4:=tyw) (5:=H3) in H4; trivial.
    rewrite <- H4 in H3; apply W0.W_F_elim in H3; trivial.
    destruct H3 as (_,(?,_)); auto.
 
-   rewrite W0.Wi_W'; [apply Ffix_inA|trivial|trivial].
+   apply ZFw.Wi_typ; auto.
 
-   rewrite H2; apply Ffix_inA; trivial.
+   rewrite H2; apply Ffix_inA. }
 Qed.
 
 Let csw_fsub : forall o w,
@@ -1307,7 +1329,8 @@ rewrite replf_ax in H1.
 destruct H1 as (i,?,?).
 rewrite H3; clear x H3.
 rewrite H2.
-rewrite csw_sup with (1:=H0).
+rewrite csw_sup with (2:=H0).
+2:{apply ZFw.Wi_typ; trivial. apply B'_morph; trivial. }
 rewrite wsup_fsub with (o:=o); auto.
  rewrite replf_ax.
  2:do 2 red; intros; apply cc_app_morph; auto with *.

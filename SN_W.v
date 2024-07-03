@@ -1649,8 +1649,8 @@ Module W_Model : W_PartialModel.
   Definition w2_eq := snd_def.
   Definition discr_mt_mkw := fun x f => discr_mt_pair (singl x) (pair x f).
 
-  Definition W_F := W_F'.
-  Definition W_F_mono := W_F'_mono.
+  Definition W_F := W_Fbot.
+  Definition W_F_mono := W_Fbot_mono.
   Definition W_F_ext :=
     fun A A' B B' X X' eqA eqB eqX =>
     W_F_ext A A' B B' (cc_bot X) (cc_bot X') eqA eqB (cc_bot_morph _ _ eqX).
@@ -1679,22 +1679,18 @@ Qed.
     W_F A B X == Σ x ∈ A, Π i ∈ B x, cc_bot X.
   reflexivity.
   Qed.
-  Definition W_ord := W_ord'.
-  Definition W_fix := W_fix'.
+  Definition W_ord := Wbot_ord.
+  Definition W_fix := Wbot_fix.
 (*  Definition mt_not_in_W_F := mt_not_in_W_F'.
   Definition W_stages := W_stages'.*)
   Lemma W_ord_ord : forall A B, morph1 B ->
     isOrd (W_ord A B).
 intros A B Bm.
 unfold W_ord.
-unfold ZFind_wbot.W_ord'.
-apply Ffix_o_o.
- apply Wf_mono'; trivial.
-
- apply Wf_typ'; trivial.
+apply Wbot_o_o; trivial.
 Qed.
-  Definition G_W_ord := G_W_ord'.
-  Definition G_W_F := G_W_F'.
+  Definition G_W_ord := G_Wbot_ord.
+  Definition G_W_F := G_W_Fbot.
 
   Definition WREC := REC' (singl empty).
   Lemma WREC_morph : Proper ((eq_set==>eq_set==>eq_set)==>eq_set==>eq_set) WREC.

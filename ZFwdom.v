@@ -584,6 +584,65 @@ Qed.
 End Wdom_Universe.
 
 (*******************************************************************************************)
+(* Specific properties related to adding a bottom to the type (for strong normalization
+   proofs) *)
+
+Section SN_Auxiliary.
+
+  Lemma Wdom_cc_bot X :
+    X ⊆ Wdom -> cc_bot X ⊆ Wdom.
+red; intros.
+apply cc_bot_ax in H0; destruct H0; auto.
+rewrite H0; apply power_intro; intros.
+apply empty_ax in H1; contradiction.
+Qed.
+
+  Definition Wfbot X := Wf (cc_bot X).
+
+  Instance Wfbot_mono : Proper (incl_set ==> incl_set) Wfbot.
+do 2 red; intros.
+unfold Wfbot; apply Wf_mono; trivial.
+apply cc_bot_mono; trivial.
+Qed.
+
+  Instance Wfbot_morph : morph1 Wfbot.
+apply Fmono_morph; auto with *.
+Qed.
+
+Hint Resolve Wfbot_mono Wfbot_morph : core.
+
+Lemma Wfbot_typ : forall X,
+  X ⊆ Wdom -> Wfbot X ⊆ Wdom.
+intros.
+unfold Wfbot; apply Wf_typ; trivial.
+apply Wdom_cc_bot; trivial.
+Qed.
+Hint Resolve Wfbot_typ : core.
+
+Lemma TI_Wfbot_typ o :
+  isOrd o ->
+  TI Wfbot o ⊆ Wdom.
+induction 1 using isOrd_ind; intros.
+red; intros.
+apply TI_elim in H2; auto.
+destruct H2.
+revert H3; apply Wfbot_typ; auto.
+Qed.
+
+  Lemma mt_not_in_Wfbot o x :
+    isOrd o ->
+    x ∈ TI Wfbot o ->
+    ~ x == empty.
+red; intros.
+apply TI_elim in H0; auto with *.
+destruct H0 as (o',?,?).
+rewrite H1 in H2.
+apply mt_not_in_Wf in H2; trivial.
+Qed.
+
+End SN_Auxiliary.
+
+(*******************************************************************************************)
 (* Specific properties related to building corecusrion by
    transifinite iteration *)
 
@@ -1020,6 +1079,8 @@ Qed.
 End Corecursion_Auxiliary.
 
 End W_Domain.
+
+#[global]Hint Resolve Wfbot_mono Wfbot_morph Wfbot_typ : core.
 
 (*******************************************************************************************)
 (* Morphism properties of discharged operations *)

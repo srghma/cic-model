@@ -818,44 +818,21 @@ red in tyA; specialize tyA with (1:=is_val).
 apply in_int_not_kind in tyA.
 2:discriminate.
 assert (G_B : forall a, a ∈ int A i -> int B (V.cons a i) ∈ ZFecc.ecc (S n)).
- intros.
+{intros.
  assert (val_ok (A::e) (V.cons a i)).
   apply vcons_add_var; trivial.
  apply tyB in H0.
  apply in_int_not_kind in H0.
  2:discriminate.
- trivial.
-apply G_incl with (TI (WF' A B i) (W_ord (int A i) (fun x => int B (V.cons x i)))); trivial.
+ trivial. }
+simpl.
+simpl.
+unfold WF'.
+apply ZFind_w.G_Wi; trivial.
+ apply Bw_morph; reflexivity.
+
  apply (ZFecc.ecc_grot (S n)).
 
- apply G_TI; trivial.
-  apply (ZFecc.ecc_grot (S n)).
-
-  apply WF'_morph; auto with *.
-
-  unfold W_ord.
-  apply Ffix_o_o; auto with *.
-   apply Wf_mono.
-   apply Bw_morph; reflexivity.
-
-   red; intros.
-   revert H0; apply Wf_typ; trivial.
-   apply Bw_morph; reflexivity.
-
-  apply G_W_ord; auto.
-   apply Bw_morph; reflexivity.
-
-   apply (ZFecc.ecc_grot (S n)).
-
-   change (omega ∈ ZFecc.ecc (S n)); auto.
-   apply ZFecc.omega_in_ecc.
-   
-  intros.
-  apply G_W_F; auto.
-   apply Bw_morph; reflexivity.
-
-   apply (ZFecc.ecc_grot (S n)).
-
- apply W_post; trivial.
- apply Bw_morph; reflexivity.
+ change (omega ∈ ZFecc.ecc (S n)); auto.
+ apply ZFecc.omega_in_ecc.
 Qed.
