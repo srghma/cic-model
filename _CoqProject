@@ -119,7 +119,9 @@ ZFfunext.v
 ZFlambda.v
 ZFlist.v
 
-ZFtheory.v
+ZFwdom.v
+ZFw.v
+ZFcow.v
 ZFwpaths.v
 ZFind_basic.v
 ZFind_natbot.v
@@ -147,6 +149,7 @@ Nest.v
 NonUniform.v
 
 fotheory/FOTheory.v
+fotheory/ZFtheory.v
 fotheory/TheoryInTerm.v
 fotheory/Explicit_sub.v
 fotheory/PIntp.v
