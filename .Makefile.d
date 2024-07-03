@@ -328,12 +328,18 @@ ZFlambda.vos ZFlambda.vok ZFlambda.required_vos: ZFlambda.v Lambda.vos ZF.vos ZF
 ZFlist.vo ZFlist.glob ZFlist.v.beautified ZFlist.required_vo: ZFlist.v ZF.vo ZFpairs.vo ZFnats.vo ZFrepl.vo ZFord.vo ZFfix.vo
 ZFlist.vio: ZFlist.v ZF.vio ZFpairs.vio ZFnats.vio ZFrepl.vio ZFord.vio ZFfix.vio
 ZFlist.vos ZFlist.vok ZFlist.required_vos: ZFlist.v ZF.vos ZFpairs.vos ZFnats.vos ZFrepl.vos ZFord.vos ZFfix.vos
-ZFtheory.vo ZFtheory.glob ZFtheory.v.beautified ZFtheory.required_vo: ZFtheory.v ZFrepl.vo ZFnats.vo ZFind_basic.vo ZFcoc.vo
-ZFtheory.vio: ZFtheory.v ZFrepl.vio ZFnats.vio ZFind_basic.vio ZFcoc.vio
-ZFtheory.vos ZFtheory.vok ZFtheory.required_vos: ZFtheory.v ZFrepl.vos ZFnats.vos ZFind_basic.vos ZFcoc.vos
-ZFwpaths.vo ZFwpaths.glob ZFwpaths.v.beautified ZFwpaths.required_vo: ZFwpaths.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFcofix.vo ZFfix.vo ZFfixfun.vo
-ZFwpaths.vio: ZFwpaths.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFcofix.vio ZFfix.vio ZFfixfun.vio
-ZFwpaths.vos ZFwpaths.vok ZFwpaths.required_vos: ZFwpaths.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFcofix.vos ZFfix.vos ZFfixfun.vos
+ZFwdom.vo ZFwdom.glob ZFwdom.v.beautified ZFwdom.required_vo: ZFwdom.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFstable.vo ZFord.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo
+ZFwdom.vio: ZFwdom.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFstable.vio ZFord.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio
+ZFwdom.vos ZFwdom.vok ZFwdom.required_vos: ZFwdom.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFstable.vos ZFord.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos
+ZFw.vo ZFw.glob ZFw.v.beautified ZFw.required_vo: ZFw.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFcofix.vo ZFfix.vo ZFfixfun.vo ZFwdom.vo
+ZFw.vio: ZFw.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFcofix.vio ZFfix.vio ZFfixfun.vio ZFwdom.vio
+ZFw.vos ZFw.vok ZFw.required_vos: ZFw.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFcofix.vos ZFfix.vos ZFfixfun.vos ZFwdom.vos
+ZFcow.vo ZFcow.glob ZFcow.v.beautified ZFcow.required_vo: ZFcow.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFfix.vo ZFcofix.vo ZFfixfun.vo ZFwdom.vo
+ZFcow.vio: ZFcow.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFfix.vio ZFcofix.vio ZFfixfun.vio ZFwdom.vio
+ZFcow.vos ZFcow.vok ZFcow.required_vos: ZFcow.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFfix.vos ZFcofix.vos ZFfixfun.vos ZFwdom.vos
+ZFwpaths.vo ZFwpaths.glob ZFwpaths.v.beautified ZFwpaths.required_vo: ZFwpaths.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFcofix.vo ZFfix.vo ZFfixfun.vo ZFw.vo
+ZFwpaths.vio: ZFwpaths.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFcofix.vio ZFfix.vio ZFfixfun.vio ZFw.vio
+ZFwpaths.vos ZFwpaths.vok ZFwpaths.required_vos: ZFwpaths.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFcofix.vos ZFfix.vos ZFfixfun.vos ZFw.vos
 ZFind_basic.vo ZFind_basic.glob ZFind_basic.v.beautified ZFind_basic.required_vo: ZFind_basic.v ZF.vo ZFnats.vo
 ZFind_basic.vio: ZFind_basic.v ZF.vio ZFnats.vio
 ZFind_basic.vos ZFind_basic.vok ZFind_basic.required_vos: ZFind_basic.v ZF.vos ZFnats.vos
@@ -385,9 +391,9 @@ ZFspos_prop.vos ZFspos_prop.vok ZFspos_prop.required_vos: ZFspos_prop.v ZF.vos Z
 ZFspos.vo ZFspos.glob ZFspos.v.beautified ZFspos.required_vo: ZFspos.v ZF.vo ZFpairs.vo ZFsum.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFstable.vo ZFiso.vo ZFind_w.vo ZFgrothendieck.vo
 ZFspos.vio: ZFspos.v ZF.vio ZFpairs.vio ZFsum.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFstable.vio ZFiso.vio ZFind_w.vio ZFgrothendieck.vio
 ZFspos.vos ZFspos.vok ZFspos.required_vos: ZFspos.v ZF.vos ZFpairs.vos ZFsum.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFstable.vos ZFiso.vos ZFind_w.vos ZFgrothendieck.vos
-ZFsposd.vo ZFsposd.glob ZFsposd.v.beautified ZFsposd.required_vo: ZFsposd.v ZF.vo ZFpairs.vo ZFsum.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFfixfun.vo ZFstable.vo ZFiso.vo ZFind_w.vo ZFspos.vo ZFind_wd.vo
-ZFsposd.vio: ZFsposd.v ZF.vio ZFpairs.vio ZFsum.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFfixfun.vio ZFstable.vio ZFiso.vio ZFind_w.vio ZFspos.vio ZFind_wd.vio
-ZFsposd.vos ZFsposd.vok ZFsposd.required_vos: ZFsposd.v ZF.vos ZFpairs.vos ZFsum.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFfixfun.vos ZFstable.vos ZFiso.vos ZFind_w.vos ZFspos.vos ZFind_wd.vos
+ZFsposd.vo ZFsposd.glob ZFsposd.v.beautified ZFsposd.required_vo: ZFsposd.v ZF.vo ZFpairs.vo ZFsum.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFfixfun.vo ZFstable.vo ZFiso.vo ZFind_w.vo ZFspos.vo ZFind_wd.vo ZFgrothendieck.vo
+ZFsposd.vio: ZFsposd.v ZF.vio ZFpairs.vio ZFsum.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFfixfun.vio ZFstable.vio ZFiso.vio ZFind_w.vio ZFspos.vio ZFind_wd.vio ZFgrothendieck.vio
+ZFsposd.vos ZFsposd.vok ZFsposd.required_vos: ZFsposd.v ZF.vos ZFpairs.vos ZFsum.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFfixfun.vos ZFstable.vos ZFiso.vos ZFind_w.vos ZFspos.vos ZFind_wd.vos ZFgrothendieck.vos
 sketches/ZFsposd_example.vo sketches/ZFsposd_example.glob sketches/ZFsposd_example.v.beautified sketches/ZFsposd_example.required_vo: sketches/ZFsposd_example.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFfixfun.vo ZFstable.vo ZFiso.vo ZFind_w.vo ZFspos.vo ZFsposd.vo
 sketches/ZFsposd_example.vio: sketches/ZFsposd_example.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFfixfun.vio ZFstable.vio ZFiso.vio ZFind_w.vio ZFspos.vio ZFsposd.vio
 sketches/ZFsposd_example.vos sketches/ZFsposd_example.vok sketches/ZFsposd_example.required_vos: sketches/ZFsposd_example.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFfixfun.vos ZFstable.vos ZFiso.vos ZFind_w.vos ZFspos.vos ZFsposd.vos
@@ -406,9 +412,12 @@ NonUniform.vos NonUniform.vok NonUniform.required_vos: NonUniform.v
 fotheory/FOTheory.vo fotheory/FOTheory.glob fotheory/FOTheory.v.beautified fotheory/FOTheory.required_vo: fotheory/FOTheory.v 
 fotheory/FOTheory.vio: fotheory/FOTheory.v 
 fotheory/FOTheory.vos fotheory/FOTheory.vok fotheory/FOTheory.required_vos: fotheory/FOTheory.v 
-fotheory/TheoryInTerm.vo fotheory/TheoryInTerm.glob fotheory/TheoryInTerm.v.beautified fotheory/TheoryInTerm.required_vo: fotheory/TheoryInTerm.v ZFtheory.vo GenModel.vo ZFcoc.vo ModelZF.vo
-fotheory/TheoryInTerm.vio: fotheory/TheoryInTerm.v ZFtheory.vio GenModel.vio ZFcoc.vio ModelZF.vio
-fotheory/TheoryInTerm.vos fotheory/TheoryInTerm.vok fotheory/TheoryInTerm.required_vos: fotheory/TheoryInTerm.v ZFtheory.vos GenModel.vos ZFcoc.vos ModelZF.vos
+fotheory/ZFtheory.vo fotheory/ZFtheory.glob fotheory/ZFtheory.v.beautified fotheory/ZFtheory.required_vo: fotheory/ZFtheory.v ZFrepl.vo ZFnats.vo ZFind_basic.vo ZFcoc.vo
+fotheory/ZFtheory.vio: fotheory/ZFtheory.v ZFrepl.vio ZFnats.vio ZFind_basic.vio ZFcoc.vio
+fotheory/ZFtheory.vos fotheory/ZFtheory.vok fotheory/ZFtheory.required_vos: fotheory/ZFtheory.v ZFrepl.vos ZFnats.vos ZFind_basic.vos ZFcoc.vos
+fotheory/TheoryInTerm.vo fotheory/TheoryInTerm.glob fotheory/TheoryInTerm.v.beautified fotheory/TheoryInTerm.required_vo: fotheory/TheoryInTerm.v fotheory/ZFtheory.vo GenModel.vo ZFcoc.vo ModelZF.vo
+fotheory/TheoryInTerm.vio: fotheory/TheoryInTerm.v fotheory/ZFtheory.vio GenModel.vio ZFcoc.vio ModelZF.vio
+fotheory/TheoryInTerm.vos fotheory/TheoryInTerm.vok fotheory/TheoryInTerm.required_vos: fotheory/TheoryInTerm.v fotheory/ZFtheory.vos GenModel.vos ZFcoc.vos ModelZF.vos
 fotheory/Explicit_sub.vo fotheory/Explicit_sub.glob fotheory/Explicit_sub.v.beautified fotheory/Explicit_sub.required_vo: fotheory/Explicit_sub.v fotheory/TheoryInTerm.vo
 fotheory/Explicit_sub.vio: fotheory/Explicit_sub.v fotheory/TheoryInTerm.vio
 fotheory/Explicit_sub.vos fotheory/Explicit_sub.vok fotheory/Explicit_sub.required_vos: fotheory/Explicit_sub.v fotheory/TheoryInTerm.vos
