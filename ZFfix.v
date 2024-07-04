@@ -68,6 +68,25 @@ apply H0.
 elim TI_elim with (3:=H3); intros; auto with *.
 apply Fmono with (TI F x); auto.
 Qed.
+
+(** The existence of an ordinal for which TI becomes stationary yields
+    a least fixpoint *)
+
+Definition closure_ordinal ord :=
+  forall o, isOrd o -> TI F o ⊆ TI F ord.
+
+(* We get a fixpoint, and it's the least one by TI_pre_fix *)
+Lemma TI_closure_ordinal o :
+  isOrd o ->
+  closure_ordinal o ->
+  TI F o == F (TI F o).
+intros.
+rewrite <- TI_mono_succ; trivial.
+apply incl_eq.
++apply TI_incl; auto.
++apply H0; auto.
+Qed.
+
 (** Stability of ordinal-indexed families *)
 
 Definition stable_ord := stable_class isOrd.
@@ -168,22 +187,22 @@ Section BoundedOperator.
 Variable A : set.
 Hypothesis Ftyp : forall X, X ⊆ A -> F X ⊆ A.
 
-(** The union of all stages. We will show it is a fixpoint. *)
-
-Definition Ffix := subset A (fun a => exists2 o, isOrd o & a ∈ TI F o).
-
-Lemma Ffix_inA : Ffix ⊆ A.
-red; intros.
-apply subset_elim1 in H; trivial.
-Qed.
-
 Lemma TI_inA o : isOrd o -> TI F o ⊆ A.
 induction 1 using isOrd_ind; intros.
 rewrite TI_eq; auto.
 apply sup_lub; auto with *.
 Qed.
 
-Lemma TI_Ffix : forall o, isOrd o -> TI F o ⊆ Ffix.
+(** The union of all stages. We will show it is a fixpoint. *)
+
+Definition Fstages := subset A (fun a => exists2 o, isOrd o & a ∈ TI F o).
+
+Lemma Fstages_inA : Fstages ⊆ A.
+red; intros.
+apply subset_elim1 in H; trivial.
+Qed.
+
+Lemma TI_Fstages : forall o, isOrd o -> TI F o ⊆ Fstages.
 intros.
 red; intros.
 apply subset_intro.
@@ -192,8 +211,8 @@ apply subset_intro.
  exists o; trivial.
 Qed.
 
-Lemma Ffix_def : forall a, a ∈ Ffix <-> exists2 o, isOrd o & a ∈ TI F o.
-unfold Ffix; intros.
+Lemma Fstages_def : forall a, a ∈ Fstages <-> exists2 o, isOrd o & a ∈ TI F o.
+unfold Fstages; intros.
 rewrite subset_ax.
 split; intros.
  destruct H.
@@ -210,7 +229,29 @@ split; intros.
   exists x; trivial.
 Qed.
 
-(** Showing Ffix is a fixpoint if collection holds *)
+Lemma Fstages_clos_TI o :
+  isOrd o ->
+  closure_ordinal o ->
+  Fstages == TI F o.
+intros.
+apply incl_eq.
++red; intros.
+ apply Fstages_def in H1.  
+ destruct H1 as (o',?,?).
+ revert H2; apply H0; trivial.
++apply TI_Fstages; trivial.
+Qed.
+
+Lemma Fstages_clos_fix o :
+  isOrd o ->
+  closure_ordinal o ->
+  Fstages == F Fstages.
+intros.
+rewrite Fstages_clos_TI with (2:=H0); trivial.
+apply TI_closure_ordinal; trivial.
+Qed.
+
+(** Showing Fstages is a fixpoint if collection holds *)
 
 Section FixColl.
 
@@ -221,47 +262,27 @@ Hypothesis coll_ax :
          (exists y, R x y) -> exists2 y, y ∈ B & R x y.
 
 
-Lemma Ffix_fix_coll_stage : exists2 o, isOrd o & Ffix ⊆ TI F o.
+Lemma closure_ordinal_from_coll : exists2 o, isOrd o & closure_ordinal o.
 pose (R := fun x o => isOrd o /\ x ∈ TI F o).
-destruct coll_ax with (A:=Ffix) (R:=R) as (B,?).
+destruct coll_ax with (A:=Fstages) (R:=R) as (B,?).
  do 3 red; intros.
  unfold R; rewrite H; rewrite H0; reflexivity.
 pose (o:=osup (subset B isOrd) (fun x => x)).
 assert (oo : isOrd o).
- apply isOrd_osup.
+{apply isOrd_osup.
   do 2 red; trivial.
   intros.
   apply subset_elim2 in H0; destruct H0.
-  rewrite H0; trivial.
+  rewrite H0; trivial. }
 exists o; trivial.
-red; intros.
-destruct H with (1:=H0).
- rewrite Ffix_def in H0.
- destruct H0 as (o',?,?); exists o'; split; auto.
-
- destruct H2.
- revert H3; apply TI_mono; auto.
-apply osup_intro with (f:=fun x=>x)(x:=x).
- do 2 red; trivial.
-
+red; red; intros.
+destruct H with z as (oz,inB,(ooz,tyz)).
++rewrite Fstages_def; eauto.
++exists o0; split; trivial.
++revert tyz; apply TI_mono; auto.
+ apply osup_intro with (f:=fun x=>x)(x:=oz).
+  do 2 red; trivial.
  apply subset_intro; trivial.
-Qed.
-
-Lemma Ffix_fix_coll : Ffix == F Ffix.
-apply eq_intro; intros.
- rewrite Ffix_def in H.
- destruct H.
- apply TI_elim in H0; trivial.
- destruct H0 as (o,?,?).
- revert H1; apply Fmono.
- apply TI_Ffix.
- apply isOrd_inv with x; trivial.
-
- destruct Ffix_fix_coll_stage as (o,?,?).
- apply Fmono in H1.
- apply H1 in H.
- rewrite <- TI_mono_succ in H; trivial.
- revert H; apply TI_Ffix; auto.
 Qed.
 
 End FixColl.
@@ -284,15 +305,15 @@ Hypothesis Kord_sup : forall I f,
   (forall x, x ∈ I -> K (f x)) ->
   K (osup I f).
 
-Definition Ffix' := subset A (fun a => exists o, K o /\ a ∈ TI F o).
+Definition Fstages' := subset A (fun a => exists o, K o /\ a ∈ TI F o).
 (*
-Lemma Ffix_inA' : Ffix' ⊆ A.
+Lemma Fstages_inA' : Fstages' ⊆ A.
 red; intros.
 apply subset_elim1 in H; trivial.
 Qed.
 *)
-Lemma Ffix_def' : forall a, a ∈ Ffix' <-> exists2 o, K o & a ∈ TI F o.
-unfold Ffix'; intros.
+Lemma Fstages_def' : forall a, a ∈ Fstages' <-> exists2 o, K o & a ∈ TI F o.
+unfold Fstages'; intros.
 rewrite subset_ax.
 split; intros.
  destruct H.
@@ -304,16 +325,16 @@ split; intros.
 
  destruct H.
  split.
-  apply Ffix_inA.
-  revert a H0; apply TI_Ffix; auto.
+  apply Fstages_inA.
+  revert a H0; apply TI_Fstages; auto.
 
   exists a; auto with *.
   exists x; auto.
 Qed.
 
-Lemma Ffix_fix_coll_stage' : exists2 o, K o & Ffix' ⊆ TI F o.
+Lemma Fstages_fix_coll_stage' : exists2 o, K o & Fstages' ⊆ TI F o.
 pose (R := fun x o => K o /\ x ∈ TI F o).
-destruct coll_ax with (A:=Ffix') (R:=R) as (B,?).
+destruct coll_ax with (A:=Fstages') (R:=R) as (B,?).
  do 3 red; intros.
  unfold R; rewrite H; rewrite H0; reflexivity.
 pose (o:=osup (subset B K) (fun x => x)).
@@ -330,7 +351,7 @@ trivial.
 exists o; trivial.
 red; intros.
 destruct H with (1:=H0).
- rewrite Ffix_def in H0.
+ rewrite Fstages_def in H0.
  destruct H0 as (o',?,?); exists o'; split; auto.
 
  destruct H2.
@@ -341,21 +362,21 @@ apply osup_intro with (f:=fun x=>x)(x:=x).
  apply subset_intro; trivial.
 Qed.
 
-Lemma Ffix_fix_coll : Ffix == F Ffix.
+Lemma Fstages_fix_coll : Fstages == F Fstages.
 apply eq_intro; intros.
- rewrite Ffix_def in H.
+ rewrite Fstages_def in H.
  destruct H.
  apply TI_elim in H0; trivial.
  destruct H0 as (o,?,?).
  revert H1; apply Fmono.
- apply TI_Ffix.
+ apply TI_Fstages.
  apply isOrd_inv with x; trivial.
 
- destruct Ffix_fix_coll_stage as (o,?,?).
+ destruct Fstages_fix_coll_stage as (o,?,?).
  apply Fmono in H1.
  apply H1 in H.
  rewrite <- TI_mono_succ in H; trivial.
- revert H; apply TI_Ffix; auto.
+ revert H; apply TI_Fstages; auto.
 Qed.
 
 End FixColl.
@@ -363,7 +384,7 @@ End FixColl.
 
 (** Subterms of [a] *)
 Definition fsub a :=
-  subset Ffix (fun b => forall X, X ⊆ Ffix -> a ∈ F X -> b ∈ X).
+  subset Fstages (fun b => forall X, X ⊆ Fstages -> a ∈ F X -> b ∈ X).
 
 Instance fsub_morph : morph1 fsub.
 unfold fsub; do 2 red; intros.
@@ -385,14 +406,14 @@ apply TI_elim in H0; auto.
 destruct H0.
 exists x0; trivial.
 rewrite H2; apply H3; trivial.
-apply TI_Ffix.
+apply TI_Fstages.
 apply isOrd_inv with o; trivial.
 Qed.
 
-Lemma Ffix_fsub_inv : forall x y,
-  x ∈ Ffix ->
+Lemma Fstages_fsub_inv : forall x y,
+  x ∈ Fstages ->
   y ∈ fsub x ->
-  y ∈ Ffix.
+  y ∈ Fstages.
 intros.
 apply subset_elim1 in H0; trivial.
 Qed.
@@ -402,12 +423,12 @@ Section Iter.
 
 Variable G : (set -> set) -> set -> set.
 Hypothesis Gm : forall x x' g g',
-  x ∈ Ffix ->
+  x ∈ Fstages ->
   eq_fun (fsub x) g g' ->
   x == x' -> G g x == G g' x'.
 
 Definition G' F a :=
-  cond_set (a ∈ Ffix) (G F a).
+  cond_set (a ∈ Fstages) (G F a).
 
 Lemma G'm : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) G'.
 do 3 red; intros.
@@ -421,7 +442,7 @@ apply cond_set_morph2.
 Qed.
 
 Lemma G'ext : forall x x' g g',
-  x ∈ Ffix ->
+  x ∈ Fstages ->
   eq_fun (fsub x) g g' ->
   x == x' -> G' g x == G' g' x'.
 intros.
@@ -444,7 +465,7 @@ Lemma fsub_acc o x:
   isOrd o ->
   x ∈ TI F o ->
   Acc (fun b a => b ∈ fsub a) x.
- apply Ffix_def in H1; destruct H1 as (o',oo',tyx).
+ apply Fstages_def in H1; destruct H1 as (o',oo',tyx).
 intros oo; revert x; elim oo using isOrd_ind; intros.
 constructor; intros.
 destruct fsub_elim with (2:=H2) (3:=H3) as (z,lty,tyy0); trivial.
@@ -465,7 +486,7 @@ transitivity (G' Fix_rec a).
   apply G'm.
 
   apply G'ext; auto with *.
-  apply Ffix_def.
+  apply Fstages_def.
   exists o; trivial.  
 
   revert a H0; elim H using isOrd_ind; intros.
@@ -473,16 +494,16 @@ transitivity (G' Fix_rec a).
   destruct fsub_elim with (2:=H3) (3:=H4) as (z,ltx,tyy0); eauto.
 
  unfold G'; apply cond_set_ok.
- apply TI_Ffix in H0; trivial.  
+ apply TI_Fstages in H0; trivial.  
 Qed.
 
   Lemma Fix_rec_typ U2 a :
-    (forall x g, ext_fun (fsub x) g -> x ∈ Ffix ->
+    (forall x g, ext_fun (fsub x) g -> x ∈ Fstages ->
         (forall y, y ∈ fsub x -> g y ∈ U2) -> G g x ∈ U2) ->
-    a ∈ Ffix ->
+    a ∈ Fstages ->
     Fix_rec a ∈ U2.
 intros.
-rewrite Ffix_def in H0; destruct H0.
+rewrite Fstages_def in H0; destruct H0.
 revert a H1.
 induction H0 using isOrd_ind; intros.
 rewrite (Fr_eqn _ _) with (2:=H3); trivial. (*!*)
@@ -490,7 +511,7 @@ apply H.
  do 2 red; intros.
  apply Fix_rec_morph0; trivial.
 
- apply TI_Ffix with y; trivial.
+ apply TI_Fstages with y; trivial.
 
  intros.
  apply fsub_elim with (o:=y) in H4; trivial.
@@ -521,9 +542,9 @@ rewrite H0; reflexivity.
 Qed.
 Hint Resolve Fe1 : core.
 
-  Lemma F_a_ord : forall a, a ∈ Ffix -> isOrd (Fix_rec F_a a).
+  Lemma F_a_ord : forall a, a ∈ Fstages -> isOrd (Fix_rec F_a a).
 intros.
-rewrite Ffix_def in H; destruct H.
+rewrite Fstages_def in H; destruct H.
 revert a H0; apply isOrd_ind with (2:=H); intros.
 rewrite Fr_eqn with (o:=y); auto.
 apply isOrd_osup; trivial.
@@ -535,23 +556,23 @@ Qed.
 
 Hint Resolve F_a_ord : core.
 
-(** We need stability to prove that Ffix is a fixpoint *)
-  Hypothesis Fstab : stable_class (fun X => X ⊆ Ffix) F.
+(** We need stability to prove that Fstages is a fixpoint *)
+  Hypothesis Fstab : stable_class (fun X => X ⊆ Fstages) F.
 
   Lemma F_intro : forall w,
     isOrd w ->
     forall a, a ∈ TI F w ->
     a ∈ F (fsub a).
 intros.
-pose (F1a := subset (power Ffix) (fun X => a ∈ F X)).
-assert (fx_ok : Ffix ∈ F1a).
+pose (F1a := subset (power Fstages) (fun X => a ∈ F X)).
+assert (fx_ok : Fstages ∈ F1a).
  apply subset_intro.
   apply power_intro; trivial.
 
   apply TI_elim in H0; auto.
   destruct H0.
   revert H1; apply Fmono.
-  apply TI_Ffix; trivial.
+  apply TI_Fstages; trivial.
   apply isOrd_inv with w; trivial.
 assert (inter (replf F1a (fun X => X)) ⊆ fsub a).
  red; intros.
@@ -559,7 +580,7 @@ assert (inter (replf F1a (fun X => X)) ⊆ fsub a).
   apply inter_elim with (1:=H1).
   rewrite replf_ax.
   2:red;red;auto.
-  exists Ffix; auto with *.
+  exists Fstages; auto with *.
 
   intros.
   apply inter_elim with (1:=H1).
@@ -592,23 +613,23 @@ apply Fstab.
   apply subset_elim2 in H3; destruct H3.
   rewrite H3; trivial.
 
-  exists (F Ffix).
+  exists (F Fstages).
   rewrite replf_ax.
   2:red;red;auto.
-  exists Ffix; auto with *.
+  exists Fstages; auto with *.
   rewrite replf_ax.
   2:red;red;trivial.
-  exists Ffix; auto with *.
+  exists Fstages; auto with *.
 Qed.
 
   Lemma F_a_tot : forall a,
-   a ∈ Ffix ->
+   a ∈ Fstages ->
    a ∈ TI F (osucc (Fix_rec F_a a)).
 intros.
-rewrite Ffix_def in H; destruct H.
+rewrite Fstages_def in H; destruct H.
 revert a H0; apply isOrd_ind with (2:=H); intros.
 assert (ao : isOrd (Fix_rec F_a a)).
- apply F_a_ord; rewrite Ffix_def; exists y; trivial.
+ apply F_a_ord; rewrite Fstages_def; exists y; trivial.
 rewrite TI_mono_succ; auto.
 assert (fsub a ⊆ TI F (Fix_rec F_a a)).
  red; intros.
@@ -618,7 +639,7 @@ assert (fsub a ⊆ TI F (Fix_rec F_a a)).
  assert (z ∈ TI F (osucc (Fix_rec F_a z))).
   apply H2 with x0; trivial.
  revert H7; apply TI_mono; auto.
-  apply isOrd_succ; apply F_a_ord; rewrite Ffix_def; exists x0; trivial.
+  apply isOrd_succ; apply F_a_ord; rewrite Fstages_def; exists x0; trivial.
 
   red; intros.
   rewrite Fr_eqn with (o:=y); auto.
@@ -630,71 +651,100 @@ apply F_intro with y; trivial.
 Qed.
 
 (** The closure ordinal *)
-  Definition Ffix_ord :=
-    osup Ffix (fun a => osucc (Fix_rec F_a a)).
+  Definition clos_ord :=
+    osup Fstages (fun a => osucc (Fix_rec F_a a)).
 
-  Lemma Ffix_o_o : isOrd Ffix_ord.
+  Lemma clos_ord_o : isOrd clos_ord.
 apply isOrd_osup; auto.
 Qed.
 
-  Lemma Ffix_post : forall a,
-   a ∈ Ffix ->
-   a ∈ TI F Ffix_ord.
-assert (fx_o := Ffix_o_o).
-intros.
+  Lemma closure_ordinal_bounded : closure_ordinal clos_ord.
+assert (fx_o := clos_ord_o).
+intros o oo a tya.
+assert (a ∈ Fstages).
+{apply Fstages_def; eauto. }
 apply TI_intro with (Fix_rec F_a a); trivial.
- apply osup_intro with (x:=a); trivial.
++apply osup_intro with (x:=a); trivial.
  apply lt_osucc; auto.
-
- rewrite <- TI_mono_succ; auto.
++rewrite <- TI_mono_succ; auto.
  apply F_a_tot; trivial.
 Qed.
 
-  Lemma TI_clos_stages o : isOrd o -> TI F o ⊆ TI F Ffix_ord.
-intros.
-transitivity Ffix.
- apply TI_Ffix; trivial.
+(*
+  Lemma Fstages_closed : Fstages ⊆ TI F clos_ord.
+assert (fx_o := clos_ord_o).
+intros a tya.
+apply TI_intro with (Fix_rec F_a a); trivial.
++apply osup_intro with (x:=a); trivial.
+ apply lt_osucc; auto.
 
- red; intros; apply Ffix_post; trivial.
++rewrite <- TI_mono_succ; auto.
+ apply F_a_tot; trivial.
 Qed.
 
-  Lemma TI_clos_fix_eqn : TI F Ffix_ord == F (TI F Ffix_ord).
-assert (fx_o := Ffix_o_o).
-apply eq_set_ax; intros z.
-rewrite <- TI_mono_succ; trivial.
-split; intros.
- revert H; apply TI_incl; auto.
-
- apply TI_clos_stages in H; auto.
-Qed.
- 
-
-  Lemma Ffix_closure : Ffix == TI F Ffix_ord.
-assert (fx_o := Ffix_o_o).
+  Lemma Fstages_closure : Fstages == TI F clos_ord.
+assert (fx_o := clos_ord_o).
 apply incl_eq.
- red; intros; apply Ffix_post; trivial.
+ red; intros; apply Fstages_closed; trivial.
 
- apply TI_Ffix; trivial.
+ apply TI_Fstages; trivial.
 Qed.
 
-(** We prove Ffix is a fixpoint *)
-  Lemma Ffix_eqn : Ffix == F Ffix.
-rewrite Ffix_closure.
-apply TI_clos_fix_eqn.
+  Lemma Fstages_post : F Fstages ⊆ Fstages.
+assert (fx_o := clos_ord_o).
+transitivity (TI F (osucc clos_ord)).
++rewrite TI_mono_succ; trivial.
+ apply Fmono.
+ apply eq_incl; exact Fstages_closure.
++red; apply TI_Fstages; auto.
 Qed.
 
+  Lemma Fstages_pre : Fstages ⊆ F Fstages.
+assert (fx_o := clos_ord_o).
+transitivity (TI F clos_ord).
++apply Fstages_closed.
++transitivity (F (TI F clos_ord)).
+ *auto with *.
+  rewrite <- TI_mono_succ; trivial.
+  apply TI_incl; auto.
+ *apply Fmono; apply TI_Fstages; trivial.
+Qed.
+  
+  (** We prove Fstages is a fixpoint *)
+  Lemma Fstages_eqn : Fstages == F Fstages.
+apply incl_eq.
+apply Fstages_pre. 
+apply Fstages_post. 
+Qed.
+
+  (* Results expressed in terms of iteration... *)
+  Lemma TI_closure_ordinal : closure_ordinal clos_ord.
+red; intros.
+rewrite <- Fstages_closure.
+apply TI_Fstages; trivial.
+Qed.
+  
+
+  Lemma TI_clos_fix_eqn : TI F clos_ord == F (TI F clos_ord).
+assert (fx_o := clos_ord_o).
+rewrite <- TI_mono_succ; trivial.
+apply incl_eq.
++apply TI_incl; auto.    
++apply TI_closure_ordinal; auto.
+Qed.
+*)
 (*BEGIN alt*)
 (** Functions defined by recursion on subterms *)
 Section Iter2.
 
 Variable G : (set -> set) -> set -> set.
 Hypothesis Gm : forall x x' g g',
-  x ∈ Ffix ->
+  x ∈ Fstages ->
   eq_fun (fsub x) g g' ->
   x == x' -> G g x == G g' x'.
 
 Definition G'' F a :=
-  cond_set (a ∈ Ffix) (G F a).
+  cond_set (a ∈ Fstages) (G F a).
 
 Lemma G''m : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) G''.
 do 3 red; intros.
@@ -708,7 +758,7 @@ apply cond_set_morph2.
 Qed.
 
 Lemma G''ext : forall x x' g g',
-  (x ∈ Ffix -> eq_fun (fsub x) g g') ->
+  (x ∈ Fstages -> eq_fun (fsub x) g g') ->
   x == x' -> G'' g x == G'' g' x'.
 intros.
 apply cond_set_morph2.
@@ -719,7 +769,7 @@ apply cond_set_morph2.
 Qed.
 (*
 Lemma G''ext : forall x x' g g',
-  x ∈ Ffix ->
+  x ∈ Fstages ->
   eq_fun (fsub x) g g' ->
   x == x' -> G'' g x == G'' g' x'.
 intros.
@@ -731,7 +781,7 @@ Qed.
 *)
 
 Definition Fix_rec' :=
-  WFR (fun b a => b ∈ Ffix /\ b ∈ fsub a) G''.
+  WFR (fun b a => b ∈ Fstages /\ b ∈ fsub a) G''.
 
 Instance Fix_rec_morph0' : morph1 Fix_rec'.
 do 2 red; intros.
@@ -747,7 +797,7 @@ Lemma fsub_acc o x:
   isOrd o ->
   x ∈ TI F o ->
   Acc (fun b a => b ∈ fsub a) x.
- apply Ffix_def in H1; destruct H1 as (o',oo',tyx).
+ apply Fstages_def in H1; destruct H1 as (o',oo',tyx).
 intros oo; revert x; elim oo using isOrd_ind; intros.
 constructor; intros.
 destruct fsub_elim with (2:=H2) (3:=H3) as (z,lty,tyy0); trivial.
@@ -771,7 +821,7 @@ transitivity (G'' Fix_rec' a).
   clear H1; red; intros.
   apply H2; auto.  
   split; trivial.
-  apply Ffix_fsub_inv with x; trivial.
+  apply Fstages_fsub_inv with x; trivial.
 
   revert a H0.
   elim H using isOrd_ind; intros.  
@@ -780,16 +830,16 @@ transitivity (G'' Fix_rec' a).
   destruct fsub_elim with (2:=H3) (3:=H5) as (z,ltx,tyy0); eauto.
 
  unfold G''; apply cond_set_ok.
- apply TI_Ffix in H0; trivial.  
+ apply TI_Fstages in H0; trivial.  
 Qed.
 
   Lemma Fix_rec_typ' U2 a :
-    (forall x g, ext_fun (fsub x) g -> x ∈ Ffix ->
+    (forall x g, ext_fun (fsub x) g -> x ∈ Fstages ->
         (forall y, y ∈ fsub x -> g y ∈ U2) -> G g x ∈ U2) ->
-    a ∈ Ffix ->
+    a ∈ Fstages ->
     Fix_rec' a ∈ U2.
 intros.
-rewrite Ffix_def in H0; destruct H0.
+rewrite Fstages_def in H0; destruct H0.
 revert a H1.
 induction H0 using isOrd_ind; intros.
 rewrite (Fr_eqn' _ _) with (2:=H3); trivial. (*!*)
@@ -797,7 +847,7 @@ apply H.
  do 2 red; intros.
  apply Fix_rec_morph0'; trivial.
 
- apply TI_Ffix with y; trivial.
+ apply TI_Fstages with y; trivial.
 
  intros.
  apply fsub_elim with (o:=y) in H4; trivial.
@@ -813,9 +863,9 @@ rewrite H0; reflexivity.
 Qed.
 Hint Resolve Fe1' : core.
 
-  Lemma F_a_ord' : forall a, a ∈ Ffix -> isOrd (Fix_rec' F_a a).
+  Lemma F_a_ord' : forall a, a ∈ Fstages -> isOrd (Fix_rec' F_a a).
 intros.
-rewrite Ffix_def in H; destruct H.
+rewrite Fstages_def in H; destruct H.
 revert a H0; apply isOrd_ind with (2:=H); intros.
 rewrite Fr_eqn' with (o:=y); auto.
 apply isOrd_osup; trivial.
@@ -828,13 +878,13 @@ Qed.
 Hint Resolve F_a_ord' : core.
 
   Lemma F_a_tot' : forall a,
-   a ∈ Ffix ->
+   a ∈ Fstages ->
    a ∈ TI F (osucc (Fix_rec' F_a a)).
 intros.
-rewrite Ffix_def in H; destruct H.
+rewrite Fstages_def in H; destruct H.
 revert a H0; apply isOrd_ind with (2:=H); intros.
 assert (ao : isOrd (Fix_rec' F_a a)).
- apply F_a_ord'; rewrite Ffix_def; exists y; trivial.
+ apply F_a_ord'; rewrite Fstages_def; exists y; trivial.
 rewrite TI_mono_succ; auto.
 assert (fsub a ⊆ TI F (Fix_rec' F_a a)).
  red; intros.
@@ -844,7 +894,7 @@ assert (fsub a ⊆ TI F (Fix_rec' F_a a)).
  assert (z ∈ TI F (osucc (Fix_rec' F_a z))).
   apply H2 with x0; trivial.
  revert H7; apply TI_mono; auto.
-  apply isOrd_succ; apply F_a_ord'; rewrite Ffix_def; exists x0; trivial.
+  apply isOrd_succ; apply F_a_ord'; rewrite Fstages_def; exists x0; trivial.
 
   red; intros.
   rewrite Fr_eqn' with (o:=y); auto.
@@ -855,17 +905,17 @@ apply H4.
 apply F_intro with y; trivial.
 Qed.
 (** The closure ordinal *)
-  Definition Ffix_ord' :=
-    osup Ffix (fun a => osucc (Fix_rec' F_a a)).
+  Definition Fstages_ord' :=
+    osup Fstages (fun a => osucc (Fix_rec' F_a a)).
 
-  Lemma Ffix_o_o' : isOrd Ffix_ord'.
+  Lemma Fstages_o_o' : isOrd Fstages_ord'.
 apply isOrd_osup; auto.
 Qed.
-Hint Resolve Ffix_o_o' : core.
+Hint Resolve Fstages_o_o' : core.
 
-  Lemma Ffix_post' : forall a,
-   a ∈ Ffix ->
-   a ∈ TI F Ffix_ord'.
+  Lemma Fstages_post' : forall a,
+   a ∈ Fstages ->
+   a ∈ TI F Fstages_ord'.
 intros.
 apply TI_intro with (Fix_rec' F_a a); auto.
  apply osup_intro with (x:=a); trivial.
@@ -875,15 +925,15 @@ apply TI_intro with (Fix_rec' F_a a); auto.
  apply F_a_tot'; trivial.
 Qed.
 
-  Lemma TI_clos_stages' o : isOrd o -> TI F o ⊆ TI F Ffix_ord'.
+  Lemma TI_clos_stages' o : isOrd o -> TI F o ⊆ TI F Fstages_ord'.
 intros.
-transitivity Ffix.
- apply TI_Ffix; trivial.
+transitivity Fstages.
+ apply TI_Fstages; trivial.
 
- red; intros; apply Ffix_post'; trivial.
+ red; intros; apply Fstages_post'; trivial.
 Qed.
 
-  Lemma TI_clos_fix_eqn' : TI F Ffix_ord' == F (TI F Ffix_ord').
+  Lemma TI_clos_fix_eqn' : TI F Fstages_ord' == F (TI F Fstages_ord').
 apply eq_set_ax; intros z.
 rewrite <- TI_mono_succ; trivial.
 split; intros.
@@ -893,16 +943,16 @@ split; intros.
 Qed.
  
 
-  Lemma Ffix_closure' : Ffix == TI F Ffix_ord'.
+  Lemma Fstages_closure' : Fstages == TI F Fstages_ord'.
 apply incl_eq.
- red; intros; apply Ffix_post'; trivial.
+ red; intros; apply Fstages_post'; trivial.
 
- apply TI_Ffix; trivial.
+ apply TI_Fstages; trivial.
 Qed.
 
-(** We prove Ffix is a fixpoint *)
-  Lemma Ffix_eqn' : Ffix == F Ffix.
-rewrite Ffix_closure'.
+(** We prove Fstages is a fixpoint *)
+  Lemma Fstages_eqn' : Fstages == F Fstages.
+rewrite Fstages_closure'.
 apply TI_clos_fix_eqn'.
 Qed.
 
@@ -934,9 +984,9 @@ apply TI_intro with y'; auto.
  apply isOrd_inv with y; trivial.
 Qed.
 
-Instance Ffix_morph : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) Ffix. 
+Instance Fstages_morph : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) Fstages. 
 do 3 red; intros.
-unfold Ffix.
+unfold Fstages.
 apply subset_morph; trivial.
 red; intros.
 apply ex2_morph'; intros.
@@ -952,13 +1002,13 @@ Instance fsub_morph_gen :
 do 4 red; intros.
 unfold fsub.
 apply subset_morph.
- apply Ffix_morph; trivial.
+ apply Fstages_morph; trivial.
  red; intros.
  apply fa_morph; intros X.
  apply impl_morph.
   apply incl_set_morph.
   reflexivity.
-  apply Ffix_morph; trivial.
+  apply Fstages_morph; trivial.
 
   intros.
   rewrite (H _ _ (reflexivity X)), H1.  
@@ -978,7 +1028,7 @@ apply WFR_morph; trivial.
  do 2 red; intros.
  apply cond_set_morph.
   apply in_set_morph; trivial.
-  apply Ffix_morph; trivial.
+  apply Fstages_morph; trivial.
 
   apply H1; trivial.
 Qed.
@@ -994,11 +1044,11 @@ apply osucc_morph.
 apply H1; trivial.
 Qed.
   
-Instance Ffix_ord_morph : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) Ffix_ord. 
+Instance clos_ord_morph : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) clos_ord. 
 do 3 red; intros.
-unfold Ffix_ord.
+unfold clos_ord.
 apply osup_morph.
- apply Ffix_morph; trivial.
+ apply Fstages_morph; trivial.
 
  red; intros.
  apply osucc_morph.
@@ -1036,28 +1086,28 @@ Hypothesis Ftyp : forall X, X ⊆ A -> F X ⊆ A.
 Variable A' : set.
 Hypothesis Ftyp' : forall X, X ⊆ A' -> F X ⊆ A'.
 
-Lemma Ffix_indep : Ffix F A == Ffix F A'.
+Lemma Fstages_indep : Fstages F A == Fstages F A'.
 apply eq_intro; intros.
- rewrite Ffix_def in H|-*; trivial.
- rewrite Ffix_def in H|-*; trivial.
+ rewrite Fstages_def in H|-*; trivial.
+ rewrite Fstages_def in H|-*; trivial.
 Qed.
 
 Lemma fsub_indep x :
   fsub F A x == fsub F A' x.
 apply subset_morph.
- apply Ffix_indep.
+ apply Fstages_indep.
 
  red; intros.
  apply fa_morph; intros X.
  apply impl_morph; auto with *.
- rewrite Ffix_indep; reflexivity.
+ rewrite Fstages_indep; reflexivity.
 Qed.
 
-Lemma Ffix_ord_indep :
-  Ffix_ord F A == Ffix_ord F A'.
-unfold Ffix_ord.
+Lemma clos_ord_indep :
+  clos_ord F A == clos_ord F A'.
+unfold clos_ord.
 apply osup_morph.
- apply Ffix_indep.
+ apply Fstages_indep.
 
  red; intros.
  apply osucc_morph.
@@ -1071,7 +1121,7 @@ apply osup_morph.
   unfold F_a.
   apply cond_set_morph.
    apply in_set_morph; trivial.
-   apply Ffix_indep.
+   apply Fstages_indep.
 
    apply osup_morph.
     rewrite H2; apply fsub_indep.
@@ -1083,7 +1133,7 @@ Qed.
 End BoundIndep.
 
 (** * Construction of the fixpoint "from above" *)
-
+(*
 Section KnasterTarski.
 
 Variable A : set.
@@ -1217,3 +1267,4 @@ Qed.
 
 End KnasterTarski.
 
+*)

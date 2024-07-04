@@ -1246,9 +1246,9 @@ Let dom_ti_incl : forall o, isOrd o -> typ_fun csw (TI Fa o) (TI Fa0 o).
 apply isOrd_inv with y; trivial.
 Qed.
 
-Let fix_incl : typ_fun csw (Ffix Fa dom_a) (Ffix Fa0 dom_a0).
+Let fix_incl : typ_fun csw (Fstages Fa dom_a) (Fstages Fa0 dom_a0).
  red; intros.
- rewrite Ffix_def in H|-*; auto.
+ rewrite Fstages_def in H|-*; auto.
  destruct H.
  exists x0; [exact H|].
  apply dom_ti_incl; auto.
@@ -1275,8 +1275,7 @@ split; intros.
   destruct h.
   rewrite H3.
   generalize (ty2 _ H2).
-  rewrite <- W0.same_fix; trivial.
-  apply ZFw.Wi_W; auto. }
+  apply TI_Fstages; auto with *. }
  {apply W0.Wf_intro; trivial.
   apply in_reg with (1:=symmetry eqw).
   apply W0.W_F_intro; trivial.
@@ -1292,8 +1291,7 @@ split; intros.
  split.
  {rewrite H1.
   generalize (ty2 _ H0).
-  rewrite <- W0.same_fix; trivial.
-  apply ZFw.Wi_W; auto. }
+  apply TI_Fstages; auto. }
 {exists z;[reflexivity|].
  intros.
  rewrite H1.
@@ -1305,9 +1303,10 @@ split; intros.
 
    apply ZFw.Wi_typ; auto.
 
-   rewrite H2; apply Ffix_inA. }
+   rewrite H2; apply Fstages_inA. }
 Qed.
 
+Existing Instance fsub_morph.
 Let csw_fsub : forall o w,
   isOrd o ->
   w ∈ Fa (TI Fa o) ->
@@ -1321,7 +1320,6 @@ assert (ty1 : fst (fst w') ∈ Arg).
 assert (ty2 : snd (fst w') ∈ A (fst (fst w'))).
  apply fst_typ_sigma in H0.
  eapply snd_typ_sigma with (2:=H0); auto with *.
-Existing Instance fsub_morph.
 rewrite H2 in H1.
 rewrite wsup_fsub with (3:=H0) in H1; auto.
 rewrite replf_ax in H1.
@@ -1356,37 +1354,37 @@ rewrite wsup_fsub with (o:=o); auto.
 Qed.
 
 Let Fra_ord : forall x,
-  x ∈ Ffix Fa dom_a ->
+  x ∈ Fstages Fa dom_a ->
   isOrd (Fix_rec Fa dom_a (F_a Fa dom_a) x).
 apply F_a_ord; auto with *.
 Qed.
 
 Let Fra0_ord : forall x,
-  x ∈ Ffix Fa dom_a ->
+  x ∈ Fstages Fa dom_a ->
   isOrd (Fix_rec Fa0 dom_a0 (F_a Fa0 dom_a0) (csw x)).
 intros.
 apply F_a_ord; auto.
 Qed.
 
 Let F_a_ext : forall (x x' : set) (g g' : set -> set),
- x ∈ Ffix Fa dom_a ->
+ x ∈ Fstages Fa dom_a ->
  eq_fun (fsub Fa dom_a x) g g' ->
  x == x' -> F_a Fa dom_a g x == F_a Fa dom_a g' x'.
 intros; apply F_a_morph; trivial.
 Qed.
 Let F_a0_ext : forall (x x' : set) (g g' : set -> set),
- x ∈ Ffix Fa0 dom_a0 ->
+ x ∈ Fstages Fa0 dom_a0 ->
  eq_fun (fsub Fa0 dom_a0 x) g g' ->
  x == x' -> F_a Fa0 dom_a0 g x == F_a Fa0 dom_a0 g' x'.
 intros; apply F_a_morph; trivial.
 Qed.
 
 Lemma Faord : forall x,
-  x ∈ Ffix Fa dom_a ->
+  x ∈ Fstages Fa dom_a ->
   Fix_rec Fa dom_a (F_a Fa dom_a) x ⊆
   Fix_rec Fa0 dom_a0 (F_a Fa0 dom_a0) (csw x).
 intros.
-rewrite Ffix_def in H; auto.
+rewrite Fstages_def in H; auto.
 destruct H.
 revert x H0; elim H using isOrd_ind; intros.
 rewrite Fr_eqn with (o:=y); auto.
@@ -1419,7 +1417,7 @@ apply osup_intro with (x:=csw x1).
   unfold fsub in H4; apply subset_elim2 in H4.
   destruct H4 as (x',?,?).
   rewrite H4; apply H5; trivial.
-  apply TI_Ffix; auto.
+  apply TI_Fstages; auto.
   apply isOrd_inv with y; trivial.
 Qed.
 
@@ -1429,7 +1427,7 @@ Lemma smaller_parameter :
   W_ord Arg A B ⊆ W_ord Arg0 A0 B0.
 unfold W_ord.
 unfold W0.W_ord.
-unfold Ffix_ord.
+unfold clos_ord.
 apply osup_lub.
  apply ZFfix.Fe1.
  apply isOrd_osup.

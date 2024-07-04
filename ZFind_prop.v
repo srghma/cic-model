@@ -1,4 +1,4 @@
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
+Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFtarski ZFstable.
 Require Import ZFgrothendieck ZFcoc.
 Require Import ZFlist.
 Require Import ZFfunext ZFfixrec.
@@ -88,20 +88,18 @@ transitivity (W_F (singl empty)).
  apply W_F_bound.
 Qed.
 
-  Definition W := FIX (singl empty) W_F.
+Definition W := FIX incl_set inter (singl prf_trm) props W_F.
 
   Lemma W_typ : W ∈ props.
 apply power_intro.
 change (W ⊆ singl prf_trm).
-apply lfp_typ.
+apply lfp_typ; auto with *.
 apply W_F_typ.
 Qed.
 
   Lemma W_eqn : W == W_F W.
-symmetry; apply FIX_eqn.
- apply W_F_mono.
-
- apply W_F_typ.
+symmetry; apply FIX_eqn; auto with *.
+apply W_F_typ.
 Qed.
 
   Definition Wi := TI W_F.
@@ -114,9 +112,8 @@ Qed.
 
   Lemma Wi_W o : isOrd o -> Wi o ⊆ W.
 intros.
-apply TI_FIX; trivial.
- apply W_F_mono.
- apply W_F_typ.
+apply TI_pre_fix; auto with *.
+apply eq_incl; symmetry; apply W_eqn.
 Qed.
 
   Lemma W_case (P:set->Prop) :
@@ -127,33 +124,26 @@ Qed.
     forall a, a ∈ W -> P a.
 intros.
 cut (a ∈ subset W P).
- intros.
+{intros.
  rewrite subset_ax in H2; destruct H2 as (_,(a',?,?)).
- rewrite H2; trivial.
-revert a H1.
-apply lower_bound.
-unfold M'.
-apply subset_intro.
- apply power_intro; intros.
- apply subset_elim1 in H1.
- apply power_elim with (2:=H1).
- apply W_typ.
-
- do 2 red; intros.
+ rewrite H2; trivial. }
+revert a H1; change (W ⊆ (subset W P)).
+apply FIX_ind; auto with *.
++apply W_F_typ.
++red; intros.
  apply subset_intro.
-  rewrite W_eqn.
-  revert H1; apply W_F_mono.
-  red; intros.
-  apply subset_elim1 in H1; trivial.
-
-  apply W_F_elim in H1.
-  destruct H1 as (w,?,(?,?)).
-  rewrite H3; apply H0 with w; trivial.
+ {rewrite W_eqn; revert H3; apply W_F_mono.
+  rewrite H2; red; intros.
+  apply subset_elim1 in H3; trivial. }
+ {apply W_F_elim in H3.
+  destruct H3 as (w,?,(?,?)).
+  rewrite H5; apply H0 with w; trivial.
   apply cc_arr_intro; intros.
    do 2 red; intros; apply cc_app_morph; auto with *.
 
-   specialize H2 with (1:=H4).
-   apply subset_elim1 in H2; trivial.
+   specialize H4 with (1:=H6).
+   apply H2 in H4.
+   apply subset_elim1 in H4; trivial. }
 Qed.
 
   Lemma Wi_case o (P:set->Prop) :
@@ -206,32 +196,28 @@ Qed.
     forall a, a ∈ W -> P a.
 intros.
 cut (a ∈ subset W P).
- intros.
+{intros.
  apply subset_elim2 in H2.
  destruct H2 as (a',eqa,?).
- rewrite eqa; trivial.
-revert a H1; apply lower_bound.
-unfold M'.
-apply subset_intro.
- apply power_intro; intros.
- apply subset_elim1 in H1.
- apply power_elim with (1:=W_typ); trivial.
-
- do 2 red; intros.
+ rewrite eqa; trivial. }
+revert a H1; change (W ⊆ (subset W P)).
+apply FIX_ind; auto with *.
++apply W_F_typ.
++red; intros.
  apply subset_intro.
-  rewrite W_eqn.
-  revert H1; apply W_F_mono.
-  red; intros.
-  apply subset_elim1 in H1; trivial.
-
-  apply H0 with (subset W P); trivial.
-   red; intros.
-   apply subset_elim1 in H2; trivial.
-
-   intros.
-   apply subset_elim2 in H2.
-   destruct H2 as (a',eqa,?).
+ {rewrite W_eqn; revert H3; apply W_F_mono.
+  rewrite H2; red; intros.
+  apply subset_elim1 in H3; trivial. }
+ {apply W_F_elim in H3.
+  destruct H3 as (w,?,(?,?)).
+  rewrite H5; apply H0 with X; trivial.
+  *intros.
+   apply H2 in H6.
+   apply subset_elim2 in H6.
+   destruct H6 as (a',eqa,?).
    rewrite eqa; trivial.
+  *apply W_F_intro; trivial.
+   do 2 red; intros; apply cc_app_morph; auto with *. }
 Qed.
 
 Section WindColl.
@@ -242,32 +228,6 @@ Hypothesis coll_ax :
   exists B, forall x, x ∈ A ->
          (exists y, R x y) -> exists2 y, y ∈ B & R x y.
 
-  Lemma same_fix :
-    W == Ffix W_F (singl zero).
-assert (Ffix W_F (singl zero) == W_F (Ffix W_F (singl zero))).
- apply Ffix_fix_coll; trivial.
-  apply W_F_mono.
-
-  apply W_F_typ.
-apply incl_eq.
- apply lower_bound.
- apply subset_intro.
-  apply power_intro; intros.
-  apply Ffix_inA in H0; trivial.
-
-  red; intros.
-  rewrite <- H; reflexivity.
-
- red; intros.
- rewrite Ffix_def in H0.
- 2:apply W_F_mono.
- 2:apply W_F_typ.
- destruct H0.
- revert H1; apply TI_FIX; trivial.
- apply W_F_mono.
- apply W_F_typ.
-Qed.
-
   Lemma W_ind_coll (P:set->Prop) :
     Proper (eq_set ==> iff) P ->
     (forall o, isOrd o ->
@@ -275,9 +235,15 @@ Qed.
      (forall a, a ∈ Wi (osucc o) -> P a)) ->
     forall a, a ∈ W -> P a.
 intros.
-rewrite same_fix in H1.
-destruct Ffix_fix_coll_stage with (1:=W_F_mono) (2:=W_F_typ); trivial.
-apply H3 in H1.
+destruct closure_ordinal_from_coll with (1:=W_F_mono) (2:=W_F_typ); trivial.
+assert (W ⊆ Wi x).
+{apply FIX_ind; auto with *.
+ +apply W_F_typ.
+ +intros.
+  transitivity (W_F (Wi x)).
+  *apply W_F_mono; trivial.
+  *unfold Wi; rewrite <- TI_mono_succ; auto with *. }
+apply H4 in H1.
 apply Wi_ind with (o:=x); trivial.
 intros.
 apply H0 with (o:=o'); trivial.

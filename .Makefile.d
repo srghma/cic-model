@@ -295,9 +295,9 @@ ZFcofix.vos ZFcofix.vok ZFcofix.required_vos: ZFcofix.v ZF.vos ZFrelations.vos Z
 ZFcont.vo ZFcont.glob ZFcont.v.beautified ZFcont.required_vo: ZFcont.v lib/basic.vo ZF.vo ZFpairs.vo ZFsum.vo ZFfix.vo ZFnats.vo ZFord.vo ZFstable.vo ZFrank.vo ZFrelations.vo
 ZFcont.vio: ZFcont.v lib/basic.vio ZF.vio ZFpairs.vio ZFsum.vio ZFfix.vio ZFnats.vio ZFord.vio ZFstable.vio ZFrank.vio ZFrelations.vio
 ZFcont.vos ZFcont.vok ZFcont.required_vos: ZFcont.v lib/basic.vos ZF.vos ZFpairs.vos ZFsum.vos ZFfix.vos ZFnats.vos ZFord.vos ZFstable.vos ZFrank.vos ZFrelations.vos
-ZFtarski.vo ZFtarski.glob ZFtarski.v.beautified ZFtarski.required_vo: ZFtarski.v ZF.vo
-ZFtarski.vio: ZFtarski.v ZF.vio
-ZFtarski.vos ZFtarski.vok ZFtarski.required_vos: ZFtarski.v ZF.vos
+ZFtarski.vo ZFtarski.glob ZFtarski.v.beautified ZFtarski.required_vo: ZFtarski.v ZF.vo ZFgrothendieck.vo ZFord.vo
+ZFtarski.vio: ZFtarski.v ZF.vio ZFgrothendieck.vio ZFord.vio
+ZFtarski.vos ZFtarski.vok ZFtarski.required_vos: ZFtarski.v ZF.vos ZFgrothendieck.vos ZFord.vos
 ZFstable.vo ZFstable.glob ZFstable.v.beautified ZFstable.required_vo: ZFstable.v ZF.vo
 ZFstable.vio: ZFstable.v ZF.vio
 ZFstable.vos ZFstable.vok ZFstable.required_vos: ZFstable.v ZF.vos
@@ -331,15 +331,12 @@ ZFlist.vos ZFlist.vok ZFlist.required_vos: ZFlist.v ZF.vos ZFpairs.vos ZFnats.vo
 ZFwdom.vo ZFwdom.glob ZFwdom.v.beautified ZFwdom.required_vo: ZFwdom.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFstable.vo ZFord.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo
 ZFwdom.vio: ZFwdom.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFstable.vio ZFord.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio
 ZFwdom.vos ZFwdom.vok ZFwdom.required_vos: ZFwdom.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFstable.vos ZFord.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos
-ZFw.vo ZFw.glob ZFw.v.beautified ZFw.required_vo: ZFw.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFcofix.vo ZFfix.vo ZFfixfun.vo ZFwdom.vo
-ZFw.vio: ZFw.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFcofix.vio ZFfix.vio ZFfixfun.vio ZFwdom.vio
-ZFw.vos ZFw.vok ZFw.required_vos: ZFw.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFcofix.vos ZFfix.vos ZFfixfun.vos ZFwdom.vos
+ZFw.vo ZFw.glob ZFw.v.beautified ZFw.required_vo: ZFw.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFcoc.vo ZFord.vo ZFcofix.vo ZFfix.vo ZFfixfun.vo ZFwdom.vo
+ZFw.vio: ZFw.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFcoc.vio ZFord.vio ZFcofix.vio ZFfix.vio ZFfixfun.vio ZFwdom.vio
+ZFw.vos ZFw.vok ZFw.required_vos: ZFw.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFcoc.vos ZFord.vos ZFcofix.vos ZFfix.vos ZFfixfun.vos ZFwdom.vos
 ZFcow.vo ZFcow.glob ZFcow.v.beautified ZFcow.required_vo: ZFcow.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFfix.vo ZFcofix.vo ZFfixfun.vo ZFwdom.vo
 ZFcow.vio: ZFcow.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFfix.vio ZFcofix.vio ZFfixfun.vio ZFwdom.vio
 ZFcow.vos ZFcow.vok ZFcow.required_vos: ZFcow.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFfix.vos ZFcofix.vos ZFfixfun.vos ZFwdom.vos
-ZFwpaths.vo ZFwpaths.glob ZFwpaths.v.beautified ZFwpaths.required_vo: ZFwpaths.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFcofix.vo ZFfix.vo ZFfixfun.vo ZFw.vo
-ZFwpaths.vio: ZFwpaths.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFcofix.vio ZFfix.vio ZFfixfun.vio ZFw.vio
-ZFwpaths.vos ZFwpaths.vok ZFwpaths.required_vos: ZFwpaths.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFcofix.vos ZFfix.vos ZFfixfun.vos ZFw.vos
 ZFind_basic.vo ZFind_basic.glob ZFind_basic.v.beautified ZFind_basic.required_vo: ZFind_basic.v ZF.vo ZFnats.vo
 ZFind_basic.vio: ZFind_basic.v ZF.vio ZFnats.vio
 ZFind_basic.vos ZFind_basic.vok ZFind_basic.required_vos: ZFind_basic.v ZF.vos ZFnats.vos
@@ -352,9 +349,9 @@ ZFind_nat.vos ZFind_nat.vok ZFind_nat.required_vos: ZFind_nat.v ZF.vos ZFsum.vos
 sketches/ZFind_nat_example.vo sketches/ZFind_nat_example.glob sketches/ZFind_nat_example.v.beautified sketches/ZFind_nat_example.required_vo: sketches/ZFind_nat_example.v ZF.vo ZFsum.vo ZFcoc.vo ZFfix.vo ZFnats.vo ZFord.vo ZFind_basic.vo ZFind_nat.vo
 sketches/ZFind_nat_example.vio: sketches/ZFind_nat_example.v ZF.vio ZFsum.vio ZFcoc.vio ZFfix.vio ZFnats.vio ZFord.vio ZFind_basic.vio ZFind_nat.vio
 sketches/ZFind_nat_example.vos sketches/ZFind_nat_example.vok sketches/ZFind_nat_example.required_vos: sketches/ZFind_nat_example.v ZF.vos ZFsum.vos ZFcoc.vos ZFfix.vos ZFnats.vos ZFord.vos ZFind_basic.vos ZFind_nat.vos
-ZFind_prop.vo ZFind_prop.glob ZFind_prop.v.beautified ZFind_prop.required_vo: ZFind_prop.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFstable.vo ZFgrothendieck.vo ZFcoc.vo ZFlist.vo ZFfunext.vo ZFfixrec.vo
-ZFind_prop.vio: ZFind_prop.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFstable.vio ZFgrothendieck.vio ZFcoc.vio ZFlist.vio ZFfunext.vio ZFfixrec.vio
-ZFind_prop.vos ZFind_prop.vok ZFind_prop.required_vos: ZFind_prop.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFstable.vos ZFgrothendieck.vos ZFcoc.vos ZFlist.vos ZFfunext.vos ZFfixrec.vos
+ZFind_prop.vo ZFind_prop.glob ZFind_prop.v.beautified ZFind_prop.required_vo: ZFind_prop.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFcoc.vo ZFlist.vo ZFfunext.vo ZFfixrec.vo
+ZFind_prop.vio: ZFind_prop.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFcoc.vio ZFlist.vio ZFfunext.vio ZFfixrec.vio
+ZFind_prop.vos ZFind_prop.vok ZFind_prop.required_vos: ZFind_prop.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFcoc.vos ZFlist.vos ZFfunext.vos ZFfixrec.vos
 ZFind.vo ZFind.glob ZFind.v.beautified ZFind.required_vo: ZFind.v ZF.vo ZFpairs.vo ZFrelations.vo ZFord.vo ZFstable.vo ZFfixfun.vo ZFfixrec.vo ZFgrothendieck.vo ZFind_wnup.vo
 ZFind.vio: ZFind.v ZF.vio ZFpairs.vio ZFrelations.vio ZFord.vio ZFstable.vio ZFfixfun.vio ZFfixrec.vio ZFgrothendieck.vio ZFind_wnup.vio
 ZFind.vos ZFind.vok ZFind.required_vos: ZFind.v ZF.vos ZFpairs.vos ZFrelations.vos ZFord.vos ZFstable.vos ZFfixfun.vos ZFfixrec.vos ZFgrothendieck.vos ZFind_wnup.vos
@@ -367,9 +364,6 @@ ZFind_wd.vos ZFind_wd.vok ZFind_wd.required_vos: ZFind_wd.v ZF.vos ZFpairs.vos Z
 ZFind_wnup.vo ZFind_wnup.glob ZFind_wnup.v.beautified ZFind_wnup.required_vo: ZFind_wnup.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFfixfun.vo ZFiso.vo ZFlimit.vo ZFwdom.vo ZFind_w.vo
 ZFind_wnup.vio: ZFind_wnup.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFfixfun.vio ZFiso.vio ZFlimit.vio ZFwdom.vio ZFind_w.vio
 ZFind_wnup.vos ZFind_wnup.vok ZFind_wnup.required_vos: ZFind_wnup.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFfixfun.vos ZFiso.vos ZFlimit.vos ZFwdom.vos ZFind_w.vos
-ZFind_wpaths.vo ZFind_wpaths.glob ZFind_wpaths.v.beautified ZFind_wpaths.required_vo: ZFind_wpaths.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFfix.vo ZFstable.vo ZFgrothendieck.vo ZFtarski.vo ZFcofix.vo ZFfixfun.vo
-ZFind_wpaths.vio: ZFind_wpaths.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFfix.vio ZFstable.vio ZFgrothendieck.vio ZFtarski.vio ZFcofix.vio ZFfixfun.vio
-ZFind_wpaths.vos ZFind_wpaths.vok ZFind_wpaths.required_vos: ZFind_wpaths.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFfix.vos ZFstable.vos ZFgrothendieck.vos ZFtarski.vos ZFcofix.vos ZFfixfun.vos
 ZFind_w.vo ZFind_w.glob ZFind_w.v.beautified ZFind_w.required_vo: ZFind_w.v ZF.vo ZFpairs.vo ZFrelations.vo ZFord.vo ZFstable.vo ZFgrothendieck.vo ZFfunext.vo ZFfix.vo ZFfixrec.vo ZFwdom.vo ZFw.vo ZFiso.vo
 ZFind_w.vio: ZFind_w.v ZF.vio ZFpairs.vio ZFrelations.vio ZFord.vio ZFstable.vio ZFgrothendieck.vio ZFfunext.vio ZFfix.vio ZFfixrec.vio ZFwdom.vio ZFw.vio ZFiso.vio
 ZFind_w.vos ZFind_w.vok ZFind_w.required_vos: ZFind_w.v ZF.vos ZFpairs.vos ZFrelations.vos ZFord.vos ZFstable.vos ZFgrothendieck.vos ZFfunext.vos ZFfix.vos ZFfixrec.vos ZFwdom.vos ZFw.vos ZFiso.vos

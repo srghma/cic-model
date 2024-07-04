@@ -318,37 +318,33 @@ Qed.
 
   Notation W' := (ZFw.W A B).
 
-  Import ZFtarski.
-Let stbl : stable_class (fun X : set => X ⊆ Ffix (Wf A B) (Wdom A B)) (Wf A B).
+Let stbl : stable_class (fun X : set => X ⊆ Fstages (Wf A B) (Wdom A B)) (Wf A B).
  apply Wf_stable0; trivial.
  intros.
  rewrite H.
- apply Ffix_inA.
+ apply Fstages_inA.
 Qed.
 
-  Lemma same_fix : W' == Ffix (Wf A B) (Wdom A B).
-apply incl_eq.
-+destruct W_lfp with (A:=A)(B:=B); trivial.
- apply H0.
- rewrite <- Ffix_eqn; auto with *.
-+rewrite Ffix_closure; auto with *.
- apply Wi_W; auto.
- apply Ffix_o_o; auto.
-Qed.
-  
-  Definition W_ord := Ffix_ord (Wf A B) (Wdom A B).
+  Definition W_ord := clos_ord (Wf A B) (Wdom A B).
 
   Lemma W_o_o : isOrd W_ord.
-apply Ffix_o_o; auto.
+apply clos_ord_o; auto.
 Qed.
 Hint Resolve W_o_o : core.
 
-  Lemma W'_post a :
-   a ∈ W' ->
-   a ∈ TI (Wf A B) W_ord.
-rewrite same_fix.
-apply Ffix_post; eauto.
-(*apply Wf_stable.*)
+Import ZFtarski.
+
+  Lemma W_o_clos : closure_ordinal (Wf A B) W_ord.
+apply closure_ordinal_bounded; auto.
+Qed.
+  
+  Lemma W'_post : W' ⊆ TI (Wf A B) W_ord.
+apply FIX_ind; auto with *.
+intros.
+transitivity (TI (Wf A B) (osucc W_ord)).
++rewrite TI_mono_succ; auto.
+ apply Wf_mono; trivial.
++apply W_o_clos; auto.
 Qed.
 
   Lemma W'_clos : W' == Wi A B W_ord.
@@ -356,10 +352,6 @@ apply incl_eq.
  red; intros; apply W'_post; trivial.
 
  apply Wi_W; trivial.
-Qed.
-
-  Lemma W'_eqn : W' == Wf A B W'.
-apply W_eqn; trivial.
 Qed.
  
 (** * The fixpoint of the W_type operator *)
@@ -421,7 +413,7 @@ cut (Wi A B W_ord == Wf A B (Wi A B W_ord)).
  apply <- TI_iso_fixpoint; auto with *.
   apply W_F_Wf_iso'; trivial.
 rewrite <- W'_clos.
-apply W'_eqn.
+apply ZFw.W_eqn; trivial.
 Qed.
 
   Lemma W_post : forall o, isOrd o -> TI W_F o ⊆ W.
@@ -865,7 +857,7 @@ apply G_cc_prod; auto.
 Qed.
   Lemma G_W_ord : W_ord ∈ U.
 unfold W_ord.
-apply G_Ffix_ord; auto.
+apply G_clos_ord; auto.
 apply G_Wdom; trivial.
 Qed.
 
@@ -916,7 +908,7 @@ Qed.
 Lemma W_ord_morph_gen : Proper (eq_set==>(eq_set==>eq_set)==>eq_set) W_ord.
 do 3 red; intros.
 unfold W_ord.  
-apply Ffix_ord_morph.
+apply clos_ord_morph.
  red; intros.
  apply Wf_morph_gen; trivial.
 

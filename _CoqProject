@@ -122,7 +122,6 @@ ZFlist.v
 ZFwdom.v
 ZFw.v
 ZFcow.v
-ZFwpaths.v
 ZFind_basic.v
 ZFind_natbot.v
 ZFind_nat.v
@@ -132,7 +131,6 @@ ZFind.v
 ZFind_wbot.v
 ZFind_wd.v
 ZFind_wnup.v
-ZFind_wpaths.v
 ZFind_w.v
 ZFpos_nest.v
 ZFnest.v

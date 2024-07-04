@@ -361,9 +361,9 @@ rewrite osup2_def; trivial.
     eauto using G_trans.
 Qed.
 
-  Lemma G_Ffix F A : A ∈ U -> Ffix F A ∈ U.
+  Lemma G_Fstages F A : A ∈ U -> Fstages F A ∈ U.
 intros.
-unfold Ffix.
+unfold Fstages.
 apply G_subset; trivial.
 Qed.
 
@@ -483,14 +483,14 @@ apply osup_univ; trivial; intros.
  apply G_N.
 Qed.
 
-  Lemma G_Ffix_ord F A :
+  Lemma G_clos_ord F A :
     Proper (incl_set ==> incl_set) F ->
     (forall X, X ⊆ A -> F X ⊆ A) ->
     A ∈ U ->
-    Ffix_ord F A ∈ U.
+    clos_ord F A ∈ U.
 intros.
 assert (Fm := Fmono_morph _ H).
-unfold Ffix_ord.
+unfold clos_ord.
 apply G_osup; intros; trivial.
  do 2 red; intros; apply osucc_morph.
  apply Fix_rec_morph; auto with *.
@@ -500,7 +500,7 @@ apply G_osup; intros; trivial.
  apply isOrd_succ.
  apply F_a_ord; auto.
 
- apply G_Ffix; trivial.
+ apply G_Fstages; trivial.
 
  unfold osucc; apply G_subset; trivial; apply G_power; trivial.
  apply subset_elim1 with (P:=isOrd).
@@ -521,7 +521,7 @@ apply G_osup; intros; trivial.
 
     unfold fsub.
     apply G_subset; trivial.
-    apply G_Ffix; trivial.
+    apply G_Fstages; trivial.
 
     intros.
     unfold osucc.

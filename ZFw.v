@@ -1,13 +1,10 @@
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFtarski ZFstable.
 Require Import ZFgrothendieck.
-Require Import ZFlist.
 Require Import ZFcoc.
 Require Import ZFord ZFcofix.
 Require Import ZFfix.
 Require Import ZFfixfun.
 Require ZFwdom.
-
-Import ZFrepl.
 
 #[global]Hint Resolve ZFwdom.Wf_mono : core.
 #[global]Hint Resolve ZFwdom.Wf_typ : core.
@@ -89,57 +86,6 @@ apply H0; trivial.
  apply cc_prod_elim with (2:=H4) in tyf.
  apply subset_elim2 in tyf; destruct tyf as (y,?,?).
  rewrite H5; trivial.
-(*clear a H1. (* proof using FIX_ind *)
-apply FIX_ind; auto with *.
-fold W; intros.
-red; intros.
-apply subset_intro.
- rewrite W_eqn.
- revert H3; apply Wf_mono; trivial.
-
- apply Wf_mono in H2.
- apply H2 in H3.
- apply Wf_elim in H3; destruct H3 as (x,?,(y,?,?)).
- rewrite H5; apply H0; trivial.
- revert H4; apply cc_prod_covariant; auto with *.
- intros.
- intros z'; apply subset_elim1.
- intros.
- apply cc_prod_elim with (2:=H6) in H4.
- apply subset_elim2 in H4; destruct H4 as (y',?,?).
- rewrite H4; trivial.
-*)
-(*apply lower_bound; auto with *.
-unfold M'.
-assert (inclDom : subset W P ⊆ Wdom).
- red; intros.
- apply W_typ.
- apply subset_elim1 in H1; trivial.
-apply subset_intro.
- apply subset_intro; trivial.
- apply power_intro; trivial.
-red.
-red; intros.
-apply Wf_elim in H1.
-destruct H1 as (x,tyx,(f,tyf,eqz)).
-rewrite eqz.
-apply subset_intro.
- rewrite W_eqn.
- apply Wf_intro; trivial.
- revert tyf; apply cc_prod_covariant; auto with *.
- red; intros.
- apply subset_elim1 in H2; trivial.
-
- apply H0; trivial.
-  revert tyf; apply cc_prod_covariant; auto with *.
-  red; intros.
-  apply subset_elim1 in H2; trivial.
-
-  intros.
-  specialize cc_prod_elim with (1:=tyf) (2:=H1); intros tyfi.
-  apply subset_elim2 in tyfi; destruct tyfi as (w',tyw',?).
-  rewrite tyw'; trivial.
- *)
 Qed.
 
 Lemma Wfst_typ w :
@@ -1526,9 +1472,8 @@ Qed.
 Instance W_morph : Proper (E==>(E==>E)==>E) W.
 do 3 red; intros.
 unfold W.
- unfold FIX.
+unfold FIX.
 apply inter_morph.
-unfold M'.
 apply subset_morph.
  apply subset_morph.
   apply power_morph.
