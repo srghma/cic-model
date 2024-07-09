@@ -78,13 +78,16 @@ Definition closure_ordinal ord :=
 (* We get a fixpoint, and it's the least one by TI_pre_fix *)
 Lemma TI_closure_ordinal o :
   isOrd o ->
-  closure_ordinal o ->
-  TI F o == F (TI F o).
+  (closure_ordinal o <-> TI F o == F (TI F o)).
 intros.
-rewrite <- TI_mono_succ; trivial.
-apply incl_eq.
-+apply TI_incl; auto.
-+apply H0; auto.
+split.
+*rewrite <- TI_mono_succ; trivial.
+ intros; apply incl_eq.
+ +apply TI_incl; auto.
+ +apply H0; auto.
+*red; intros.
+ apply TI_pre_fix; auto with *.
+ rewrite <- H0; reflexivity.
 Qed.
 
 (** Stability of ordinal-indexed families *)
@@ -670,70 +673,7 @@ apply TI_intro with (Fix_rec F_a a); trivial.
  apply F_a_tot; trivial.
 Qed.
 
-(*
-  Lemma Fstages_closed : Fstages ⊆ TI F clos_ord.
-assert (fx_o := clos_ord_o).
-intros a tya.
-apply TI_intro with (Fix_rec F_a a); trivial.
-+apply osup_intro with (x:=a); trivial.
- apply lt_osucc; auto.
-
-+rewrite <- TI_mono_succ; auto.
- apply F_a_tot; trivial.
-Qed.
-
-  Lemma Fstages_closure : Fstages == TI F clos_ord.
-assert (fx_o := clos_ord_o).
-apply incl_eq.
- red; intros; apply Fstages_closed; trivial.
-
- apply TI_Fstages; trivial.
-Qed.
-
-  Lemma Fstages_post : F Fstages ⊆ Fstages.
-assert (fx_o := clos_ord_o).
-transitivity (TI F (osucc clos_ord)).
-+rewrite TI_mono_succ; trivial.
- apply Fmono.
- apply eq_incl; exact Fstages_closure.
-+red; apply TI_Fstages; auto.
-Qed.
-
-  Lemma Fstages_pre : Fstages ⊆ F Fstages.
-assert (fx_o := clos_ord_o).
-transitivity (TI F clos_ord).
-+apply Fstages_closed.
-+transitivity (F (TI F clos_ord)).
- *auto with *.
-  rewrite <- TI_mono_succ; trivial.
-  apply TI_incl; auto.
- *apply Fmono; apply TI_Fstages; trivial.
-Qed.
-  
-  (** We prove Fstages is a fixpoint *)
-  Lemma Fstages_eqn : Fstages == F Fstages.
-apply incl_eq.
-apply Fstages_pre. 
-apply Fstages_post. 
-Qed.
-
-  (* Results expressed in terms of iteration... *)
-  Lemma TI_closure_ordinal : closure_ordinal clos_ord.
-red; intros.
-rewrite <- Fstages_closure.
-apply TI_Fstages; trivial.
-Qed.
-  
-
-  Lemma TI_clos_fix_eqn : TI F clos_ord == F (TI F clos_ord).
-assert (fx_o := clos_ord_o).
-rewrite <- TI_mono_succ; trivial.
-apply incl_eq.
-+apply TI_incl; auto.    
-+apply TI_closure_ordinal; auto.
-Qed.
-*)
-(*BEGIN alt*)
+  (*BEGIN alt*)
 (** Functions defined by recursion on subterms *)
 Section Iter2.
 

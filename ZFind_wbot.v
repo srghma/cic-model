@@ -1,7 +1,6 @@
 Require Import ZF ZFpairs ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFcoc.
-Require Import ZFwdom.
 Require Export ZFind_w.
 
 (** In this file we develop an alternative model of W-types where all stages are non-empty
@@ -15,9 +14,8 @@ Variable A : set.
 Variable B : set -> set.
 Hypothesis Bm : morph1 B.
 
-(*Local Notation WF := (W_F A B).*)
-Local Notation Wd := (Wdom A B).
-Local Notation Wfb := (Wfbot A B).
+Local Notation Wd := (ZFwdom.Wdom A B).
+Local Notation Wfb := (ZFwdom.Wfbot A B).
 
 Hint Resolve Wintro_ext : core.
   
@@ -59,18 +57,8 @@ Lemma Wintro_inj_bot : forall X Y x x',
   Wintro x == Wintro x' -> x == x'.
 intros X Y x x' tyf tyf' H H0 H1.
 apply Wintro_inj with (4:=H) (5:=H0) (6:=H1); trivial.
- apply Wdom_cc_bot; trivial.
- apply Wdom_cc_bot; trivial.
-Qed.
-
-
-Lemma Wintro_typ_gen_bot : forall X x,
-  X ⊆ Wd ->
-  x ∈ W_Fbot X ->
-  Wintro x ∈ Wd.
-intros.
-apply Wf_intro in H0;[|trivial].
-revert H0; apply Wfbot_typ; trivial.
+ apply ZFwdom.Wdom_cc_bot; trivial.
+ apply ZFwdom.Wdom_cc_bot; trivial.
 Qed.
 
 Lemma W_F_Wf_iso_bot X :
@@ -97,10 +85,10 @@ apply iso_fun_trans with (W_Fbot (TI Wfb o)).
  apply WFmap_iso; trivial.
  apply iso_cc_bot; trivial.
   intro h; apply mt_not_in_W_Fbot in h; auto with *.
-  intro h; apply mt_not_in_Wfbot in h; auto with *.
+  intro h; apply ZFwdom.mt_not_in_Wfbot in h; auto with *.
 
  apply W_F_Wf_iso_bot.
- apply TI_Wfbot_typ; trivial.
+ apply ZFwdom.TI_Wfbot_typ; trivial.
 Qed.
 
 Lemma wisobot_ext : forall X f f',
@@ -146,7 +134,7 @@ Qed.
 
   Lemma Wbot_fix : Wbot == W_Fbot Wbot.
 unfold Wbot, Wibot.
-rewrite TI_iso_fixpoint with (2:=Wfbot_mono A _ Bm) (g:=fun f => wiso B (fbot f)); auto with *.
+rewrite TI_iso_fixpoint with (2:=ZFwdom.Wfbot_mono A _ Bm) (g:=fun f => wiso B (fbot f)); auto with *.
  apply TI_closure_ordinal; auto.
   apply ZFw.Wbot_ord_clos; trivial.
  
@@ -190,7 +178,7 @@ Qed.
 
   Lemma G_Wbot_ord : Wbot_ord ∈ U.
 apply G_clos_ord; auto.
-apply G_Wdom; trivial.
+apply ZFwdom.G_Wdom; trivial.
 Qed.
 
   Lemma G_Wbot : Wbot ∈ U.

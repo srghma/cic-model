@@ -1551,6 +1551,16 @@ apply incl_set_morph; auto with *.
 apply ZFwdom.Wf_morph_gen; auto with *.
 Qed.
 
+Lemma W_ord_morph : Proper (E==>(E==>E)==>E) W_ord.
+do 3 red; intros.
+unfold W_ord.  
+apply clos_ord_morph.
+ red; intros.
+ apply ZFwdom.Wf_morph_gen; trivial.
+
+ apply ZFwdom.Wdom_morph; trivial.
+Qed.
+
 Instance WREC_morph_gen :
   Proper (E==>(E==>E)==>(E==>E)==>(E==>E==>E==>E)==>E==>E) WREC.
 do 6 red; intros.

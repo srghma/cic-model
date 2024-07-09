@@ -1,7 +1,7 @@
 Require Import ZF ZFpairs ZFrelations ZFord ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFfunext ZFfix ZFfixrec.
-Require Import ZFwdom ZFw.
+Require Import ZFw.
 Require Import ZFiso.
 
 (** In this file we develop the theory of W-types:
@@ -101,7 +101,7 @@ rewrite cc_beta_eq in eqr; trivial.
 rewrite <- H2; trivial; rewrite <- H5; trivial.
 Qed.
 
-
+  (** Applying [f] to the recursive subterms of [x] *)
   Definition WFmap f x :=
     couple (fst x) (λ i ∈ B (fst x), f (cc_app (snd x) i)).
 
@@ -193,7 +193,8 @@ apply H; auto.
 rewrite H4; reflexivity.
 Qed.
 
-
+(** If [f] is as iso between [X] and [Y},
+    then [WFmap f] is an iso between [W_F X] and [W_F Y] *)
 Lemma WFmap_iso X Y f :
   iso_fun X Y f ->
   iso_fun (W_F X) (W_F Y) (WFmap f).
@@ -230,8 +231,10 @@ constructor; intros.
    apply iso_inv_typ with (1:=isof); trivial.
 Qed.
 
-(** * Encoding W-types as sets of path in a tree *)
+(** The iso between [W_F X] and [Wf X]. *)
 
+Section WfIso. Import ZFwdom.
+  
 Definition Wintro x := Wsup (fst x) (snd x).
 Instance Wintro_morph : morph1 Wintro.
 do 2 red; intros.
@@ -252,7 +255,7 @@ apply W_F_elim in H.
 destruct H as (tyx,(tyy,eqx)).
 apply snd_morph in eqx.
 rewrite snd_def in eqx.
-apply ZFwdom.Wf_intro; trivial.
+apply Wf_intro; trivial.
 rewrite eqx.
 apply cc_prod_intro; auto.
 do 2 red; intros; apply cc_app_morph; auto with *.
@@ -263,7 +266,7 @@ Lemma Wf_elim a X :
   exists2 x, x ∈ W_F X &
   a == Wintro x.
 intros.
-apply ZFwdom.Wf_elim in H;[|trivial].
+apply Wf_elim in H;[|trivial].
 destruct H as (x,tyx,(f,tyf,eqa)).
 exists (couple x f).
 +rewrite cc_eta_eq with (1:=tyf).
@@ -273,7 +276,7 @@ exists (couple x f).
 +unfold Wintro; rewrite fst_def, snd_def; trivial.
 Qed.
 
-Hint Resolve Wf_mono Wf_morph : core.
+(*Hint Resolve Wf_mono Wf_morph : core.*)
 
 Lemma Wintro_inj X X' x x' :
   X ⊆ Wdom A B ->
@@ -314,64 +317,15 @@ split; intros.
  destruct Wf_elim with (1:=H0); eauto with *.
 Qed.
 
- (** The closure ordinal of Wf (and W_F) *)
-(*
-  Notation W' := (ZFw.W A B).
-
-Let stbl : stable_class (fun X : set => X ⊆ Fstages (Wf A B) (Wdom A B)) (Wf A B).
- apply Wf_stable_gen; trivial.
- intros.
- rewrite H.
- apply Fstages_inA.
-Qed.
-
-  Definition W_ord := clos_ord (Wf A B) (Wdom A B).
-
-  Lemma W_o_o : isOrd W_ord.
-apply clos_ord_o; auto.
-Qed.
-Hint Resolve W_o_o : core.
-
-Import ZFtarski.
-
-  Lemma W_o_clos : closure_ordinal (Wf A B) W_ord.
-apply closure_ordinal_bounded; auto.
-Qed.
-  
-  Lemma W'_post : W' ⊆ TI (Wf A B) W_ord.
-apply FIX_ind; auto with *.
-intros.
-transitivity (TI (Wf A B) (osucc W_ord)).
-+rewrite TI_mono_succ; auto.
- apply Wf_mono; trivial.
-+apply W_o_clos; auto.
-Qed.
-
-  Lemma W'_clos : W' == Wi A B W_ord.
-apply incl_eq.
- red; intros; apply W'_post; trivial.
-
- apply Wi_W; trivial.
-Qed.
- *)
-(** * The fixpoint of the W_type operator *)
-
-(** We get W the fixpoint of W_F by isomorphism *)
-
-  Definition W_ord := ZFw.W_ord A B.
-  Definition W := TI W_F W_ord.
-
-  Lemma W_ord_o : isOrd W_ord.
-apply ZFw.W_ord_o; trivial.
-Qed.
-Hint Resolve W_ord_o : core.
-  
+End WfIso.
+ 
+(** The iso between [W_F X] and [Wf Y], given an iso [f] between [X] and [Y]. *)
 Definition wiso f := comp_iso (WFmap f) Wintro.
 
-Lemma W_F_Wf_iso' o f :
+Lemma W_F_Wf_mapiso o f :
   isOrd o ->
   iso_fun (TI W_F o) (Wi A B o) f ->
-  iso_fun (W_F (TI W_F o)) (Wf A B (Wi A B o)) (wiso f).
+  iso_fun (W_F (TI W_F o)) (ZFwdom.Wf A B (Wi A B o)) (wiso f).
 intros.
 apply iso_fun_trans with (W_F (Wi A B o)).
  apply WFmap_iso; trivial.
@@ -406,18 +360,31 @@ apply WFmap_ext.
 Qed.
 Hint Resolve wiso_ext : core.
 
+(** The iso between [TI W_F o] and [TI Wf o]. *)
 Lemma TI_W_F_Wf_iso o :
   isOrd o ->
   iso_fun (TI W_F o) (Wi A B o) (TI_iso W_F wiso o).
 intros.
 apply TI_iso_fun; intros; auto with *.
-apply W_F_Wf_iso'; trivial.
+apply W_F_Wf_mapiso; trivial.
 Qed.
 
+(** * The fixpoint of the W_type operator *)
+
+(** We get W the fixpoint of W_F by isomorphism *)
+
+  Definition W_ord := ZFw.W_ord A B.
+  Definition W := TI W_F W_ord.
+
+  Lemma W_ord_o : isOrd W_ord.
+apply ZFw.W_ord_o; trivial.
+Qed.
+Hint Resolve W_ord_o : core.
+
   Lemma W_eqn : W == W_F W.
-cut (Wi A B W_ord == Wf A B (Wi A B W_ord)).
- apply <- TI_iso_fixpoint; auto with *.
- apply W_F_Wf_iso'; trivial.
+unfold W.
+apply TI_iso_fixpoint with (5:=W_F_Wf_mapiso); auto with *.
+unfold W_ord. fold (Wi A B).
 rewrite <- ZFw.W_clos; trivial.
 apply ZFw.W_eqn; trivial.
 Qed.
@@ -864,7 +831,7 @@ Qed.
   Lemma G_W_ord : W_ord ∈ U.
 unfold W_ord.
 apply G_clos_ord; auto.
-apply G_Wdom; trivial.
+apply ZFwdom.G_Wdom; trivial.
 Qed.
 
   Lemma G_W : W ∈ U.
@@ -890,7 +857,7 @@ End W_theory.
 
 #[global]Hint Resolve W_ord_o : core.
 
-(* More on W_F: *)
+(* Discharged morphism results *)
 
 Instance W_F_morph_gen :
   Proper (eq_set==>(eq_set==>eq_set)==>eq_set==>eq_set) W_F.
@@ -913,14 +880,8 @@ apply cc_prod_ext; auto with *.
 red; auto.
 Qed.
 
-Lemma W_ord_morph_gen : Proper (eq_set==>(eq_set==>eq_set)==>eq_set) W_ord.
-do 3 red; intros.
-unfold W_ord.  
-apply clos_ord_morph.
- red; intros.
- apply Wf_morph_gen; trivial.
-
- apply Wdom_morph; trivial.
+Lemma W_ord_morph : Proper (eq_set==>(eq_set==>eq_set)==>eq_set) W_ord.
+apply ZFw.W_ord_morph.
 Qed.
 
 Lemma WREC_morph_gen : Proper ((eq_set==>eq_set==>eq_set)==>eq_set==>eq_set) WREC.

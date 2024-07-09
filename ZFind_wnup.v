@@ -9,7 +9,7 @@ Existing Instance TIF_morph.
 (** A dependent version of ZFind_w: Arg is the type of indexes
    This should support non-uniform parameters.
  *)
-Require Import ZFwdom.
+(*Require Import ZFwdom.*)
 Require ZFind_w.
 Module W0 := ZFind_w.
 
@@ -914,7 +914,7 @@ Qed.
   Lemma W_ord_morph_all : Proper (E==>(E==>E)==>(E==>E==>E)==>E) W_ord.
 do 4 red; intros.
 unfold W_ord.
-apply W0.W_ord_morph_gen.
+apply W0.W_ord_morph.
  apply A'_morph_gen; trivial.
 
  red; intros.
@@ -1082,27 +1082,27 @@ Qed.
 Existing Instance cswm.
 
 Notation Fa := (ZFwdom.Wf (A' Arg A) (B' B)).
-Notation dom_a := (Wdom (A' Arg A) (B' B)).
-Notation Fa0 := (Wf (A' Arg0 A0) (B' B0)).
-Notation dom_a0 := (Wdom (A' Arg0 A0) (B' B0)).
+Notation dom_a := (ZFwdom.Wdom (A' Arg A) (B' B)).
+Notation Fa0 := (ZFwdom.Wf (A' Arg0 A0) (B' B0)).
+Notation dom_a0 := (ZFwdom.Wdom (A' Arg0 A0) (B' B0)).
 
 Let Fam : morph1 Fa.
-apply Wf_morph; auto.
+apply ZFwdom.Wf_morph; auto.
 Qed.
 Let Famono : Proper (incl_set ==> incl_set) Fa.
-apply Wf_mono; auto.
+apply ZFwdom.Wf_mono; auto.
 Qed.
 Let fadom : forall X, X ⊆ dom_a -> Fa X ⊆ dom_a.
-apply Wf_typ; auto.
+apply ZFwdom.Wf_typ; auto.
 Qed.
 Let Fam0 : morph1 Fa0.
-apply Wf_morph; auto.
+apply ZFwdom.Wf_morph; auto.
 Qed.
 Let Famono0 : Proper (incl_set ==> incl_set) Fa0.
-apply Wf_mono; auto.
+apply ZFwdom.Wf_mono; auto.
 Qed.
 Let fadom0 : forall X, X ⊆ dom_a0 -> Fa0 X ⊆ dom_a0.
-apply Wf_typ; auto.
+apply ZFwdom.Wf_typ; auto.
 Qed.
 
 Let dom_incl : typ_fun csw dom_a dom_a0.
@@ -1144,7 +1144,7 @@ unfold csw at 1.
 rewrite replf_ax; trivial.
 split; intros.
 *destruct H.
- unfold W0.Wintro in H|-*; rewrite Wsup_def in H|-*.
+ unfold W0.Wintro in H|-*; rewrite ZFwdom.Wsup_def in H|-*.
  destruct H; [left|right].
   rewrite H0; rewrite H; rewrite fst_def; rewrite snd_def; reflexivity.
  destruct H as (i&l&y&?&?).
@@ -1167,10 +1167,10 @@ split; intros.
   rewrite replf_ax; trivial.
   exists (couple l y); trivial.
   rewrite fst_def, snd_def; reflexivity.
-*rewrite Wsup_def in H.
+*rewrite ZFwdom.Wsup_def in H.
  destruct H.
  {exists (couple Nil (fst w)).
-   rewrite Wsup_def; left; auto with *.
+   rewrite ZFwdom.Wsup_def; left; auto with *.
    rewrite fst_def,snd_def; trivial. }
  destruct H as (i&l&y&?&?).
  rewrite cc_lam_def in H;[|trivial].
@@ -1185,7 +1185,7 @@ split; intros.
  exists (couple (Cons i l) (snd z')).
  2:{rewrite fst_def, snd_def.
     rewrite e2 in H0; trivial. }
- rewrite Wsup_def; right.
+ rewrite ZFwdom.Wsup_def; right.
  exists i; exists l; exists (snd z');split;[|reflexivity].
  rewrite eqw,snd_def in tyz'.
  apply couple_in_app in tyz'.
@@ -1256,8 +1256,8 @@ Qed.
 
 Lemma wsup_fsub A_ B_ (bm : morph1 B_) o w :
   isOrd o ->
-  w ∈ W0.W_F A_ B_ (TI (Wf A_ B_) o) ->
-  fsub (Wf A_ B_) (Wdom A_ B_) (W0.Wintro w) == replf (B_ (fst w)) (fun i => cc_app (snd w) i).
+  w ∈ W0.W_F A_ B_ (TI (ZFwdom.Wf A_ B_) o) ->
+  fsub (ZFwdom.Wf A_ B_) (ZFwdom.Wdom A_ B_) (W0.Wintro w) == replf (B_ (fst w)) (fun i => cc_app (snd w) i).
 intros.
 assert (tyw :=H0).
 apply W0.W_F_elim in H0; trivial.

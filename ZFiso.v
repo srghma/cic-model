@@ -846,7 +846,6 @@ apply couple_intro_sigma; auto with *.
   rewrite H3; reflexivity.
 
  apply couple_intro_sigma; auto with *.
-
  apply eq_elim with (2:=H2).
  apply eC; auto.
   rewrite fst_def; reflexivity.
@@ -2038,7 +2037,7 @@ Qed.
     isOrd o ->
     eq_fun (TI F o) f f' ->
     eq_fun (F (TI F o)) (g f) (g f').
-  Hypothesis isog' : forall o f, isOrd o ->
+  Hypothesis isog : forall o f, isOrd o ->
     iso_fun (TI F o) (TI G o) f -> iso_fun (F (TI F o)) (G (TI G o)) (g f).
 
   Let Fm := Fmono_morph _ Fmono.
@@ -2048,6 +2047,59 @@ do 2 red; intros.
 apply gm; trivial.
 apply cc_app_morph; auto with *.
 Qed.
+
+
+Section IsoFamilyCorollary.
+  (** If we have a family of isomorphism, then the least fixpoints of F and G
+      are isomorphic, and they have the same closure ordinal  *)
+  Variable isof : set -> set -> set.
+  Hypothesis isof_iso : forall o, isOrd o -> iso_fun (TI F o) (TI G o) (isof o).
+  Hypothesis isof_def : forall o x, isOrd o -> x ∈ TI F o -> isof o x == g (isof o) x.
+  
+  Lemma TI_same_fixpoint_by_iso o :
+    isOrd o ->
+    (TI F o == F (TI F o) <-> TI G o == G (TI G o)).
+intros oord.
+assert (iso1 := isof_iso oord).
+assert (iso2 := isog oord iso1).
+assert (same_iso : eq_fun (TI F o) (isof o) (g (isof o))).
+{red; intros.
+ transitivity (isof o x').
+  apply iso1; trivial.
+ rewrite H0 in H.
+ apply isof_def; trivial. }
+assert (iso1' : iso_fun (TI F o) (TI G o) (g (isof o))).
+{generalize iso1; apply iso_fun_ext; auto with *.
+ apply gm.
+ apply iso1. }
+clear iso1.
+split; intros.
+*apply iso_fun_sym in iso1'.
+ apply iso_fun_inj with (TI F o) (iso_inv (TI F o) (g (isof o))); trivial.
+ +apply iso_fun_sym.
+  generalize iso2; apply iso_fun_morph; auto with *.
+  apply iso_funm in iso2; trivial.
+
+ +rewrite <- TI_mono_succ; auto.
+  apply TI_incl; auto.
+
+*apply iso_fun_inj with (TI G o) (g (isof o)); trivial.
+ +apply iso_change_rhs with (G (TI G o)); auto with *.
+
+ +rewrite <- TI_mono_succ; auto.
+  apply TI_incl; auto.
+Qed.
+
+  Lemma TI_same_closure_ordinal_by_iso o :
+    isOrd o ->
+    (closure_ordinal F o <-> closure_ordinal G o). 
+intros oo.
+rewrite TI_closure_ordinal; trivial.
+rewrite TI_closure_ordinal; trivial.
+apply TI_same_fixpoint_by_iso; trivial.
+Qed.
+
+End IsoFamilyCorollary.
 
   Lemma TI_iso_recursor_hyps ord :
     recursor_hyps ord (TI F)
@@ -2081,7 +2133,7 @@ constructor; intros.
   rewrite TI_mono_succ; auto with *.
   apply is_cc_fun_lam; auto.
 
-  apply isog' in fiso; trivial.
+  apply isog in fiso; trivial.
   revert fiso; apply iso_fun_ext.
    apply cc_app_morph; reflexivity.
    symmetry; apply TI_mono_succ; eauto using isOrd_inv.
@@ -2146,40 +2198,12 @@ unfold TI_iso at 2; rewrite <- H3.
 apply rec_spec_irr with (1:=TI_iso_recursor H0); auto with *.
 Qed.
 
+  
   Lemma TI_iso_fixpoint o :
     isOrd o ->
     (TI F o == F (TI F o) <-> TI G o == G (TI G o)).
-intros oord.
-assert (iso1 := proj1 (TI_iso_fun oord)).
-assert (iso2 := isog' oord iso1).
-assert (same_iso : eq_fun (TI F o) (TI_iso F g o) (g (TI_iso F g o))).
- red; intros.
- transitivity (TI_iso F g o x').
-  unfold TI_iso; rewrite H0; auto with *.
- rewrite H0 in H.
- apply TI_iso_fun; trivial.
-assert (iso1' : iso_fun (TI F o) (TI G o) (g (TI_iso F g o))).
- revert iso1; apply iso_fun_ext; auto with *.
- apply gm.
- apply cc_app_morph; reflexivity.
-clear iso1.
-split; intros.
- apply iso_fun_sym in iso1'.
- apply iso_fun_inj with (TI F o) (iso_inv (TI F o) (g (TI_iso F g o))); trivial.
-  apply iso_fun_sym.
-  generalize iso2; apply iso_fun_morph; auto with *.
-  apply iso_funm in iso2; trivial.
-
-  rewrite <- TI_mono_succ; auto.
-  apply TI_incl; auto.
-
- apply iso_fun_inj with (TI G o) (g (TI_iso F g o)); trivial.
-  apply iso_change_rhs with (G (TI G o)); auto with *.
-
-  rewrite <- TI_mono_succ; auto.
-  apply TI_incl; auto.
+apply TI_same_fixpoint_by_iso with (isof := TI_iso F g); intros; apply TI_iso_fun; trivial.
 Qed.
-
 
 End TI_iso.
 
@@ -2285,6 +2309,58 @@ Qed.
      forall X Y f, morph1 X -> morph1 Y -> morph2 f ->
      (forall a, a ∈ A -> iso_fun (X a) (Y a) (f a)) ->
       forall a, a ∈ A -> iso_fun (F X a) (G Y a) (g f a).
+
+
+Section IsoFamilyCorollary.
+  (** If we have a family of isomorphism, then the least fixpoints of F and G
+      are isomorphic, and they have the same closure ordinal  *)
+  Variable isof : set -> set -> set -> set.
+  Hypothesis isofm : forall o, isOrd o -> morph2 (isof o).
+  Hypothesis isof_iso :
+    forall o a, isOrd o -> a ∈ A -> iso_fun (TIF A F o a) (TIF A G o a) (isof o a).
+  Hypothesis isof_def :
+    forall o a x, isOrd o -> a ∈ A -> x ∈ TIF A F o a -> isof o a x == g (isof o) a x.
+  
+  Lemma TIF_same_fixpoint_by_iso o :
+    isOrd o ->
+    ((forall a, a ∈ A -> TIF A F o a == F (TIF A F o) a) <->
+     (forall a, a ∈ A -> TIF A G o a == G (TIF A G o) a)).
+intros oord.
+assert (iso1 := fun a => @isof_iso _ a oord).
+assert (iso2:forall a : set, a ∈ A -> iso_fun (F (TIF A F o) a) (G (TIF A G o) a) (g (isof o) a)).
+{apply isog; auto with *.
+ apply TIF_morph; auto with *.
+ apply TIF_morph; auto with *. }
+assert (same_iso : forall a, a ∈ A -> eq_fun (TIF A F o a) (isof o a) (g (isof o) a)).
+{red; intros.
+ transitivity (isof o a x').
+ apply isofm; auto with *.
+ rewrite H1 in H0.
+ apply isof_def; trivial. }
+assert (iso1' : forall a, a ∈ A -> iso_fun (TIF A F o a) (TIF A G o a) (g (isof o) a)).
+{intros a tya.
+ generalize (iso1 _ tya); apply iso_fun_ext; auto with *. }
+clear iso1.
+split; intros.
+*assert (iso1 := iso_fun_sym (iso1' a H0)).
+ clear iso1'.
+ apply iso_fun_inj with (TIF A F o a) (iso_inv (TIF A F o a) (g (isof o) a)); trivial.
+ +apply iso_fun_sym.
+  generalize (iso2 a H0); apply iso_fun_morph; auto with *.
+  apply iso_funm with (1:=iso2 a H0); trivial.
+
+ +rewrite <- TIF_mono_succ; auto.
+  apply TIF_incl; auto.
+
+*apply iso_fun_inj with (TIF A G o a) (g (isof o) a); auto.
+ +apply iso_change_rhs with (G (TIF A G o) a); auto with *.
+  symmetry; apply H; trivial.
+ +rewrite <- TIF_mono_succ; auto.
+  apply TIF_incl; auto.
+Qed.
+
+End IsoFamilyCorollary.
+
 
   Variable o : set.
   Variable oo : isOrd o.
