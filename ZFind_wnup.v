@@ -719,10 +719,10 @@ Qed.
 
 Definition W_ord := W0.W_ord A' B'.
 
-Lemma W_o_o : isOrd W_ord.
-apply W0.W_o_o; trivial.
+Lemma W_ord_o : isOrd W_ord.
+apply W0.W_ord_o; trivial.
 Qed.
-Hint Resolve W_o_o : core.
+Hint Resolve W_ord_o : core.
 
 Definition W := Wi W_ord.
 
@@ -732,7 +732,7 @@ rewrite <- TIF_mono_succ; auto with *.
 apply eq_intro; intros.
  revert H0; apply TIF_incl; auto with *.
 
- destruct (iso_surj (tr_iso_it _ _ (isOrd_succ _ W_o_o) H)) with z; trivial.
+ destruct (iso_surj (tr_iso_it _ _ (isOrd_succ _ W_ord_o) H)) with z; trivial.
  rewrite subset_ax in H1; destruct H1.
  destruct H3.
  rewrite <- H3 in H4; clear x0 H3.
@@ -751,7 +751,7 @@ apply eq_intro; intros.
 
    rewrite TI_mono_succ; eauto using isOrd_inv.
 
- apply (iso_typ (tr_iso_it _ _ W_o_o H)).  
+ apply (iso_typ (tr_iso_it _ _ W_ord_o H)).  
  apply subset_intro; trivial.
 Qed.
 
@@ -2059,7 +2059,7 @@ Definition W_ord_a a :=
 Lemma isOrd_W_ord_a a : isOrd (W_ord_a a).
 intros.
 unfold W_ord_a.
-apply W_o_o.
+apply W_ord_o.
 apply B''_morph'.
 Qed.
 Hint Resolve isOrd_W_ord_a : core.
@@ -2081,17 +2081,17 @@ Lemma W_rebase a :
   W Arg A B f a == W (Arg' a) (A'' a) (B'' a) extln empty.
 intros.
 unfold W.
-rewrite Wi_rebase; auto using W_o_o.
+rewrite Wi_rebase; auto using W_ord_o.
 apply incl_eq.
  fold (W (Arg' a) (A'' a) (B'' a) extln empty).
- apply W_post; auto using W_o_o with *.
+ apply W_post; auto using W_ord_o with *.
   intros.
   apply extln_typ; auto.
 
   apply Arg'_intro1; trivial.
 
  unfold Wi.
- apply TIF_mono; auto using W_o_o with *.
+ apply TIF_mono; auto using W_ord_o with *.
   apply Arg'_intro1; trivial.
 
   assert (tmp := W_ord_a_smaller).
@@ -2172,7 +2172,7 @@ Qed.
 intros.
 rewrite W_rebase; trivial.
 unfold W.
-apply G_Wi; auto using W_o_o with *.
+apply G_Wi; auto using W_ord_o with *.
 intros; apply extln_typ; trivial.
 
  apply G_Arg'; trivial.

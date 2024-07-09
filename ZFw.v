@@ -6,8 +6,8 @@ Require Import ZFfix.
 Require Import ZFfixfun.
 Require ZFwdom.
 
-#[global]Hint Resolve ZFwdom.Wf_mono : core.
-#[global]Hint Resolve ZFwdom.Wf_typ : core.
+Existing Instance ZFwdom.Wf_mono.
+Existing Instance ZFwdom.Wfbot_mono.
 
 Section W.
 
@@ -22,7 +22,6 @@ Notation Wf := (ZFwdom.Wf A B).
 Notation Wsup := ZFwdom.Wsup.
 Notation Wfst := ZFwdom.Wfst.
 Notation Wsnd_fun := ZFwdom.Wsnd_fun.
-Existing Instance ZFwdom.Wf_mono.
 
 (*******************************************************************************************)
 (** * Definition and properties of the W-type operator *)
@@ -49,12 +48,6 @@ Qed.
 
 Lemma W_typ : W ⊆ Wdom.
 apply lfp_typ; auto with *.
-Qed.
-
-Lemma Wf_stable : stable_class (fun X => X ⊆ W) Wf.
-apply ZFwdom.Wf_stable0; trivial.
-intros; transitivity W; trivial.
-apply W_typ.
 Qed.
 
 Lemma W_ind : forall (P:set->Prop),
@@ -156,12 +149,14 @@ Qed.
 Lemma Wbot_typ : Wbot ⊆ Wdom.
 apply lfp_typ; auto with *.
 Qed.
+
 Lemma Wbot_typ' : cc_bot Wbot ⊆ Wdom.
 red; intros.
 apply cc_bot_ax in H; destruct H.
  rewrite H; trivial.
  apply Wbot_typ; trivial.
 Qed.
+
 Lemma Wbot_ind : forall (P:set->Prop),
   Proper (eq_set ==> iff) P ->
   (forall x f, x ∈ A -> f ∈ (Π i ∈ B x, cc_bot Wbot) ->
@@ -196,44 +191,7 @@ apply H0; trivial.
  apply subset_elim2 in H5; destruct H5 as (y,?,?).
  rewrite <- H5 in H6; auto.
 Qed. 
- 
-Lemma Wfbot_stable : stable_class (fun X => X ⊆ cc_bot Wbot) Wfbot.
-eapply compose_stable_class with (F:=Wf) (K1:=fun X => X⊆cc_bot Wbot); auto with *.
- do 2 red; intros.
- rewrite H; reflexivity.
-
- apply ZFwdom.Wf_stable0; intros; trivial.
- rewrite H.
- apply Wbot_typ'; trivial.
-
- red; intros.
- red; intros.
- destruct inter_wit with (2:=H0); auto with *.
- assert (forall x, x ∈ X -> z ∈ cc_bot x).
-  intros.
-  apply inter_elim with (1:=H0).
-  apply replf_ax; auto with *.
-  exists x0; auto with *.
- assert (zcase:=H2 _ H1).
- apply cc_bot_ax in zcase; destruct zcase.
-  rewrite H3; auto.
- specialize H with (1:=H1).
- apply H in H3. 
- apply cc_bot_ax in H3; destruct H3.
-  rewrite H3; auto.
- apply cc_bot_intro. 
- apply inter_intro;[|eauto].
- intros. 
- apply H2 in H4.
- apply cc_bot_ax in H4; destruct H4; trivial.
- rewrite H4 in H3; rewrite Wbot_eqn in H3.
- apply ZFwdom.mt_not_in_Wf in H3;[|trivial]; contradiction.
-
- red; intros.
- apply cc_bot_ax in H0; destruct H0; auto.
- rewrite H0; auto.
-Qed.
-
+  
 Lemma Wfst_typ_bot w : w ∈ Wbot -> Wfst w ∈ A.
 intros.
 apply ZFwdom.Wfst_typ_gen with (B:=B)(X:=cc_bot Wbot); trivial.
@@ -259,6 +217,31 @@ Section FixpointByIteration.
    for which the sequence reaches the fixpoint W.
    We introduce notion of subterm as an auxiliary tool to defining the recursor. *)
 
+  Lemma Wf_stable : stable_class (fun X => X ⊆ W) Wf.
+apply ZFwdom.Wf_stable_gen; trivial.
+intros; transitivity W; trivial.
+apply W_typ.
+Qed.
+
+  Lemma Wf_stable_stages : stable_class (fun X : set => X ⊆ Fstages Wf Wdom) Wf.
+apply ZFwdom.Wf_stable_gen; trivial.
+intros.
+rewrite H.
+apply Fstages_inA.
+Qed.
+Hint Resolve Wf_stable_stages : core.
+
+  Definition W_ord := clos_ord Wf Wdom.
+
+  Lemma W_ord_o : isOrd W_ord.
+apply clos_ord_o; auto.
+Qed.
+Hint Resolve W_ord_o : core.
+
+  Lemma W_ord_clos : closure_ordinal Wf W_ord.
+apply closure_ordinal_bounded; auto.
+Qed.
+
 Definition Wi := TI Wf.
 
 Lemma Wi_typ o : isOrd o -> Wi o ⊆ Wdom.
@@ -272,7 +255,84 @@ intros.
 apply TI_pre_fix; auto with *.
 rewrite <- W_eqn; reflexivity.
 Qed.
+  
+  Lemma W_post : W ⊆ Wi W_ord.
+apply W_least.
+rewrite <- TI_mono_succ; auto.
+apply W_ord_clos; auto.
+Qed.
 
+  Lemma W_clos : W == Wi W_ord.
+apply incl_eq.
+ red; intros; apply W_post; trivial.
+
+ apply Wi_W; trivial.
+Qed.
+
+(** With bottom *)
+
+Lemma Wfbot_stable : stable_class (fun X => X ⊆ Wfbot Wdom) Wfbot.
+apply ZFwdom.Wfbot_stable_gen; trivial.
+split.
++rewrite H; apply Wfbot_typ; reflexivity.
++intros.
+ apply H in H0.
+ right; intro eqz; rewrite eqz in H0.
+ apply ZFwdom.mt_not_in_Wf in H0; trivial.
+Qed.
+
+Hint Resolve Wfbot_mono Wfbot_typ : core.
+Lemma Wfbot_stable_stages : stable_class (fun X : set => X ⊆ Fstages Wfbot Wdom) Wfbot.
+apply ZFwdom.Wfbot_stable_gen; trivial.
+split.
++rewrite H; apply Fstages_inA.
++intros.
+ apply H in H0.
+ right; intro eqz.
+ apply Fstages_def in H0; auto.
+ destruct H0 as (o,oo,mt).
+ apply ZFwdom.mt_not_in_Wfbot in mt; auto with *.
+Qed.
+Hint Resolve Wfbot_stable_stages : core.
+
+  Definition Wbot_ord := clos_ord Wfbot Wdom.
+
+  Lemma Wbot_ord_o : isOrd Wbot_ord.
+apply clos_ord_o; auto.
+Qed.
+  Hint Resolve Wbot_ord_o : core.
+
+  Lemma Wbot_ord_clos : closure_ordinal Wfbot Wbot_ord.
+apply closure_ordinal_bounded; auto with *.
+Qed.
+
+  Definition Wbi := TI Wfbot.
+
+Lemma Wbi_typ o : isOrd o -> Wbi o ⊆ Wdom.
+intros oo.
+apply TI_pre_fix; auto with *.
+Qed.
+
+Lemma Wbi_Wbot o : isOrd o -> Wbi o ⊆ Wbot.
+intros.
+apply TI_pre_fix; auto with *.
+rewrite <- Wbot_eqn; reflexivity.
+Qed.
+  
+  Lemma Wbot_post : Wbot ⊆ Wbi Wbot_ord.
+apply Wbot_least.
+rewrite <- TI_mono_succ; auto.
+apply Wbot_ord_clos; auto.
+Qed.
+
+  Lemma Wbot_clos : Wbot == Wbi Wbot_ord.
+apply incl_eq.
+ red; intros; apply Wbot_post; trivial.
+
+ apply Wbi_Wbot; trivial.
+Qed.
+
+  
 End FixpointByIteration.
 
 
@@ -1447,6 +1507,10 @@ Qed.
 End TransitiveRecursor.
 
 End W.
+
+#[global]Hint Resolve W_ord_o : core.
+#[global]Hint Resolve Wbot_ord_o : core.
+
 
 Local Notation E := eq_set (only parsing).
 

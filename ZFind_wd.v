@@ -290,16 +290,8 @@ intros.
 apply incl_eq.
  unfold Wd; rewrite <- TIF_mono_succ; auto with *.
  apply TIF_incl; auto with *.
-  apply isOrd_succ.
-  apply W_o_o; trivial.
-
-  apply lt_osucc; apply W_o_o; trivial.
-
- apply W_o_o; trivial.
-
  red; intros.
- unfold Wd; rewrite <- inst_inv; trivial.
- 2:apply W_o_o; trivial.
+ unfold Wd; rewrite <- inst_inv; auto.
  apply subset_intro.
   change (z ∈ W A B).
   rewrite W_eqn; trivial.
@@ -310,18 +302,14 @@ apply incl_eq.
    red; intros.
    unfold Wd in H1.
    rewrite <- inst_inv in H1; auto.
-   2:apply W_o_o; trivial.
    apply subset_elim1 in H1; trivial.
    
   unfold Wd in H0; rewrite <- TIF_mono_succ in H0; auto.
    rewrite <- inst_inv in H0; auto.
-   2:apply isOrd_succ; apply W_o_o; trivial.
    rewrite subset_ax in H0; destruct H0 as (_,(?,?,?)).
    rewrite H0; trivial.
 
    apply W_Fd_morph.
-
-   apply W_o_o; trivial.
 Qed.
 
 (*

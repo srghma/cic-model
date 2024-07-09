@@ -152,7 +152,7 @@ Definition dIND_clos_ord (p:dpositive) := W0.W_ord Arg (w1 p) (w2 p).
 Lemma isOrd_clos_ord p : isDPositive p -> isOrd (dIND_clos_ord p).
 intros.
 unfold dIND_clos_ord.
-apply W0.W_o_o; auto with *.
+apply W0.W_ord_o; auto with *.
 Qed.
 Hint Resolve isOrd_clos_ord : core.
 
@@ -373,7 +373,7 @@ apply iso_fun_inj with (f:=isow p (dIND_clos_ord p) a)
    apply iso_indep.
     apply isOrd_clos_ord_a; trivial.
 (*    trivial.
-    apply W0.W_o_o; auto with *.*)
+    apply W0.W_ord_o; auto with *.*)
     unfold dIND_clos_ord_a.
     unfold dIND_clos_ord.
     apply W0.W_ord_a_smaller; trivial.

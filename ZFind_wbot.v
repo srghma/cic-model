@@ -15,78 +15,26 @@ Variable A : set.
 Variable B : set -> set.
 Hypothesis Bm : morph1 B.
 
-Local Notation WF := (W_F A B).
+(*Local Notation WF := (W_F A B).*)
 Local Notation Wd := (Wdom A B).
 Local Notation Wfb := (Wfbot A B).
 
 Hint Resolve Wintro_ext : core.
-
-  Definition Wbot_ord := clos_ord Wfb Wd.
-
-  Lemma Wbot_o_o : isOrd Wbot_ord.
-apply clos_ord_o; auto.
-Qed.
-  
-Lemma cc_bot_stable :
-  stable_class (fun X => X ⊆ Fstages Wfb Wd) cc_bot.
-unfold cc_bot; apply union2_stable_disjoint.
- do 2 red; reflexivity.
-
- do 2 red; trivial.
-
- apply cst_stable_class.
-
- apply id_stable_class.
-
- intros.
- apply singl_elim in H1.
- rewrite H1 in H2; apply H0 in H2.
- rewrite Fstages_def in H2; auto.
- destruct H2.
- apply mt_not_in_Wfbot in H3; auto with *.
-Qed.
-
-Lemma Wfbot_stable : stable_class (fun X => X ⊆ Fstages Wfb Wd) Wfb.
-apply compose_stable_class with (F:=Wf A B) (K1:=fun X => X ⊆ cc_bot (Fstages Wfb Wd)); trivial.
- do 2 red; intros.
- rewrite H; reflexivity.
-
- apply Wf_mono; trivial.
-
- apply cc_bot_morph.
-
- apply Wf_stable0; intros; trivial.
- rewrite H.
- apply Wdom_cc_bot.
- apply Fstages_inA.
-
- apply cc_bot_stable.
-
- intros; apply cc_bot_mono; trivial.
-Qed.
-Hint Resolve Wfbot_stable : core.
   
   Definition W_Fbot X := W_F A B (cc_bot X).
   Definition Wibot o := TI W_Fbot o.
-  Definition Wbot := Wibot Wbot_ord  .
+  Definition Wbot_ord := ZFw.Wbot_ord A B.
+  Definition Wbot := Wibot Wbot_ord.
+
+  Lemma Wbot_ord_o : isOrd Wbot_ord.
+apply ZFw.Wbot_ord_o; trivial.
+Qed.
+Hint Resolve Wbot_ord_o : core.
   
   Instance W_Fbot_mono : Proper (incl_set==>incl_set) W_Fbot.
 do 2 red; intros.
 unfold W_Fbot; apply W_F_mono; trivial.
 apply cc_bot_mono; auto with *.
-Qed.
-
-Lemma W_Fbot_stable : stable_class (fun X => X ⊆ Fstages Wfb Wd) W_Fbot.
-apply compose_stable_class with (F:=WF) (K1:=fun _ => True); trivial.
- do 2 red; reflexivity.
-
- apply W_F_mono; trivial.
-
- apply cc_bot_morph.
-
- apply W_F_stable; trivial.
-
- apply cc_bot_stable.
 Qed.
 
   Lemma mt_not_in_W_Fbot o x :
@@ -196,21 +144,12 @@ apply TI_iso_fun; intros; auto.
  apply W_F_Wf_iso_bot'; trivial.
 Qed.
 
-  Lemma Wbot_ord_o : isOrd Wbot_ord.
-apply clos_ord_o; auto with *.
-Qed.
-Hint Resolve Wbot_ord_o : core.
-
-Lemma Wbot_clos_ord : closure_ordinal Wfb Wbot_ord.
-apply closure_ordinal_bounded; auto with *.
-Qed.
-Hint Resolve Wbot_clos_ord : core.
-
   Lemma Wbot_fix : Wbot == W_Fbot Wbot.
 unfold Wbot, Wibot.
 rewrite TI_iso_fixpoint with (2:=Wfbot_mono A _ Bm) (g:=fun f => wiso B (fbot f)); auto with *.
  apply TI_closure_ordinal; auto.
-
+  apply ZFw.Wbot_ord_clos; trivial.
+ 
  intros.
  apply wisobot_ext; trivial.
  intros h; apply mt_not_in_W_Fbot in h; auto with *.
@@ -272,3 +211,5 @@ Qed.
 End W_Univ.
 
 End W_theory.
+
+#[global]Hint Resolve Wbot_ord_o : core.

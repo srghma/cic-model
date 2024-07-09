@@ -143,8 +143,8 @@ Qed.
       A and B. *)
   Definition W_ord := W0.W_ord Arg' A' B'.
 
-  Lemma W_o_o : isOrd W_ord.
-apply W0.W_o_o; auto.
+  Lemma W_ord_o : isOrd W_ord.
+apply W0.W_ord_o; auto.
 Qed.
 
   Lemma W_def ia : ia ∈ Arg' -> W ia == Wi W_ord ia.
@@ -501,11 +501,11 @@ intros.
 unfold W_REC.
 pose (X:=fun o => Π p ∈ (Σ ia ∈ Arg', Wi o ia), P (fst p) (snd p)).
 assert (REC WF W_ord ∈ X W_ord).
- apply typed_rec_typ with (1:= recur _ W_o_o); auto with *.
+ apply typed_rec_typ with (1:= recur _ W_ord_o); auto with *.
   do 2 red; intros.
   rewrite <- H3; reflexivity. 
 
-  apply W_o_o.
+  apply W_ord_o.
 assert (couple (couple i a) w ∈ Σ ia ∈ Arg', W ia).
  apply couple_intro_sigma; auto with *.
  apply couple_intro_sigma; auto.
@@ -529,7 +529,7 @@ assert (tyw : couple (couple i a) (couple x y) ∈ (Σ ia ∈ Arg', Wi W_ord ia)
 
   apply W_intro; try assumption.
 unfold W_REC at 1.
-rewrite rec_spec_eqn with (1:= recur _ W_o_o) (2:=W_o_o); auto with *.
+rewrite rec_spec_eqn with (1:= recur _ W_ord_o) (2:=W_ord_o); auto with *.
 unfold WF at 1; rewrite cc_beta_eq; trivial.
  apply Fm.
   rewrite fst_def,fst_def; reflexivity.
@@ -567,10 +567,10 @@ revert tyw; apply sigma_mono; auto.
   apply W0.W_Fd_morph; auto.
 
   apply isOrd_succ.
-  apply W_o_o.
+  apply W_ord_o.
 
   apply lt_osucc.
-  apply W_o_o.
+  apply W_ord_o.
 Qed.
 
   End Recursor.

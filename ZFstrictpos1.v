@@ -552,8 +552,9 @@ Qed.
     DIND p a == dpos_oper p (DIND p) a.
 intros.
 assert (isOrd (IND_clos_ord (tr_pos p))).
- unfold IND_clos_ord; apply ZFind_w.W_o_o.
- apply pos_to_w2_morph; trivial.
+{unfold IND_clos_ord.
+ apply ZFind_w.W_ord_o.
+ apply pos_to_w2_morph; trivial. }
 unfold DIND, IND.
 fold (DINDi p (IND_clos_ord (tr_pos p))).
 rewrite <- DINDi_eq; trivial.

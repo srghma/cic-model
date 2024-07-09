@@ -1687,7 +1687,7 @@ Qed.
     isOrd (W_ord A B).
 intros A B Bm.
 unfold W_ord.
-apply Wbot_o_o; trivial.
+apply Wbot_ord_o; trivial.
 Qed.
   Definition G_W_ord := G_Wbot_ord.
   Definition G_W_F := G_W_Fbot.

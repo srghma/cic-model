@@ -38,8 +38,6 @@ Qed.
   Lemma COWi_succ o : isOrd o -> COWi (osucc o) == Wf (COWi o).
 intros.
 unfold COWi; apply COTI_mono_succ; auto with *.
-apply ZFwdom.Wf_typ; trivial.
-reflexivity.
 Qed.
 
   Lemma COWi_decreasing : decreasing COWi.
@@ -80,7 +78,6 @@ apply COTI_intro; auto with *.
  intros.
  assert (oo':isOrd o') by eauto using isOrd_inv.
  rewrite <- COTI_mono_succ; auto with *.
- 2:apply ZFwdom.Wf_typ; [trivial|reflexivity].
  assert (z ∈ Wf (COWi (osucc o'))).
  {apply COTI_elim with (3:=H); auto with *. }
  rewrite eqz in H2.

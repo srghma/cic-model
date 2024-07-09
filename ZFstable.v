@@ -6,6 +6,35 @@ Require Export ZF.
 Definition stable_class (P:set->Prop) (F:set->set) :=
   forall X, (forall x, x∈X -> P x) -> inter (replf X F) ⊆ F (inter X).
 
+#[global]Instance stable_class_morph :
+  Proper (pointwise_relation set iff==>(eq_set==>eq_set)==>iff) stable_class.
+Proof.
+do 3 red; intros.
+apply fa_morph; intros X.
+apply impl_morph;[|intros].
++apply fa_morph; intros a.
+ rewrite (H a); reflexivity.
++apply incl_set_morph.
+ *apply inter_morph.
+  apply replf_morph;[reflexivity|].
+  red; intros; apply H0; trivial.
+ *apply H0; reflexivity.
+Qed.
+
+(* Could be generalized with eq_index *)
+#[global]Instance stable_class_mono :
+  Proper (pointwise_relation set impl-->(eq_set==>eq_set)==>impl) stable_class.
+Proof.
+intros K1 K2 eqK F1 F2 eqF stbl X Xok.
+rewrite <- (eqF (inter X) (inter X));[|reflexivity].
+rewrite <- (stbl X).
++apply eq_incl.
+ apply inter_morph.
+ apply replf_morph; auto with *.
+ do 2 red; intros; symmetry; apply eqF; auto with *.
++intros; apply eqK; auto.
+Qed.
+
 Lemma cst_stable_class A K : stable_class K (fun _ => A).
 red; red; intros.
 apply inter_elim with (1:=H0) (y:=A).

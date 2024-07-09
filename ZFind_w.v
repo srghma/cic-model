@@ -315,11 +315,11 @@ split; intros.
 Qed.
 
  (** The closure ordinal of Wf (and W_F) *)
-
+(*
   Notation W' := (ZFw.W A B).
 
 Let stbl : stable_class (fun X : set => X ⊆ Fstages (Wf A B) (Wdom A B)) (Wf A B).
- apply Wf_stable0; trivial.
+ apply Wf_stable_gen; trivial.
  intros.
  rewrite H.
  apply Fstages_inA.
@@ -353,13 +353,19 @@ apply incl_eq.
 
  apply Wi_W; trivial.
 Qed.
- 
+ *)
 (** * The fixpoint of the W_type operator *)
 
 (** We get W the fixpoint of W_F by isomorphism *)
 
+  Definition W_ord := ZFw.W_ord A B.
   Definition W := TI W_F W_ord.
 
+  Lemma W_ord_o : isOrd W_ord.
+apply ZFw.W_ord_o; trivial.
+Qed.
+Hint Resolve W_ord_o : core.
+  
 Definition wiso f := comp_iso (WFmap f) Wintro.
 
 Lemma W_F_Wf_iso' o f :
@@ -411,8 +417,8 @@ Qed.
   Lemma W_eqn : W == W_F W.
 cut (Wi A B W_ord == Wf A B (Wi A B W_ord)).
  apply <- TI_iso_fixpoint; auto with *.
-  apply W_F_Wf_iso'; trivial.
-rewrite <- W'_clos.
+ apply W_F_Wf_iso'; trivial.
+rewrite <- ZFw.W_clos; trivial.
 apply ZFw.W_eqn; trivial.
 Qed.
 
@@ -627,7 +633,7 @@ assert (forall w, w ∈ W -> cc_app f w ∈ U w).
 rename H into fty.
 assert (fcompat W f W_REC).
 revert H1 H0; unfold W.
-apply isOrd_ind with (2:=W_o_o).
+apply isOrd_ind with (2:=W_ord_o).
 intros.
 red; intros.
 rewrite W_REC_eqn.
@@ -882,6 +888,8 @@ End W_Univ.
 
 End W_theory.
 
+#[global]Hint Resolve W_ord_o : core.
+
 (* More on W_F: *)
 
 Instance W_F_morph_gen :
@@ -954,7 +962,7 @@ Qed.
     forall x, x ∈ sets -> P x.
 unfold sets,W;intros.
 assert (isOrd (W_ord U (fun X => X))).
- apply W_o_o; trivial.
+ apply W_ord_o; trivial.
 revert x H0; elim H1 using isOrd_ind; intros.
 apply TI_elim in H4; auto with *.
 2:apply W_F_morph; trivial.

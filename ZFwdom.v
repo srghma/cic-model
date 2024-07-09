@@ -3,6 +3,47 @@ Require Import ZFgrothendieck.
 Require Import ZFlist.
 Require Import ZFcoc.
 
+Lemma cc_bot_stable K :
+  (forall x X, K X -> x ∈ X -> x==empty \/ ~x==empty) ->
+  stable_class K cc_bot.
+intros empty_dec.
+do 2 red; intros.
+destruct inter_wit with (2:=H0); auto with *.
+assert (forall x, x ∈ X -> z ∈ cc_bot x).
+{intros.
+ apply inter_elim with (1:=H0).
+ apply replf_ax; auto with *.
+ exists x0; auto with *. }
+assert (zcase:=H2 _ H1).
+apply cc_bot_ax in zcase; destruct zcase.
+ rewrite H3; auto.
+specialize H with (1:=H1).
+destruct (empty_dec z x) as [is_mt|not_mt]; trivial.
+ rewrite is_mt; auto.
+apply cc_bot_intro. 
+apply inter_intro;[|eauto].
+intros. 
+apply H2 in H4.
+apply cc_bot_ax in H4; destruct H4; [contradiction|trivial].
+Qed.
+(*Lemma cc_bot_stable K :
+  (forall X, K X -> ~ empty ∈ X) ->
+  stable_class K cc_bot.
+intros non_empty.
+unfold cc_bot; apply union2_stable_disjoint.
+ do 2 red; reflexivity.
+
+ do 2 red; trivial.
+
+ apply cst_stable_class.
+
+ apply id_stable_class.
+
+ intros.
+ apply singl_elim in H1.
+ rewrite H1 in H2; apply non_empty in H2; trivial.
+Qed.*)
+
 Definition directed I X f :=
   forall x y, x ∈ I -> y ∈ I ->
   exists2 z, z ∈ I & f z ∈ X /\ f x ⊆ f z /\ f y ⊆ f z.
@@ -459,23 +500,12 @@ apply Fmono_morph; auto with *.
 Qed.
 Hint Resolve Wf_mono Wf_morph : core.
 
-Lemma mt_not_in_Wf X : ~ empty ∈ Wf X.
-intro.
-apply Wf_elim in H.
-destruct H as (x,_,(f,_,?)).
-apply empty_ax with (x:=couple Nil x).
-rewrite H; apply Wsup_def; auto with *.
-Qed.
-
 Lemma Wf_typ X :
   X ⊆ Wdom -> Wf X ⊆ Wdom.
 red; intros.
 apply Wf_elim in H0; destruct H0 as (x,tyx,(f,tyf,eqz)); rewrite eqz.
 apply Wsup_typ_gen; trivial.
 revert tyf; apply cc_prod_covariant; auto with *.
-(*intros.
-apply H.
-apply cc_prod_elim with (1:=tyf); trivial.*)
 Qed.
 Hint Resolve Wf_typ : core.
 
@@ -518,7 +548,7 @@ apply cc_prod_elim with (1:=H0); trivial.
 Qed.
 
 
-Lemma Wf_stable0 (K:set->Prop) :
+Lemma Wf_stable_gen (K:set->Prop) :
   (forall X, K X -> X ⊆ Wdom) ->
  stable_class K Wf.
 red; intros Kdef X Xty z H.
@@ -557,13 +587,6 @@ apply Wsup_inj in eqz'; trivial; intros.
  apply cc_prod_elim with (1:=tyf'); trivial.
 Qed.
   
-(*
-Lemma Wf_stable : stable_class (fun X : set => X ⊆ Ffix Wf Wdom) Wf.
-apply Wf_stable0.
-intros.
-rewrite H; apply Ffix_inA.
-Qed.
-*)
 Section Wdom_Universe.
 
   Variable U : set.
@@ -589,6 +612,14 @@ End Wdom_Universe.
 
 Section SN_Auxiliary.
 
+  Lemma mt_not_in_Wf X : ~ empty ∈ Wf X.
+intro.
+apply Wf_elim in H.
+destruct H as (x,_,(f,_,?)).
+apply empty_ax with (x:=couple Nil x).
+rewrite H; apply Wsup_def; auto with *.
+Qed.
+
   Lemma Wdom_cc_bot X :
     X ⊆ Wdom -> cc_bot X ⊆ Wdom.
 red; intros.
@@ -609,7 +640,18 @@ Qed.
 apply Fmono_morph; auto with *.
 Qed.
 
-Hint Resolve Wfbot_mono Wfbot_morph : core.
+  Hint Resolve Wfbot_mono Wfbot_morph : core.
+
+  Lemma mt_not_in_Wfbot o x :
+    isOrd o ->
+    x ∈ TI Wfbot o ->
+    ~ x == empty.
+red; intros.
+apply TI_elim in H0; auto with *.
+destruct H0 as (o',?,?).
+rewrite H1 in H2.
+apply mt_not_in_Wf in H2; trivial.
+Qed.
 
 Lemma Wfbot_typ : forall X,
   X ⊆ Wdom -> Wfbot X ⊆ Wdom.
@@ -629,17 +671,27 @@ destruct H2.
 revert H3; apply Wfbot_typ; auto.
 Qed.
 
-  Lemma mt_not_in_Wfbot o x :
-    isOrd o ->
-    x ∈ TI Wfbot o ->
-    ~ x == empty.
-red; intros.
-apply TI_elim in H0; auto with *.
-destruct H0 as (o',?,?).
-rewrite H1 in H2.
-apply mt_not_in_Wf in H2; trivial.
-Qed.
 
+Lemma Wfbot_stable_gen K :
+  (forall X, K X -> X ⊆ Wdom /\ (forall z, z ∈ X -> z==empty \/ ~z==empty)) ->
+  stable_class K Wfbot.
+intros Fprop.
+apply compose_stable_class with (F:=Wf) (K1:=fun X => X ⊆ Wdom); trivial.
+ do 2 red; intros.
+ rewrite H; reflexivity.
+
+ apply cc_bot_morph.
+
+ apply Wf_stable_gen; intros; trivial.
+
+ apply cc_bot_stable; intros.
+ apply (proj2 (Fprop _ H)); trivial.
+
+ intros X KX.
+ apply Wdom_cc_bot.
+ apply Fprop; trivial.
+Qed.
+  
 End SN_Auxiliary.
 
 (*******************************************************************************************)
@@ -648,16 +700,14 @@ End SN_Auxiliary.
 
 Section Corecursion_Auxiliary.
 
-Lemma Wsup_incl_hd_inv x x' f f' :
-  Wsup x f ⊆ Wsup x' f' -> x==x'.
+  Lemma Wsup_incl_hd_inv x x' f f' :
+    Wsup x f ⊆ Wsup x' f' -> x==x'.
 intros.
 assert (couple Nil x ∈ Wsup x' f').
- apply H.
- apply Wsup_def; auto with *.
+{apply H.
+ apply Wsup_def; auto with *. }
 apply Wsup_hd_prop in H0; trivial.
 Qed.
-
-
 
 Lemma Wsnd_def_raw0 i w z :
   z ∈ Wsnd w i <-> z == couple (fst z) (snd z) /\ couple (Cons i (fst z)) (snd z) ∈ w.
@@ -721,8 +771,6 @@ split.
  apply Wsnd_mono; auto.
  apply Wsnd_mono; auto.
 Qed.
-
-
   
   Lemma Wsup_sup_new I X f :
   ext_fun I f ->
@@ -813,23 +861,6 @@ apply eq_set_ax; intros z.
    apply sup_incl with (1:=sfm _); trivial.
    apply Xty;apply cc_prod_elim with (1:=tyf1); trivial.
    
-(*
-
-  apply Wsup_def in ley.
-  destruct ley as [?|(i&l&a'&tyi&eqz)];[auto|].
-  right; exists i; exists l; exists a'; split; trivial.
-  apply cc_lam_def; trivial.
-  exists i; trivial.
-   apply tyf1 in tyi.
-   destruct tyi as (_,tyi).
-   rewrite fst_def in tyi; trivial.
-
-   exists (couple l a'); auto with *.
-   apply sup_ax; trivial.
-   exists y; trivial.
-   rewrite eqz in tyz.  
-   apply Wsnd_def_raw; trivial.
-*)
  rewrite Wsup_def in H.
  destruct H as [?|(i&l&y&?&eqz)].
   destruct fdir with (1:=wit) as (i,tyi,(f0,tyf0,(lei,le0))).
@@ -849,98 +880,6 @@ apply eq_set_ax; intros z.
   rewrite H; trivial.
 Qed.
 
-
-
-(*Lemma infb_complete I J F :
-  ext_fun J F ->
-  (forall j, j ∈ J -> F j ⊆ Wdom) ->
-  (forall j, j ∈ J -> complete I (F j)) ->
-  complete I (infb Wdom J F).
-intros Fext Fty Fcl.
-red; intros.
-apply infb_ax; intros; trivial.
-split.
- apply power_intro; intros.
- apply sup_ax in H1; trivial.
- destruct H1 as (y,tyy,tyz).
- destruct H0 with y y as (y',tyy',(tyfy'&ley'&_)); trivial.
- apply infb_ax in tyfy'; trivial.
- apply ley' in tyz.
- apply power_elim with (2:=tyz).
- apply tyfy'.
-
- intros.
- apply Fcl; trivial.
- red; intros.
- destruct H0 with x0 y as (z,zty,(tyfz&le1&le2)); trivial.
- exists z; trivial.
- split; auto.
- apply infb_ax in tyfz; trivial.
- apply tyfz; trivial.
-Qed.
-*)
-(*
-Lemma Wsup_sup I X f :
-  ext_fun I f ->
-  X ⊆ Wdom ->
-  (exists i, i∈I) ->
-  directed I (Wf X) f ->
-  exists2 a, a ∈ A &
-  exists2 g, is_cc_fun (B a) g &
-  sup I f == Wsup a g /\
-  forall x, x ∈ B a -> cc_app g x == sup I (fun i => Wsnd (f i) x).
-intros fext Xty (i0,wit0) dir.
-red in dir.
-destruct dir with (1:=wit0)(2:=wit0) as (i,wit,(tyfi&lei&_)).
-clear wit0 lei.
-apply Wf_elim in tyfi.
-destruct tyfi as (a0,tya0,(f0,tyf0,eqf0)).
-exists a0; trivial.
-apply cc_prod_is_cc_fun in tyf0.
-econstructor;[|split;[apply Wsup_sup_raw with (X:=X); eauto|]].
- apply is_cc_fun_lam. admit.
-
-admit.
-
-intros.
-rewrite cc_beta_eq; auto with *.
-admit.
-(*
-apply Wsup_sup_raw with (X:=X); eauto.
-intros.
-destruct dir with (1:=wit)(2:=H) as (z,tyz,(tyfz&le0&le1)).
-rewrite eqf0 in le0.
-apply Wf_elim in tyfz.
-destruct tyfz as (a,tya,(f1,tyf1,eqfz)).
-rewrite eqfz in le0.
-apply Wsup_incl_hd_inv in le0.
-apply cc_prod_is_cc_fun in tyf1.
-rewrite <- le0 in tyf1,eqfz.
-exists z; trivial.
-exists f1; auto.*)
-Qed.
-
- Lemma Wf_complete I X :
-  (exists i, i ∈ I) ->
-  X ⊆ Wdom -> complete I X -> complete I (Wf X).
-intros Iwit tyX Xcl.
-red; intros f fext fdir.  
-destruct Wsup_sup with (4:=fdir) as (a,tya,(g,tyg,(eqf,?))); trivial. 
-rewrite eqf; apply Wf_intro; trivial.
-rewrite cc_eta_eq' with (1:=tyg).
-apply cc_prod_intro; intros; auto.
- admit.
-apply Xcl; auto.
-apply Wsnd_directed; trivial.
-intros.
-red in fdir.
-apply Wf_elim in H1; destruct H1 as (a1,_,(f1,_,eqf1)).
-assert (f i ⊆ sup I f); auto.
-rewrite eqf, eqf1 in H1.
-apply Wsup_incl_hd_inv in H1.
-rewrite eqf1,Wfst_def,H1; trivial.
-Qed.
-*)
   
   Lemma Wsup_sup I X f :
   ext_fun I f ->
@@ -1030,49 +969,49 @@ intros Xty Xcl cw1 cw2 incl12.
 apply incl_eq; trivial.
 red; intros.
 assert (tyz : exists2 p, p ∈ List (sup A B) & exists2 a, a ∈ A & z == couple p a).
- specialize power_elim with (1:=Xty _ cw2) (2:=H); intros.
+{specialize power_elim with (1:=Xty _ cw2) (2:=H); intros.
  exists (fst z);[apply fst_typ in H0; trivial|].
  exists (snd z);[apply snd_typ in H0; trivial|].
- apply surj_pair with (1:=H0).
+ apply surj_pair with (1:=H0). }
 destruct tyz as (p,typ,(a,tya,eqz)).
 assert (forall a w1 w2, a ∈ A -> w1 ⊆ w2 -> w1 ∈ X -> w2 ∈ X ->
                         couple p a ∈ w2 -> couple p a ∈ w1).
- clear z eqz incl12 cw1 cw2 H w1 w2 a tya.
+{clear z eqz incl12 cw1 cw2 H w1 w2 a tya.
  elim typ using List_ind; intros.
-  do 2 red; intros.
+ {do 2 red; intros.
   apply fa_morph; intros a.
   apply fa_morph; intros w1.
   apply fa_morph; intros w2.
-  rewrite H; reflexivity.
+  rewrite H; reflexivity. }
 
-  apply Xcl in H1; apply Wf_elim in H1; destruct H1 as (a1,_,(f1,_,eqw1)).
+ {apply Xcl in H1; apply Wf_elim in H1; destruct H1 as (a1,_,(f1,_,eqw1)).
   apply Xcl in H2; apply Wf_elim in H2; destruct H2 as (a2,_,(f2,_,eqw2)).
   rewrite eqw1 in H0|-*; rewrite eqw2 in H0,H3; clear eqw1 eqw2.
   apply Wsup_incl_hd_inv in H0.
   apply Wsup_hd_prop in H3; apply Wsup_hd_prop.
-  rewrite H0; trivial.
+  rewrite H0; trivial. }
 
-  assert (tyw2 :=H5).
+ {assert (tyw2 :=H5).
   apply Xcl in H4; apply Wf_elim in H4; destruct H4 as (a1,_,(f1,tyf1,eqw1)).
   apply Xcl in H5; apply Wf_elim in H5; destruct H5 as (a2,_,(f2,tyf2,eqw2)).
   rewrite eqw1 in H3|-*; rewrite eqw2 in H3,H6,tyw2; clear eqw1 eqw2.
   assert (same_x := H3); apply Wsup_incl_hd_inv in same_x.
   apply Wsup_tl_prop in H6; apply Wsup_tl_prop.
   assert (tyx2 : x ∈ B a2).
-   apply couple_in_app in H6.
+  {apply couple_in_app in H6.
    apply cc_prod_is_cc_fun in tyf2.
    apply tyf2 in H6.
    destruct H6 as (_,tyx).
-   rewrite fst_def in tyx; trivial.
+   rewrite fst_def in tyx; trivial. }
   assert (tyx1 : x ∈ B a1).
    rewrite same_x; trivial.
   revert H6; apply H1; auto.
-   apply Wsnd_mono with (x:=x) in H3; auto.
+  +apply Wsnd_mono with (x:=x) in H3; auto.
    rewrite !Wsnd_def in H3; auto.
     apply Xty; apply cc_prod_elim with (1:=tyf2); trivial.
     apply Xty; apply cc_prod_elim with (1:=tyf1); trivial.
-   apply cc_prod_elim with (1:=tyf1); trivial.
-   apply cc_prod_elim with (1:=tyf2); trivial.
+  +apply cc_prod_elim with (1:=tyf1); trivial.
+  +apply cc_prod_elim with (1:=tyf2); trivial. } }
 revert H; rewrite eqz; apply H0; trivial.
 Qed.
 
@@ -1080,6 +1019,7 @@ End Corecursion_Auxiliary.
 
 End W_Domain.
 
+#[global]Hint Resolve Wf_mono Wf_morph Wf_typ : core.
 #[global]Hint Resolve Wfbot_mono Wfbot_morph Wfbot_typ : core.
 
 (*******************************************************************************************)

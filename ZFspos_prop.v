@@ -240,7 +240,7 @@ destruct TI_iso_fun with
 
  apply wf'iso; trivial.
 
- apply W_o_o; trivial.
+ apply W_ord_o; trivial.
 
  fold isow in expTI, isof.
  apply iso_fun_inj with Wp2 (wf' isow).
@@ -260,11 +260,11 @@ destruct TI_iso_fun with
   unfold IND, INDi; red; intros.
   rewrite <- TI_mono_succ; auto with *.
   2:apply p_ok; trivial.
-  2:apply W_o_o; trivial.  
+  2:apply W_ord_o; trivial.  
   revert H; apply TI_incl.
    apply Fmono_morph; apply p_ok; trivial.
-   apply isOrd_succ; apply W_o_o; trivial.
-   apply lt_osucc; apply W_o_o; trivial.
+   apply isOrd_succ; apply W_ord_o; trivial.
+   apply lt_osucc; apply W_ord_o; trivial.
 Qed.
 
   Lemma INDi_IND : forall o,
@@ -719,7 +719,7 @@ apply G_TI; trivial.
  apply Fmono_morph; apply p_ok.
 
  unfold IND_clos_ord.
- apply W_o_o; apply p_ok.
+ apply W_ord_o; apply p_ok.
 
  unfold IND_clos_ord; apply G_W_ord; trivial.
   apply p_ok.

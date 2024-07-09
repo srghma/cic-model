@@ -188,7 +188,7 @@ Lemma dIND_eq : forall p a, isDPositive p -> a ∈ Arg -> dIND p a == dpos_oper 
 intros p a dp tya.
 assert (oo : isOrd (IND_clos_ord p)).
 {unfold IND_clos_ord.
- apply W_o_o.
+ apply W_ord_o.
  apply dp. }
 apply incl_eq.
 +unfold dIND; rewrite <- dINDi_succ_eq; trivial.
@@ -940,7 +940,7 @@ apply G_TIF; trivial; try apply p_ok.
  apply G_sup; auto.
  
 +unfold IND_clos_ord.
- apply W_o_o; apply p_ok.
+ apply W_ord_o; apply p_ok.
 
 +unfold IND_clos_ord; apply G_W_ord; trivial.
   apply p_ok.
