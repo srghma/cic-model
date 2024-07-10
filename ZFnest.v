@@ -459,7 +459,6 @@ Let a'of_typ o a fc X :
   a'of a fc ∈ A'i(osucc o).
 unfold a'of; intros.
 unfold A'i; rewrite TI_mono_succ; auto with *.
-2:apply W_F_mono; auto with *.
 apply W_F_intro; intros; auto with *.
  do 2 red; intros; apply fst_morph; auto.
 

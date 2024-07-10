@@ -119,8 +119,10 @@ ZFfunext.v
 ZFlambda.v
 ZFlist.v
 
+ZFencode.v
 ZFwdom.v
 ZFw.v
+ZFwsimul.v
 ZFcow.v
 ZFind_basic.v
 ZFind_natbot.v

@@ -29,11 +29,11 @@ Hypothesis gm : Proper (eq_set==>eq_set==>iff) g.
 
 (** The intended type operator:
 
-    [Inductive Wd : Arg->Type := C (x:A) (_:forall i:B x, Wd(f x i)) : Wd(g x).
+    [[Inductive Wd : Arg->Type := C (x:A) (_:forall i:B x, Wd(f x i)) : Wd(g x).]]
 
     is encoded as
 
-    [Inductive Wd' (a:Arg) : Type := C' (x:A) (_:g x=a) (_:forall i:B x, Wd(f x i)).
+    [[Inductive Wd' (a:Arg) : Type := C' (x:A) (_:g x=a) (_:forall i:B x, Wd(f x i)).]]
  *)
 Definition W_Fd (X:set->set) (a:set) :=
   Σ x ∈ subset A (fun x => g x a), Π i ∈ B x, X (f x i).
@@ -208,7 +208,6 @@ rewrite TIF_eq; auto with *.
 apply eq_set_ax; intros z.
 rewrite subset_ax.
 rewrite TI_eq; auto with *.
-2:apply W_F_morph; trivial.
 rewrite sup_ax.
  rewrite sup_ax.
   split; intros.
@@ -283,7 +282,14 @@ rewrite sup_ax.
 Qed.
 
 (** Fixpoint of the W_Fd operator *)
-Definition Wd := TIF Arg W_Fd (W_ord A B).
+Definition Wd_ord := W_ord A B.
+
+Lemma Wd_ord_o : isOrd Wd_ord.
+apply W_ord_o; trivial.
+Qed.
+Hint Resolve Wd_ord_o : core.
+
+Definition Wd := TIF Arg W_Fd Wd_ord.
 
 Lemma Wd_eqn : forall a, a ∈ Arg -> Wd a == W_Fd Wd a.
 intros.
@@ -449,3 +455,5 @@ Qed.
 *)
 
 End DependentW.
+
+#[global]Hint Resolve Wd_ord_o : core.

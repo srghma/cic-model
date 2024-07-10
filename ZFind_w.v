@@ -855,7 +855,7 @@ End W_Univ.
 
 End W_theory.
 
-#[global]Hint Resolve W_ord_o : core.
+#[global]Hint Resolve W_F_mono W_ord_o : core.
 
 (* Discharged morphism results *)
 
@@ -926,7 +926,6 @@ assert (isOrd (W_ord U (fun X => X))).
  apply W_ord_o; trivial.
 revert x H0; elim H1 using isOrd_ind; intros.
 apply TI_elim in H4; auto with *.
-2:apply W_F_morph; trivial.
 destruct H4 as (o',?,?).
 apply W_F_elim in H5; auto with *.
 destruct H5 as (?,(?,?)).
@@ -934,9 +933,7 @@ apply H with (fst x) (cc_app (snd x)); intros; trivial.
  apply cc_app_morph; reflexivity.
 
  generalize (H6 _ H8); apply TI_incl; auto with *.
-  apply W_F_morph; trivial.
-
-  apply H2; trivial.
+ apply H2; trivial.
 
  apply H3 with o'; auto.
 Qed.
