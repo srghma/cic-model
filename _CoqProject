@@ -123,7 +123,6 @@ ZFencode.v
 ZFwdom.v
 ZFw.v
 ZFwsimul.v
-ZFcow.v
 ZFind_basic.v
 ZFind_natbot.v
 ZFind_nat.v
@@ -144,6 +143,8 @@ ZFsposd.v
 sketches/ZFsposd_example.v
 ZFstrictpos1.v
 ZFstrictpos.v
+ZFcow.v
+ZFind_streams.v
 
 Nest.v
 NonUniform.v

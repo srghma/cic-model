@@ -2,7 +2,7 @@ Require Import ZF ZFpairs ZFrelations ZFcoc ZFlist ZFord ZFfix.
 Require Import ZFwdom.
 Require ZFw.
 
-Lemma wsup_fsub A B (bm : morph1 B) X x f :
+  Lemma wsup_fsub A B (bm : morph1 B) X x f :
   X ⊆ Fstages (Wf A B) (Wdom A B) ->
   x ∈ A ->
   f ∈ (Π __∈B x, X) ->
@@ -56,7 +56,7 @@ split; intros.
   apply H2 in ty.
   revert ty; apply Fstages_inA. }
 Qed.
-
+    
 Section Wsimulation.
   Variable A : set.
   Variable B : set -> set.
@@ -97,7 +97,11 @@ rewrite H0; reflexivity.
 Qed.
 
   Instance Wfmap_morph : morph1 Wfmap.
-  Admitted.
+do 2 red; intros.
+apply replf_morph; trivial.
+red; intros.
+rewrite H1; reflexivity.
+Qed.
   
   Lemma Wfmap_typ : typ_fun Wfmap Wd Wd'.
 intros w tyw.
@@ -248,7 +252,7 @@ apply Wf_elim in H0; [|auto].
 destruct H0 as (x',tyx',(f',tyf',eqw)).
 rewrite eqw in H1.
 rewrite wsup_fsub with (3:=tyx')(4:=tyf') in H1; auto.
-2:apply TI_Fstages; auto.
+2:apply TI_Fstages; auto with *.
 rewrite replf_ax in H1.
 2:do 2 red; intros; apply cc_app_morph; auto with *.
 destruct H1 as (i,tyi,eqx).

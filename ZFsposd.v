@@ -4,7 +4,32 @@ Require Import ZFstable ZFiso ZFind_w ZFspos.
 (** Inductive families. Indexes are modelled as a constraint over an inductive
     type defined without considering the index values.
  *)
+(*
+Section FamiliesAsSubsets.
 
+  Variable I : set.
+  Variable A : set.
+  Variable F : set -> set.
+  Hypothesis Fmono : Proper (incl_set==>incl_set) F.
+
+  Variable Fd : (set->set)->set->set.
+  Hypothesis Fdmono : mono_fam I Fd.
+  
+  Variable R : set->set->Prop. (* [R i x] means object x has index a∈I *)
+  Hypothesis Rm : Proper (eq_set==>eq_set==>iff) R.
+  Hypothesis F_subset :
+    forall X, morph1 X ->
+    forall i, i ∈ I ->
+    Fd X i == subset (F (sup A X)) (R i).
+
+
+
+
+*)
+
+
+
+  
 Require Import ZFind_wd.
 
 Section InductiveFamily.

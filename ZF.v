@@ -964,16 +964,6 @@ apply eq_intro; intros.
  destruct H; eauto using union_intro.
 Qed.
 
-Lemma power_sup_closed a I f :
-  ext_fun I f ->
-  (forall x, x ∈ I -> f x ∈ power a) ->
-  sup I f ∈ power a.
-intros fext tyf; apply power_intro; intros.
-apply sup_ax in H; trivial.
-destruct H as (?,?,tyz).
-apply power_elim with (f x); auto.
-Qed.
-
 (** Conditional set *)
 
 Definition if_prop P x y :=

@@ -510,6 +510,30 @@ split; intros.
   intro h; rewrite h in H3; contradiction.
 Qed.
 
+Lemma cc_bot_stable K :
+  (forall x X, K X -> x ∈ X -> x==empty \/ ~x==empty) ->
+  stable_class K cc_bot.
+intros empty_dec.
+do 2 red; intros.
+destruct inter_wit with (2:=H0); auto with *.
+assert (forall x, x ∈ X -> z ∈ cc_bot x).
+{intros.
+ apply inter_elim with (1:=H0).
+ apply replf_ax; auto with *.
+ exists x0; auto with *. }
+assert (zcase:=H2 _ H1).
+apply cc_bot_ax in zcase; destruct zcase.
+ rewrite H3; auto.
+specialize H with (1:=H1).
+destruct (empty_dec z x) as [is_mt|not_mt]; trivial.
+ rewrite is_mt; auto.
+apply cc_bot_intro. 
+apply inter_intro;[|eauto].
+intros. 
+apply H2 in H4.
+apply cc_bot_ax in H4; destruct H4; [contradiction|trivial].
+Qed.
+
 (** Taking the bottom value out of the domain of a function *)
 Definition squash f := subset f (fun c => ~ fst c == empty).
 

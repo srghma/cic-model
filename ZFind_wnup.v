@@ -10,11 +10,8 @@ Existing Instance TIF_morph.
 (** A dependent version of ZFind_w: Arg is the type of indexes
    This should support non-uniform parameters.
  *)
-(*Require Import ZFwdom.*)
 Require ZFind_w.
 Module W0 := ZFind_w.
-
-(*Hint Resolve W0.W_F_mono Fmono_morph : core.*)
 
 Section W_theory.
 
@@ -345,9 +342,9 @@ Qed.
     Arg appears in the data, so if it is big, the resulting inductive type is big.
  *)
 
-Definition A' := sigma Arg A.
-Definition B' a' := B (fst a') (snd a').
-Global Instance B'_morph : morph1 B'.
+Let A' := sigma Arg A.
+Let B' a' := B (fst a') (snd a').
+Instance B'_morph : morph1 B'.
 do 2 red; intros; apply Bm; [apply fst_morph|apply snd_morph]; trivial.
 Qed.
 Hint Resolve B'_morph : core.
@@ -873,13 +870,7 @@ Hint Resolve B'_morph : core.
 
 Section MoreMorph.
 
-Local Notation E := eq_set.
-
-Instance A'_morph_gen : Proper (eq_set==>(eq_set==>eq_set)==>eq_set) A'.
-do 3 red; intros.
-unfold A'.
-apply sigma_morph; auto.
-Qed.
+Local Notation E := eq_set (only parsing).
 
 Lemma W_Fd_morph_all :
   Proper ((E==>E)==>(E==>E==>E)==>(E==>E==>E==>E)==>(E==>E)==>E==>E) W_Fd.
@@ -916,10 +907,9 @@ Qed.
 do 4 red; intros.
 unfold W_ord.
 apply W0.W_ord_morph.
- apply A'_morph_gen; trivial.
+ apply sigma_morph; trivial.
 
  red; intros.
- unfold B'.
  apply H1.
   apply fst_morph; trivial. 
   apply snd_morph; trivial. 
@@ -954,19 +944,75 @@ Hypothesis ftyp : forall a x y,
 (** We show the above encoding with small index simulates [W], and
     hence the closure ordinal of [W a] is small for each parameter [a].
  *)
-Definition A'' a q := A (Dec f a q).
-Definition B'' a q := B (Dec f a q).
 
-Instance A''_morph : morph2 A''.
+Let f' a b := f a (fst b) (snd b).
+Let idx' a := sigma (A a) (B a).
+Notation Arg' := (Aenc Arg idx' f').
+Notation decode := (Dec f').
+Let fenc a x y := extln a (couple x y).
+
+Let f'_typ a b : a ∈ Arg -> b ∈ idx' a -> f' a b ∈ Arg.
+unfold f'; intros tya tyi.
+apply sigma_elim in tyi; auto with *.
+2:do 2 red; intros; apply Bm; auto with *.
+destruct tyi as (_ & ? & ?).
+apply ftyp; trivial.
+Qed.
+Local Instance idx'm : morph1 idx'.
+do 2 red; intros.
+apply sigma_morph; auto with *.
+Qed.
+Local Instance f'm : morph2 f'.
+do 3 red; intros.
+unfold f'.
+rewrite H,H0; reflexivity.
+Qed.
+Local Instance fencm : Proper (eq_set ==> eq_set ==> eq_set ==> eq_set) fenc.
+do 4 red; intros.
+unfold fenc.
+apply extln_morph; trivial.
+apply couple_morph; trivial.
+Qed.
+
+Let idx'_intro a p x i :
+  a ∈ Arg ->
+  p ∈ Arg' a ->
+  x ∈ A (decode a p) ->
+  i ∈ B (decode a p) x ->
+  couple x i ∈ idx' (decode a p).
+intros.
+apply couple_intro_sigma; trivial.  
+do 2 red; intros.
+apply Bm; auto with *.
+Qed.
+
+Let decode_fenc a p x i :
+  a ∈ Arg ->
+  p ∈ Arg' a ->
+  x ∈ A (decode a p) ->
+  i ∈ B (decode a p) x ->
+  decode a (fenc p x i) == f (decode a p) x i.
+intros.
+unfold fenc.
+rewrite Dec_extln with (A:=Arg)(B:=idx')(f:=f'); auto with *.
+unfold f'.
+rewrite fst_def, snd_def; reflexivity.
+Qed.
+  
+Hint Resolve f'_typ idx'm f'm fencm : core.
+
+Let A'' a q := A (decode a q).
+Let B'' a q := B (decode a q).
+
+Local Instance A''_morph : morph2 A''.
 unfold A''.
 do 3 red; intros.
 rewrite H,H0; reflexivity.
 Qed.
-Instance B''_morph : Proper (eq_set==>eq_set==>eq_set==>eq_set) B''.
+Local Instance B''_morph : Proper (eq_set==>eq_set==>eq_set==>eq_set) B''.
 unfold B''; do 4 red; intros.
 rewrite H,H0,H1; reflexivity.
 Qed.
-
 Local Instance A''_morph' a : morph1 (A'' a).
 apply A''_morph; reflexivity.
 Qed.
@@ -975,30 +1021,32 @@ Local Instance B''_morph' a : morph2 (B'' a).
 apply B''_morph; reflexivity.
 Qed.
 
-Instance WWf_morph a' : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set)
-     (W_Fd (A'' a') (B'' a') extln).
+Let W_Fd' a      := W_Fd (A'' a) (B'' a) fenc.
+Let Wi'   a o a' := Wi (Arg' a) (A'' a) (B'' a) fenc o a'.
+            
+Instance W_Fd'_morph a' : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) (W_Fd' a').
 do 3 red; intros.
 apply W_Fd_morph; auto with *.
 Qed.
 
-Notation Arg' := (ZFencode.Arg' Arg A B f).
 
 Lemma Wi_rebase o a :
   isOrd o ->
   a ∈ Arg ->
   Wi Arg A B f o a ==
-  Wi (Arg' a) (A'' a) (B'' a) extln o empty.
+  Wi' a o empty.
 intros.
 symmetry.
-unfold Wi.
-transitivity (TIF Arg (W_Fd A B f) o (Dec f a empty)).
-2:apply TIF_morph; [reflexivity|apply Dec_mt with (Arg:=Arg)(A:=A)(B:=B); trivial].
-generalize empty (Arg'_intro1 Arg A B f Am Bm fm  ftyp _ H0).
+unfold Wi', Wi.
+transitivity (TIF Arg (W_Fd A B f) o (decode a empty)).
+2:apply TIF_morph; [reflexivity|apply Dec_mt with (A:=Arg)(B:=idx'); auto].
+generalize empty (Aenc_intro1 Arg idx' f' idx'm f'm  f'_typ _ H0).
 apply isOrd_ind with (2:=H).
 intros ord oord leo Hrec p typ.
 rewrite !TIF_eq; auto with *.
 2:apply W_Fd_morph; auto with *.
-2:apply Dec_typ with (A:=A)(B:=B); trivial.
+2:apply Dec_typ with (B:=idx'); trivial.
+2:apply W_Fd'_morph.
 apply sup_morph; auto with *.
 red; intros o' o'' o'lt eqo.
 unfold W_Fd.
@@ -1011,8 +1059,11 @@ apply sigma_ext.
  +intros i i' tyi eqi.
   rewrite Hrec; trivial.
   2:rewrite <-eqx,<-eqi; apply extln_typ; trivial.  
+  2:apply idx'_intro; trivial.
   apply TIF_morph; [symmetry; trivial|].
-  symmetry; rewrite <-eqx,<-eqi; apply Dec_extln with (Arg:=Arg)(A:=A)(B:=B); trivial.
+  symmetry; rewrite <-eqx,<-eqi.
+  unfold fenc.
+  apply decode_fenc; trivial.
 Qed.
 
 
@@ -1032,37 +1083,39 @@ Lemma W_ord_a_smaller a :
   a ∈ Arg -> W_ord_a a ⊆ W_ord Arg A B.
 unfold W_ord_a.
 intros.
-apply Wfmap_W_ord with (f:=fun p => couple (Dec f a (fst p)) (snd p)); intros; auto with *.
+apply Wfmap_W_ord with (f:=fun p => couple (decode a (fst p)) (snd p)); intros; auto with *.
 +do 2 red; intros.
-rewrite H0; reflexivity.
+ rewrite H0; reflexivity.
 +red; intros.
  apply sigma_elim in H0; auto with *.
  destruct H0 as (eqx&typ&tyx).
  apply couple_intro_sigma; auto with *.
- apply Dec_typ with (A:=A)(B:=B); trivial. 
-+unfold B'.
- unfold A' in H0.
- rewrite fst_def, snd_def. 
- reflexivity.
+ apply Dec_typ with (A:=Arg)(B:=idx'); trivial. 
++unfold B''.
+ rewrite fst_def, snd_def; reflexivity.
 Qed.
 
 Lemma W_rebase a :
   a ∈ Arg ->
-  W Arg A B f a == W (Arg' a) (A'' a) (B'' a) extln empty.
+  W Arg A B f a == W (Arg' a) (A'' a) (B'' a) fenc empty.
 intros.
 unfold W.
 rewrite Wi_rebase; auto using W_ord_o.
+unfold Wi'.
 apply incl_eq.
- fold (W (Arg' a) (A'' a) (B'' a) extln empty).
+ fold (W (Arg' a) (A'' a) (B'' a) fenc empty).
  apply W_post; auto using W_ord_o with *.
   intros.
-  apply extln_typ; auto.
+  apply extln_typ; trivial.  
+  apply idx'_intro; trivial.
 
-  apply Arg'_intro1; trivial.
+  apply Aenc_intro1; trivial.
 
  unfold Wi.
  apply TIF_mono; auto using W_ord_o with *.
-  apply Arg'_intro1; trivial.
+  apply W_Fd'_morph.
+
+  apply Aenc_intro1; trivial.
 
   assert (tmp := W_ord_a_smaller).
   unfold W_ord_a in tmp; auto.
@@ -1089,20 +1142,26 @@ Section UniverseFacts.
   Hypothesis aU : forall a, a ∈ Arg -> A a ∈ U.
   Hypothesis bU : forall a x, a ∈ Arg -> x ∈ A a -> B a x ∈ U.
 
+  Let G_Arg' a : a ∈ Arg -> Arg' a ∈ U.
+intros.
+apply G_Aenc; trivial.
+intros.
+apply G_sigma; auto with *.
+do 2 red; intros; apply Bm; auto with *.
+Qed.
+
   (* ... but the closure ordinal is in U, for each value of [a] *)
   Lemma G_W_ord_a a : a ∈ Arg -> W_ord_a a ∈ U.
 intros.
 unfold W_ord_a.
 apply G_W_ord; auto with *.
- apply G_Arg'; trivial.
-
  intros.
  apply aU.
- apply Dec_typ with (A:=A)(B:=B); trivial.
+ apply Dec_typ with (A:=Arg)(B:=idx'); trivial. 
 
  intros.
  apply bU; trivial.
- apply Dec_typ with (A:=A)(B:=B); trivial.
+ apply Dec_typ with (A:=Arg)(B:=idx'); trivial. 
 Qed.
 
   Lemma G_W_big a : a ∈ Arg -> W Arg A B f a ∈ U.
@@ -1110,22 +1169,21 @@ intros.
 rewrite W_rebase; trivial.
 unfold W.
 apply G_Wi; auto using W_ord_o with *.
-intros; apply extln_typ; trivial.
-
- apply G_Arg'; trivial.
-
+ intros; apply extln_typ; trivial.
+ apply idx'_intro; trivial.
+                         
  intros.
  apply aU.
- apply Dec_typ with (A:=A)(B:=B); trivial.
+ apply Dec_typ with (A:=Arg)(B:=idx'); trivial. 
 
  intros.
  apply bU; trivial.
- apply Dec_typ with (A:=A)(B:=B); trivial. 
+ apply Dec_typ with (A:=Arg)(B:=idx'); trivial. 
 
  change (W_ord_a a ∈ U).
  apply G_W_ord_a; trivial.
 
- apply Arg'_intro1; trivial.
+ apply Aenc_intro1; trivial.
 Qed.
 
 End UniverseFacts.
@@ -1139,24 +1197,19 @@ Instance W_ord_a_morph :
 do 6 red; intros.
 unfold W_ord_a.
 apply W_ord_morph_all.
- unfold Arg'.
- apply TIF_morph_gen; auto with *.
- do 2 red; intros.
- apply union2_morph; auto with *.
- apply sigma_morph; auto with *.
- red; intros; apply sigma_morph; auto with *.
-  apply H1; trivial.
+ apply Aenc_morph_gen; trivial.
 
-  red; intros; apply H4; apply H2; auto with *.
+ red; intros; apply sigma_morph; auto with *.
+ do 2 red; intros; apply H2; try rewrite H5; auto with *.
 
  red; intros.
- unfold A''.
  apply H0; apply Dec_morph_gen; auto with *.
+ do 2 red; intros; apply H2; try rewrite H6; auto with *.
 
  do 2 red; intros.
- unfold B''.
  apply H1; trivial.
  apply Dec_morph_gen; auto with *.
+ do 2 red; intros; apply H2; try rewrite H7; auto with *.
 Qed.
 
 Section Test.

@@ -40,8 +40,22 @@ intros.
 unfold COWi; apply COTI_mono_succ; auto with *.
 Qed.
 
+  Lemma COWi_zero : COWi zero == Wdom.
+apply COTI_initial; auto.
+Qed.
+
+  Lemma COWi_one : COWi (osucc zero) == Wf Wdom.
+rewrite COWi_succ; auto.
+rewrite COWi_zero; reflexivity.
+Qed.
+
   Lemma COWi_decreasing : decreasing COWi.
 apply COTI_mono; auto with *.
+Qed.
+
+  Lemma COWi_incl o: isOrd o -> COWi (osucc o) ⊆ COWi o.
+intros; apply COWi_decreasing; auto.
+red; intros; apply isOrd_trans with o; auto.
 Qed.
   
   (** Coinductive *)
@@ -94,11 +108,10 @@ apply incl_eq.
 
  unfold COW.
  rewrite <- COWi_succ; trivial.
- apply COWi_decreasing; auto with *.
- red; intros.
- apply isOrd_trans with co_ord; auto.
+ apply COWi_incl; trivial.
 Qed.
 
+(* It is the greatest fixpoint (in Wdom) *)
 Lemma COW_gfp X : X ⊆ Wdom -> X ⊆ Wf X -> X ⊆ COW.
 intros.
 apply COTI_post_fix; auto with *.
@@ -115,15 +128,8 @@ End CoFixpointByIteration.
 
 
 (* We do not need more properties about COW beyond this point *)
-(* We rediscover after the fact that COW is the iteration at omega *)
 Lemma COW_def : COW == COWi co_ord.
 reflexivity.
-(*apply incl_eq.
- apply COW_COWi; trivial.
-
- apply COW_gfp.
-  apply COTI_bound; auto.
-  apply COWi_closure.*)
 Qed.
 Opaque COW.
 Hint Resolve co_ordo : core.
@@ -175,7 +181,7 @@ intros wit oo; elim oo using isOrd_ind; intros.
 assert (aux := fun o => isOrd_inv _ o H).
 intros f fext fdir.
 apply COTI_intro; intros; auto with *.
-+apply Wdom_sup_closed; trivial.
++apply Wdom_complete; trivial.
  revert fdir; apply directed_covariant.
  apply COTI_bound; auto with *.
 
@@ -184,8 +190,8 @@ apply COTI_intro; intros; auto with *.
 
   revert fdir; apply directed_covariant.
   rewrite <- COTI_mono_succ; auto with *.
-   apply COTI_mono; auto with *.
-   apply olts_le; apply lt_osucc_compat; trivial.
+  apply COTI_mono; auto with *.
+  apply olts_le; apply lt_osucc_compat; trivial.
 Qed.
 
 Lemma COWi_sup_intro f o o' :
@@ -196,25 +202,37 @@ Lemma COWi_sup_intro f o o' :
   (forall o'', o' ⊆ o'' -> o'' ∈ o -> f o'' ∈ Wf (COWi o')) ->
   sup o f ∈ Wf (COWi o').
 intros fext fmono oo lto Hrec.
+assert (oo' : isOrd o') by eauto using isOrd_inv.
 intros; apply complete_sup_intro with (F:=fun o => Wf(COWi o)); trivial.
-apply Wf_complete; eauto.
- apply COTI_bound; auto with *.
- apply isOrd_inv with o; trivial.
-
- apply COWi_complete; eauto.
- apply isOrd_inv with o; trivial.
+rewrite <- COWi_succ; auto with *.
+apply COWi_complete; eauto.
 Qed.
 
 (* Simple co-recursion *)
 Section SimpleCorecursion.
 
+(* The body of the cofixpoint *)
 Hypothesis F:set->set.
 Hypothesis Fm:morph1 F.
-(*Existing Instance Fm.*)
+(* The body produces a constructor each time it is applied *)
 Hypothesis Fty :
-  forall X w, COW ⊆ Wf X -> Wf X ⊆ X ->
+  forall o w, isOrd o -> w ∈ COWi o -> F w ∈ COWi (osucc o).
+
+(*Hypothesis Fty :
+  (forall X w, X ⊆ Wdom -> COW ⊆ X -> Wf X ⊆ X -> P X) ->
+(forall o, isOrd o -> P (COWi o)). 
             w ∈ X -> F w ∈ Wf X.
-(*Hint Resolve Fm.*)
+*)
+Lemma Fty_post_fix : forall P, 
+  (forall X, X ⊆ Wdom -> COW ⊆ X -> Wf X ⊆ X -> P X) ->
+  (forall o, isOrd o -> P (COWi o)). 
+intros.
+apply X; auto with *.
++apply COWi_typ; trivial.
++apply COW_COWi; trivial.
++rewrite <- COWi_succ; auto with *.
+ apply COWi_incl; trivial.
+Qed.
 
 Lemma TI_WF_dom o :
   isOrd o ->
@@ -227,37 +245,47 @@ apply sup_ax in H2. 2:do 2 red; intros; apply Fm; apply TI_morph; trivial.
 destruct H2.
 apply power_elim with (2:=H3).
 apply Wf_typ with (X:=Wdom); auto with *.
+rewrite <- COWi_one.
+apply Fty; auto.
+rewrite COWi_zero; auto.
 Qed.
-
 
 Lemma FTI_typ o w :
   isOrd o ->
   w ∈ COWi o ->
   F w ∈ Wf (COWi o).
 intros.
-apply Fty; trivial.
- rewrite COW_eqn; apply Wf_mono; [trivial|].
- apply COW_COWi; trivial.
-
- unfold COWi; rewrite <- COTI_mono_succ; auto with *.
- apply COTI_incl; auto with *.
+rewrite <- COWi_succ; auto with *.
 Qed.
 
 (**)
 
-Definition productive X F :=
-  forall w w0,
-  w0 ∈ X -> (* w0 = observation *)
-  w ∈ X -> w0 ⊆ w -> (* obs of w0 are the same in w *)
-  F w0 ⊆ F w. (* F w0 can be observed both in F w *)
+Definition mono_bounded X F :=
+  forall x y, x ∈ X -> y ∈ X ->
+  x ⊆ y -> F x ⊆ F y.
   
-Hypothesis Fprod : productive Wdom F.
+Hypothesis Fmono : mono_bounded Wdom F.
 (*  forall X, X ⊆ Wdom -> COW ⊆ Wf X -> Wf X ⊆ X -> (* = K X *)
-  productive X F.*)
+  mono_bounded X F.*)
          
+
+Lemma TI_pre_fix_bounded fx o :
+     isOrd o ->
+     fx ∈ Wdom ->
+     F fx ⊆ fx ->
+     TI F o ⊆ fx.
+intros oo tyfx prefx.
+elim oo using isOrd_ind; intros.
+red; intros.
+elim TI_elim with (3:=H2); intros; auto with *.
+apply prefx.
+revert H4; apply Fmono; auto.
+apply TI_WF_dom; eauto using isOrd_inv.
+Qed.
+
 Lemma FTI_mono : increasing (fun o => F (TI F o)).
 red; intros.
-apply Fprod.
+apply Fmono.
  apply TI_WF_dom; trivial.
 
  apply TI_WF_dom; trivial.
@@ -272,16 +300,14 @@ destruct H0 as (o',?,?).
 revert H1; apply FTI_mono; eauto using isOrd_inv.
 Qed.
 
-
-Lemma TI_WF_typ_gen o o' : isOrd o -> isOrd o' -> o' ⊆ o -> TI F o ∈ COWi o'.
+  Lemma TI_WF_typ_gen o o' : isOrd o -> isOrd o' -> o' ⊆ o -> TI F o ∈ COWi o'.
 intros oo; revert o'; elim oo using isOrd_ind; intros.
 apply COTI_intro; auto with *.
  apply TI_WF_dom; trivial.
 
  intros o''; intros.
+ fold (COWi o'').
  assert (oo'':isOrd o'') by eauto using isOrd_inv.
- assert (eqC: Wf (COWi o'') == COWi (osucc o'')).
-  symmetry; apply COTI_mono_succ; auto with *.
  rewrite TI_eq; auto.
  apply COWi_sup_intro; auto.
   apply FTI_mono.
@@ -295,32 +321,6 @@ intros; apply TI_WF_typ_gen; auto with *.
 Qed.
 
 
-
-Definition K X :=
-  COW ⊆ X /\ X ⊆ Wdom /\ Wf X ⊆ X.
-Definition K' X :=
-  COW ⊆ X /\ X ⊆ Wdom /\ X ⊆ Wf X.
-
-Definition Fcfx X := subset X (fun w => F w ⊆ w).
-
-Lemma Fcxf_cofix w :
-  w ∈ Fcfx COW ->
-  w ∈ COW /\ w == F w.
-intros.
-apply subset_ax' in H.
-destruct H.
-split; trivial.
-apply pre_incl_eq with (A:=A)(B:=B)(X:=COW); auto.
- rewrite <-COW_eqn; reflexivity.
-
- rewrite COW_eqn; apply Fty; auto.
-  rewrite <-COW_eqn; reflexivity.
-  rewrite <-COW_eqn; reflexivity.
-do 2 red; intros.
-rewrite H1.
-reflexivity.
-Qed.
-
 Definition COREC := TI F co_ord.
 
 Lemma COREC_typ : COREC ∈ COW.
@@ -330,19 +330,30 @@ Qed.
 
 Lemma COREC_eqn : COREC == F COREC.  
 symmetry.
-apply pre_incl_eq with (A:=A)(B:=B)(X:=COWi co_ord); auto.
- apply COWi_closure.
-
+apply pre_incl_eq with (A:=A)(B:=B)(X:=COW); auto.
++apply COWi_closure.
++apply COREC_typ.
++rewrite COW_eqn.
+ rewrite COW_def.
+ apply FTI_typ; trivial.
  rewrite <- COW_def.
  apply COREC_typ.
-
- rewrite <- COW_def, COW_eqn, COW_def.
- apply FTI_typ; trivial.
- apply COREC_typ.
-
- apply TI_WF_step; trivial.
++apply TI_WF_step; trivial.
 Qed.
 
+Lemma corec_COWi w :
+  w ∈ Wdom ->
+  w == F w ->
+  forall o, isOrd o -> w ∈ COWi o.
+intros tyw wfx o oo.
+elim oo using isOrd_ind; intros.
+apply COTI_intro; intros; auto with *.
+fold (COWi o').
+assert (oo' : isOrd o') by eauto using isOrd_inv.
+rewrite <- COWi_succ; trivial.
+rewrite wfx.
+apply Fty; auto.
+Qed.
 
 Lemma corec_typ w :
   w ∈ Wdom ->
@@ -350,12 +361,18 @@ Lemma corec_typ w :
   w ∈ COW.
 intros.
 rewrite COW_def.
+apply corec_COWi; trivial.
+(*apply COTI_intro; intros; auto with *.
+rewrite H0.
+
+
 elim co_ordo using isOrd_ind; intros.
 apply COTI_intro; intros; auto with *.
 rewrite H0.
-apply FTI_typ; eauto using isOrd_inv.
+apply FTI_typ; eauto using isOrd_inv.*)
 Qed.
 
+  
 Lemma COREC_unique w :
   w ∈ Wdom ->
   w == F w ->
@@ -368,38 +385,34 @@ apply pre_incl_eq with (A:=A)(B:=B)(X:=COW); auto.
 
  apply corec_typ; trivial.
 
- unfold COREC.
- elim co_ordo using isOrd_ind; intros.
- red; intros.
- elim TI_elim with (3:=H4); intros; auto with *.
- rewrite H0; revert H6; apply Fprod; auto.
- apply TI_WF_dom; eauto using isOrd_inv.
+ apply TI_pre_fix_bounded; trivial.
+ rewrite <- H0; reflexivity.
 Qed.
 
-(* Productive functions : includes constructors *)
+(* Mono_Bounded functions : includes constructors *)
 
  
-Lemma productive_id X : productive X (fun w => w).
+Lemma mono_bounded_id X : mono_bounded X (fun w => w).
   red; trivial.
 Qed.
 
-Lemma productive_comp X Y F0 G :
+Lemma mono_bounded_comp X Y F0 G :
   (forall w, w ∈ X -> F0 w ∈ Y) ->
-  productive X F0 ->
-  productive Y G ->
-  productive X (fun x => G (F0 x)).
-unfold productive; auto.
+  mono_bounded X F0 ->
+  mono_bounded Y G ->
+  mono_bounded X (fun x => G (F0 x)).
+unfold mono_bounded; auto.
 Qed.
 
-Lemma productive_cst X w : productive X (fun _ => w).
+Lemma mono_bounded_cst X w : mono_bounded X (fun _ => w).
 red; reflexivity.
 Qed.
 
-Lemma productive_cstr X x f :
+Lemma mono_bounded_cstr X x f :
   (forall w, w ∈ X -> is_cc_fun (B x) (f w)) ->
-  (forall i, i ∈ B x -> productive X (fun w => cc_app (f w) i)) ->
-  productive X (fun w => Wsup x (f w)).
-unfold productive; intros fty fprod; intros.
+  (forall i, i ∈ B x -> mono_bounded X (fun w => cc_app (f w) i)) ->
+  mono_bounded X (fun w => Wsup x (f w)).
+unfold mono_bounded; intros fty fprod; intros.
 apply ZFwdom.Wsup_mono with (B:=B); auto with *.
 Qed.
 
@@ -418,13 +431,13 @@ Variable F:(set->set)->set->set.
 Hypothesis Fm:Proper((eq_set==>eq_set)==>eq_set==>eq_set) F.
 Existing Instance Fm.
 Hypothesis Fty :
-  forall X f, COW ⊆ Wf X -> Wf X ⊆ X ->
+  forall X f, X ⊆ Wdom -> COW ⊆ X -> Wf X ⊆ X ->
   morph1 f ->
   typ_fun f I X ->
   typ_fun (F f) I (Wf X).
 Hint Resolve Fm : core.
 
-Definition iproductive I X F :=
+Definition imono_bounded I X F :=
   forall w w0,
   morph1 w -> morph1 w0 ->
   typ_fun w0 I X -> (* w0 = observation *)
@@ -432,7 +445,7 @@ Definition iproductive I X F :=
   incl_fam I w0 w -> (* obs of w0 are the same in w *)
   incl_fam I (F w0) (F w). (* F w0 can be observed both in F w *)
   
-Hypothesis Fprod : iproductive I Wdom F.
+Hypothesis Fmono : imono_bounded I Wdom F.
 
 Lemma TIF_WF_dom o :
   isOrd o ->
@@ -455,17 +468,16 @@ Lemma FTIF_typ o w (wm:morph1 w) :
   typ_fun (F w) I (Wf (COWi o)).
 intros.
 apply Fty; trivial.
- rewrite COW_eqn; apply Wf_mono; auto with *.
- apply COW_COWi; trivial.
-
- unfold COWi; rewrite <- COTI_mono_succ; auto with *.
++apply COTI_bound; auto.
++apply COW_COWi; trivial.
++rewrite <- COWi_succ; auto with *.
  apply COTI_incl; auto with *.
 Qed.
 
 
 Lemma FTIF_mono a : a ∈ I -> increasing (fun o => F (TIF I F o) a).
 red; intros.
-apply Fprod; auto.
+apply Fmono; auto.
  apply TIF_morph; auto with *.
  apply TIF_morph; auto with *.
 
@@ -580,7 +592,7 @@ apply pre_incl_eq with (A:=A)(B:=B)(X:=COW); auto.
  red; intros.
  elim TIF_elim with (4:=H5); intros; auto with *.
  red in H0; rewrite H0; [|trivial|reflexivity].
- revert H7; apply Fprod; auto.
+ revert H7; apply Fmono; auto.
   apply TIF_morph; reflexivity.
 
   apply TIF_WF_dom; eauto using isOrd_inv.
