@@ -325,9 +325,9 @@ ZFfunext.vos ZFfunext.vok ZFfunext.required_vos: ZFfunext.v lib/basic.vos ZF.vos
 ZFlambda.vo ZFlambda.glob ZFlambda.v.beautified ZFlambda.required_vo: ZFlambda.v Lambda.vo ZF.vo ZFpairs.vo ZFnats.vo ZFord.vo ZFgrothendieck.vo ZFfix.vo Sat.vo
 ZFlambda.vio: ZFlambda.v Lambda.vio ZF.vio ZFpairs.vio ZFnats.vio ZFord.vio ZFgrothendieck.vio ZFfix.vio Sat.vio
 ZFlambda.vos ZFlambda.vok ZFlambda.required_vos: ZFlambda.v Lambda.vos ZF.vos ZFpairs.vos ZFnats.vos ZFord.vos ZFgrothendieck.vos ZFfix.vos Sat.vos
-ZFlist.vo ZFlist.glob ZFlist.v.beautified ZFlist.required_vo: ZFlist.v ZF.vo ZFpairs.vo ZFnats.vo ZFrepl.vo ZFord.vo ZFfix.vo
-ZFlist.vio: ZFlist.v ZF.vio ZFpairs.vio ZFnats.vio ZFrepl.vio ZFord.vio ZFfix.vio
-ZFlist.vos ZFlist.vok ZFlist.required_vos: ZFlist.v ZF.vos ZFpairs.vos ZFnats.vos ZFrepl.vos ZFord.vos ZFfix.vos
+ZFlist.vo ZFlist.glob ZFlist.v.beautified ZFlist.required_vo: ZFlist.v ZF.vo ZFpairs.vo ZFnats.vo ZFord.vo ZFfix.vo
+ZFlist.vio: ZFlist.v ZF.vio ZFpairs.vio ZFnats.vio ZFord.vio ZFfix.vio
+ZFlist.vos ZFlist.vok ZFlist.required_vos: ZFlist.v ZF.vos ZFpairs.vos ZFnats.vos ZFord.vos ZFfix.vos
 ZFencode.vo ZFencode.glob ZFencode.v.beautified ZFencode.required_vo: ZFencode.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFgrothendieck.vo ZFlist.vo ZFfixfun.vo
 ZFencode.vio: ZFencode.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFgrothendieck.vio ZFlist.vio ZFfixfun.vio
 ZFencode.vos ZFencode.vok ZFencode.required_vos: ZFencode.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFgrothendieck.vos ZFlist.vos ZFfixfun.vos
@@ -400,9 +400,9 @@ ZFstrictpos1.vos ZFstrictpos1.vok ZFstrictpos1.required_vos: ZFstrictpos1.v ZF.v
 ZFstrictpos.vo ZFstrictpos.glob ZFstrictpos.v.beautified ZFstrictpos.required_vo: ZFstrictpos.v ZF.vo ZFpairs.vo ZFsum.vo ZFrelations.vo ZFcoc.vo ZFord.vo ZFfix.vo ZFstable.vo ZFind_w.vo ZFiso.vo ZFgrothendieck.vo
 ZFstrictpos.vio: ZFstrictpos.v ZF.vio ZFpairs.vio ZFsum.vio ZFrelations.vio ZFcoc.vio ZFord.vio ZFfix.vio ZFstable.vio ZFind_w.vio ZFiso.vio ZFgrothendieck.vio
 ZFstrictpos.vos ZFstrictpos.vok ZFstrictpos.required_vos: ZFstrictpos.v ZF.vos ZFpairs.vos ZFsum.vos ZFrelations.vos ZFcoc.vos ZFord.vos ZFfix.vos ZFstable.vos ZFind_w.vos ZFiso.vos ZFgrothendieck.vos
-ZFcow.vo ZFcow.glob ZFcow.v.beautified ZFcow.required_vo: ZFcow.v ZF.vo ZFpairs.vo ZFsum.vo ZFnats.vo ZFrelations.vo ZFtarski.vo ZFstable.vo ZFgrothendieck.vo ZFlist.vo ZFcoc.vo ZFord.vo ZFfix.vo ZFcofix.vo ZFfixfun.vo ZFwdom.vo
-ZFcow.vio: ZFcow.v ZF.vio ZFpairs.vio ZFsum.vio ZFnats.vio ZFrelations.vio ZFtarski.vio ZFstable.vio ZFgrothendieck.vio ZFlist.vio ZFcoc.vio ZFord.vio ZFfix.vio ZFcofix.vio ZFfixfun.vio ZFwdom.vio
-ZFcow.vos ZFcow.vok ZFcow.required_vos: ZFcow.v ZF.vos ZFpairs.vos ZFsum.vos ZFnats.vos ZFrelations.vos ZFtarski.vos ZFstable.vos ZFgrothendieck.vos ZFlist.vos ZFcoc.vos ZFord.vos ZFfix.vos ZFcofix.vos ZFfixfun.vos ZFwdom.vos
+ZFcow.vo ZFcow.glob ZFcow.v.beautified ZFcow.required_vo: ZFcow.v ZF.vo ZFpairs.vo ZFnats.vo ZFrelations.vo ZFord.vo ZFcoc.vo ZFgrothendieck.vo ZFfix.vo ZFcofix.vo ZFfixfun.vo ZFwdom.vo
+ZFcow.vio: ZFcow.v ZF.vio ZFpairs.vio ZFnats.vio ZFrelations.vio ZFord.vio ZFcoc.vio ZFgrothendieck.vio ZFfix.vio ZFcofix.vio ZFfixfun.vio ZFwdom.vio
+ZFcow.vos ZFcow.vok ZFcow.required_vos: ZFcow.v ZF.vos ZFpairs.vos ZFnats.vos ZFrelations.vos ZFord.vos ZFcoc.vos ZFgrothendieck.vos ZFfix.vos ZFcofix.vos ZFfixfun.vos ZFwdom.vos
 ZFind_streams.vo ZFind_streams.glob ZFind_streams.v.beautified ZFind_streams.required_vo: ZFind_streams.v ZF.vo ZFnats.vo ZFord.vo ZFcoc.vo ZFwdom.vo ZFcow.vo ZFwsimul.vo
 ZFind_streams.vio: ZFind_streams.v ZF.vio ZFnats.vio ZFord.vio ZFcoc.vio ZFwdom.vio ZFcow.vio ZFwsimul.vio
 ZFind_streams.vos ZFind_streams.vok ZFind_streams.required_vos: ZFind_streams.v ZF.vos ZFnats.vos ZFord.vos ZFcoc.vos ZFwdom.vos ZFcow.vos ZFwsimul.vos

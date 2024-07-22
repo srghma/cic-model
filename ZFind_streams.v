@@ -2,6 +2,14 @@ Require Import ZF ZFnats ZFord ZFcoc ZFwdom ZFcow.
 Require Import ZFwsimul.
 Import ZFcofix.
 
+
+Lemma imono_bounded_inst I X g : typ_fun g I I -> imono_bounded I X (fun f i => f (g i)).
+red; red; intros.
+apply H4.
+auto.
+Qed.
+
+
 Existing Instance Wfmap_morph.
 
 Section Streams.
@@ -16,6 +24,7 @@ Qed.
 
   Definition sdom := Wdom A Bstrm.
   
+  Definition streami o := COWi A Bstrm o.
   Definition stream := COW A Bstrm.
   
   Definition Scons (x:set) (s:set) : set :=
@@ -26,32 +35,60 @@ do 3 red; intros.
 apply Wsup_morph; trivial.
 apply cc_lam_ext; [reflexivity|red; auto with *].
 Qed.
-  
-  Definition streami o := COWi A Bstrm o.
 
-Lemma Scons_typ_gen_gen X x s :
-  X ⊆ sdom -> stream ⊆ X -> Wf A Bstrm X ⊆ X ->
-  x ∈ A -> s ∈ X -> Scons x s ∈ Wf A Bstrm X.
+  Lemma Scons_typ_gen X x s :
+    X ⊆ sdom -> stream ⊆ X -> Wf A Bstrm X ⊆ X ->
+    x ∈ A -> s ∈ X -> Scons x s ∈ Wf A Bstrm X.
 intros.
 apply Wf_intro; trivial.
 apply cc_prod_intro; auto with *.
 Qed.
 
-Lemma Scons_typ_gen o x s : isOrd o -> x ∈ A -> s ∈ streami o -> Scons x s ∈ streami (osucc o).
+  Lemma Scons_typ_stage o x s : isOrd o -> x ∈ A -> s ∈ streami o -> Scons x s ∈ streami (osucc o).
 intros oo tyx tys.
 unfold streami; rewrite COWi_succ; auto.
-apply Scons_typ_gen_gen; auto.
+apply Scons_typ_gen; auto.
 +apply COWi_typ; trivial.
 +apply COW_COWi; trivial.
 +rewrite <- COWi_succ; auto.
  apply COWi_incl; trivial.
 Qed.
 
-Lemma Scons_typ x s : x ∈ A -> s ∈ stream -> Scons x s  ∈ stream.
+  Lemma Scons_typ x s : x ∈ A -> s ∈ stream -> Scons x s ∈ stream.
 intros tyx tys.
 unfold stream; rewrite COW_eqn; trivial.
-unfold COW; rewrite <- COWi_succ; auto.
-apply Scons_typ_gen; trivial.
+apply Scons_typ_gen; auto with *.
++apply COW_typ; trivial.
++reflexivity.
++rewrite <- COW_eqn; trivial.
+ reflexivity.
+Qed.
+
+  Lemma Scons_mono_raw x x' s s' :
+    x == x' ->
+    s ⊆ s' ->
+    Scons x s ⊆ Scons x' s'.
+intros eqx incls.
+apply ZFwdom.Wsup_mono with (B:=Bstrm); auto with *.
++apply is_cc_fun_lam; auto with *.
++intros.
+ rewrite cc_beta_eq; auto.
+ rewrite cc_beta_eq; auto.
+Qed.
+  
+  Lemma Scons_mono X x s :
+    mono_bounded X s ->
+    mono_bounded X (fun i => Scons x (s i)).
+unfold mono_bounded; intros smono; intros.
+apply Scons_mono_raw; [reflexivity|auto].
+Qed.
+
+  Lemma Scons_imono I X x s :
+    imono_bounded I X s ->
+    imono_bounded I X (fun f i => Scons (x i) (s f i)).
+unfold imono_bounded; intros smono; red; intros.
+apply Scons_mono_raw; [reflexivity|].
+apply smono; auto.
 Qed.
 
   Definition hd s := Wfst s.
@@ -63,123 +100,13 @@ Qed.
   Lemma hd_def x s : hd (Scons x s) == x.
 apply Wfst_def.  
 Qed.
-
+  
   Definition tl s := Wsnd s zero.
 
   Instance tl_morph : morph1 tl.
 do 3 red; intros.
 apply Wsnd_morph; [trivial|reflexivity].
 Qed.
-
-  Lemma tl_def x s : s ∈ stream -> tl (Scons x s) == s. 
-intros tys.
-assert (e : cc_app (cc_lam (succ zero) (fun _ => s)) zero == s).
-{rewrite cc_beta_eq; auto with *. apply succ_intro1; reflexivity. }
-unfold tl, Scons; rewrite Wsnd_def with (A:=A)(B:=Bstrm); trivial.
-rewrite e.
-apply COW_typ; trivial.
-Qed.
-
-
-Section Repeat.
-(* Parameterized cofix:
-   CoFixpoint repeat x := Scons x (repeat x) *)
-
-  Variable x : set.
-  Hypothesis tyx : x ∈ A.
-  
-  Definition repeat := COREC (fun s => Scons x s).
-
-  Instance rpt_m : morph1 (fun s : set => Scons x s).
-do 2 red; intros; apply Scons_morph; auto with *.
-Qed.
-
-  Lemma rpt_typ o w :
-    isOrd o ->
-    w ∈ streami o -> Scons x w ∈ streami (osucc o).
-intros.
-apply Scons_typ_gen; trivial.
-Qed.
-  
-  Lemma mono_rpt : mono_bounded sdom (fun s => Scons x s).
-red; intros.
-apply Wsup_mono with (B:=Bstrm); auto with *.
-apply is_cc_fun_lam; auto with *.
-intros.
-rewrite cc_beta_eq; auto with *.
-rewrite cc_beta_eq; auto with *.
-Qed.
-
-  Lemma repeat_typ : repeat ∈ stream.
-apply COREC_typ; auto.
-+apply rpt_m.
-+apply rpt_typ.
-+apply mono_rpt.
-Qed.
-  
-  Lemma repeat_eqn : repeat == Scons x repeat.
-apply COREC_eqn with (A:=A)(B:=Bstrm); auto.
-+apply rpt_m.
-+apply rpt_typ.
-+apply mono_rpt.
-Qed.
-
-End Repeat.
-
-
-Section From.
-
-  Variable f : set -> set.
-  Hypothesis fm : morph1 f.
-  Hypothesis ftyp : typ_fun f A A.
-
-  (* Indexed cofix:
-  CoFixpoint from x := Scons x (from (f x)) *)
-
-  Definition from := ICOREC A (fun frm x => Scons x (frm (f x))).
-
-  Instance frm_m :  Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set)
-                      (fun frm x => Scons x (frm (f x))).
-do 3 red; intros; apply Scons_morph; auto with *.
-Qed.
-
-  Lemma frm_typ X frm :
-  X ⊆ sdom -> stream ⊆ X -> Wf A Bstrm X ⊆ X ->
-  morph1 frm ->
-  typ_fun frm A X ->
-  typ_fun (fun x => Scons x (frm (f x))) A (Wf A Bstrm X).
-red; intros.
-apply Scons_typ_gen_gen; trivial.
-apply H3.
-apply ftyp; trivial.
-Qed.
-  
-  Lemma frm_mono : imono_bounded A sdom (fun frm x => Scons x (frm (f x))).
-do 2 red; intros.
-apply Wsup_mono with (B:=Bstrm); auto with *.
-apply is_cc_fun_lam; auto with *.
-intros.
-rewrite cc_beta_eq; auto with *.
-rewrite cc_beta_eq; auto with *.
-Qed.
-
-  Lemma from_typ x : x ∈ A -> from x ∈ stream.
-intros tyx.
-unfold from; apply ICOREC_typ; auto with *.
-+apply frm_typ.
-+apply frm_mono.
-Qed.
-  
-  Lemma from_eqn x : x ∈ A -> from x == Scons x (from (f x)).
-intros tyx.
-unfold from.
-apply ICOREC_eqn with (A:=A)(B:=Bstrm)(F:=fun frm x => Scons x (frm (f x))); auto with *.
-+apply frm_typ.
-+apply frm_mono.
-Qed.
-
-End From.
-
   
   Lemma tl_def_gen o x s : isOrd o -> s ∈ streami o -> tl (Scons x s) == s. 
 intros oo tys.
@@ -190,6 +117,10 @@ rewrite e.
 apply COWi_typ in tys; trivial.
 Qed.
 
+
+  Lemma tl_def x s : s ∈ stream -> tl (Scons x s) == s. 
+apply tl_def_gen; trivial.
+Qed.
 
   Lemma stream_elim_gen o s :
     isOrd o ->
@@ -225,6 +156,91 @@ split;[|split].
  assumption.
 Qed.
     
+
+Section Repeat.
+(* Parameterized cofix:
+   CoFixpoint repeat x := Scons x (repeat x) *)
+
+  Variable x : set.
+  Hypothesis tyx : x ∈ A.
+  
+  Definition repeat := COREC (fun s => Scons x s).
+
+  Instance rpt_m : morph1 (fun s : set => Scons x s).
+do 2 red; intros; apply Scons_morph; auto with *.
+Qed.
+
+  Lemma rpt_typ o w :
+    isOrd o ->
+    w ∈ streami o -> Scons x w ∈ streami (osucc o).
+intros.
+apply Scons_typ_stage; trivial.
+Qed.
+  
+  Lemma mono_rpt : mono_bounded sdom (fun s => Scons x s).
+apply Scons_mono with (s:=fun s=>s).
+apply mono_bounded_id.
+Qed.
+
+Hint Resolve rpt_m rpt_typ mono_rpt : core.
+  
+  Lemma repeat_typ : repeat ∈ stream.
+apply COREC_typ; auto.
+Qed.
+  
+  Lemma repeat_eqn : repeat == Scons x repeat.
+apply COREC_eqn with (A:=A)(B:=Bstrm); auto.
+Qed.
+
+End Repeat.
+
+
+Section From.
+
+  Variable f : set -> set.
+  Hypothesis fm : morph1 f.
+  Hypothesis ftyp : typ_fun f A A.
+
+  (* Indexed cofix:
+  CoFixpoint from x := Scons x (from (f x)) *)
+
+  Definition from := ICOREC A (fun frm x => Scons x (frm (f x))).
+
+  Instance frm_m :  Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set)
+                      (fun frm x => Scons x (frm (f x))).
+do 3 red; intros; apply Scons_morph; auto with *.
+Qed.
+
+  Lemma frm_typ X frm :
+  X ⊆ sdom -> stream ⊆ X -> Wf A Bstrm X ⊆ X ->
+  morph1 frm ->
+  typ_fun frm A X ->
+  typ_fun (fun x => Scons x (frm (f x))) A (Wf A Bstrm X).
+red; intros.
+apply Scons_typ_gen; trivial.
+apply H3.
+apply ftyp; trivial.
+Qed.
+  
+  Lemma frm_mono : imono_bounded A sdom (fun frm x => Scons x (frm (f x))).
+apply Scons_imono.
+apply imono_bounded_inst; trivial.
+Qed.
+
+  Hint Resolve frm_m frm_typ frm_mono : core.
+  
+  Lemma from_typ x : x ∈ A -> from x ∈ stream.
+intros tyx.
+unfold from; apply ICOREC_typ; auto with *.
+Qed.
+  
+  Lemma from_eqn x : x ∈ A -> from x == Scons x (from (f x)).
+intros tyx.
+unfold from.
+apply ICOREC_eqn with (A:=A)(B:=Bstrm)(F:=fun frm x => Scons x (frm (f x))); auto with *.
+Qed.
+
+End From.
 
 
 Section Map.
@@ -320,21 +336,16 @@ Qed.
     x ∈ A ->
     forall o w, isOrd o -> w ∈ streami o -> Scons x (map w) ∈ streami (osucc o).
 intros.
-apply Scons_typ_gen; auto.
+apply Scons_typ_stage; auto.
 apply map_typ; trivial.
 Qed.
 
     Lemma altfrm_mono x :
     x ∈ A ->
     mono_bounded sdom (fun s => Scons x (map s)).
-red; intros.
-apply Wsup_mono with (B:=Bstrm).
-reflexivity.
-apply is_cc_fun_lam; auto with *.
-intros.
-rewrite cc_beta_eq; auto.
-rewrite cc_beta_eq; auto.
-apply map_mono; trivial.
+intros tyx.
+apply Scons_mono.
+apply map_mono.
 Qed.
 
 Hint Resolve altfrmm altfrm_typ altfrm_mono : core.

@@ -1072,15 +1072,17 @@ apply subset_elim1 in H.
 rewrite union_ax in H; destruct H; eauto.
 Qed.
 
-Lemma inter_wit : forall X F, morph1 F -> 
- forall x, x ∈ inter (replf X F) ->
- exists y, y ∈ X.
-intros.
-destruct inter_non_empty with (1:=H0).
-rewrite replf_ax in H1.
-2:red;red;intros; apply H; trivial.
-destruct H1; eauto.
+Lemma inter_ax a z :
+  z ∈ inter a <-> (exists w, w ∈ a) /\ (forall y, y ∈ a -> z ∈ y).
+split; intros.
+*split.
+ +destruct inter_non_empty with (1:=H) as (w,?,_); eauto.
+ +intros.
+  apply inter_elim with (1:=H); trivial.
+*destruct H as (wit,inall).
+ apply inter_intro; trivial.
 Qed.
+
 
 Lemma inter_ext :
   forall i a,
@@ -1106,6 +1108,16 @@ apply subset_morph; intros;  eauto.
  split; intros.
  rewrite <- H in H2; auto.
  rewrite H in H2; auto.
+Qed.
+
+Lemma inter_wit : forall X F, morph1 F -> 
+ forall x, x ∈ inter (replf X F) ->
+ exists y, y ∈ X.
+intros.
+destruct inter_non_empty with (1:=H0).
+rewrite replf_ax in H1.
+2:red;red;intros; apply H; trivial.
+destruct H1; eauto.
 Qed.
 
 (** Binary intersection *)

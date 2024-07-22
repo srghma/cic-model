@@ -823,29 +823,40 @@ End Examples.
 
 (** Increasing sequences *)
 
+Definition increasing_bounded o F :=
+  forall x x', x < o -> x' < o -> x ⊆ x' -> F x ⊆ F x'.
+
+Lemma increasing_bounded_is_ext F o :
+  isOrd o ->
+  increasing_bounded o F ->
+  ext_fun o F.
+intros oo Fincr.
+red; red; intros.
+apply eq_intro.
+*apply Fincr; trivial.
+ rewrite <- H0; trivial.
+ rewrite H0; reflexivity.
+*apply Fincr; trivial.
+ rewrite <- H0; trivial.
+ rewrite H0; reflexivity.
+Qed.
+#[global]Hint Resolve increasing_bounded_is_ext : core.
+
 Definition increasing F :=
   forall x y, isOrd x -> isOrd y -> y ⊆ x -> F y ⊆ F x.
 
-Lemma increasing_is_ext : forall F,
+(*Lemma increasing_is_ext : forall F,
   increasing F ->
   forall o, isOrd o ->
   ext_fun o F.
-intros F Fincr o H.
-red; red; intros.
-apply eq_intro.
- apply Fincr.
-  rewrite <- H1; eauto using isOrd_inv.
-  eauto using isOrd_inv.
-  rewrite H1; reflexivity.
- apply Fincr.
-  eauto using isOrd_inv.
-  rewrite <- H1; eauto using isOrd_inv.
-  rewrite H1; reflexivity.
-Qed.
-Hint Resolve increasing_is_ext : core.
+Hint Resolve increasing_is_ext : core. *)
 
-Definition increasing_bounded o F :=
-  forall x x', x' < o -> x < x' -> F x ⊆ F x'.
+Lemma increasing_bounded_weaker F :
+  increasing F -> forall o, isOrd o -> increasing_bounded o F.
+red; intros.
+apply H; eauto using isOrd_inv.
+Qed.
+#[global]Hint Resolve increasing_bounded_weaker : core.
 
 (** Successor ordinals *)
 

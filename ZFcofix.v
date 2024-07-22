@@ -1,5 +1,5 @@
 Require Import ZF ZFrelations ZFwfr ZFnats ZFord ZFstable.
-
+  
 (** Decreasing transfinite iteration of a monotonic operator
  *)
 
@@ -266,7 +266,7 @@ rewrite <- COTI_mono_succ.
 
  apply isOrd_inv with o; trivial.
 Qed.
-
+  
   Lemma COTI_post_fix : forall fx o,
      isOrd o ->
      fx ⊆ A ->
@@ -281,6 +281,88 @@ apply H1 in H4.
 revert H4; apply Fmono; auto.
 Qed.
 
+(** Case where F is stable: closure ordinal is omega *)
+
+  Let m1 o : ext_fun o (fun o' => F (COTI A F o')).
+do 2 red; intros.
+rewrite H0; reflexivity.
+Qed.
+
+  Let m2 o : ext_fun o (COTI A F).
+do 2 red; intros.
+rewrite H0; reflexivity.
+Qed.
+
+  
+  Lemma COTI_limit_def o : limitOrd o -> zero ∈ o -> COTI A F o == inter (replf o (COTI A F)).
+intros (oo,limo) nmt.
+rewrite COTI_eq; auto.
+apply eq_set_ax; intros z.
+rewrite infb_ax; trivial.
+rewrite inter_ax.
+split; intros.
+*destruct H as (zdom,inall).
+ split; [exists (COTI A F zero); rewrite replf_ax; eauto with*|].
+ intros.
+ rewrite replf_ax in H; auto.
+ destruct H as (o',inw,eqy).
+ assert (o'o : isOrd o') by eauto using isOrd_inv.
+ rewrite eqy.
+ apply COTI_incl with (o:=osucc o'); auto.
+ rewrite COTI_mono_succ; trivial.
+ apply inall; trivial.
+*destruct H as ((x,wit),inall).
+ split.
+ +specialize inall with (1:=wit). 
+  rewrite replf_ax in wit; trivial.
+  destruct wit as (w,wo,eqx).
+  rewrite eqx in inall.
+  revert inall; apply COTI_bound; eauto using isOrd_inv.
+ +intros o' lto.
+  assert (o'o : isOrd o') by eauto using isOrd_inv.
+  rewrite <- COTI_mono_succ; auto.
+  apply inall.
+  rewrite replf_ax; trivial.
+  exists (osucc o'); auto with *.
+  apply limo; trivial.
+Qed.
+
+  Lemma COTI_closure_stable :
+    stable_class (fun X => exists2 o, isOrd o & X == COTI A F o) F ->
+    COTI A F omega ⊆ F (COTI A F omega).
+intros stabl.
+rewrite COTI_limit_def;[|split;[trivial|intros; apply osucc_omega; trivial]|apply zero_omega].
+red; intros.
+apply stabl.
+*intros.
+ rewrite replf_ax in H0; trivial.
+ destruct H0 as (n,inw,eqx).
+ exists n; trivial.
+ apply isOrd_inv with omega; trivial.
+*apply inter_intro. 
+ +intros. 
+  rewrite replf_ax in H0; trivial.
+  2:do 2 red; intros; apply Fmono_morph; trivial.
+  destruct H0 as (w,tyw,eqy); rewrite eqy.
+  rewrite replf_ax in tyw; trivial.
+  destruct tyw as (n,tyn,eqw); rewrite eqw.
+  rewrite <- COTI_mono_succ; auto.  
+  2:apply isOrd_inv with omega; trivial.
+  apply inter_elim with (1:=H).  
+  rewrite replf_ax; trivial.
+  exists (osucc n);[|reflexivity].
+  apply osucc_omega; trivial.
+
+ +exists (F (COTI A F zero)).
+  rewrite replf_ax.
+  2:do 2 red; intros; apply Fmono_morph; trivial.
+  exists (COTI A F zero);[|reflexivity].
+  rewrite replf_ax; trivial.
+  exists zero;[|reflexivity].
+  apply zero_omega.
+Qed.
+
+  
 (** Stability of ordinal-indexed families *)
 (*
 Definition stable_ord := stable_class isOrd.
@@ -966,6 +1048,117 @@ End BoundedOperator.
 
 End IterMonotone.
 
+Section IterMonotoneBounded.
+
+  Variable A : set.
+  Hypothesis Acomplete : forall I f,
+    ext_fun I f ->
+    (forall i, i ∈ I -> f i ∈ A) ->
+    sup I f ∈ A.
+
+  Variable h : set -> set.
+  Hypothesis hm : morph1 h.
+
+  Definition mono_bounded :=
+    forall x y, x ∈ A -> y ∈ A -> x ⊆ y -> h x ⊆ h y.
+
+  Section SimpleType.
+  
+    Hypothesis hty : typ_fun h A A.
+    Hypothesis hmono : mono_bounded.
+
+  
+    Lemma TI_mono_bound o :
+      isOrd o ->
+      TI h o ∈ A.
+induction 1 using isOrd_ind; intros.
+rewrite TI_eq; auto with *.
+Qed.
+
+  Lemma TI_pre_fix_bounded fx o :
+     isOrd o ->
+     fx ∈ A ->
+     h fx ⊆ fx ->
+     TI h o ⊆ fx.
+intros oo tyfx prefx.
+elim oo using isOrd_ind; intros.
+red; intros.
+elim TI_elim with (3:=H2); intros; auto with *.
+apply prefx.
+revert H4; apply hmono; auto.
+apply TI_mono_bound; eauto using isOrd_inv.
+Qed.
+
+  Lemma FTI_mono_bounded : increasing (fun o => h (TI h o)).
+red; intros.
+apply hmono.
+ apply TI_mono_bound; trivial.
+ apply TI_mono_bound; trivial.
+ apply TI_mono; trivial.
+Qed.
+  Lemma TI_incl_step o :
+    isOrd o ->
+    TI h o ⊆ h (TI h o).
+red; intros.
+apply TI_elim in H0; trivial.
+destruct H0 as (o',?,?).
+revert H1; apply FTI_mono_bounded; eauto using isOrd_inv.
+Qed.
+
+  End SimpleType.
+
+  Section COTI_Typed.
+
+    Variable F : set -> set.
+    Hypothesis Fmono : Proper (incl_set==>incl_set) F.
+    Hypothesis Fbound : F A ⊆ A.
+    
+    Hypothesis hty : forall o, isOrd o -> typ_fun h (COTI A F o) (COTI A F (osucc o)).
+    Hypothesis hmono : mono_bounded.
+
+    Hypothesis COTIcomplete : forall f o o' ,
+        isOrd o ->
+        isOrd o' ->
+        o' ⊆ o ->
+        increasing_bounded o f ->
+        (exists2 o0, o0 ∈ o &
+              forall o'', o0 ⊆ o'' -> o'' ∈ o -> f o'' ∈ COTI A F o') ->
+        sup o f ∈ COTI A F o'.
+
+    Let hty_simple : typ_fun h A A.
+red; intros.      
+rewrite <- COTI_initial with (A:=A)(F:=F) in H; auto.
+apply hty in H; auto.
+rewrite COTI_mono_succ in H; trivial.
+rewrite COTI_initial in H; auto.
+Qed.
+
+    Lemma TI_typ_COTI_gen o o' : isOrd o -> isOrd o' -> o' ⊆ o -> TI h o ∈ COTI A F o'.
+intros oo; revert o'; elim oo using isOrd_ind; intros.
+apply COTI_intro; auto with *.
++apply TI_mono_bound; trivial.
+
++intros o''; intros.
+ assert (oo'':isOrd o'') by eauto using isOrd_inv.
+ rewrite TI_eq; auto.
+ rewrite <- COTI_mono_succ; auto.
+ apply COTIcomplete; auto.
+ *apply olts_le.
+  apply lt_osucc_compat; trivial.
+  apply H3; trivial.
+
+ *apply increasing_bounded_weaker; trivial.
+  apply FTI_mono_bounded; trivial.
+
+ *exists o''; auto.
+  intros.
+  apply hty; auto.
+Qed.
+
+  End COTI_Typed.
+
+End IterMonotoneBounded.
+  
 (*
 Lemma TI_mono_gen G G' o o' :
   morph1 G ->
