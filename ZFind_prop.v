@@ -2,7 +2,6 @@ Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFtarski ZFstable
 Require Import ZFgrothendieck ZFcoc.
 Require Import ZFlist.
 Require Import ZFfunext ZFfixrec.
-Import ZFrepl.
 
 (** In this file we develop the theory of W-types in Prop:
     - typing

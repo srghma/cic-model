@@ -168,10 +168,10 @@ destruct x; destruct y; simpl; intros.
 reflexivity.
 Qed.
 
-Lemma eqset_isL : forall x y, isL(eq_set x y).
+Lemma eq_set_isL : forall x y, isL(eq_set x y).
 intros; rewrite eq_set_def; auto.
 Qed.
-Global Hint Resolve eqset_isL : core.
+Global Hint Resolve eq_set_isL : core.
 
 Lemma eq_set_intro x y :
   (forall i, exists j, eq_set (elts x i) (elts y j)) ->
@@ -215,10 +215,10 @@ Qed.
 Definition in_set x y :=
   #exists j, eq_set x (elts y j).
 
-Lemma inset_isL : forall x y, isL (in_set x y).
+Lemma in_set_isL : forall x y, isL (in_set x y).
 intros; apply Tr_isL.
 Qed.
-Global Hint Resolve inset_isL : core.
+Global Hint Resolve in_set_isL : core.
 
 Notation "x ∈ y" := (in_set x y) (at level 60).
 Notation "x == y" := (eq_set x y) (at level 70).

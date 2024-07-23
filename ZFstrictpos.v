@@ -789,7 +789,7 @@ induction eqp; simpl; intros.
   apply cc_prod_sigma_iso_typ.
    do 2 red; intros; apply pos_to_w1_morph; auto.
 
-   do 2 red; intros; apply cc_prod_ext;[|red; reflexivity].
+   red; intros; apply cc_prod_ext;[|red; reflexivity].
    apply pos_to_w2_morph; auto.
 
   apply sigma_isomap_typ.
@@ -814,7 +814,7 @@ induction eqp; simpl; intros.
     apply pos_to_w2_morph; auto with *.
     apply cc_app_morph; auto with *.
 
-    do 2 red; reflexivity.
+    red; reflexivity.
 Qed.
 
 Lemma trad_pos_w_ext X Y p f f':

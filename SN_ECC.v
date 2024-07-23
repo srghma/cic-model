@@ -39,7 +39,7 @@ Definition eq_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, inX y1 x -> y1 == y2 -> f1 y1 == f2 y2.
 
 Lemma eq_fun_El x f1 f2 : eq_fun x f1 f2 -> ZF.eq_fun (El x) f1 f2.
-do 2 red; intros.
+red; intros.
 apply H; auto.
 Qed.
 Hint Resolve eq_fun_El : core.
@@ -70,7 +70,6 @@ apply couple_morph.
   red; intros.
   apply union2_morph; auto with *.
   apply fst_morph; apply H0; auto.
-  red; auto.
 
  apply iSAT_morph.
  unfold piSAT, Real.

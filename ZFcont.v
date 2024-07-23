@@ -1,6 +1,5 @@
 Require Export basic.
 Require Import ZF ZFpairs ZFsum ZFfix ZFnats ZFord ZFstable ZFrank ZFrelations.
-Import ZFrepl.
 
 (** Geeralized continuity *)
 

@@ -104,15 +104,15 @@ red; intros.
 apply subset_elim1 in H0; trivial.
 Qed.
 
-Require Import ZFrepl.
+Require ZFrepl.
 
 Lemma isWf_repl : forall x R,
-  repl_rel x R ->
+  ZFrepl.repl_rel x R ->
   (forall a b, a ∈ x -> R a b -> isWf b) ->
   isWf (repl x R).
 intros.
 apply isWf_intro; intros.
-elim repl_elim with (1:=H) (2:=H1); intros; eauto.
+elim ZFrepl.repl_elim with (1:=H) (2:=H1); intros; eauto.
 Qed.
 
 Lemma isWf_inter2 : forall x y, isWf x -> isWf y -> isWf (x ∩ y).
@@ -219,35 +219,35 @@ Lemma isWf_equiv x :
   isWf x <-> isWf' x.
 split; intros.
  apply H; intros.
- assert (Hm : ext_fun a (fun b => uchoice (isTransClos b))).
-  do 2 red; intros.
-  apply uchoice_morph_raw; red; intros.
-  apply isTransClos_morph; trivial.
- assert (Hch : forall b, b ∈ a -> uchoice_pred (isTransClos b)).
-  split; [|split; intros]; auto.
+ assert (Hm : ext_fun a (fun b => ZFrepl.uchoice (isTransClos b))).
+ {do 2 red; intros.
+  apply ZFrepl.uchoice_morph_raw; red; intros.
+  apply isTransClos_morph; trivial. }
+ assert (Hch : forall b, b ∈ a -> ZFrepl.uchoice_pred (isTransClos b)).
+ {split; [|split; intros]; auto.
    intros.
    rewrite <- H2; trivial.
 
    destruct H0 with (1:=H1).
    exists x0; trivial.
 
-   apply isTransClos_fun with b; trivial.
- exists (singl a ∪ sup a (fun b => uchoice (isTransClos b))).
+   apply isTransClos_fun with b; trivial. }
+ exists (singl a ∪ sup a (fun b => ZFrepl.uchoice (isTransClos b))).
   apply isTransClos_intro.
    do 2 red; intros.
-   apply uchoice_morph_raw; red; intros.
+   apply ZFrepl.uchoice_morph_raw; red; intros.
    apply isTransClos_morph; trivial.
 
    intros.
-   apply uchoice_def; auto.
+   apply ZFrepl.uchoice_def; auto.
 
   intros.
   apply H1; intros; trivial.
    red; intros; apply union2_intro2.
    rewrite sup_ax; trivial.
    exists z; trivial.
-   assert (isTransClos z (uchoice (isTransClos z))).
-    apply uchoice_def; auto.
+   assert (isTransClos z (ZFrepl.uchoice (isTransClos z))).
+    apply ZFrepl.uchoice_def; auto.
    destruct H3.
    destruct H3; trivial.
 
@@ -258,7 +258,7 @@ split; intros.
    red; intros; apply union2_intro2.
    rewrite sup_ax; trivial.
    exists z; trivial.
-   rewrite <- uchoice_ext with (x:=x0); auto.
+   rewrite <- ZFrepl.uchoice_ext with (x:=x0); auto.
 
  red; intros.
  destruct H as (c,?,?).
@@ -275,7 +275,7 @@ split; intros.
   generalize (H4 _ H6); rewrite subset_ax; intros (_,(b',?,?)); auto with *.
 Qed.
 
-Lemma isWf_clos_ex x : isWf x -> uchoice_pred (isTransClos x).
+Lemma isWf_clos_ex x : isWf x -> ZFrepl.uchoice_pred (isTransClos x).
 split;[|split]; intros.
  rewrite <- H0; trivial.
 
@@ -284,25 +284,25 @@ split;[|split]; intros.
  apply isTransClos_fun with x; trivial.
 Qed.
 
-Definition trClos x := uchoice (isTransClos x).
+Definition trClos x := ZFrepl.uchoice (isTransClos x).
 
 Global Instance trClos_morph : morph1 trClos.
 do 2 red; intros; unfold trClos.
-apply uchoice_morph_raw; red; intros.
+apply ZFrepl.uchoice_morph_raw; red; intros.
 apply isTransClos_morph; trivial.
 Qed.
 
 Lemma trClos_intro1 x : isWf x -> x ∈ trClos x.
 intro.
 specialize isWf_clos_ex with (1:=H); intro.
-apply uchoice_def in H0.
+apply ZFrepl.uchoice_def in H0.
 destruct H0 as ((?,_),_); trivial.
 Qed.
 
 Lemma trClos_intro2 x y z : isWf x -> y ∈ trClos x -> z ∈ y -> z ∈ trClos x.
 intros.
 specialize isWf_clos_ex with (1:=H); intro.
-apply uchoice_def in H2.
+apply ZFrepl.uchoice_def in H2.
 destruct H2 as ((_,?),_); eauto.
 Qed.
 
@@ -315,7 +315,7 @@ Lemma trClos_ind x (P:set->Prop) :
   P y.
 intros.
 specialize isWf_clos_ex with (1:=H); intro.
-apply uchoice_def in H3.
+apply ZFrepl.uchoice_def in H3.
 destruct H3 as (?,?).
 assert (y ∈ subset (trClos x) (fun z => forall z', z==z' -> P z')).
  apply H4; trivial.

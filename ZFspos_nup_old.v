@@ -1058,7 +1058,7 @@ eapply iso_fun_trans.
  apply iso_sigma_sigma; auto.
   do 2 red; intros; apply H2; auto with *.
 
-  do 2 red; intros.
+  red; intros.
   apply cc_prod_morph.
    apply H3; auto with *.
   red; intros.
@@ -1233,7 +1233,7 @@ eapply iso_fun_trans.
  eapply iso_fun_trans.
   apply iso_fun_cc_prod_sigma; trivial.
    do 2 red; intros; apply H2; auto with *.
-   do 2 red; intros.
+   red; intros.
    apply cc_prod_morph.
     apply H3; auto with *.
    red; intros.
@@ -1286,7 +1286,7 @@ eapply iso_fun_trans.
    do 2 red; intros.
    rewrite H8,H10; reflexivity.
 
-   do 2 red; intros.
+   red; intros.
    rewrite H8,H10,H12; reflexivity.
 Qed.
 

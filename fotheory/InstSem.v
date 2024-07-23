@@ -396,7 +396,7 @@ intros. apply impredicative_prod.
   do 2 red; intros; reflexivity.
 
   apply prod_elim with (x:=m0) in H1; trivial.
-   do 2 red; intros; reflexivity.
+   red; intros; reflexivity.
    
    rewrite El_def,eqNbot; trivial.
 
@@ -449,9 +449,9 @@ pose (x3:=x1(*empty*)).
      apply impredicative_prod; [do 2 red|]; trivial.
 
      apply prod_elim with (x:=k) in H2; 
-       [|do 2 red; intros; reflexivity|rewrite El_def,eqNbot]; trivial.
+       [|red; intros; reflexivity|rewrite El_def,eqNbot]; trivial.
 
-  apply prod_elim with (x:=(P3 x2)) in HS; [|do 2 red; intros|trivial].
+  apply prod_elim with (x:=(P3 x2)) in HS; [|red; intros|trivial].
   2 : apply prod_ext; [|do 2 red; intros]; rewrite H6; reflexivity.
   assert (El (prod (app (P3 x2) (succ n)) (fun _ : X => app (P3 x2) (succ m))) ==
    El (prod (app x2 n) (fun _ : X => app x2 m))).
@@ -459,7 +459,7 @@ pose (x3:=x1(*empty*)).
 
   rewrite H5 in HS; clear H5.
   apply prod_elim with (x:=x3) in HS; trivial.
-   do 2 red; intros; reflexivity.
+   red; intros; reflexivity.
 
 assert (x == (lam (prod (mkTY N cNAT) (fun _ => props)) 
 (fun x0 => lam (app x0 n) (fun x1 => app (app x (P3 x0)) x1)))).

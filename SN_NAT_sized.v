@@ -355,7 +355,7 @@ assert (lam (mkTY (TI NATf' (int O i)) cNAT) succ ∈
   apply cc_lam_ext.
    rewrite El_def; reflexivity.
 
-   do 2 red; intros; apply succ_morph.
+   red; intros; apply succ_morph.
    exact H0.
 
   do 2 red; intros; apply succ_morph; trivial.

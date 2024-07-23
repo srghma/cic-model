@@ -63,17 +63,17 @@ apply posp; trivial.
 Qed.
 
  Instance ww2m : morph1 (w2 p).
-do 3 red; intros.
+do 2 red; intros.
 apply posp; trivial.
 Qed.
 
  Instance ww3m : morph2 (w3 p).
-do 4 red; intros.
+do 3 red; intros.
 apply posp; trivial.
 Qed.
 
  Instance pm : morph1 (dp_iso p).
-do 3 red; intros.
+do 2 red; intros.
 apply posp; trivial.
 Qed.
 
@@ -1104,7 +1104,7 @@ eapply iso_fun_trans.
 
  unfold W0.W_Fd.
  apply iso_sigma_sigma; auto.
- do 2 red; intros.
+ red; intros.
  apply cc_prod_morph.
   apply Bm; auto with *.
  red; intros.
@@ -1276,7 +1276,7 @@ eapply iso_fun_trans.
  eapply iso_fun_trans.
   apply iso_fun_cc_prod_sigma; trivial.
    do 2 red; intros; apply Am; auto with *.
-   do 2 red; intros.
+   red; intros.
    apply cc_prod_morph.
     apply Bm; auto with *.
    red; intros.
@@ -1327,7 +1327,7 @@ eapply iso_fun_trans.
    do 2 red; intros.
    rewrite H0,H2; reflexivity.
 
-   do 2 red; intros.
+   red; intros.
    rewrite H0,H2,H4; reflexivity.
 Qed.
 
@@ -1432,11 +1432,11 @@ constructor; simpl; intros.
   apply H in H3.
   apply eq_dop; auto with *.
 
-  do 3 red; intros.
+  do 2 red; intros.
   apply H in H2.
   apply eq_dw1; auto with *.
 
-  do 4 red; intros.
+  do 3 red; intros.
   apply H in H2.
   apply eq_dw2; auto with *.
 

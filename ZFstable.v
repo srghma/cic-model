@@ -31,7 +31,7 @@ rewrite <- (stbl X).
 +apply eq_incl.
  apply inter_morph.
  apply replf_morph; auto with *.
- do 2 red; intros; symmetry; apply eqF; auto with *.
+ red; intros; symmetry; apply eqF; auto with *.
 +intros; apply eqK; auto.
 Qed.
 

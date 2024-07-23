@@ -60,13 +60,13 @@ Inductive in_set_ (x y:set) : Prop :=
 
 Definition in_set := in_set_.
 
-Lemma inset_isL x y : isL (in_set x y).
+Lemma in_set_isL x y : isL (in_set x y).
 red.
 constructor.
 Telim H; intro.
 destruct H; trivial.
 Qed.
-Global Hint Resolve inset_isL : core.
+Global Hint Resolve in_set_isL : core.
 
 Lemma in_set_elim : forall x y, in_set x y <->
   #exists2 x', proj1_sig x x' &
@@ -83,11 +83,11 @@ Definition eq_set a b := forall x, x ∈ a <-> x ∈ b.
 
 Notation "x == y" := (eq_set x y).
 
-Lemma eqset_isL x y : isL (x == y).
+Lemma eq_set_isL x y : isL (x == y).
 red; red; intros.
 Telim H; auto.
 Qed.
-Global Hint Resolve eqset_isL : core.
+Global Hint Resolve eq_set_isL : core.
 
 Lemma eq_set_ax : forall a b, a == b <-> (forall x, x ∈ a <-> x ∈ b).
 reflexivity.

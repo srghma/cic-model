@@ -7,6 +7,7 @@ Require Import Sublogic.
  *)
 
 Module IZF_R <: IZF_R_Ex_sig CoqSublogicThms.
+Import CoqSublogicThms.
 
 (* The level of indexes *)
 Definition Ti := Type.
@@ -24,6 +25,8 @@ Definition elts (x:set) : idx x -> set :=
 Fixpoint eq_set (x y:set) {struct x} :=
   (forall i, exists j, eq_set (elts x i) (elts y j)) /\
   (forall j, exists i, eq_set (elts x i) (elts y j)).
+
+Definition eq_set_isL x y : isL (eq_set x y) := fun h => h.
 
 Lemma eq_set_refl : forall x, eq_set x x.
 induction x; simpl.
@@ -67,6 +70,8 @@ Qed.
 
 Definition in_set x y :=
   exists j, eq_set x (elts y j).
+
+Definition in_set_isL x y : isL (in_set x y) := fun h => h.
 
 Definition incl_set x y := forall z, in_set z x -> in_set z y.
 

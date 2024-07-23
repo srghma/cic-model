@@ -104,7 +104,7 @@ Qed.
   Definition tl s := Wsnd s zero.
 
   Instance tl_morph : morph1 tl.
-do 3 red; intros.
+do 2 red; intros.
 apply Wsnd_morph; [trivial|reflexivity].
 Qed.
   

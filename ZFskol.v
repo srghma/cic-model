@@ -8,7 +8,8 @@ Require Export ZFdef.
 Require Import Sublogic.
 
 Module Skolem (Z : IZF_R_Ex_sig CoqSublogicThms) <: IZF_R_sig CoqSublogicThms.
-
+Import CoqSublogicThms.
+  
 Instance Zsetoid: Equivalence Z.eq_set.
 Proof.
 split; red; intros; rewrite Z.eq_set_ax in *; intros.
@@ -61,10 +62,12 @@ split; intros.
 Qed.
 
 Notation "x ∈ y" := (in_set x y).
+Definition in_set_isL x y : isL (x ∈ y) := fun h => h.
 
 Definition eq_set a b := forall x, x ∈ a <-> x ∈ b.
 
 Notation "x == y" := (eq_set x y).
+Definition eq_set_isL x y : isL (x == y) := fun h => h.
 
 Lemma eq_set_ax : forall a b, a == b <-> (forall x, x ∈ a <-> x ∈ b).
 reflexivity.

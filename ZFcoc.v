@@ -442,8 +442,8 @@ Lemma eqf_fbot X f f' :
   eq_fun (cc_bot X) (fbot f) (fbot f').
 red; intros.
 rewrite cc_bot_ax in H1; destruct H1.
- unfold fbot; rewrite cond_set_mt;[|tauto].
- rewrite H2 in H1; rewrite cond_set_mt;[|tauto].
+ unfold fbot; rewrite cond_set_mt;[|unfold Tnot;tauto].
+ rewrite H2 in H1; rewrite cond_set_mt;[|unfold Tnot; tauto].
  reflexivity.
 
  assert (~x==empty).
@@ -467,7 +467,7 @@ split; intros.
 
  red; intros.
  apply cc_bot_ax in H2; destruct H2.
-  rewrite cond_set_mt; auto.
+ rewrite cond_set_mt; auto.
 
   rewrite cond_set_ok.
    apply cc_bot_intro.
@@ -477,7 +477,7 @@ split; intros.
 
  rewrite cc_bot_ax in H2,H3.
  destruct H2; [rewrite H2|]; (destruct H3;[rewrite H3|]); try reflexivity.
-  rewrite cond_set_mt in H4;[|tauto].
+  rewrite cond_set_mt in H4;[|unfold Tnot; tauto].
   rewrite cond_set_ok in H4.
    elim H1.
    rewrite H4.
@@ -486,7 +486,7 @@ split; intros.
    intro h; rewrite h in H3; contradiction.
 
   rewrite cond_set_ok in H4.
-   rewrite cond_set_mt in H4;[|tauto].
+   rewrite cond_set_mt in H4;[|unfold Tnot; tauto].
    elim H1.
    rewrite <- H4.
    apply (iso_typ H); trivial.

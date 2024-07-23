@@ -223,9 +223,12 @@ SN_variance.vos SN_variance.vok SN_variance.required_vos: SN_variance.v SN_ECC_R
 SN_W.vo SN_W.glob SN_W.v.beautified SN_W.required_vo: SN_W.v lib/basic.vo Models.vo SN_ECC_Real.vo ZFfunext.vo ZFcoc.vo ZFrecbot.vo ZFecc.vo ZFuniv_real.vo SATtypes.vo SATw.vo SN_ord.vo SN_variance.vo ZFind_wbot.vo
 SN_W.vio: SN_W.v lib/basic.vio Models.vio SN_ECC_Real.vio ZFfunext.vio ZFcoc.vio ZFrecbot.vio ZFecc.vio ZFuniv_real.vio SATtypes.vio SATw.vio SN_ord.vio SN_variance.vio ZFind_wbot.vio
 SN_W.vos SN_W.vok SN_W.required_vos: SN_W.v lib/basic.vos Models.vos SN_ECC_Real.vos ZFfunext.vos ZFcoc.vos ZFrecbot.vos ZFecc.vos ZFuniv_real.vos SATtypes.vos SATw.vos SN_ord.vos SN_variance.vos ZFind_wbot.vos
-ZF.vo ZF.glob ZF.v.beautified ZF.required_vo: ZF.v lib/basic.vo lib/Sublogic.vo ZFdef.vo ZFskolEm.vo
-ZF.vio: ZF.v lib/basic.vio lib/Sublogic.vio ZFdef.vio ZFskolEm.vio
-ZF.vos ZF.vok ZF.required_vos: ZF.v lib/basic.vos lib/Sublogic.vos ZFdef.vos ZFskolEm.vos
+Z.vo Z.glob Z.v.beautified Z.required_vo: Z.v lib/basic.vo lib/Sublogic.vo ZFdef.vo
+Z.vio: Z.v lib/basic.vio lib/Sublogic.vio ZFdef.vio
+Z.vos Z.vok Z.required_vos: Z.v lib/basic.vos lib/Sublogic.vos ZFdef.vos
+ZF.vo ZF.glob ZF.v.beautified ZF.required_vo: ZF.v lib/basic.vo lib/Sublogic.vo ZFdef.vo Z.vo ZFskolEm.vo
+ZF.vio: ZF.v lib/basic.vio lib/Sublogic.vio ZFdef.vio Z.vio ZFskolEm.vio
+ZF.vos ZF.vok ZF.required_vos: ZF.v lib/basic.vos lib/Sublogic.vos ZFdef.vos Z.vos ZFskolEm.vos
 ZFrepl.vo ZFrepl.glob ZFrepl.v.beautified ZFrepl.required_vo: ZFrepl.v ZF.vo
 ZFrepl.vio: ZFrepl.v ZF.vio
 ZFrepl.vos ZFrepl.vok ZFrepl.required_vos: ZFrepl.v ZF.vos

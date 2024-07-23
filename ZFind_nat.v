@@ -1,7 +1,6 @@
 Require Import ZF ZFsum ZFfix ZFnats ZFrelations ZFord ZFcont ZFrank.
 Require Import ZFind_basic.
 Require Import ZFfunext ZFfixrec.
-Import ZFrepl.
 
 Section Nat_theory.
 

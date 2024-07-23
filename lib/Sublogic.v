@@ -1,7 +1,8 @@
 Require Export basic.
 Require Import Logics.
 
-Reserved Notation "# T" (at level 200).
+Reserved Notation "# T" (at level 30).
+Reserved Notation "#¬ T" (at level 75).
 
 Set Implicit Arguments.
 
@@ -94,12 +95,21 @@ Admitted.
   Parameter imp_isL : forall P Q, isL Q -> isL (P -> Q).
   Parameter iff_isL : forall P Q, isL P -> isL Q -> isL (P <-> Q).
 
-Global Hint Resolve Tr_isL T_isL and_isL fa_isL imp_isL iff_isL : core.
+  #[global]Hint Resolve Tr_isL T_isL and_isL fa_isL imp_isL iff_isL : core.
 
   Parameter rFF : forall (Q:Prop), Tr False -> Tr Q.
   Parameter rFF': forall (Q:Prop), Tr False -> isL Q -> Q.
 
-(** Introduction tactics *)
+  Definition Tnot (P:Prop) := P -> Tr False.
+  Notation "#¬ P" := (Tnot P).
+  #[global]Hint Unfold Tnot : core.
+
+  Parameter Tnot_morph : Proper (iff ==> iff) Tnot.
+  Parameter Tnot_mono  : Proper (impl --> impl) Tnot.
+  #[global]Existing Instance Tnot_morph.
+  #[global]Existing Instance Tnot_mono.
+
+  (** Introduction tactics *)
 
 Ltac Tin := apply TrI.
 Ltac Texists t := Tin; exists t.
@@ -216,6 +226,22 @@ Lemma rFF' (Q:Prop) : Tr False -> isL Q -> Q.
 intros.
 apply H0; apply rFF; trivial.
 Qed.
+
+  Definition Tnot (P:Prop) := P -> Tr False.
+  Notation "#¬ P" := (Tnot P).
+
+#[global]Instance Tnot_morph : Proper (iff ==> iff) Tnot.
+do 2 red; intros.
+unfold Tnot.
+rewrite H.
+reflexivity.
+Qed.
+#[global]Instance Tnot_mono : Proper (impl --> impl) Tnot.
+do 3 red; intros.
+unfold Tnot.
+intros; apply H0; auto.
+Qed.
+
 Ltac Tin := apply TrI.
 Ltac Texists t := Tin; exists t.
 Ltac Tleft := Tin; left.
@@ -237,6 +263,7 @@ Ltac prove_isL :=
   | |- isL(impl _ _) => apply imp_isL; prove_isL
   | |- isL(iff _ _) => apply iff_isL; prove_isL
   | |- isL(forall x, _) => (apply imp_isL || (apply fa_isL; intro)); prove_isL
+  | |- isL(Tnot _) => apply imp_isL; prove_isL
   | |- isL _ => auto 10; fail "Cannot prove isL side-condition"
   | |- _ => fail "Tactic prove_isL does not apply to this goal"
   end.

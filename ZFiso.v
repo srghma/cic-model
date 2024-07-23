@@ -46,7 +46,7 @@ Instance iso_fun_morph : Proper (eq_set==>eq_set==>(eq_set==>eq_set)==>iff) iso_
 apply morph_impl_iff3; auto with *.
 do 4 red; intros.
 red; apply iso_fun_ext; trivial.
- do 3 red; intros.
+ do 2 red; intros.
  transitivity (x1 x2); auto with *.
  symmetry; apply H1; auto with *.
 

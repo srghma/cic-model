@@ -13,16 +13,20 @@ Reserved Infix "∩" (at level 40).
 (************************************************************************)
 (** * A generic set theory signature *)
 
-Module Type SetTheory.
+Module Type SetTheory (L:SublogicTheory).
 
 Parameter
  (set : Type)
  (eq_set : set -> set -> Prop)
  (in_set : set -> set -> Prop).
 
-Notation "x ∈ y" := (in_set x y).
 Notation "x == y" := (eq_set x y).
+Notation "x ∈ y" := (in_set x y).
 
+Parameter eq_set_isL : forall x y, L.isL (x == y).
+Parameter in_set_isL : forall x y, L.isL (x ∈ y).
+#[global]Hint Resolve eq_set_isL in_set_isL : core.
+ 
 Parameter
  (eq_set_ax : forall a b, a == b <-> (forall x, x ∈ a <-> x ∈ b))
  (in_reg : forall a a' b, a == a' -> a ∈ b -> a' ∈ b).
@@ -34,7 +38,7 @@ End SetTheory.
    setting (regularity is classical). *)
 Module Type WfSetTheory (L:SublogicTheory).
   Import L.
-  Include SetTheory.
+  Include SetTheory L.
 
 Parameter
  (wf_ax: forall P:set->Prop,
@@ -67,7 +71,7 @@ Parameter
  (power : set -> set).
 
 Parameter
- (empty_ax: forall x, x ∈ empty -> #False)
+ (empty_ax: forall x, #¬x ∈ empty)
  (pair_ax: forall a b x, x ∈ pair a b <-> #(x == a \/ x == b))
  (union_ax: forall a x, x ∈ union a <-> #exists2 y, x ∈ y & y ∈ a)
  (subset_ax : forall a P x,
@@ -85,14 +89,14 @@ Include WfSetTheory L.
 Import L.
 
 Parameter
- (empty_ex: #(exists empty, forall x, x ∈ empty -> #False))
+ (empty_ex: #(exists empty, forall x, #¬x ∈ empty))
  (pair_ex: forall a b, #exists c, forall x, x ∈ c <-> #(x == a \/ x == b))
  (union_ex: forall a, #exists b,
     forall x, x ∈ b <-> #exists2 y, x ∈ y & y ∈ a)
  (subset_ex : forall a P, #exists b,
     forall x, x ∈ b <-> (x ∈ a /\ #exists2 x', x==x' & P x'))
  (infinity_ex: #exists2 infinite,
-    #exists2 empty, (forall x, x ∈ empty -> #False) &
+    #exists2 empty, (forall x, #¬x ∈ empty) &
         empty ∈ infinite &
     (forall x, x ∈ infinite ->
      #exists2 y, (forall z, z ∈ y <-> #(z == x \/ z ∈ x)) &
@@ -197,7 +201,7 @@ End ZF_sig.
 (************************************************************************)
 (* begin hide *)
 
-Module Type Choice_Sig (L:SublogicTheory) (S:SetTheory).
+Module Type Choice_Sig (L:SublogicTheory) (S:SetTheory L).
 Import L S.
 Parameter
   (choose : set -> set)

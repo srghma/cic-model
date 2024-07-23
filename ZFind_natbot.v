@@ -2,7 +2,6 @@ Set Implicit Arguments.
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
 Require Import ZFgrothendieck.
 Require Import ZFlist ZFcoc.
-Import ZFrepl.
 Require Export ZFind_nat.
 
 (** In this file we develop an alternative model of nat contain the empty set.

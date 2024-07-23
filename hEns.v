@@ -311,6 +311,7 @@ End Ker.
 (** * The type of intensional sets *)
 
 Module Z := Zermelo TrSubThms.
+Import TrSubThms.
 Import Z.
 
   Notation eq_iset := Z.eq_set.
@@ -324,7 +325,7 @@ apply isProp_conj.
  apply isProp_forall; intros i.
  apply tr_prop.
 Qed.
-
+  
   Lemma isProp_in_set x y : isProp (Z.in_set x y).
 apply tr_prop.
 Qed.
@@ -400,7 +401,8 @@ Definition Kers (a:set) : map set :=
   (* Equality *)
   Definition eq_set (x y:set) := x=y.
   #[local]Notation "x == y" := (eq_set x y).
-
+  Definition eq_set_isL (x y:set) : isL (x==y) := hott.tr_elim (isSet_quo _ _ _ x y).
+  
 Lemma eq_set_intro x y :
   eq_map (Kers x) (Kers y) ->
   x = y.
@@ -447,7 +449,9 @@ Qed.
   Definition in_set (x y:set) : Prop :=
     tr{j:Ker y & x = Kerf y j}.
   #[local]Notation "x ∈ y" := (in_set x y).
-
+  Definition in_set_isL x y : isL (x ∈ y) :=
+    hott.tr_elim (tr_prop _).
+  
   Lemma in_iset_ax z (X:Ti) f :
       z ∈ mks (Z.isup X f) <->
       tr{i:X| z = mks (f i)}.
@@ -973,7 +977,8 @@ Definition set_ind_nodep (P:Type) (Ps : isSet P)
   set_ind (fun _ => P) (fun _ => Ps) (fun X f=>h(mkm X f)) (set_comp_nodep_intro hcomp) x.
 
 Definition eq_set := @eq set.
-
+Definition eq_set_isL (x y:set) : isL (eq_set x y) :=
+  tr_elim (isSet_set x y).
 
 Definition in_set (x y:set) : Prop :=
   #exists X:Ti, exists2 f:X->set, y = sup X f & exists j:X, x = f j.
@@ -981,6 +986,8 @@ Definition in_set (x y:set) : Prop :=
 Lemma isProp_in_set x y : isProp (in_set x y).
 apply tr_prop.
 Qed.
+Definition in_set_isL (x y:set) : isL (in_set x y) :=
+  tr_elim (isProp_in_set x y).
 
 Hint Resolve isProp_in_set : core.
 
