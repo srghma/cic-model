@@ -2,19 +2,187 @@
 Require Export basic.
 Require Import Sublogic.
 Require Export ZFdef.
-Require Import Z.
+Require Z.
 Export CoqSublogicThms.
 #[global]Hint Unfold Tnot : core.
 
+Module Structure.
+  Record izfr : Type :=
+    BuildIZFR {
+        set : Type;
+        eq_set : set -> set -> Prop;
+        in_set : set -> set -> Prop;
+        eq_set_ax :
+          forall a b : set, eq_set a b <-> (forall x : set, in_set x a <-> in_set x b);
+        in_reg : forall a a' b : set, eq_set a a' -> in_set a b -> in_set a' b;
+        wf_ax :
+          forall P : set -> Prop,
+            (forall x : set, (forall y : set, in_set y x -> P y) -> P x) ->
+            forall x : set, P x;
+        empty : set;
+        pair : set -> set -> set;
+        union : set -> set;
+        subset : set -> (set -> Prop) -> set;
+        infinite : set;
+        power : set -> set;
+        empty_ax : forall x : set, ~ in_set x empty;
+        pair_ax :
+          forall a b x : set, in_set x (pair a b) <-> eq_set x a \/ eq_set x b;
+        union_ax :
+          forall a x : set, in_set x (union a) <-> exists2 y : set, in_set x y & in_set y a;
+        subset_ax :
+          forall (a : set) (P : set -> Prop) (x : set),
+          in_set x (subset a P) <-> in_set x a /\ exists2 x' : set, eq_set x x' & P x';
+        infinity_ax1 : in_set empty infinite;
+        infinity_ax2 :
+          forall x : set, in_set x infinite -> in_set (union (pair x (pair x x))) infinite;
+        power_ax :
+          forall a x : set, in_set x (power a) <-> (forall y : set, in_set y x -> in_set y a);
+        repl : set -> (set -> set -> Prop) -> set;
+        repl_mono :
+          forall a a' : set,
+            (forall z : set, in_set z a -> in_set z a') ->
+            forall R R' : set -> set -> Prop,
+              (forall x x' : set, eq_set x x' -> forall y y' : set,
+                    eq_set y y' -> R x y <-> R' x' y') ->
+              forall z : set, in_set z (repl a R) -> in_set z (repl a' R');
+        repl_ax :
+          forall (a : set) (R : set -> set -> Prop),
+          (forall x x' y y' : set, in_set x a -> eq_set x x' -> eq_set y y' -> R x y -> R x' y') ->
+          (forall x y y' : set, in_set x a -> R x y -> R x y' -> eq_set y y') ->
+          forall x : set, in_set x (repl a R) <-> exists2 y : set, in_set y a & R y x }.
+End Structure.
+  
 (** We assume the existence of a model of IZF (that is actually
     constructed modulo one axiom (ttrepl): *)
 Require ZFskolEm.
-Module IZF : IZF_R_sig CoqSublogicThms := ZFskolEm.IZF_R.
-Include IZF.
-(*Print Assumptions repl_ax.*)
+(** We will only use this construction of sets through the abstract
+    module signature IZF_R_Sig. *)
+(*Module IZF_Axioms : IZF_R_sig CoqSublogicThms := ZFskolEm.IZF_R.*)
 
-Include ZermeloSetTheory CoqSublogicThms IZF.
+Section BuildStructure.
+  Import Structure ZFskolEm.IZF_R.
+  
+  Lemma izfr_struct : izfr.
+ exact (BuildIZFR set
+        eq_set
+        in_set
+        eq_set_ax
+        in_reg
+        wf_ax
+        empty
+        pair
+        union
+        subset
+        infinite
+        power
+        empty_ax
+        pair_ax
+        union_ax
+        subset_ax
+        infinity_ax1
+        infinity_ax2
+        power_ax
+        repl
+        repl_mono
+        repl_ax).
+  Qed.
+End BuildStructure.
 
+Module IZF_Axioms.
+Definition set : Type :=
+  Structure.set izfr_struct.
+Definition eq_set : set -> set -> Prop :=
+  Structure.eq_set izfr_struct.
+Definition in_set : set -> set -> Prop :=
+  Structure.in_set izfr_struct.
+Definition eq_set_isL (x y:set) : eq_set x y->eq_set x y := fun h=>h.
+Definition in_set_isL (x y:set) : in_set x y->in_set x y := fun h=>h.
+Lemma eq_set_ax :
+  forall a b : set, eq_set a b <-> (forall x : set, in_set x a <-> in_set x b).
+exact (Structure.eq_set_ax izfr_struct).
+Qed.
+Lemma in_reg : forall a a' b : set, eq_set a a' -> in_set a b -> in_set a' b.
+exact (Structure.in_reg izfr_struct).
+Qed.
+Lemma wf_ax :
+  forall P : set -> Prop,
+    (forall x : set, (forall y : set, in_set y x -> P y) -> P x) ->
+    forall x : set, P x.
+exact (Structure.wf_ax izfr_struct).
+Qed.
+Definition empty : set :=
+  Structure.empty izfr_struct.
+Definition pair : set -> set -> set :=
+  Structure.pair izfr_struct.
+Definition union : set -> set :=
+  Structure.union izfr_struct.
+Definition subset : set -> (set -> Prop) -> set :=
+  Structure.subset izfr_struct.
+Definition infinite : set :=
+  Structure.infinite izfr_struct.
+Definition power : set -> set :=
+  Structure.power izfr_struct.
+Lemma empty_ax : forall x : set, ~ in_set x empty.
+exact (Structure.empty_ax izfr_struct).
+Qed.
+Lemma pair_ax :
+  forall a b x : set, in_set x (pair a b) <-> eq_set x a \/ eq_set x b.
+exact (Structure.pair_ax izfr_struct).
+Qed.
+Lemma union_ax :
+  forall a x : set, in_set x (union a) <-> exists2 y : set, in_set x y & in_set y a.
+exact (Structure.union_ax izfr_struct).
+Qed.
+Lemma subset_ax :
+  forall (a : set) (P : set -> Prop) (x : set),
+    in_set x (subset a P) <-> in_set x a /\ exists2 x' : set, eq_set x x' & P x'.
+exact (Structure.subset_ax izfr_struct).
+Qed.
+Lemma infinity_ax1 : in_set empty infinite.
+exact (Structure.infinity_ax1 izfr_struct).
+Qed.
+Lemma infinity_ax2 :
+  forall x : set, in_set x infinite -> in_set (union (pair x (pair x x))) infinite.
+exact (Structure.infinity_ax2 izfr_struct).
+Qed.
+Lemma power_ax :
+  forall a x : set, in_set x (power a) <-> (forall y : set, in_set y x -> in_set y a).
+exact (Structure.power_ax izfr_struct).
+Qed.
+Definition repl : set -> (set -> set -> Prop) -> set :=
+  Structure.repl izfr_struct.
+Lemma repl_mono :
+  forall a a' : set,
+    (forall z : set, in_set z a -> in_set z a') ->
+    forall R R' : set -> set -> Prop,
+      (forall x x' : set, eq_set x x' -> forall y y' : set,
+            eq_set y y' -> R x y <-> R' x' y') ->
+      forall z : set, in_set z (repl a R) -> in_set z (repl a' R').
+exact (Structure.repl_mono izfr_struct).
+Qed.
+Lemma repl_ax :
+  forall (a : set) (R : set -> set -> Prop),
+    (forall x x' y y' : set, in_set x a -> eq_set x x' -> eq_set y y' -> R x y -> R x' y') ->
+    (forall x y y' : set, in_set x a -> R x y -> R x y' -> eq_set y y') ->
+    forall x : set, in_set x (repl a R) <-> exists2 y : set, in_set y a & R y x.
+exact (Structure.repl_ax izfr_struct).
+Qed.
+End IZF_Axioms.
+Module IZ_Lemmas := Z.ZermeloSetTheory CoqSublogicThms IZF_Axioms.
+
+Export IZF_Axioms.
+Export IZ_Lemmas.
+#[global]Opaque set eq_set in_set empty pair union subset power infinite repl.
+Notation "x == y" := (eq_set x y).
+Notation "x ∈ y" := (in_set x y).
+
+(*Include IZF_Axioms.*) (*Print Assumptions repl_ax.*)
+(** And we import all the basic derived notions belonging to
+    Zermelo set theory *)
+
+(**********************************************************************)
+(* Basic derived notions involving (functional) replacement *)
 
 (*Parameter replf : set -> (set->set) -> set.*)
 Definition replf (a:set) (F:set->set) : set :=
@@ -155,6 +323,15 @@ apply replf_morph_gen; intros.
 
  apply eq_index_eq; trivial.
 Qed.
+
+Lemma replf_id x : replf x (fun y => y) == x.
+apply eq_set_ax; intros z.
+rewrite replf_ax;[|auto with *].
+split; intros.
+*destruct H as (z',?,e).
+ rewrite e; trivial.
+*exists z; [trivial|reflexivity].
+Qed. 
 
 Lemma replf_empty : forall F, replf empty F == empty.
 Proof.

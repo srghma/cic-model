@@ -332,7 +332,7 @@ rewrite WFR_eqn_gen; auto.
   apply Dec_morph; auto with *.
   rewrite fst_def; reflexivity.
 
-  clear -fm; do 4 red; intros.
+  clear -fm; do 3 red; intros.
   apply WFR_morph0.
   rewrite H,H0; reflexivity.
 
@@ -559,7 +559,7 @@ apply WFR_morph.
  do 2 red; intros.
  rewrite H2,H3; reflexivity.
 
- do 3 red; intros.
+ do 2 red; intros.
  apply if_prop_morph.
   apply ex_morph; intros b'.
   apply ex_morph; intros q'.

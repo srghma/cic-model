@@ -32,7 +32,7 @@ Module Type W_PartialModel.
   Existing Instance W_F_mono.
   Parameter W_F_ext : forall A A' B B' X X',
     A == A' ->
-    ZF.eq_fun A B B' -> X == X' -> W_F A B X == W_F A' B' X'.
+    eq_fun A B B' -> X == X' -> W_F A B X == W_F A' B' X'.
   Parameter W_F_intro : forall A B, morph1 B ->
     forall X x f,
     x ∈ A ->
@@ -1247,7 +1247,7 @@ Lemma wfix_eq : forall X G,
            (App (subst O (subst (lift 1 (WFix O M)) M)) N).
 intros X G N tyN.
 red; intros.
-unfold eqX.
+unfold CC_Real.eqX.
 change
  (cc_app (WREC (F' i) (int O i)) (int N i) ==
   cc_app (int (subst O (subst (lift 1 (WFix O M)) M)) i) (int N i)).
@@ -1272,10 +1272,10 @@ Lemma TIeq: forall i i' j j' o',
 intros; apply TI_morph_gen; auto with *.
 red; intros.
 apply W_F_ext; trivial.
- apply El_morph.
+*apply El_morph.
  apply (Aeq _ _ _ _ H).
 
- red; intros.
+*red; intros.
  apply El_morph.
  eapply Beq.
  apply val_push_var with (1:=H); trivial.

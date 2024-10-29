@@ -119,7 +119,7 @@ Qed.
 
 Lemma add_var_eq_fun : forall T U U' i,
   (forall x, x ∈ int T i -> int U (V.cons x i) == int U' (V.cons x i)) ->
-  eq_fun (int T i)
+  eqX_fun (int T i)
     (fun x => int U (V.cons x i))
     (fun x => int U' (V.cons x i)).
 red; intros.
@@ -423,7 +423,7 @@ Lemma eq_typ_beta : forall e T M M' N N',
   eq_typ e (App (Abs T M) N) (subst N' M').
 Proof.
 unfold eq_typ, typ, App, Abs; simpl; intros.
-assert (eq_fun (int T i)
+assert (eqX_fun (int T i)
   (fun x => int M (V.cons x i)) (fun x => int M (V.cons x i))).
  apply add_var_eq_fun with (T:=T); intros; trivial; reflexivity.
 assert (int N i ∈ int T i).

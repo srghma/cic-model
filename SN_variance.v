@@ -374,10 +374,10 @@ rewrite beta_eq; try assumption.
 
    split; [trivial|apply varSAT].
 
-  red; red; intros.
+  red; intros.
   rewrite H7; reflexivity.
 
- red; red; intros.
+ red; intros.
  rewrite H7; reflexivity.
 Qed.
 

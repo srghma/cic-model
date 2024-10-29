@@ -65,7 +65,7 @@ destruct Ht as (_, Ht).
 apply Hxy; clear Hxy Hclsd e Hx Hy j' Hok' Hok.
 unfold EQ_term in Ht. simpl int in Ht.
 apply rprod_elim with (x:=int P i) (u:=tm P j) in Ht.
-2:{do 2 red; intros; apply prod_ext.
+2:{red; intros; apply prod_ext.
    rewrite H0; reflexivity.
    red; intros.
    rewrite H0,H2; reflexivity. }
@@ -73,7 +73,7 @@ apply rprod_elim with (x:=int u i) (u:=tm u j) in Ht.
  exists (App (App t P) u). revert Ht; apply real_morph; simpl; [reflexivity| |reflexivity].
   rewrite split_lift. do 2 rewrite int_cons_lift_eq; reflexivity.
 
- do 2 red; intros. rewrite H0. reflexivity.
+ red; intros. rewrite H0. reflexivity.
 
  revert Hv; apply real_morph; [|rewrite int_cons_lift_eq|]; reflexivity.
 

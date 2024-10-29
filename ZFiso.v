@@ -180,33 +180,32 @@ Qed.
 
 (** Composition and transitivity *)
 
-Lemma iso_fun_trans_eq : forall X Y Z f g h,
+Lemma iso_fun_trans_eq X Y Z f g h :
   (forall x, g (f x) == h x) ->
   iso_fun X Y f ->
   iso_fun Y Z g ->
   iso_fun X Z h.
 intros.
 constructor; intros.
- do 2 red; intros.
-  rewrite <- H; trivial.
-  rewrite <- H.
-  apply (iso_funm H1).
-  apply (iso_funm H0); trivial.
+*do 2 red; intros.
+ rewrite <- H; trivial.
+ rewrite <- H.
+ apply (iso_funm H1).
+ apply (iso_funm H0); trivial.
 
- red; intros.
+*red; intros.
  rewrite <- H; trivial.
  apply (iso_typ H1).
  apply (iso_typ H0); trivial.
 
- do 2 (rewrite <- H in H4; trivial).
+*do 2 (rewrite <- H in H4; trivial).
  apply (iso_inj H1) in H4.
   apply (iso_inj H0) in H4; trivial.
-
   apply (iso_typ H0); trivial.
   apply (iso_typ H0); trivial.
 
- destruct (iso_surj H1 H2).
- destruct (iso_surj H0 H3).
+*destruct (iso_surj H1 _ H2).
+ destruct (iso_surj H0 _ H3).
  exists x0; trivial.
  rewrite <- H; auto.
  rewrite <- H4; apply (iso_funm H1); trivial.
@@ -274,9 +273,9 @@ Lemma iso_fun_inj X1 X2 Y f :
   X1 == X2.
 intros.
 apply eq_intro; intros; auto.
-assert (tyz1 := iso_typ H0 H2).
-assert (tyz2 := iso_inv_typ H tyz1).
-assert (eqz1 := iso_inv_eq H tyz1).
+assert (tyz1 := iso_typ H0 _ H2).
+assert (tyz2 := iso_inv_typ _ H tyz1).
+assert (eqz1 := iso_inv_eq _ H tyz1).
 apply (iso_inj H0) in eqz1; auto.
 rewrite <- eqz1; trivial.
 Qed.
@@ -289,14 +288,14 @@ Lemma iso_fun_narrow X1 X2 Y1 Y2 f x :
   f x ∈ Y1 ->
   x ∈ X1.
 intros.
-assert (ty1 := iso_inv_typ H H3).
-assert (ty2 := iso_typ H ty1).
-assert (eq1 := iso_inv_eq H H3).
+assert (ty1 := iso_inv_typ _ H H3).
+assert (ty2 := iso_typ H _ ty1).
+assert (eq1 := iso_inv_eq _ H H3).
 apply (iso_inj H0) in eq1; trivial.
  rewrite <- eq1; trivial.
 
  apply H1.
- apply (iso_inv_typ H); trivial.
+ apply (iso_inv_typ _ H); trivial.
 Qed.
 
 
@@ -667,9 +666,9 @@ constructor; intros.
 
   apply snd_typ_sigma with (2:=H5); auto with *.
 
- destruct (iso_surj H2 (y:=fst y)).
+ destruct (iso_surj H2 (fst y)).
   apply fst_typ_sigma in H4; trivial.
- destruct (iso_surj (H3 _ _ H5 H6) (y:=snd y)).
+ destruct (iso_surj (H3 _ _ H5 H6) (snd y)).
   apply snd_typ_sigma with (2:=H4); auto with *.
  exists (couple x x0).
   apply couple_intro_sigma; auto.
@@ -757,7 +756,7 @@ constructor; intros; auto with *.
 
   apply snd_typ_sigma with (2:=H2); auto with *.
 
- destruct (iso_surj (H0 _ H1) (y:=empty)).
+ destruct (iso_surj (H0 _ H1) (empty)).
   apply singl_intro.
  exists (couple y x).
   apply couple_intro_sigma; auto.
@@ -794,7 +793,7 @@ constructor; intros; auto with *.
 
  apply sigma_1r_iso_typ; trivial.
  intros.
- apply (iso_typ (H1 _ H2) (singl_intro empty)).
+ apply (iso_typ (H1 _ H2) _ (singl_intro empty)).
 
  apply couple_injection in H4; destruct H4; trivial.
 

@@ -31,9 +31,9 @@ TypModels.vos TypModels.vok TypModels.required_vos: TypModels.v Models.vos
 ZFdef.vo ZFdef.glob ZFdef.v.beautified ZFdef.required_vo: ZFdef.v lib/basic.vo lib/Sublogic.vo
 ZFdef.vio: ZFdef.v lib/basic.vio lib/Sublogic.vio
 ZFdef.vos ZFdef.vok ZFdef.required_vos: ZFdef.v lib/basic.vos lib/Sublogic.vos
-ZFskolEm.vo ZFskolEm.glob ZFskolEm.v.beautified ZFskolEm.required_vo: ZFskolEm.v lib/basic.vo ZFdef.vo EnsEm.vo lib/Sublogic.vo
-ZFskolEm.vio: ZFskolEm.v lib/basic.vio ZFdef.vio EnsEm.vio lib/Sublogic.vio
-ZFskolEm.vos ZFskolEm.vok ZFskolEm.required_vos: ZFskolEm.v lib/basic.vos ZFdef.vos EnsEm.vos lib/Sublogic.vos
+ZFskolEm.vo ZFskolEm.glob ZFskolEm.v.beautified ZFskolEm.required_vo: ZFskolEm.v lib/basic.vo lib/Sublogic.vo ZFdef.vo EnsEm.vo
+ZFskolEm.vio: ZFskolEm.v lib/basic.vio lib/Sublogic.vio ZFdef.vio EnsEm.vio
+ZFskolEm.vos ZFskolEm.vok ZFskolEm.required_vos: ZFskolEm.v lib/basic.vos lib/Sublogic.vos ZFdef.vos EnsEm.vos
 ZFskol.vo ZFskol.glob ZFskol.v.beautified ZFskol.required_vo: ZFskol.v lib/basic.vo ZFdef.vo lib/Sublogic.vo
 ZFskol.vio: ZFskol.v lib/basic.vio ZFdef.vio lib/Sublogic.vio
 ZFskol.vos ZFskol.vok ZFskol.required_vos: ZFskol.v lib/basic.vos ZFdef.vos lib/Sublogic.vos

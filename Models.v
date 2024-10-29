@@ -21,7 +21,7 @@ Notation "x ∈ y" := (inX x y).
 Notation "x == y" := (eqX x y).
 Notation "x ⊆ y" := (inclX x y).
 
-Definition eq_fun (x:X) (f1 f2:X->X) :=
+Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
 
 End Sets.
@@ -37,7 +37,7 @@ Parameter prod : X -> (X -> X) -> X.
 Parameter lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   lam x1 f1 == lam x2 f2.
 
 Parameter app_ext: Proper (eqX ==> eqX ==> eqX) app.
@@ -46,12 +46,12 @@ Existing Instance app_ext.
 Parameter prod_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   prod x1 f1 == prod x2 f2.
 
 Parameter beta_eq:
   forall dom F x,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   x ∈ dom ->
   app (lam dom F) x == F x.
 
@@ -67,19 +67,19 @@ Module Type CC_Terms := Sets <+ CC_Sig.
 Module Type CC_Properties (Import T:CC_Terms).
 
 Parameter prod_intro : forall dom f F,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   (forall x, x ∈ dom -> f x ∈ F x) ->
   lam dom f ∈ prod dom F.
 
 Parameter prod_elim : forall dom f x F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   f ∈ prod dom F ->
   x ∈ dom ->
   app f x ∈ F x.
 
 Parameter impredicative_prod : forall dom F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   (forall x, x ∈ dom -> F x ∈ props) ->
   prod dom F ∈ props.
 
@@ -120,7 +120,7 @@ Module Type ECC_Model.
   Parameter u_card_incl_prop : forall x, x ∈ props -> x ∈ u_card 0.
   Parameter u_card_incl : forall n x, x ∈ u_card n -> x ∈ u_card (S n).
   Parameter u_card_prod : forall n X Y,
-    eq_fun X Y Y ->
+    eqX_fun X Y Y ->
     X ∈ u_card n ->
     (forall x, x ∈ X -> Y x ∈ u_card n) ->
     prod X Y ∈ u_card n.
@@ -145,21 +145,21 @@ Parameter props_typ : props ∈ kinds.
 Parameter prod_typ : forall dom F s1 s2,
   s1 == props \/ s1 == kinds ->
   s2 == props \/ s2 == kinds ->
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   dom ∈ s1 ->
   (forall x, x ∈ dom -> F x ∈ s2) ->
   prod dom F ∈ s2.
 
 Parameter prod_intro : forall dom f F s1,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   s1 == props \/ s1 == kinds ->
   dom ∈ s1 ->
   (forall x, x ∈ dom -> f x ∈ F x) ->
   lam dom f ∈ prod dom F.
 
 Parameter prod_elim : forall dom f x F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   f ∈ prod dom F ->
   x ∈ dom ->
   app f x ∈ F x.

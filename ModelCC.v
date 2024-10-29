@@ -79,7 +79,7 @@ apply abstract_consistency with (M:=int_trm(unmark_app M)) (FF:=empty); trivial.
 Qed.
 
 (*begin hide*)
-Module TypChoice (C : Choice_Sig CoqSublogicThms IZF).
+Module TypChoice (C : Choice_Sig CoqSublogicThms IZF_Axioms).
 
 Import C.
 Import BuildModel.

@@ -99,16 +99,16 @@ assert (forall x, x ∈ N ->
  intros; change (El props) with ((fun _ => El props) x).
   apply natrec_typ; [do 2 red; reflexivity|do 3 red; reflexivity|trivial| |intros].
    apply impredicative_prod.
-    do 2 red; intros; apply prod_ext; [|do 2 red]; trivial.
+    do 2 red; intros; apply prod_ext; [|red]; trivial.
 
     intros; apply impredicative_prod; [do 2 red; reflexivity|trivial].
 
    apply impredicative_prod; [do 2 red |]; trivial.
 
 apply rprod_intro_lam.
- do 2 red; intros; apply natrec_morph; [reflexivity|do 3 red; reflexivity|trivial].
+ red; intros; apply natrec_morph; [reflexivity|do 2 red; reflexivity|trivial].
  
- do 2 red; reflexivity.
+ red; reflexivity.
 
  apply Lc.sn_abs; apply Lc.sn_var.
  
@@ -151,14 +151,14 @@ assert (prod (prod (mkTY N cNAT) (fun _ : X => props))
   (fun x0 : X => prod (app x0 m') (fun _ : X => app x0 n')) ==
   prod (prod (mkTY N cNAT) (fun _ : X => props))
   (fun x0 : X => prod (app x0 zero) (fun _ : X => app x0 (succ n)))).
- apply prod_ext; [reflexivity|do 2 red; intros].
-  apply prod_ext; [rewrite Hm'|do 2 red; intros; rewrite Hn']; rewrite H0; reflexivity.
+ apply prod_ext; [reflexivity|red; intros].
+  apply prod_ext; [rewrite Hm'|red; intros; rewrite Hn']; rewrite H0; reflexivity.
 
 rewrite H in Ht. clear m' n' Hm' Hn' H.
 apply rprod_elim with (x:=P1) (u:=Lc.K) in Ht; [| |apply P1_real].
-2: do 2 red; intros; apply prod_ext; [|do 2 red; intros]; rewrite H0; reflexivity.
+2: red; intros; apply prod_ext; [|red; intros]; rewrite H0; reflexivity.
 apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y))) 
-  (u:=(Lc.Abs (Lc.Abs (Lc.Ref 0)))) in Ht; [|do 2 red; reflexivity|].
+  (u:=(Lc.Abs (Lc.Abs (Lc.Ref 0)))) in Ht; [|red; reflexivity|].
  set (prf:=Lc.App (Lc.App (tm t j) Lc.K) (Lc.Abs (Lc.Abs (Lc.Ref 0)))) in Ht.
  assert (forall S, inSAT (Lc.App prf (Lc.Abs (Lc.Ref 0))) S).
   intros; assert ([mkProp S, (Lc.Abs (Lc.Ref 0))] \real props).
@@ -180,10 +180,10 @@ apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y)))
     assert (H2 := @rprod_elim props (app (app x P1) 
       (lam props (fun x => (lam x (fun y => y))))) (mkProp S) 
     (fun P=>P) prf (Lc.Abs (Lc.Ref 0))).
-     destruct H2; [do 2 red| | |]; trivial.
+     destruct H2; [red| | |]; trivial.
       rewrite Real_mkProp in H1; trivial.
       apply rprod_elim with (x:=(mkProp S)) (u:=(Lc.Abs (Lc.Ref 0))) in Ht; 
-        [|do 2 red|]; trivial.
+        [|red|]; trivial.
       unfold inX in H0; rewrite El_mkProp in H0; apply singl_elim in H0; trivial.
 
       destruct (neutral_not_closed _ H). inversion_clear H0.
@@ -204,11 +204,11 @@ apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y)))
  apply real_morph; [| |rewrite P1_ZERO; trivial]; reflexivity.
 
  apply H; clear H.
- apply rprod_intro_lam; [do 2 red; intros; apply lam_ext; [|do 2 red; intros]; trivial
-   | do 2 red; intros; apply prod_ext; [|do 2 red; intros]; trivial
+ apply rprod_intro_lam; [red; intros; apply lam_ext; [|red; intros]; trivial
+   | red; intros; apply prod_ext; [|red; intros]; trivial
    | apply Lc.sn_abs; apply Lc.sn_var
    | unfold Lc.subst; simpl Lc.subst_rec; intros].
-  apply rprod_intro_lam; [do 2 red; trivial|do 2 red; reflexivity|apply Lc.sn_var|].
+  apply rprod_intro_lam; [red; trivial|red; reflexivity|apply Lc.sn_var|].
    unfold Lc.subst; simpl Lc.subst_rec; intros; rewrite Lc.lift0; trivial.
 Qed.
 
@@ -222,14 +222,14 @@ assert (forall x, x ∈ N ->
    apply impredicative_prod; [do 2 red |]; trivial.
 
    apply impredicative_prod; [do 2 red|]; intros.
-    apply prod_ext; [|do 2 red]; trivial.
+    apply prod_ext; [|red]; trivial.
 
     apply impredicative_prod; [do 2 red; reflexivity|trivial].
 
 apply rprod_intro_lam.
- do 2 red; intros; apply natrec_morph; [reflexivity|do 3 red; reflexivity|trivial].
+ red; intros; apply natrec_morph; [reflexivity|do 2 red; reflexivity|trivial].
  
- do 2 red; reflexivity.
+ red; reflexivity.
 
  apply Lc.sn_abs; apply Lc.sn_var.
 
@@ -245,7 +245,7 @@ Lemma P2_SUCC : forall n, n ∈ N ->
 intros; unfold P2; rewrite beta_nat_eq.
  rewrite natrec_S; [reflexivity|do 3 red; reflexivity|trivial].
 
- do 2 red; intros. apply natrec_morph; [reflexivity|do 3 red; intros; reflexivity|trivial].
+ do 2 red; intros. apply natrec_morph; [reflexivity|do 2 red; intros; reflexivity|trivial].
 
  apply succ_typ; trivial.
 Qed.
@@ -254,7 +254,7 @@ Lemma P2_ZERO : app P2 zero == FF.
 unfold P2; rewrite beta_nat_eq.
  apply natrec_0.
 
- do 2 red; intros; apply natrec_morph; [reflexivity|do 3 red; reflexivity|trivial].
+ do 2 red; intros; apply natrec_morph; [reflexivity|do 2 red; reflexivity|trivial].
 
  apply zero_typ.
 Qed.
@@ -274,14 +274,14 @@ assert ([x, tm t j]\real
   prod (prod (mkTY N cNAT) (fun _ : X => props))
   (fun x0 : X => prod (app x0 (succ n)) (fun _ : X => app x0 zero))).
 {apply real_morph; [reflexivity|reflexivity|].
- apply prod_ext; [reflexivity|do 2 red; intros].
-  apply prod_ext; [rewrite Hm1|do 2 red; intros; rewrite Hm2]; rewrite H0;  reflexivity. }
+ apply prod_ext; [reflexivity|red; intros].
+  apply prod_ext; [rewrite Hm1|red; intros; rewrite Hm2]; rewrite H0;  reflexivity. }
 
 apply H in Ht; clear H.
 apply rprod_elim with (x:=P2) (u:=Lc.K) in Ht; [| |apply P2_real].
-2: do 2 red; intros; apply prod_ext; [|do 2 red; intros]; rewrite H0; reflexivity.
+2: red; intros; apply prod_ext; [|red; intros]; rewrite H0; reflexivity.
 apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y))) 
-  (u:=(Lc.Abs (Lc.Abs (Lc.Ref 0)))) in Ht; [|do 2 red; reflexivity|].
+  (u:=(Lc.Abs (Lc.Abs (Lc.Ref 0)))) in Ht; [|red; reflexivity|].
  set (prf:=Lc.App (Lc.App (tm t j) Lc.K) (Lc.Abs (Lc.Abs (Lc.Ref 0)))) in Ht.
  assert (forall S, inSAT (Lc.App prf (Lc.Abs (Lc.Ref 0))) S).
   intros; assert ([mkProp S, (Lc.Abs (Lc.Ref 0))] \real props).
@@ -301,10 +301,10 @@ apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y)))
     assert (H2 := @rprod_elim props (app (app x P2) 
       (lam props (fun x => (lam x (fun y => y))))) (mkProp S) 
     (fun P=>P) prf (Lc.Abs (Lc.Ref 0))).
-     destruct H2; [do 2 red| | |]; trivial.
+     destruct H2; [red| | |]; trivial.
       rewrite Real_mkProp in H1; trivial.
       apply rprod_elim with (x:=(mkProp S)) (u:=(Lc.Abs (Lc.Ref 0))) in Ht; 
-        [|do 2 red|]; trivial.
+        [|red|]; trivial.
       unfold inX in H0; rewrite El_mkProp in H0; apply singl_elim in H0; trivial.
 
       destruct (neutral_not_closed _ H). inversion_clear H0.
@@ -325,11 +325,11 @@ apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y)))
   apply real_morph; [| |rewrite P2_SUCC; trivial]; reflexivity.
 
  apply H; clear H.
- apply rprod_intro_lam; [do 2 red; intros; apply lam_ext; [|do 2 red; intros]; trivial
-   | do 2 red; intros; apply prod_ext; [|do 2 red; intros]; trivial
+ apply rprod_intro_lam; [red; intros; apply lam_ext; [|red; intros]; trivial
+   | red; intros; apply prod_ext; [|red; intros]; trivial
    | apply Lc.sn_abs; apply Lc.sn_var
    | unfold Lc.subst; simpl Lc.subst_rec; intros].
-  apply rprod_intro_lam; [do 2 red; trivial|do 2 red; reflexivity|apply Lc.sn_var|].
+  apply rprod_intro_lam; [red; trivial|red; reflexivity|apply Lc.sn_var|].
    unfold Lc.subst; simpl Lc.subst_rec; intros; rewrite Lc.lift0; trivial.
 Qed.
 
@@ -347,21 +347,21 @@ assert (forall x, x ∈ N ->
    apply impredicative_prod; [do 2 red |]; trivial.
 
    specialize (inSAT_n k H1); intros H3. destruct H3 as (x1, (H3, _)).
-   apply rprod_elim with (x:=k) (u:=x1) in H; [|do 2 red; intros; reflexivity|].
+   apply rprod_elim with (x:=k) (u:=x1) in H; [|red; intros; reflexivity|].
     destruct H as (H, _); unfold inX in H; trivial.
 
     split; [unfold inX; rewrite El_def,eqNbot|]; trivial.
      rewrite Real_def; auto.
      intros; apply cNAT_morph; trivial.
 
-apply rprod_intro_sn; [|do 2 red; reflexivity|apply real_sn in H; trivial|].
- do 2 red; intros; apply natrec_morph; [reflexivity
-   |do 3 red; intros; rewrite H3; reflexivity|trivial].
+apply rprod_intro_sn; [|red; reflexivity|apply real_sn in H; trivial|].
+ red; intros; apply natrec_morph; [reflexivity
+   |do 2 red; intros; rewrite H3; reflexivity|trivial].
 
  intros. assert (x ∈ N).
   destruct H1 as (H1, _). unfold inX in H1; rewrite El_def,eqNbot in H1; trivial.
 
- apply rprod_elim with (x:=x) (u:=u0) in H; [apply H0 in H2|do 2 red; reflexivity|trivial].
+ apply rprod_elim with (x:=x) (u:=u0) in H; [apply H0 in H2|red; reflexivity|trivial].
   split; [unfold inX|rewrite Real_sort; [apply real_sn in H|]]; trivial.
 Qed.
 
@@ -372,7 +372,7 @@ intros; unfold P3; rewrite beta_nat_eq.
  rewrite natrec_S; [reflexivity|do 3 red; intros; rewrite H0; reflexivity|trivial].
 
  do 2 red; intros. apply natrec_morph; 
- [reflexivity|do 3 red; intros; rewrite H2; reflexivity|trivial].
+ [reflexivity|do 2 red; intros; rewrite H2; reflexivity|trivial].
 
  apply succ_typ; trivial.
 Qed.
@@ -390,7 +390,7 @@ assert (forall m n, m ∈ N -> n ∈ N ->
 prod (prod (mkTY N cNAT) (fun _ : X => props))
      (fun x0 : X => prod (app x0 n) (fun _ : X => app x0 m)) ∈ El props).
 intros. apply impredicative_prod.
- do 2 red; intros. apply prod_ext; [|do 2 red; intros]; rewrite H2; reflexivity.
+ do 2 red; intros. apply prod_ext; [|red; intros]; rewrite H2; reflexivity.
 
  intros; apply impredicative_prod.
   do 2 red; intros; reflexivity.
@@ -415,14 +415,14 @@ assert ((lam (prod (mkTY N cNAT) (fun _ => props))
 El (prod (prod (mkTY N cNAT) (fun _ : X => props))
      (fun x0 : X => prod (app x0 n) (fun _ : X => app x0 m)))).
 apply prod_intro.
- do 2 red; intros. apply lam_ext; [rewrite H3; reflexivity|do 2 red; intros; rewrite H5].
+ do 2 red; intros. apply lam_ext; [rewrite H3; reflexivity|red; intros; rewrite H5].
   apply app_ext; [|reflexivity].
    apply app_ext; [reflexivity|unfold P3].
-    apply lam_ext; [reflexivity|do 2 red; intros].
+    apply lam_ext; [reflexivity|red; intros].
      apply natrec_morph;
        [reflexivity|do 2 red; intros; rewrite H3; rewrite H8; reflexivity|trivial].
 
- do 2 red; intros. apply prod_ext; [|do 2 red; intros]; rewrite H3; reflexivity.
+ do 2 red; intros. apply prod_ext; [|red; intros]; rewrite H3; reflexivity.
 
  intros. apply prod_intro.
   do 2 red; intros. rewrite H4; reflexivity.
@@ -435,7 +435,7 @@ pose (x3:=x1(*empty*)).
   assert (P3 x2 ∈ El (prod (mkTY N cNAT) (fun _ : X => props))).
    unfold P3. apply prod_intro.
     do 2 red; intros. 
-    apply natrec_morph; [reflexivity|do 3 red; intros; rewrite H6; reflexivity|trivial].
+    apply natrec_morph; [reflexivity|do 2 red; intros; rewrite H6; reflexivity|trivial].
 
     do 2 red; intros; reflexivity.
 
@@ -452,10 +452,10 @@ pose (x3:=x1(*empty*)).
        [|red; intros; reflexivity|rewrite El_def,eqNbot]; trivial.
 
   apply prod_elim with (x:=(P3 x2)) in HS; [|red; intros|trivial].
-  2 : apply prod_ext; [|do 2 red; intros]; rewrite H6; reflexivity.
+  2 : apply prod_ext; [|red; intros]; rewrite H6; reflexivity.
   assert (El (prod (app (P3 x2) (succ n)) (fun _ : X => app (P3 x2) (succ m))) ==
    El (prod (app x2 n) (fun _ : X => app x2 m))).
-   apply El_morph; apply prod_ext; [|do 2 red; intros]; rewrite P3_SUCC; trivial; reflexivity.
+   apply El_morph; apply prod_ext; [|red; intros]; rewrite P3_SUCC; trivial; reflexivity.
 
   rewrite H5 in HS; clear H5.
   apply prod_elim with (x:=x3) in HS; trivial.
@@ -481,37 +481,37 @@ apply real_morph; [trivial| |]; reflexivity.
 
 apply H4. clear H0 (*x0*) H (*x1*) H1 H2 H3 H4.
 apply rprod_intro_sn.
- do 2 red; intros. apply lam_ext; [rewrite H0; reflexivity|do 2 red; intros].
+ red; intros. apply lam_ext; [rewrite H0; reflexivity|red; intros].
   apply app_ext; trivial.
    apply app_ext; [reflexivity|].
-    unfold P3. apply lam_ext; [reflexivity|do 2 red; intros].
-     apply natrec_morph; [reflexivity|do 3 red; intros; rewrite H0, H5; reflexivity|trivial].
+    unfold P3. apply lam_ext; [reflexivity|red; intros].
+     apply natrec_morph; [reflexivity|do 2 red; intros; rewrite H0, H5; reflexivity|trivial].
 
- do 2 red; intros. apply prod_ext; [|do 2 red; intros]; rewrite H0; reflexivity.
+ red; intros. apply prod_ext; [|red; intros]; rewrite H0; reflexivity.
 
  apply real_sn in HS; trivial.
 
  intros. apply rprod_intro_sn.
-  do 2 red; intros. rewrite H1; reflexivity. 
+  red; intros. rewrite H1; reflexivity. 
   
-  do 2 red; intros. reflexivity.
+  red; intros. reflexivity.
 
   apply rprod_elim with (3:=H) in HS.
    apply real_sn in HS; trivial.
 
-   do 2 red; intros. apply prod_ext; [|do 2 red; intros]; rewrite H1; reflexivity.
+   red; intros. apply prod_ext; [|red; intros]; rewrite H1; reflexivity.
 
   intros. apply rprod_elim with (x:=P3 x0) (u:=u) in HS; [| |apply P3_real; trivial].
-  2 : do 2 red; intros; apply prod_ext; [|do 2 red; intros]; rewrite H2; reflexivity.
+  2 : red; intros; apply prod_ext; [|red; intros]; rewrite H2; reflexivity.
    assert ([app x (P3 x0), GenRealSN.Lc.App y u]\real
        prod (app (P3 x0) (succ n)) (fun _ : X => app (P3 x0) (succ m)) ->
    [app x (P3 x0), GenRealSN.Lc.App y u]\real
        prod (app x0 n) (fun _ : X => app x0 m)).
     apply real_morph; [reflexivity|reflexivity|].
-     apply prod_ext; [|do 2 red; intros]; rewrite <- P3_SUCC; trivial; reflexivity.
+     apply prod_ext; [|red; intros]; rewrite <- P3_SUCC; trivial; reflexivity.
    
    apply H1 in HS. clear H1.
-   apply rprod_elim with (x:=x1) (u:=u0) in HS; [|do 2 red; reflexivity|]; trivial.
+   apply rprod_elim with (x:=x1) (u:=u0) in HS; [|red; reflexivity|]; trivial.
 Qed.
 
 Fixpoint const_env n := 
@@ -595,8 +595,8 @@ assert ([int t i, tm t j] \real int (EQ_term x y) i ->
   [int t i, tm t j] \real prod (prod (mkTY N cNAT) (fun _ : X => props))
   (fun x0 : X => prod (app x0 (int x i)) (fun x : X => app x0 (int y i)))).
 simpl int; apply real_morph; [reflexivity |reflexivity|].
- apply prod_ext; [reflexivity | do 2 red; intros].
-  apply prod_ext; [|do 2 red; intros]; rewrite H0; [|rewrite split_lift];
+ apply prod_ext; [reflexivity | red; intros].
+  apply prod_ext; [|red; intros]; rewrite H0; [|rewrite split_lift];
     repeat rewrite int_cons_lift_eq; reflexivity.
 
 apply H in Ht; clear H.
@@ -613,21 +613,21 @@ clear x y.
 revert int_y Hy Ht; pattern int_x; apply N_ind; [| | |exact Hx]; intros.
  rewrite <- H0. apply H1; [trivial|].
   revert Ht; apply real_morph; [reflexivity|reflexivity|].
-   apply prod_ext; [reflexivity|do 2 red; intros].
-    apply prod_ext; [rewrite H0|do 2 red; intros]; rewrite H3; reflexivity.
+   apply prod_ext; [reflexivity|red; intros].
+    apply prod_ext; [rewrite H0|red; intros]; rewrite H3; reflexivity.
 
  revert Ht; pattern int_y; apply N_ind; [|reflexivity| |exact Hy]; intros.
   rewrite <- H0; apply H1; revert Ht; apply real_morph; [reflexivity|reflexivity|].
-   apply prod_ext; [reflexivity|do 2 red; intros].
-    apply prod_ext; [|do 2 red; intros; rewrite H0]; rewrite H3; reflexivity.
+   apply prod_ext; [reflexivity|red; intros].
+    apply prod_ext; [|red; intros; rewrite H0]; rewrite H3; reflexivity.
 
   apply False_closed1 with (n:=n0) in Ht; 
     [contradiction|trivial|reflexivity|reflexivity|trivial].
    
  revert Ht; pattern int_y; apply N_ind; [| | |exact Hy]; intros.
   rewrite <- H2; apply H3; revert Ht; apply real_morph; [reflexivity|reflexivity|].
-   apply prod_ext; [reflexivity|do 2 red; intros].
-    apply prod_ext; [|do 2 red; intros; rewrite H2]; rewrite H5; reflexivity.
+   apply prod_ext; [reflexivity|red; intros].
+    apply prod_ext; [|red; intros; rewrite H2]; rewrite H5; reflexivity.
 
   apply False_closed2 with (n:=n0) in Ht; 
     [contradiction|trivial|reflexivity|reflexivity|trivial].
@@ -837,7 +837,7 @@ Lemma int_S : forall n i, int n i ∈ N ->
   int (App Succ n) i == succ (int n i).
 intros; simpl.
 rewrite beta_eq; [reflexivity| |red;rewrite El_def,eqNbot; trivial].
- do 2 red; intros; rewrite H1; reflexivity.
+ red; intros; rewrite H1; reflexivity.
 Qed.
 
 Definition Add := Abs Nat (Abs Nat (NatRec (Ref 1) (Abs Nat Succ) (Ref 0))).
@@ -1011,20 +1011,20 @@ replace (int (App ax1_aux (App Succ n)) i) with
   (int (App Succ n) i)) by reflexivity.
 rewrite int_S; [unfold ax1_aux; simpl int|trivial].
 rewrite beta_eq; [
-  |do 2 red; intros; apply natrec_morph; [reflexivity
-    |do 3 red; intros; apply app_ext; [apply app_ext; [reflexivity|]|]|]
+  |red; intros; apply natrec_morph; [reflexivity
+    |do 2 red; intros; apply app_ext; [apply app_ext; [reflexivity|]|]|]
   |red;rewrite El_def,eqNbot; apply succ_typ]; trivial.
 rewrite natrec_S; [
   |do 3 red; intros; apply app_ext; [apply app_ext; [reflexivity|]|]
   |]; trivial.
-rewrite beta_eq;[|do 2 red; reflexivity|red;rewrite El_def,eqNbot; trivial].
-rewrite beta_eq; [reflexivity|do 2 red; reflexivity
+rewrite beta_eq;[|red; reflexivity|red;rewrite El_def,eqNbot; trivial].
+rewrite beta_eq; [reflexivity|red; reflexivity
   |change (El props) with ((fun _ => El props) (int n i))].
 red; apply natrec_typ with (P:=fun _ => El props); [do 2 red; reflexivity
   |do 3 red; intros; apply app_ext; [apply app_ext; [reflexivity|]|]; trivial
   | | |intros]; trivial.
-rewrite beta_eq; [|do 2 red; reflexivity|red;rewrite El_def,eqNbot; trivial].
-rewrite beta_eq; [|do 2 red; reflexivity|]; trivial.
+rewrite beta_eq; [|red; reflexivity|red;rewrite El_def,eqNbot; trivial].
+rewrite beta_eq; [|red; reflexivity|]; trivial.
 Qed.
 
 Definition ax1 := forall e, exists t, 
@@ -1082,7 +1082,7 @@ apply Impl_intro; [|discriminate|].
        [apply refl|simpl; split; red; reflexivity].
      
      red; intros; simpl. apply natrec_morph; [reflexivity| |reflexivity].
-      do 3 red; intros. apply app_ext; [apply app_ext; [reflexivity|]|]; trivial.
+      do 2 red; intros. apply app_ext; [apply app_ext; [reflexivity|]|]; trivial.
 
      red; intros; unfold lift. red in H. 
      assert (nth_error (App ax1_aux Zero :: Prod (Prod Nat prop)
@@ -1185,8 +1185,8 @@ assert ([int (Ref 0) i, tm (Ref 0) j] \real
   [i 0, j 0] \real (prod (prod (mkTY N cNAT) (fun _ => props)) (fun x =>
     prod (app x (succ (i 1))) (fun y => app x (succ (i 2)))))).
  apply real_morph; [reflexivity|reflexivity|].
-  apply prod_ext; [reflexivity|do 2 red; intros].
-   apply prod_ext; [|do 2 red; intros].
+  apply prod_ext; [reflexivity|red; intros].
+   apply prod_ext; [|red; intros].
     rewrite int_cons_lift_eq. 
     assert (int (Ref 0) (V.shift 1 i) == i 1) by reflexivity.
     assert (int (App Succ Zero) (V.shift 1 i) == succ zero) by (apply int_S; apply zero_typ).
@@ -1269,7 +1269,7 @@ assert (eq_term (lift_rec 1 0 Add) Add) as Hadd_lift.
    simpl; split; red; intros.
     apply natrec_morph; [unfold V.lams, V.shift; simpl; apply H| 
       |unfold V.lams, V.shift; simpl; apply H].
-     do 3 red; intros. apply app_ext; [apply app_ext; [reflexivity|]|]; trivial.
+     do 2 red; intros. apply app_ext; [apply app_ext; [reflexivity|]|]; trivial.
 
      unfold I.lams, I.shift; simpl.
      f_equal; trivial.

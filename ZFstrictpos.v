@@ -603,12 +603,12 @@ do 3 red.
 intros f f' eqf p p' eqp; revert p p' eqp.
 induction 1; red; simpl; intros.
  (* Cst *)
- unfold trad_cst; red; intros.
+ unfold trad_cst; intros.
  unfold sigma_1r_iso.
  apply couple_morph; auto with *.
 
  (* Rec *)
- unfold trad_reccall, comp_iso; red; intros.
+ unfold trad_reccall, comp_iso; intros.
  apply couple_morph; auto with *.
  apply cc_lam_ext; auto with *.
  red; auto.

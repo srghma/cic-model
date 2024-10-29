@@ -636,11 +636,13 @@ rewrite H; reflexivity.
 Qed.
 
 Lemma add0 n : add n zero == n.
-  apply natrec_0; do 3 red; intros; apply succ_morph; trivial.
+unfold add.
+apply natrec_0.
 Qed.
   
 Lemma addS : forall m n, m ∈ N -> add n (succ m) == succ (add n m).
 intros.
+unfold add.
 apply natrec_S; trivial.
 do 3 red; intros; apply succ_morph; trivial.  
 Qed.
@@ -655,6 +657,7 @@ Qed.
 Lemma add_typ m n :
   m ∈ N -> n ∈ N -> add m n ∈ N.
 intros.
+unfold add.
 apply natrec_typ with (P:=fun _=>N); auto with *.
  do 2 red; reflexivity.
  do 3 red; intros; apply succ_morph; trivial.  

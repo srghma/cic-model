@@ -80,8 +80,8 @@ Qed.
 *)
 (* Works even when dom is empty: *)
 Lemma rprod_intro_sn : forall dom f F m,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   Lc.sn m ->
   (forall x u, [x,u] \real dom ->
    [f x, Lc.App m u] \real F x) ->
@@ -100,8 +100,8 @@ apply H2; auto.
 Qed.
 
 Lemma rprod_intro_lam : forall dom f F m,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   Lc.sn m ->
   (forall x u, [x,u] \real dom ->
    [f x, Lc.subst u m] \real F x) ->
@@ -118,7 +118,7 @@ apply rprod_intro_sn; intros; trivial.
 Qed.
 
 Lemma rprod_elim : forall dom f x F t u,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   [f,t] \real prod dom F ->
   [x,u] \real dom ->
   [app f x, Lc.App t u] \real F x.
@@ -289,7 +289,7 @@ Qed.
 
 Lemma add_var_eq_fun : forall T U U' i,
   (forall x t, [x,t] \real int T i -> int U (V.cons x i) == int U'(V.cons x i)) -> 
-  eq_fun (int T i)
+  eqX_fun (int T i)
     (fun x => int U (V.cons x i))
     (fun x => int U' (V.cons x i)).
 red; intros.
@@ -765,8 +765,8 @@ apply rprod_elim with (x:=int v i) (u:=tm v j) in ty_u; trivial.
 Qed.
 
 Lemma prod_intro2 : forall dom f F t m,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   Lc.sn t ->
   (exists x, [x,SatSet.daimon] \real dom) ->
   (forall x u, [x, u] \real dom -> [f x, Lc.subst u m] \real F x) ->
@@ -1095,7 +1095,7 @@ Qed.
    Contravariance of product does not hold in set-theory.
  *)
 Definition sub_typ_covariant
-  (eta_eq : forall dom F f, eq_fun dom F F -> f ∈ prod dom F -> f == lam dom (app f))
+  (eta_eq : forall dom F f, eqX_fun dom F F -> f ∈ prod dom F -> f == lam dom (app f))
   e U1 U2 V1 V2 :
   U1 <> kind ->
   eq_typ e U1 U2 ->

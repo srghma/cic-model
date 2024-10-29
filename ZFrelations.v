@@ -41,7 +41,6 @@ Lemma rel_domain_intro : forall r x y, couple x y ∈ r -> x ∈ rel_domain r.
 Proof.
 unfold rel_domain in |- *; intros.
 apply subset_intro.
- red in H.
  destruct union_elim with x (couple x y) as (z,?,?).
   rewrite union_couple_eq.
   apply pair_intro1.
@@ -56,7 +55,6 @@ Lemma rel_image_intro : forall r x y, couple x y ∈ r -> y ∈ rel_image r.
 Proof.
 unfold rel_image in |- *; intros.
 apply subset_intro.
- red in H.
  destruct union_elim with y (couple x y) as (z,?,?).
   rewrite union_couple_eq; auto.
 
@@ -75,7 +73,6 @@ Lemma rel_comp_intro : forall f g x y z,
   couple x y ∈ g -> couple y z ∈ f -> couple x z ∈ rel_comp f g.
 Proof.
 intros.
-red in |- *.
 unfold rel_comp in |- *.
 apply subset_intro.
  apply couple_intro.
@@ -161,11 +158,9 @@ apply power_intro; intros.
 apply couple_intro.
  apply H0.
    apply rel_domain_intro with (snd z).
-   red in |- *.
     rewrite <- (H _ H2); trivial.
  apply H1.
    apply rel_image_intro with (fst z).
-   red in |- *.
     rewrite <- (H _ H2); trivial.
 Qed.
 
@@ -493,7 +488,6 @@ split; intros.
  rewrite H1.
  rewrite fst_def; rewrite snd_def; reflexivity. 
 
- red in H0,H1|-.
  apply replf_elim in H0; auto.
  apply replf_elim in H1; auto.
  destruct H0; destruct H1.
@@ -517,7 +511,6 @@ apply subset_intro.
   unfold rel_domain; red; intros.
   apply subset_elim2 in H1; destruct H1.
   destruct H2.
-  red in H2.
   apply replf_elim in H2; auto.
   destruct H2.
   apply couple_injection in H3; destruct H3.
@@ -526,7 +519,6 @@ apply subset_intro.
   unfold rel_image; red; intros.
   apply subset_elim2 in H1; destruct H1.
   destruct H2.
-  red in H2.
   apply replf_elim in H2; auto.
   destruct H2.
   apply couple_injection in H3; destruct H3.
@@ -535,7 +527,6 @@ apply subset_intro.
 
  split; intros.
   exists (f x); auto.
-  red.
   apply replf_intro with x; auto.
   reflexivity.
 
@@ -558,7 +549,6 @@ apply app_defined.
 
   destruct lam_is_function with (1:=H); eauto.
 
- red.
  apply replf_intro with x; auto.
  reflexivity.
 Qed.
@@ -701,7 +691,7 @@ apply eq_intro; intros.
  destruct H1 with (1:= H3); clear H1.
  apply surj_pair in is_rel.
  apply func_is_function in H.
- red in H5; rewrite <- H0 in H5; clear x H0.
+ rewrite <- H0 in H5; clear x H0.
  specialize app_defined with (1:=H) (2:=H5); intros.
  destruct H.
  rewrite is_rel in H2.
@@ -720,7 +710,7 @@ apply eq_intro; intros.
    apply func_is_function in H; trivial.
   apply H1 in H2.
   destruct H2.
-  red in H4; rewrite <- H0 in H4.
+  rewrite <- H0 in H4.
   apply rel_domain_intro with x1; trivial.
 
   do 2 red; intros.
@@ -867,13 +857,12 @@ unfold cc_app, rel_image; split; intros.
   apply fst_def.
 
  exists x.
- red; apply subset_intro; trivial.
+ apply subset_intro; trivial.
  apply fst_def.
 
  rewrite subset_ax in H; destruct H.
  destruct H0.
  destruct H1.
- red in H1.
  rewrite subset_ax in H1; destruct H1.
  destruct H2.
  rewrite <- H0 in H1.

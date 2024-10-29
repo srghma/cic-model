@@ -457,7 +457,7 @@ apply sn_sort_intro.
 Qed.
 
 
-Definition eq_fun dom f g := (* ZF.eq_fun (El dom) f g. *)
+Definition eqX_fun dom f g := (* ZF.eq_fun (El dom) f g. *)
   forall x x', x ∈ El dom -> x == x' -> f x == g x'.
 
 Definition props := sn_props.
@@ -465,7 +465,7 @@ Definition props := sn_props.
 Lemma lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   lam x1 f1 == lam x2 f2.
 intros.
 apply cc_lam_ext; trivial.
@@ -478,7 +478,7 @@ Existing Instance app_ext.
 Lemma prod_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   prod x1 f1 == prod x2 f2.
 unfold prod, eqX, mkTY; intros.
 apply couple_morph.
@@ -508,7 +508,7 @@ Qed.
 
 Lemma beta_eq:
   forall dom F x,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   inX x dom ->
   app (lam dom F) x == F x.
 unfold app, lam, inX, eqX, El; intros.

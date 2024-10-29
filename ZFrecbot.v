@@ -360,7 +360,6 @@ Lemma typed_bot_rec_ext bot bot' X X' F F' U U' g g' o o' :
    fcompat (X (osucc z)) (F z f) (F' z f')) -> 
   fcompat (bot ∪ X o) (g o) (g' o').
 intros oo oo' ole botincl Xincl oko oko' eqF n tyn.
-red; intros.
 assert (oko'o: typed_bot_recursor_spec bot' X' U' F' g' o).
  destruct oko' as (?,?,?,?,?,?).
  assert (forall o1, o1 ⊆ o -> o1 ⊆ o').

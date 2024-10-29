@@ -398,7 +398,7 @@ apply and_split.
  2:intros; apply cNAT_morph; trivial.
  assert (cc_app (lam (mkTY (TI NATf' (int O i)) cNAT) succ) x == succ x).
   apply beta_eq.
-   do 2 red; intros; apply succ_morph; trivial.
+   red; intros; apply succ_morph; trivial.
    red; rewrite El_def; trivial.
  rewrite H2.
  rewrite Real_def.
@@ -524,7 +524,7 @@ eapply transitivity.
   apply V.cons_morph;[exact h|reflexivity].
 
   apply beta_eq.
-   do 2 red; intros; apply succ_morph; trivial.
+   red; intros; apply succ_morph; trivial.
   apply H in H0.
   apply in_int_not_kind in H0.
   2:discriminate.
@@ -588,7 +588,7 @@ apply and_split; intros.
     rewrite int_lift_eq; reflexivity.
    simpl.
    apply beta_eq.
-    do 2 red; intros; apply succ_morph; trivial.
+    red; intros; apply succ_morph; trivial.
 
     red; rewrite El_def; trivial.
     rewrite V.lams0.

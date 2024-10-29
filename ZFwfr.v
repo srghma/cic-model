@@ -70,7 +70,7 @@ Section WellFoundedRecursion.
   Let F' f x := F (fun y => cond_set (R y x) (f y)) x.
 
   Local Instance Fm' : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) F'.
-do 4 red; intros.   
+do 3 red; intros.   
 unfold F'.
 apply Fm; trivial.
 red; intros.

@@ -619,7 +619,7 @@ End RecursorDef.
 End RecursorWithInvariant.
 
 Global Instance REC_morph_gen : Proper ((eq_set==>eq_set==>eq_set)==>eq_set==>eq_set) REC.
-do 4 red; intros.
+do 3 red; intros.
 unfold REC.
 apply TR_morph; trivial.
 do 2 red; intros.

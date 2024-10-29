@@ -104,6 +104,11 @@ Qed.
 
   Definition Lamn n := TI LAMf (nat2ordset n).
 
+  Lemma Lamn_initial : Lamn 0 == empty.
+unfold Lamn.
+apply TI_initial; trivial with *.
+Qed.
+    
   Lemma Lamn_incl_succ : forall k, Lamn k ⊆ Lamn (S k).
 unfold Lamn; simpl; intros.
 apply TI_incl; auto with *.
@@ -148,8 +153,7 @@ Qed.
     (forall a k', (k' < k)%nat -> a ∈ Lamn k' -> P (Abs a)) ->
     forall a, a ∈ Lamn k -> P a.
 destruct k; intros.
- unfold Lamn in H4.
- rewrite TI_initial in H4; auto with *.
+ rewrite Lamn_initial in H4.
  elim empty_ax with (1:=H4).
 
  rewrite Lamn_eq in H4.
@@ -263,8 +267,8 @@ Fixpoint iLAM (t:term) :=
   end.
 
 Lemma iLAM_typ : forall t, iLAM t ∈ CCLam.
-unfold CCLam; induction t; try destruct s; simpl;
- repeat
+  unfold CCLam; induction t; try destruct s; simpl;
+  repeat
   (apply Var_typ0 || apply Cst_typ0 || apply App_typ0 || apply Abs_typ0 ||
    (apply succ_intro1; reflexivity) || apply succ_intro2 || apply nat2set_typ);
  trivial.

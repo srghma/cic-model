@@ -1,5 +1,5 @@
 Require Import ZFskol.
-Require Import Choice. (* Axiom *)
+Require Import Choice.
 Require Import Sublogic.
 
 (** In this file, we give an attempt to build a model of IZF
@@ -542,9 +542,12 @@ Qed.
 Definition ttrepl :=
   forall a:set, unique_choice {x|in_set x a} set eq_set.
 
+Axiom choice_axiom : forall A B, choice A B.
+
 (* We show it is a consequence of [choice]. *)
 Lemma ttrepl_axiom : ttrepl.
-red; red; intros; apply choice_axiom; trivial.
+red; red; intros.
+apply choice_axiom; trivial.
 Qed.
 
 Lemma repl_ax:

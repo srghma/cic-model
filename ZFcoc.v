@@ -324,7 +324,7 @@ Lemma cc_bot_bot x : empty ∈ cc_bot x.
 apply union2_intro1; apply singl_intro.
 Qed.
 Lemma cc_bot_intro x z : z ∈ x -> z ∈ cc_bot x.
-red; intros.
+intros.
 apply union2_intro2; trivial.
 Qed.
 Hint Resolve cc_bot_bot cc_bot_intro : core.

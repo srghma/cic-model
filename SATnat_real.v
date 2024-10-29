@@ -89,7 +89,7 @@ Lemma natcase_ext X b0 b0' bS bS' n n' :
  n == empty \/ isNat X n ->
  n == n' ->
  b0 == b0' ->
- ZF.eq_fun (cc_bot X) bS bS' ->
+ eq_fun (cc_bot X) bS bS' ->
  natcase b0 bS n == natcase b0' bS' n'.
 intros mS mS' tyn eqn eq0 eqS.
 destruct tyn as [?|[?|(m,tym,?)]].

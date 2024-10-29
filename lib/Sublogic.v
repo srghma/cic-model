@@ -39,7 +39,7 @@ End InstSublogicFamily.
 
 Module Type ConsistentSublogic.
 Include Sublogic.
-Parameter TrCons : ~ Tr False.
+Parameter TrCons : ~ #False.
 End ConsistentSublogic.
 
 (** Sublogics are monads *)
@@ -77,10 +77,10 @@ Include Sublogic.
 
 Definition isL (P:Prop) := Tr P -> P.
 
-Global Instance Tr_morph : Proper (iff==>iff) Tr.
-Admitted.
-Global Instance isL_morph : Proper (iff==>iff) isL.
-Admitted.
+  Parameter Tr_morph : Proper (iff==>iff) Tr.
+  #[global]Existing Instance Tr_morph.
+  Parameter isL_morph : Proper (iff==>iff) isL.
+  #[global]Existing Instance isL_morph.
 
   (* monad bind *)
   Parameter TrB : forall (P Q:Prop), Tr P -> (P -> Tr Q) -> Tr Q.
@@ -101,7 +101,7 @@ Admitted.
   Parameter rFF': forall (Q:Prop), Tr False -> isL Q -> Q.
 
   Definition Tnot (P:Prop) := P -> Tr False.
-  Notation "#¬ P" := (Tnot P).
+  Notation "#¬ P" := (Tnot P). (* may differ from ~P in inconsistent sublogics *)
   #[global]Hint Unfold Tnot : core.
 
   Parameter Tnot_morph : Proper (iff ==> iff) Tnot.
@@ -326,17 +326,26 @@ End ClassicSublogic.
 Module ClassicSublogicThms.
   Include BuildConsistentSublogic ClassicSublogic.
 
-  Lemma nnpp (P:Prop) : ((P->False)->False) -> Tr P.
-Proof (fun h => h).
+  Lemma nnpp (P:Prop) : #¬ (#¬ P) -> #P.
+  Proof.
+    exact (fun nnp np => nnp (fun p _ => np p) (fun n => n)).
+  Qed.
 
   (** excluded-middle: note that P need not be classical, which makes the
      positive case stronger. *)
-  Lemma classic : forall P, Tr(P \/ (Tr P -> False)).
+  Lemma classic : forall P, #(P \/ #¬ P).
+Proof.
 intros P nem.
-apply nem; right; intro tp.
-apply Tr_ind with (3:=tp); intros; trivial.
-apply nem; left; assumption.
+apply nem; right; intros tp _.
+apply nem; left; trivial.
 Qed.
+  Lemma classic_cons : forall P, #(P \/ ~P).
+Proof.
+intros P; Tdestruct (@classic P); [Tleft;trivial|Tright;intro p].
+apply H; trivial.
+red; trivial.
+Qed.
+
 End ClassicSublogicThms.
 
 (** ** Friedman's A-translation *)
@@ -406,22 +415,26 @@ Qed.
 End ASublogicThms.
 
 (** Example: if ~~exists x. P(x) is derivable, then so is exists x. P(x) *)
-Module AtransExample.
-Parameter (T:Type) (P : T->Prop).
-Module nnex. Definition x:=exists x, P x. End nnex.
-Module Atr := ASublogicThms nnex.
-Import nnex Atr.
+Module Type Predicate.
+  Parameter (T:Type) (P : T->Prop).
+End Predicate.
+Module AtransExample (Pred : Predicate).
+  Import Pred.
+  Module nnex. Definition x:=exists x, P x. End nnex.
+  Module Atr := ASublogicThms nnex.
+  Import nnex Atr.
 
-Lemma markov_rule :
-  ((Tr(exists x, P x) -> Tr False) -> Tr False) ->
-  exists x, P x.
-intro.
-apply FF_a.
-apply H; intro.
-apply Tr_ind with (3:=H0); intros; trivial.
- apply Atr.Tr_isL.
-apply FF_a.
-assumption.
+  Lemma markov_rule :
+    ((Tr(exists x, P x) -> Tr False) -> Tr False) ->
+    exists x, P x.
+Proof.
+  intro.
+  apply FF_a.
+  apply H; intro.
+  apply Tr_ind with (3:=H0); intros; trivial.
+  apply Atr.Tr_isL.
+  apply FF_a.
+  assumption.
 Qed.
 End AtransExample.
 
@@ -596,7 +609,7 @@ End SublogicToHOLogic.
 Module TypeClasses.
 (***************************************************************************)
 (** * 4. The same ideas but using records and typeclasses *)
-
+Section S.
 Class sub_logic0 := mkSubLogic0 {
   Tr : Prop -> Prop;
   TrI : forall P:Prop, P -> Tr P;
@@ -604,7 +617,7 @@ Class sub_logic0 := mkSubLogic0 {
   Teq1 (P Q:Prop) (m:Tr P) (f:P->Tr Q) (x:P): TrB (TrI x) f = f x;
   Teq2 (P:Prop) (m:Tr P) : TrB m (@TrI _) = m
 }.
-Parameter M0 : sub_logic0.
+Variable M0 : sub_logic0.
 Existing Instance M0.
 
 Definition mono (P Q:Prop) (f:P->Q) (m:Tr P) : Tr Q :=
@@ -622,7 +635,7 @@ Class sub_logic := mkSubLogic {
   eq2 (P Q:Prop) (f:P->Q) (x:P) : P2p_mono f (P2pI x) = P2pI (f x)*)
 }.
 
-Parameter M : sub_logic.
+Variable M : sub_logic.
 Existing Instance M.
 
 Definition ret (P:Prop) (x:P) : P2p P := P2pI x.
@@ -654,6 +667,8 @@ do 2 rewrite eq1.
 reflexivity.
 Qed.
 *)
+End S.
+
 Section SubLogicFacts.
 
 Hypothesis L : sub_logic.

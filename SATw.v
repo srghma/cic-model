@@ -302,7 +302,7 @@ Lemma rWi_ext X X' Y Y' RX RX' RY RY' x x' :
   morph1 Y ->
   morph1 Y' ->
   X == X' ->
-  ZF.eq_fun X Y Y' ->
+  eq_fun X Y Y' ->
   (eq_set==>eqSAT)%signature RX RX' ->
   (forall x x', x ∈ X -> x==x' -> (eq_set==>eqSAT)%signature (RY x) (RY' x')) ->
   x == x' ->

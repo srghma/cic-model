@@ -101,7 +101,7 @@ elim H using N_ind; intros.
    apply app_ext; try reflexivity.
    rewrite simpl_int_lift. symmetry; apply simpl_int_lift1.
 
-   do 2 red; intros.
+   red; intros.
    apply prod_ext; auto with *.
     rewrite !simpl_int_lift.
     apply app_ext; auto with *.
@@ -425,9 +425,9 @@ Admitted.
 Lemma Impl_intro : forall e b A B, A <> None -> B <> None -> 
   typ (A::e) b (lift 1 B) -> typ e (Abs A b) (Impl A B).
 do 2 red; simpl; intros. apply prod_intro; intros.
- do 2 red; intros. rewrite H4; reflexivity.
+ red; intros. rewrite H4; reflexivity.
 
- do 2 red; intros; reflexivity. 
+ red; intros; reflexivity. 
 
  do 2 red in H1; simpl in H1.
  assert (val_ok (A::e) (V.cons x i)).
@@ -457,7 +457,7 @@ replace (fun k : nat => i k) with i in *; trivial.
 destruct A.
  destruct B.
   apply prod_elim with (2:=H1); trivial.
-   do 2 red; intros; reflexivity.
+   red; intros; reflexivity.
 
   elim H0; trivial.
 
@@ -483,7 +483,7 @@ Definition Fall : term -> term.
 intros t; left.
 exists (fun i => prod N (fun z => int t (V.cons z i))).
 do 3 red; intros. apply prod_ext; try rewrite H; try reflexivity.
- do 2 red; intros. rewrite H; rewrite H1; reflexivity.
+ red; intros. rewrite H; rewrite H1; reflexivity.
 Defined.
 
 
@@ -491,9 +491,9 @@ Lemma Fall_intro : forall e t B, B <> None ->
   typ (T::e) t B -> 
   typ e (Abs T t) (Fall B).
 do 2 red; intros; simpl. apply prod_intro.
- do 2 red; intros. rewrite H3; reflexivity.
+ red; intros. rewrite H3; reflexivity.
 
- do 2 red; intros. rewrite H3; reflexivity.
+ red; intros. rewrite H3; reflexivity.
 
  intros.
  replace (fun k : nat => i k) with i; trivial.
@@ -514,7 +514,7 @@ generalize (subst_Some _ u H); intros.
 case_eq (subst u B); intros.
  rewrite <- H4. rewrite int_subst_eq. 
  apply prod_elim with (2:=H0); trivial.
-  do 2 red; intros. rewrite H6; reflexivity.
+  red; intros. rewrite H6; reflexivity.
   
  elim H3; trivial.
 Qed.
@@ -730,7 +730,7 @@ apply Impl_intro.
     rewrite H1; reflexivity.
     red; intros.
     apply prod_ext; [reflexivity|].
-    do 2 red; intros.    
+    red; intros.    
     rewrite int_lift_rec_eq.
     apply int_morph;[reflexivity|].
     do 2 red.

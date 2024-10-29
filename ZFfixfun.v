@@ -208,7 +208,7 @@ do 5 red; intros.
 unfold TIF.
 apply cc_app_morph; trivial.
 apply TR_morph; trivial.
-do 3 red; intros.
+do 2 red; intros.
 apply cc_lam_ext; trivial.
 red; intros.
 apply sup_morph; trivial.

@@ -146,7 +146,7 @@ Definition W_Fd_map g a w :=
 
 Instance W_Fd_map_morph :
   Proper ((eq_set==>eq_set==>eq_set)==>eq_set==>eq_set==>eq_set) W_Fd_map.
-do 5 red; intros.
+do 4 red; intros.
 unfold W_Fd_map.
 apply couple_morph.
  apply fst_morph; trivial.

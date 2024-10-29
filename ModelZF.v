@@ -19,7 +19,7 @@ Notation "x == y" := (eqX x y). *)
 Lemma in_ext: Proper (eqX ==> eqX ==> iff) inX.
 Proof in_set_morph.
 
-Definition eq_fun (x:X) (f1 f2:X->X) :=
+Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
 
 End ZFsets.

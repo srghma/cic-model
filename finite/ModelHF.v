@@ -30,13 +30,13 @@ Definition app := cc_app.
 Definition lam := cc_lam.
 Definition prod := cc_prod.
 
-Definition eq_fun (x:X) (f1 f2:X->X) :=
+Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
 
 Lemma lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   lam x1 f1 == lam x2 f2.
 Proof cc_lam_ext.
 
@@ -46,33 +46,33 @@ Proof cc_app_morph.
 Lemma prod_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   prod x1 f1 == prod x2 f2.
 Proof cc_prod_ext.
 
 Lemma prod_intro : forall dom f F,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   (forall x, x ∈ dom -> f x ∈ F x) ->
   lam dom f ∈ prod dom F.
 Proof cc_prod_intro.
 
 Lemma prod_elim : forall dom f x F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   f ∈ prod dom F ->
   x ∈ dom ->
   app f x ∈ F x.
 Proof cc_prod_elim.
 
 Lemma impredicative_prod : forall dom F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   (forall x, x ∈ dom -> F x ∈ props) ->
   prod dom F ∈ props.
 Proof cc_impredicative_prod.
 
 Lemma beta_eq:
   forall dom F x,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   x ∈ dom ->
   app (lam dom F) x == F x.
 Proof cc_beta_eq.

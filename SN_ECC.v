@@ -35,10 +35,10 @@ Definition app := cc_app.
 Definition lam := sn_lam.
 Definition prod := sn_prod.
 
-Definition eq_fun (x:X) (f1 f2:X->X) :=
+Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, inX y1 x -> y1 == y2 -> f1 y1 == f2 y2.
 
-Lemma eq_fun_El x f1 f2 : eq_fun x f1 f2 -> ZF.eq_fun (El x) f1 f2.
+Lemma eq_fun_El x f1 f2 : eqX_fun x f1 f2 -> eq_fun (El x) f1 f2.
 red; intros.
 apply H; auto.
 Qed.
@@ -47,7 +47,7 @@ Hint Resolve eq_fun_El : core.
 Lemma lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   lam x1 f1 == lam x2 f2.
 unfold lam, sn_lam, eqX; intros.
 apply cc_lam_ext; auto.
@@ -60,7 +60,7 @@ Proof cc_app_morph.
 Lemma prod_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  eq_fun x1 f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   prod x1 f1 == prod x2 f2.
 unfold prod, sn_prod, eqX, mkTY, El; intros.
 apply couple_morph.
@@ -83,14 +83,14 @@ apply couple_morph.
 Qed.
 
 Lemma prod_intro : forall dom f F,
-  eq_fun dom f f ->
-  eq_fun dom F F ->
+  eqX_fun dom f f ->
+  eqX_fun dom F F ->
   (forall x, inX x dom -> inX (f x) (F x)) ->
   inX (lam dom f) (prod dom F).
 Proof sn_prod_intro.
 
 Lemma prod_elim : forall dom f x F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   inX f (prod dom F) ->
   inX x dom ->
   inX (app f x) (F x).
@@ -99,14 +99,14 @@ eapply sn_prod_elim; eauto.
 Qed.
 
 Lemma impredicative_prod : forall dom F,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   (forall x, inX x dom -> inX (F x) props) ->
   inX (prod dom F) props.
 Proof sn_impredicative_prod.
 
 Lemma beta_eq:
   forall dom F x,
-  eq_fun dom F F ->
+  eqX_fun dom F F ->
   inX x dom ->
   app (lam dom F) x == F x.
 unfold app, lam, inX, eqX; intros.

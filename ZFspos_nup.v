@@ -58,7 +58,7 @@ Section InstancesPos.
   Hypothesis posp : isPositive p.
 
  Instance opm : Proper ((eq_set ==> eq_set) ==> eq_set) (dp_oper p).
-do 3 red; intros.
+do 2 red; intros.
 apply posp; trivial.
 Qed.
 
@@ -1440,7 +1440,7 @@ constructor; simpl; intros.
   apply H in H2.
   apply eq_dw2; auto with *.
 
-  do 5 red; intros.
+  do 4 red; intros.
   apply H in H2.
   apply eq_dw3; auto with *.
 
@@ -1491,7 +1491,7 @@ Qed.
 End InductiveFamily.
 
 Instance dp_oper_morph_gen : Proper (eqdpos==>(eq_set==>eq_set)==>eq_set) dp_oper.
-do 4 red; intros.
+do 3 red; intros.
 apply eq_dop; trivial.
 Qed.
 
@@ -1505,7 +1505,7 @@ apply eq_dop; trivial.
 Qed.
 
 Instance dIND_clos_ord_morph_gen : Proper (eq_set==>(eq_set==>eqdpos)==>eq_set) dIND_clos_ord.
-do 4 red; intros.
+do 3 red; intros.
 unfold dIND_clos_ord.
 apply W0.W_ord_morph_all; trivial.
  red; intros.
@@ -1519,7 +1519,7 @@ Qed.
 
 Instance dIND_clos_ord_a_morph_gen :
   Proper (eq_set==>(eq_set==>eqdpos)==>eq_set==>eq_set) dIND_clos_ord_a.
-do 5 red; intros.
+do 4 red; intros.
 unfold dIND_clos_ord_a.
 apply W0.W_ord_a_morph; auto with *.
  red; intros.
@@ -1582,7 +1582,7 @@ apply isDPos_sum.
    reflexivity.
 
    apply dpos_consrec_morph.
-    apply dpos_rec_morph; red; trivial.
+    apply dpos_rec_morph; trivial.
     apply dpos_inst_morph; auto with *.
     apply succ_morph; trivial.
 

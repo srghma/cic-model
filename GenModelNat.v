@@ -20,7 +20,7 @@ Module MakeNatModel (Import M : CCNat_Model) <: CCNat_Rules.
   Module MM := MakeModel(M).
   Include MM.
 
-Lemma (*Let*) succ_m : eq_fun N succ succ.
+Lemma (*Let*) succ_m : eqX_fun N succ succ.
 red; intros; apply succ_morph; trivial.
 Qed.
 Hint Resolve succ_m : core.

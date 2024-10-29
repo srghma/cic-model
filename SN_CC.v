@@ -57,14 +57,14 @@ unfold inX, El, eqX in *.
 rewrite H; rewrite H0; reflexivity.
 Qed.
 
+Definition eqX_fun (x:X) (f1 f2:X->X) :=
+  forall y1 y2, inX y1 x -> y1 == y2 -> f1 y1 == f2 y2.
+
 Lemma Real_morph : Proper (eqX ==> eqSAT) Real.
 do 2 red; intros.
 apply sSAT_morph.
 apply snd_morph; trivial.
 Qed.
-
-Definition eq_fun (x:X) (f1 f2:X->X) :=
-  forall y1 y2, inX y1 x -> y1 == y2 -> f1 y1 == f2 y2.
 
 (** Pi-types *)
 
@@ -79,8 +79,8 @@ Definition app := cc_app.
 Definition lam A F := cc_lam (El A) F.
 
 Lemma prod_intro : forall dom f F,
-  ZF.ext_fun (El dom) f ->
-  ZF.ext_fun (El dom) F ->
+  ext_fun (El dom) f ->
+  ext_fun (El dom) F ->
   (forall x, x ∈ El dom -> f x ∈ El (F x)) ->
   lam dom f ∈ El (prod dom F).
 intros.
@@ -92,7 +92,7 @@ apply fst_morph; auto.
 Qed.
 
 Lemma prod_elim dom f x F :
-  ZF.ext_fun (El dom) F -> (* unused assumption *)
+  ext_fun (El dom) F -> (* unused assumption *)
   f ∈ El (prod dom F) ->
   x ∈ El dom ->
   app f x ∈ El (F x).
@@ -105,7 +105,7 @@ Qed.
 Lemma lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  ZF.eq_fun (El x1) f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   lam x1 f1 == lam x2 f2.
 unfold lam, eqX; intros.
 apply cc_lam_ext; trivial.
@@ -118,7 +118,7 @@ Proof cc_app_morph.
 Lemma prod_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->
-  ZF.eq_fun (El x1) f1 f2 ->
+  eqX_fun x1 f1 f2 ->
   prod x1 f1 == prod x2 f2.
 unfold prod, eqX, mkTY, El; intros.
 apply couple_morph.
@@ -141,7 +141,7 @@ Qed.
 
 Lemma beta_eq:
   forall dom F x,
-  ZF.eq_fun (El dom) F F ->
+  eqX_fun dom F F ->
   x ∈ El dom ->
   app (lam dom F) x == F x.
 unfold app, lam, inX, eqX, El; intros.
@@ -162,7 +162,7 @@ Qed.
 Hint Resolve prop_repl_morph : core.
 
 Lemma impredicative_prod : forall dom F,
-  ZF.ext_fun (El dom) F ->
+  ext_fun (El dom) F ->
   (forall x, x ∈ El dom -> F x ∈ El props) ->
   prod dom F ∈ El props.
 unfold props, mkTY, El; intros.
@@ -227,7 +227,6 @@ rewrite snd_def.
 rewrite iSAT_id.
 reflexivity.
 Qed.
-
 
 End AbstractModel.
 Export AbstractModel.

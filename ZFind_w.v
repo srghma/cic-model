@@ -543,7 +543,7 @@ apply mkTypedRec; auto with *.
   intros.
   apply cc_prod_elim with (1:=H0); trivial.
 
- red; red; intros.
+ red; intros.
  assert (oo' : isOrd o') by eauto using isOrd_inv.
  unfold F'.
  rewrite cc_beta_eq; trivial.

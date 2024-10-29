@@ -26,9 +26,6 @@ Section FamiliesAsSubsets.
 
 
 *)
-
-
-
   
 Require Import ZFind_wd.
 
@@ -268,7 +265,7 @@ Lemma isDPos_inst i : isDPositive (dpos_inst i).
 constructor; simpl; intros.
  apply isPos_cst.
 
- do 4 red; intros.
+ do 3 red; intros.
  rewrite H0; reflexivity.
 
  do 2 red; intros.
@@ -304,7 +301,7 @@ Lemma isDPos_cst A : isDPositive (dpos_cst A).
 constructor; simpl; intros.
  apply isPos_cst.
 
- do 4 red; reflexivity.
+ do 3 red; reflexivity.
 
  do 2 red; intros; reflexivity.
 
@@ -334,7 +331,7 @@ Lemma isDPos_rec j : j ∈ Arg -> isDPositive (dpos_rec j).
 constructor; simpl; intros; trivial.
  apply isPos_rec.
 
- do 4 red; intros.
+ do 3 red; intros.
  apply H0; reflexivity.
 
  do 2 red; intros.
@@ -379,7 +376,7 @@ destruct (Gdp) as (Gp,Gdm,Gdmo,G3m,G4m,Gty,Gdep).
 constructor; simpl; intros.
 *apply isPos_sum; trivial.
 
-*do 4 red; intros.
+*do 3 red; intros.
  apply sum_morph.
   apply Fdm; trivial.
   apply Gdm; trivial.
@@ -551,7 +548,7 @@ assert (w2mG := w2m _ Gp).
 constructor; simpl; intros.
 *apply isPos_consrec; trivial.
 
-*do 4 red; intros.
+*do 3 red; intros.
  apply prodcart_morph.
   apply Fdm; trivial.
   apply Gdm; trivial.
@@ -674,7 +671,7 @@ constructor; simpl; intros.
   intros.
   apply H0; trivial.
 
-*do 4 red; intros.
+*do 3 red; intros.
  apply sigma_morph; auto with *.
  red; intros.
  apply H; trivial.
@@ -780,7 +777,7 @@ constructor; simpl; intros.
   intros.
   apply H0; trivial.
 
-*do 4 red; intros.
+*do 3 red; intros.
  apply cc_prod_ext; auto with *.
  red; intros.
  apply H; trivial.

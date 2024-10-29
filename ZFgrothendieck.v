@@ -8,32 +8,32 @@ Record grot_univ (U:set) : Prop := {
   G_trans : forall x y, y ∈ x -> x ∈ U -> y ∈ U;
   G_pair : forall x y, x ∈ U -> y ∈ U -> pair x y ∈ U;
   G_power : forall x, x ∈ U -> power x ∈ U;
-  G_union_repl : forall I R, repl_rel I R -> I ∈ U ->
+  G_union : forall x, x ∈ U -> union x ∈ U;
+  G_repl_hidden : forall I R, repl_rel I R -> I ∈ U ->
                 (forall x y, x ∈ I -> R x y -> y ∈ U) ->
-                union (repl I R) ∈ U }.
+                repl I R ∈ U }.
 
 Instance grot_univ_morph : Proper (eq_set==>iff) grot_univ.
 apply morph_impl_iff1; auto with *.
 do 3 red; intros.
-destruct H0 as (Gtr,G2,Gpow,Gsup).
+destruct H0 as (Gtr,G2,Gpow,Gun,Grepl).
 split; intros.
- rewrite <- H in H1|-*; eauto.
-
- rewrite <- H in H0,H1|-*; auto.
-
- rewrite <- H in H0|-*; auto.
-
- rewrite <- H in H1|-*.
- apply Gsup; intros; auto.
+*rewrite <- H in H1|-*; eauto.
+*rewrite <- H in H0,H1|-*; auto.
+*rewrite <- H in H0|-*; auto.
+*rewrite <- H in H0|-*; auto.
+*rewrite <- H in H1|-*.
+ apply Grepl; intros; auto.
  rewrite H; eauto.
 Qed.
 
 Lemma grot_empty : grot_univ empty.
 split; intros.
- elim empty_ax with (1:=H0).
- elim empty_ax with (1:=H0).
- elim empty_ax with (1:=H).
- elim empty_ax with (1:=H0).
+*elim empty_ax with (1:=H0).
+*elim empty_ax with (1:=H0).
+*elim empty_ax with (1:=H).
+*elim empty_ax with (1:=H).
+*elim empty_ax with (1:=H0).
 Qed.
 
 (* grot_succ empty == HF *)
@@ -62,7 +62,7 @@ Lemma G_singl : forall x, x ∈ U -> singl x ∈ U.
 unfold singl; intros; apply G_pair; auto.
 Qed.
 
-Lemma G_repl : forall A R,
+(*Lemma hidden_G_repl : forall A R,
   repl_rel A R ->
   A ∈ U ->
   (forall x y, x ∈ A -> R x y -> y ∈ U) ->
@@ -101,30 +101,14 @@ setoid_replace (repl A R) with
    apply repl_intro with x0; trivial.
    exists x; trivial; reflexivity.
 Qed.
-
-Lemma G_union : forall x, x ∈ U -> union x ∈ U.
-intros.
-setoid_replace x with (repl x (fun y z => z==y)).
-apply G_union_repl; trivial; intros.
- apply repl_rel_fun with (f:=fun x:set=>x).
- do 2 red; auto.
-
- rewrite H1; apply G_trans with x; trivial.
- apply repl_ext; intros.
-  apply repl_rel_fun with (f:=fun x:set=>x).
-  do 2 red; auto.
-
-  rewrite H1; trivial.
-
-  exists y; trivial; reflexivity.
-Qed.
+*)
 
 Lemma G_replf : forall A F,
   ext_fun A F ->
   A ∈ U ->
   (forall x, x ∈ A -> F x ∈ U) ->
   replf A F ∈ U.
-unfold replf; intros; apply G_repl; intros; auto.
+unfold replf; intros; apply G_repl_hidden; intros; auto.
  apply repl_rel_fun; trivial.
  rewrite H3; auto.
 Qed.
@@ -132,7 +116,7 @@ Qed.
 Lemma G_union2 : forall x y, x ∈ U -> y ∈ U -> x ∪ y ∈ U.
 intros.
 unfold union2.
-apply G_union.
+apply G_union; trivial.
 apply G_pair; trivial.
 Qed.
 
@@ -246,7 +230,7 @@ Qed.
 Lemma G_app f x :
   f ∈ U -> x ∈ U -> app f x ∈ U.
 unfold app; intros.
-apply G_union.
+apply G_union; trivial.
 apply G_subset.
 unfold rel_image.
 apply G_subset.
@@ -278,8 +262,8 @@ Qed.
 unfold cc_app; intros.
 unfold rel_image.
 apply G_subset.
-apply G_union.
-apply G_union.
+apply G_union; trivial.
+apply G_union; trivial.
 apply G_subset; trivial.
 Qed.
 
@@ -586,22 +570,26 @@ Lemma grot_inter : forall UU,
   grot_univ (inter UU).
 destruct 1.
 split; intros.
- apply inter_intro; intros; eauto.
- destruct (H0 _ H3) as (trans,_,_,_).
+*apply inter_intro; intros; eauto.
+ destruct (H0 _ H3) as (trans,_,_,_,_).
  apply trans with x0; trivial.
  apply inter_elim with (1:=H2); trivial.
 
- apply inter_intro; intros; eauto.
- destruct (H0 _ H3) as (_,clos_pair,_,_).
+*apply inter_intro; intros; eauto.
+ destruct (H0 _ H3) as (_,clos_pair,_,_,_).
  apply clos_pair; eapply inter_elim; eauto.
 
- apply inter_intro; intros; eauto.
- destruct (H0 _ H2) as (_,_,clos_pow,_).
+*apply inter_intro; intros; eauto.
+ destruct (H0 _ H2) as (_,_,clos_pow,_,_).
  apply clos_pow; eapply inter_elim; eauto.
 
- apply inter_intro; intros; eauto.
- destruct (H0 _ H4) as (_,_,_,clos_union).
- apply clos_union; trivial; intros; eapply inter_elim; eauto.
+*apply inter_intro; intros; eauto.
+ destruct (H0 _ H2) as (_,_,_,clos_un,_).
+ apply clos_un; eapply inter_elim; eauto.
+
+*apply inter_intro; intros; eauto.
+ destruct (H0 _ H4) as (_,_,_,_,clos_repl).
+ apply clos_repl; trivial; intros; eapply inter_elim; eauto.
 Qed.
 
 Lemma grot_intersection : forall (P:set->Prop) x,
@@ -609,7 +597,7 @@ Lemma grot_intersection : forall (P:set->Prop) x,
   grot_univ (subset x (fun y => forall U, grot_univ U -> P U -> y ∈ U)).
 intros.
 split; intros.
- apply subset_intro; intros.
+*apply subset_intro; intros.
   apply G_trans with x0; trivial.
   apply subset_elim1 with (1:=H2).
 
@@ -617,7 +605,7 @@ split; intros.
   apply G_trans with x0; auto.
   rewrite H5; auto.
 
- apply subset_intro; intros.
+*apply subset_intro; intros.
   apply G_pair; trivial.
    apply subset_elim1 with (1:=H1).
    apply subset_elim1 with (1:=H2).
@@ -627,7 +615,7 @@ split; intros.
   rewrite H5; rewrite H7.
   apply G_pair; auto.
    
- apply subset_intro; intros.
+*apply subset_intro; intros.
   apply G_power; trivial.
   apply subset_elim1 with (1:=H1).
 
@@ -635,12 +623,20 @@ split; intros.
   rewrite H4.
   apply G_power; auto.
 
- apply subset_intro; intros.
-  apply G_union_repl; intros; trivial.
+*apply subset_intro; intros.
+  apply G_union; trivial.
+  apply subset_elim1 with (1:=H1).
+
+  elim subset_elim2 with (1:=H1); intros.
+  rewrite H4.
+  apply G_union; auto.
+
+*apply subset_intro; intros.
+  apply G_repl_hidden; intros; trivial.
    apply subset_elim1 with (1:=H2).
    apply subset_elim1 with (1:=H3 _ _ H4 H5).
 
-  apply G_union_repl; intros; auto.
+  apply G_repl_hidden; intros; auto.
    elim subset_elim2 with (1:=H2); intros.
    rewrite H6; auto.
 
@@ -663,11 +659,11 @@ apply fa_morph; intros U.
 rewrite H; rewrite H0; reflexivity.
 Qed.
 
-Definition grot_succ U := uchoice (grot_succ_pred U).
+Definition grot_succ U := ZFrepl.uchoice (grot_succ_pred U).
 
 Instance grot_succ_morph : morph1 grot_succ.
 do 2 red; intros.
-apply uchoice_morph_raw.
+apply ZFrepl.uchoice_morph_raw.
 apply grot_succ_pred_morph; trivial.
 Qed.
 
@@ -677,8 +673,8 @@ Lemma grot_succ_incl x y :
   uchoice_pred (grot_succ_pred y) ->
   grot_succ x ⊆ grot_succ y.
 intros.
-specialize uchoice_def with (1:=H0); intros (_,(_,xmin)).
-specialize uchoice_def with (1:=H1); intros (?,(?,_)).
+specialize ZFrepl.uchoice_def with (1:=H0); intros (_,(_,xmin)).
+specialize ZFrepl.uchoice_def with (1:=H1); intros (?,(?,_)).
 apply xmin; trivial.
 Qed.
 
@@ -689,7 +685,7 @@ Lemma grot_succ_mono x y :
   grot_succ x ⊆ grot_succ y.
 intros.
 apply grot_succ_incl; trivial.
-specialize uchoice_def with (1:=H1); intros (?,(?,_)).
+specialize ZFrepl.uchoice_def with (1:=H1); intros (?,(?,_)).
 apply G_incl with y; trivial.
 Qed.
 
@@ -735,14 +731,14 @@ Lemma grot_succ_U_typ x :
   uchoice_pred (grot_succ_pred x) ->
   grot_univ (grot_succ x).
 intro.
-apply uchoice_def in H; apply H.
+apply ZFrepl.uchoice_def in H; apply H.
 Qed.
 
 Lemma grot_succ_U_in x :
   uchoice_pred (grot_succ_pred x) ->
   x ∈ grot_succ x.
 intro.
-apply uchoice_def in H; destruct H as (_,(?,_)); trivial.
+apply ZFrepl.uchoice_def in H; destruct H as (_,(?,_)); trivial.
 Qed.
 
 Lemma grot_succ_U_lst U x :
@@ -752,7 +748,7 @@ Lemma grot_succ_U_lst U x :
 intros.
 specialize grot_succ_from_U with (1:=H)(2:=H0); intro.
 apply grot_succ_ex in H1.
-apply uchoice_def in H1.
+apply ZFrepl.uchoice_def in H1.
 destruct H1 as (_,(_,?)); auto.
 Qed.
 

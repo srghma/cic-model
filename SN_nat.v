@@ -115,7 +115,7 @@ intros.
 apply typ_common;[exact I|intros i j isval].
 rewrite intProd_eq.
 apply rprod_intro_sn.
- red; red; intros.
+ red; intros.
  rewrite H0; reflexivity.
 
  red; intros.

@@ -21,16 +21,54 @@ Qed.
 
 Lemma VN_grot : grot_univ (VN mu).
 split; intros.
- apply VN_trans with x; trivial.
+*apply VN_trans with x; trivial.
 
- apply VN_clos_pair; auto.
+*apply VN_clos_pair; auto.
 
- apply VNlim_power; trivial.
+*apply VNlim_power; trivial.
  split; trivial.
 
- apply mu_reg; trivial.
-Qed.
+*rewrite <- (replf_id x).
+ apply mu_reg; intros; trivial.
+ apply ZFrepl.repl_rel_fun; auto with *.
+ rewrite H1.
+ apply VN_trans with x; trivial.
+ 
+*assert (ZFrepl.repl_rel I (fun x y => exists2 z, R x z & y == singl z)).
+ {destruct H as (Rext,Rfun).
+  split; intros.
+  destruct H4.
+   exists x0.
+    apply Rext with x x0; auto; try reflexivity.
+    transitivity y; auto; symmetry; auto.
 
+    destruct H2; destruct H3.
+    rewrite H4; rewrite H5.
+    apply singl_morph.
+    eauto. }
+ setoid_replace (repl I R) with
+   (union (repl I (fun x y => exists2 z, R x z & y == singl z))).
+ {apply mu_reg; trivial.
+  intros.
+  destruct H4 as (z', ?,eqz).
+  rewrite eqz.  
+  assert (z' ∈ VN mu) by eauto.
+  apply VN_clos_pair; auto. }
+ {apply union_ext; intros.
+  elim ZFrepl.repl_elim with (2:=H4); trivial; intros.
+  destruct H6.
+  rewrite H7 in H3.
+  rewrite (singl_elim _ _ H3).
+  apply ZFrepl.repl_intro with x0; trivial.
+
+  elim ZFrepl.repl_elim with (2:=H3); trivial; intros.
+  exists (singl x).
+   apply singl_intro.
+
+   apply ZFrepl.repl_intro with x0; trivial.
+   exists x; trivial; reflexivity. }
+Qed.
+                
 End VN_Inaccessible.
 
 (* Conversely, the set of ordinals of a Grothendieck universe form

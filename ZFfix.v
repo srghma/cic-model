@@ -1057,7 +1057,7 @@ apply osup_morph.
   apply in_set_morph; auto with *.
   apply fsub_indep.
 
-  do 3 red; intros.
+  do 2 red; intros.
   unfold F_a.
   apply cond_set_morph.
    apply in_set_morph; trivial.

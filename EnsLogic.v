@@ -1,5 +1,5 @@
 Require Export basic.
-Require Import Choice. (* Axiom *)
+Require Import Choice.
 Require Import Logics.
 
 (** In this file, we build a model of classical ZF
@@ -453,6 +453,8 @@ split; intros.
 Qed.
 
 (* Collection *)
+
+Axiom choice_axiom : forall A B, choice A B.
 
 (* intuitionistic version *)
 

@@ -293,7 +293,7 @@ unfold ZFcoc.props; rewrite power_ax; intros; trivial.
  apply empty_ax in H0; contradiction. 
 
  revert y H0. rewrite <- power_ax. apply impredicative_prod.
-  do 2 red; reflexivity.
+  red; reflexivity.
 
   unfold props; unfold ZFcoc.props; intros.
   rewrite power_ax; intros.
@@ -312,13 +312,13 @@ unfold ZFcoc.props; rewrite power_ax; intros; trivial.
      trivial.
 
  revert y H0. rewrite <- power_ax. apply impredicative_prod.
-  do 2 red; reflexivity.
+  red; reflexivity.
 
   intros. do 2 red in IHf2; simpl in IHf2; 
   apply IHf2 with (e:=e); trivial.
 
  revert y H0. rewrite <- power_ax. apply impredicative_prod.
-  do 2 red. intros y1 y2 Hy1N H0; rewrite H0; reflexivity.
+  red. intros y1 y2 Hy1N H0; rewrite H0; reflexivity.
 
   intros. do 2 red in IHf; simpl in IHf; 
   apply IHf with (e:=(T::e)).
@@ -347,18 +347,16 @@ apply prod_ext.
 
  red; intros. apply prod_ext.
   apply prod_ext; try reflexivity.
-   red; intros. apply prod_ext.
-    apply int_morph; try reflexivity.
-     replace (fun k : nat => V.cons y0 (fun k0 : nat => x k0) k)
-       with (V.cons y0 x); trivial.
-     rewrite H3, H. reflexivity.
+  red; intros. apply prod_ext.
+   apply int_morph; try reflexivity.
+   change (fun k : nat => V.cons x1 (fun k0 : nat => x k0) k)
+     with (V.cons x1 x).
+   rewrite H3, H. reflexivity.
 
-     red; intros. rewrite <- subst_int_subst_fml. simpl.
+   red; intros. rewrite <- subst_int_subst_fml. simpl.
      do 2 rewrite int_subst_eq. rewrite <- lift_int_lift_fml_rec.
-     replace (fun k : nat => V.cons y0 (fun k0 : nat => x k0) k) with
-       (V.cons y0 x); trivial.
-     replace (fun k : nat => V.cons y3 (fun k0 : nat => y k0) k) with
-       (V.cons y3 y); trivial.
+     change (fun k : nat => V.cons x1 (fun k0 : nat => x k0) k) with
+       (V.cons x1 x).
      rewrite H. rewrite H3. reflexivity.
    
    red; intros. apply prod_ext; try reflexivity.

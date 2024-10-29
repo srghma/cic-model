@@ -9,19 +9,19 @@ Require Import Models TypModels List.
 Module MakeModel(M : CC_Model) <: Judge.
 Import M.
 
-Lemma eq_fun_sym : forall x f1 f2, eq_fun x f1 f2 -> eq_fun x f2 f1.
+Lemma eqX_fun_sym : forall x f1 f2, eqX_fun x f1 f2 -> eqX_fun x f2 f1.
 Proof.
-unfold eq_fun in |- *; intros.
+unfold eqX_fun in |- *; intros.
 symmetry  in |- *.
 apply H.
  rewrite <- H1; trivial.
  symmetry  in |- *; trivial.
 Qed.
 
-Lemma eq_fun_trans : forall x f1 f2 f3,
-   eq_fun x f1 f2 -> eq_fun x f2 f3 -> eq_fun x f1 f3.
+Lemma eqX_fun_trans : forall x f1 f2 f3,
+   eqX_fun x f1 f2 -> eqX_fun x f2 f3 -> eqX_fun x f1 f3.
 Proof.
-unfold eq_fun in |- *; intros.
+unfold eqX_fun in |- *; intros.
 transitivity (f2 y1); auto.
 apply H; trivial.
 reflexivity.
@@ -681,7 +681,7 @@ Qed.
 
 Lemma add_var_eq_fun : forall T U U' i,
   (forall x, el T i x -> int U (V.cons x i) == int U' (V.cons x i)) -> 
-  eq_fun (int T i)
+  eqX_fun (int T i)
     (fun x => int U (V.cons x i))
     (fun x => int U' (V.cons x i)).
 red; intros.
@@ -847,7 +847,7 @@ Lemma eq_typ_beta : forall e T M M' N N',
 Proof.
 unfold eq_typ, typ, App, Abs; simpl; intros.
 rewrite int_subst_eq.
-assert (eq_fun (int T i) (fun x => int M (V.cons x i)) (fun x => int M (V.cons x i))).
+assert (eqX_fun (int T i) (fun x => int M (V.cons x i)) (fun x => int M (V.cons x i))).
  apply add_var_eq_fun with (T:=T); intros; trivial; reflexivity.
 assert (int N i ∈ int T i).
  destruct T as [(T,Tm)|]; [clear H2;simpl in *;auto|elim H2;reflexivity]. 

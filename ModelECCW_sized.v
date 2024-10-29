@@ -474,10 +474,10 @@ apply val_push_var; auto with *.
 
   apply ole_lts; auto.
 
- red; rewrite El_int_W_lift.
+ rewrite El_int_W_lift.
  revert H5; apply TI_incl; simpl; auto.
 
- red; rewrite El_int_W_lift.
+ rewrite El_int_W_lift.
  rewrite <- H6.
  revert H5; apply TI_incl; simpl; auto.
  apply ole_lts; trivial.

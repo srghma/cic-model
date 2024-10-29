@@ -493,7 +493,7 @@ Module ECC <: ECC_Model.
   Proof ecc_incl.
 
   Lemma u_card_prod : forall n X Y,
-    CC.eq_fun X Y Y ->
+    CC.eqX_fun X Y Y ->
     X ∈ u_card n ->
     (forall x, x ∈ X -> Y x ∈ u_card n) ->
     CC.prod X Y ∈ u_card n.

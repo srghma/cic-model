@@ -550,7 +550,7 @@ Definition dpos_cst A :=
 
 Instance dpos_cst_morph : Proper ((eq_set==>eq_set)==>eqdpos) dpos_cst.
 constructor.
- do 3 red; intros; auto.
+ do 2 red; intros; auto.
 
  red; simpl; intros; auto.
 
@@ -558,7 +558,7 @@ constructor.
 
  do 3 red; auto.
 
- do 3 red; intros.
+ do 2 red; intros.
  apply couple_morph;[|apply cc_lam_morph;[|red;intros]]; auto with *.
 Qed.
 
@@ -1465,7 +1465,7 @@ apply eq_dop; trivial.
 Qed.
 
 Instance dIND_clos_ord_morph_gen : Proper (eq_set==>eqdpos==>eq_set) dIND_clos_ord.
-do 4 red; intros.
+do 3 red; intros.
 unfold dIND_clos_ord.
 apply W0.W_ord_morph_all; trivial.
  apply eq_dw1.
@@ -1473,7 +1473,7 @@ apply W0.W_ord_morph_all; trivial.
 Qed.
 
 Instance dIND_clos_ord_a_morph_gen : Proper (eq_set==>eqdpos==>eq_set==>eq_set) dIND_clos_ord_a.
-do 5 red; intros.
+do 4 red; intros.
 unfold dIND_clos_ord_a.
 apply W0.W_ord_a_morph; auto with *.
  apply eq_dw1.

@@ -458,7 +458,7 @@ apply mkTypedRec; auto with *.
   red; intros.
   apply cc_prod_elim with (1:=H1); trivial.
 
- red; red; intros.
+ red; intros.
  unfold WF.
  rewrite cc_beta_eq; trivial.
  rewrite cc_beta_eq; trivial.

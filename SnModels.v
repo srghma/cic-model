@@ -70,7 +70,7 @@ Module Type SAT_strong_addon (M : CC_Model).
   Parameter Real_sort : forall P, P ∈ props -> eqSAT (Real props P) snSAT.
 
   Parameter Real_prod : forall dom f F,
-    eq_fun dom F F ->
+    eqX_fun dom F F ->
     f ∈ prod dom F ->
     eqSAT (Real (prod dom F) f)
       (piSAT0 (fun x => x ∈ dom) (Real dom)

@@ -710,7 +710,7 @@ constructor; intros.
    apply B'nil with (osucc o); auto.
    unfold A'i; rewrite TI_mono_succ; auto with *.
 
-   apply (iso_inv_typ H0).
+   apply (iso_inv_typ _ H0).
    apply fb'ty; trivial.
 
   rewrite et.
@@ -820,7 +820,7 @@ apply TRF_indep with (6:=H1); trivial.
  unfold comp_iso.
  rewrite TI_mono_succ in H4; auto with *.
  eapply gext with (1:=H3).
-  eapply (iso_typ (hiso _ _) H4).
+  eapply (iso_typ (hiso _ _) _ H4).
   apply hm; trivial.
 Qed.
 
@@ -877,7 +877,7 @@ constructor; intros.
  apply (iso_inj H2) in H5; trivial.
  2:apply (iso_typ (hiso _ _)); trivial.
  2:apply (iso_typ (hiso _ _)); trivial.
- apply (iso_inj (hiso _ _) H11) in H5; trivial.
+ apply (iso_inj (hiso _ _) _ _ H11) in H5; trivial.
  
  apply W_F_elim in H3; auto with *.
  destruct H3 as (?,(?,?)).
@@ -888,7 +888,7 @@ constructor; intros.
  destruct (iso_surj H2) with y0.
   rewrite H5; apply W_F_intro; auto with *.
   do 2 red; intros; apply cc_app_morph; auto with *.
- destruct (iso_surj (hiso _ _) H7).
+ destruct (iso_surj (hiso _ _) _ H7).
  exists x1.
   apply TI_intro with x; auto with *.
  rewrite <- H8.
