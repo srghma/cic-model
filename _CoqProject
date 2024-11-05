@@ -54,6 +54,7 @@ GenModelSyntax.v
 GenModel.v
 ModelCC_em.v
 ModelCC.v
+sketches/ModelCC_choice.v
 ModelECC_oldstyle.v
 ModelECC.v
 ModelECCW_sized.v
