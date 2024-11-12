@@ -391,6 +391,7 @@ unfold dIND_clos_ord_a.
 intros.
 apply W0.isOrd_W_ord_a; trivial.
  apply w2m; trivial.
+ apply w3m; trivial.
 Qed.
 
 Lemma dIND_small p a :
@@ -444,6 +445,7 @@ apply TIF_mono.
  apply isOrd_clos_ord; trivial.
  apply W0.isOrd_W_ord_a.
   apply w2m; trivial.
+  apply w3m; trivial.
 unfold dIND_clos_ord.
     apply W0.W_ord_a_smaller; trivial.
      apply w1m; trivial.
@@ -542,6 +544,7 @@ apply G_TIF; trivial.
 
  apply W0.isOrd_W_ord_a.
   apply w2m; trivial.
+  apply w3m; trivial.
 
  apply W0.G_W_ord_a; trivial.
   apply w1m; trivial.

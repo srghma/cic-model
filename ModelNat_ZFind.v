@@ -13,16 +13,29 @@ Require Import ModelZF.
 
 (** All that remains to build is the recursor *)
 Definition NAT_REC f g n :=
-  WFR (fun n m => n ∈ NAT /\ m == SUCC n)
+  WFR (fun m => subset NAT (fun n => m == SUCC n))
       (fun F n => NATCASE f (fun m => g m (F m)) n) n.
+
+Let Rm : morph1 (fun m => subset NAT (fun n => m == SUCC n)).
+do 2 red; intros.
+apply subset_morph; [reflexivity|].  
+red; intros.
+rewrite H; reflexivity.
+Qed.
+
+Let Rzero : forall y : set, ~ y ∈ subset NAT (fun n : set => ZERO == SUCC n).
+red; intros.
+apply subset_elim2 in H.
+destruct H as (?,_,abs).
+apply NATf_discr in abs; trivial.
+Qed.
 
 Instance NATREC_morph :
   Proper (eq_set ==> (eq_set ==> eq_set ==> eq_set) ==> eq_set ==> eq_set) NAT_REC.
 do 4 red; intros.
 unfold NAT_REC.
 apply WFR_morph; trivial.
- do 2 red; intros.
- rewrite H2,H3; reflexivity.
+ apply Rm.
 
  do 2 red; intros.
  apply NATCASE_morph; trivial.
@@ -30,33 +43,39 @@ apply WFR_morph; trivial.
  apply H0; auto.
 Qed.
 Section NatrecProperties.
-
+(*
   Let Rm : Proper (eq_set ==> eq_set ==> iff) (fun n m : set => n ∈ NAT /\ m == SUCC n).
 do 3 red; intros.
 rewrite H,H0; reflexivity.
 Qed.
-
-  Let AccN x : x ∈ NAT -> Acc (fun n m : set => n ∈ NAT /\ m == SUCC n) x.
+*)
+  Let AccN x : x ∈ NAT -> Acc (fun n m : set => n ∈ subset NAT (fun n => m == SUCC n)) x.
 intros.
 apply NAT_ind with (4:=H). 
  intros.
  revert H2; apply iff_impl; eapply wf_morph with (eqA:=eq_set); auto with *.
-
+ do 2 red; intros; apply in_set_morph; trivial.
+ apply Rm; trivial.
+ 
  constructor; intros.
- destruct H0.
- apply NATf_discr in H1; contradiction.
+ apply Rzero in H0; contradiction.
 
  intros.
  constructor; intros.
- destruct H2.
- apply SUCC_inj in H3.
+ apply subset_elim2 in H2.
+ destruct H2 as (y',eqy,e). 
+ rewrite <-eqy in e. 
+ apply SUCC_inj in e.
  revert H1; apply iff_impl; apply wf_morph with (eqA:=eq_set); auto with *.
+ do 2 red; intros; apply in_set_morph; trivial.
+ apply Rm; trivial.
 Qed.
 
+(*
   Let invN x y : x ∈ NAT /\ y == SUCC x -> y ∈ NAT -> x ∈ NAT.
 destruct 1; trivial.
 Qed.
-
+*)
   Let casem f' g' : morph2 g' -> Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set)
                 (fun F n => NATCASE f' (fun m => g' m (F m)) n).
 do 3 red; intros.
@@ -68,12 +87,13 @@ Qed.
   Let caseext f g :
     morph2 g ->
     forall x F F', x ∈ NAT ->
-    (forall y y' : set, y ∈ NAT /\ x == SUCC y -> y == y' -> F y == F' y') ->
+    (forall y y' : set, y ∈ subset NAT (fun y => x == SUCC y) -> y == y' -> F y == F' y') ->
     NATCASE f (fun m : set => g m (F m)) x ==
     NATCASE f (fun m : set => g m (F' m)) x.
 intros.
 apply NATCASE_morph_gen; intros; auto with *.
-apply H; trivial; apply H1; trivial; split; trivial.
+apply H; trivial; apply H1; trivial.
+apply subset_intro; trivial.
 rewrite NAT_eq in H0.
 apply SUCC_inv_typ_gen.
 rewrite <- H2; trivial.
@@ -84,8 +104,7 @@ unfold NAT_REC; intros.
 rewrite WFR_eqn_norec; auto.
  apply NATCASE_ZERO.
 
- red; destruct 1.
- apply NATf_discr in H0; trivial.
+ apply Rzero.
 
  intros.
  rewrite NATCASE_ZERO.
@@ -102,17 +121,20 @@ Qed.
 Lemma NATREC_S : forall f g n, morph2 g -> n ∈ NAT ->
    NAT_REC f g (SUCC n) == g n (NAT_REC f g n).
 unfold NAT_REC; intros.
-rewrite WFR_eqn_gen; auto.
- rewrite NATCASE_SUCC.
+rewrite WFR_eqn; auto.
+*rewrite NATCASE_SUCC.
   reflexivity.
 
   intros; apply H; trivial.
   apply WFR_morph0; trivial.
 
- intros; apply caseext; trivial.
- apply SUCC_typ; trivial.
+*do 2 red; intros.
+ apply Rm; trivial.
+  
+*intros; apply caseext; trivial.
+  apply SUCC_typ; trivial.
 
- apply AccN.
+*apply AccN.
  apply SUCC_typ; trivial.
 Qed.
 End NatrecProperties.

@@ -55,15 +55,15 @@ Let plump_set f ub :=
       (forall y, y ∈ ub -> y ∈ x -> y ∈ f y) /\
       (forall z y, y ∈ ub -> z ∈ f y -> z ⊆ y -> y ∈ x -> z ∈ x) /\
       Q x).
-
+(*
 Let R x y := isWf x /\ x ∈ y.
 
 Local Instance Rmorph : Proper (eq_set==>eq_set==>iff) R.
 unfold R; do 3 red; intros.
 rewrite H,H0; reflexivity.
 Qed.
-
-Definition plumps := WFR R plump_set.
+*)
+Definition plumps := WFR (fun x=>x) plump_set.
 
 Let plumps_m :
   Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) plump_set.
@@ -84,10 +84,10 @@ apply subset_morph.
   rewrite H0; rewrite (H _ _ (reflexivity _)); reflexivity.
 Qed.
 
-Let isWf_accR x : isWf x -> Acc R x.
+Let isWf_accR x : isWf x -> Acc in_set x.
 intros.
 apply isWf_ind with (2:=H); intros.
-constructor; destruct 1; auto.
+constructor; auto.
 Qed.
 
 Let plump_eqn ub x :
@@ -100,7 +100,7 @@ Let plump_eqn ub x :
 intro.
 revert x; induction H using isWf_ind; intros.
 unfold plumps at 1; rewrite WFR_eqn; fold plumps; trivial with *.
- unfold plump_set; rewrite subset_ax.
+*unfold plump_set; rewrite subset_ax.
  rewrite power_ax.
  apply and_iff_morphisml; auto with *.
   intros _ xincla.
@@ -112,36 +112,35 @@ unfold plumps at 1; rewrite WFR_eqn; fold plumps; trivial with *.
    split; auto.
    apply isWf_incl with a; trivial.
 
- intros; apply subset_morph; auto with *.
+*auto with *.   
+
+*intros; apply subset_morph; auto with *.
  red; intros.
  apply and_iff_morphisml; auto with *.
  intros _ wfx1.
- assert (forall z, z ∈ x1 -> z ∈ x0 -> R z x0).
-  split; trivial.
-  apply isWf_inv with x1; trivial.
  apply and_iff_morphism.
   apply fa_morph; intros y.
   apply fa_morph; intros h0.
   apply fa_morph; intros h1.
-  rewrite (H2 y y); auto with *.
+  rewrite (H1 y y); auto with *.
  apply and_iff_morphism; auto with *.
  apply fa_morph; intros z.
  apply fa_morph; intros y.
  apply fa_morph; intros h.
  split; intros.
-  apply H5; trivial.
-  rewrite (H2 y y); auto with *.
+  apply H3; trivial.
+  rewrite (H1 y y); auto with *.
 
-  apply H5; trivial.
-  rewrite <- (H2 y y); auto with *.
+  apply H3; trivial.
+  rewrite <- (H1 y y); auto with *.
 
- apply isWf_accR; trivial.
+*apply isWf_accR; trivial.
 Qed.
 
 Instance plumps_morph : morph1 plumps.
 do 2 red; intros; unfold plumps.
 apply WFR_morph; trivial.
-apply Rmorph.
+red; trivial.
 Qed.
 
 Lemma plump_bound : forall ub1 ub2 x,
@@ -974,19 +973,19 @@ Qed.
 
 (*begin hide *)
 Require Import ZFpairs ZFrelations.
-Require Import ZFrepl.
 
 Module FirstOrderStyle.
+Import ZFrepl.
 
 Section TransfiniteRecursion.
 
+  
   Variable F : (set -> set) -> set -> set.
   Hypothesis Fm : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) F.
 
   Variable ord : set.
   Hypothesis Fmorph :
     forall x f f', isOrd x -> x ⊆ ord -> eq_fun x f f' -> F f x == F f' x.
-
 
   Definition isTR_rel P :=
     forall o y,
@@ -1145,7 +1144,7 @@ End TransfiniteRecursion.
   Global Instance TR_morph0 : forall F, morph1 (TR F).
 do 2 red; intros.
 unfold TR.
-apply uchoice_morph_raw.
+apply ZFrepl.uchoice_morph_raw.
 red; intros.
 assert (trm := TR_rel_morph).
 rewrite H; rewrite H0; reflexivity.
@@ -1155,7 +1154,7 @@ Qed.
     Proper (((eq_set ==> eq_set) ==> eq_set ==> eq_set) ==> eq_set ==> eq_set) TR.
 do 3 red; intros.
 unfold TR.
-apply uchoice_morph_raw; red; intros.
+apply ZFrepl.uchoice_morph_raw; red; intros.
 unfold TR_rel.
 apply ex2_morph; red; intros.
  apply fa_morph; intros o.
@@ -1178,14 +1177,7 @@ Section TransfiniteRecursion.
   Variable F : (set -> set) -> set -> set.
   Hypothesis Fm : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) F.
 
-  Let R o o' := o < o'.
-
-  Local Instance Rm : Proper (eq_set==>eq_set==>iff) R.
-unfold R; do 3 red; intros.
-rewrite H,H0; reflexivity.
-Qed.
-
-  Definition TR := WFR R F.
+  Definition TR := WFR (fun x => x) F.
 
 Global Instance TR_morph0 : morph1 TR.
 clear Fm; do 2 red; intros.
@@ -1199,7 +1191,7 @@ Qed.
     TR o == F TR o.
 intros oo Fext.
 unfold TR.
-apply WFR_eqn_gen; auto with *.
+apply WFR_eqn; auto with *.
 elim oo using isOrd_ind; intros; constructor; intros; auto.
 Qed. 
 
@@ -1249,11 +1241,10 @@ Global Instance TR_morph :
     Proper (((eq_set ==> eq_set) ==> eq_set ==> eq_set) ==> eq_set ==> eq_set) TR.
 do 3 red; intros.
 apply WFR_morph; trivial.
- do 2 red; intros.
- rewrite H1, H2; reflexivity.
+red; trivial.
 Qed.
 
-  Lemma TR_ext_ord F F' o o' :
+(*  Lemma TR_ext_ord F F' o o' :
   (forall f f' oo,
    morph1 f ->
    morph1 f' ->
@@ -1266,20 +1257,18 @@ Qed.
  TR F o == TR F' o'.
 intros.
 apply WFR_ext; auto with *.
- do 2 red; intros.
- rewrite H2; reflexivity.
 intros.
 assert (isOrd y /\ y ⊆ o).
- apply Kstar_rel with (3:=H5); auto with *.
-  do 2 red; intros.
-  rewrite H6; reflexivity.
-
-  destruct 2; split.
-   apply isOrd_inv with y0; trivial.
-   rewrite <- H8; auto.
-clear H5; destruct H6.
+{revert H0; elim H5; intros.
+ *destruct H0 as [H0|H0]; [rewrite H0;auto with *|].
+  split; [apply isOrd_inv with y0; trivial|].
+  intros ??; apply isOrd_trans with x; trivial.
+ *destruct H8; trivial.
+  destruct H6; trivial.
+  rewrite <- H10; auto. }
+destruct H6.
 apply H; trivial.
-Qed.
+Qed.*)
 
 (** Specialized version where the case of limit ordinals is union *)
 Section TransfiniteIteration.
@@ -1409,22 +1398,32 @@ Qed.
 
 Section BinarySup.
 
-  Definition isCouple c := c == couple (fst c) (snd c).
-  Global Instance isCouple_morph : Proper (eq_set==>iff) isCouple.
-do 2 red; intros; unfold isCouple.
-rewrite H; reflexivity.
+  (* epsilon-recursion on the first component *and* second component *)
+  Let Rsub xy := prodcart (fst xy) (snd xy).
+  Let R x y := x ∈ Rsub y.
+
+  Let Rdef x y : R x y <-> isCouple x /\ fst x ∈ fst y /\ snd x ∈ snd y.
+split; intros.
+*split.
+ apply surj_pair in H; trivial.
+ split;[apply fst_typ in H|apply snd_typ in H]; trivial.    
+*destruct H as (isc&?&?).
+ red in isc|-*; rewrite isc.
+ apply couple_intro; trivial.
 Qed.
-  Lemma isCouple_couple a b : isCouple (couple a b).
-red.
-rewrite fst_def, snd_def; reflexivity.
+ 
+  Local Instance Rsubm : morph1 Rsub.
+do 2 red; intros.
+unfold Rsub; rewrite H; reflexivity.
 Qed.
-Hint Resolve isCouple_couple : core.
-  
-  Let R xy xy' := isCouple xy /\ fst xy < fst xy'.
-  Let Rm : Proper (eq_set==>eq_set==>iff) R.
+
+  Local Instance Rm : Proper (eq_set==>eq_set==>iff) R.
 unfold R; do 3 red; intros.
-rewrite H,H0; reflexivity.
+rewrite H,H0.
+reflexivity.
 Qed.
+
+Hint Resolve Rsubm : core.
 
   Let F f xy :=
     let x := fst xy in
@@ -1441,7 +1440,7 @@ red; intros.
 apply H; rewrite H2,H4; reflexivity.
 Qed.
 
-  Definition osup2 x y := WFR R F (couple x y).
+  Definition osup2 x y := WFR Rsub F (couple x y).
 
 Infix "⊔" := osup2 (at level 50). (* input method: \sqcup *)
 (* ⋓ = \Cup would be nicer, but poor html rendering... *)
@@ -1456,7 +1455,7 @@ Qed.
 intros.
 unfold osup2 at 1.
 rewrite WFR_eqn; auto.
- unfold F.
+*unfold F.
  apply union2_morph.
   rewrite fst_def,snd_def; reflexivity.
  apply sup_morph.
@@ -1467,20 +1466,18 @@ rewrite WFR_eqn; auto.
  red; intros.
  apply osup2_morph; trivial.
 
- intros.
+*intros.
  apply union2_morph; auto with *.
  apply sup_morph; auto with *.
  red; intros.
  apply replf_morph; auto with *.
  red; intros.
- apply H1.
-  red.
-  rewrite fst_def; auto.
+ apply H0; [apply couple_intro; trivial|].
+ rewrite H2,H4; reflexivity.
 
-  rewrite H3,H5; reflexivity.
-
- revert y; elim H using isOrd_ind; intros.
- constructor; destruct 1.
+*revert y; elim H using isOrd_ind; intros.
+ constructor; intros.
+ apply Rdef in H3; destruct H3 as (?&?&_).
  rewrite fst_def in H4.
  eapply wf_morph with  (3:=Rm)(4:=H3) ; auto with *.
 Qed.

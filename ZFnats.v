@@ -469,20 +469,27 @@ rewrite cond_set_mt.
  rewrite e in eqn; apply discr in eqn; trivial.
 Qed.
 
-Local Instance Rmorph : Proper (eq_set==>eq_set==>iff) (fun n m => n∈N /\ n<m).
+Local Instance Rsub_morph : morph1 (fun m => subset N(fun n=>n<m)).
+do 2 red; intros.
+apply subset_morph; [reflexivity|].
+red; intros.
+rewrite H; reflexivity.
+Qed.
+
+Local Instance Rmorph : Proper (eq_set==>eq_set==>iff) (fun n m => n∈subset N(fun n=>n<m)).
 do 3 red; intros.
-rewrite H,H0; reflexivity.
+apply in_set_morph; trivial.
+apply Rsub_morph; trivial.
 Qed.
 
 Definition natrec (f:set) (g:set->set->set) (n:set) : set :=
-  WFR (fun n m => n ∈ N /\ n < m) (natrec_body f g) n.
+  WFR (fun m => subset N (fun n => n < m)) (natrec_body f g) n.
 
 Global Instance natrec_morph :
   Proper (eq_set ==> (eq_set ==> eq_set ==> eq_set) ==> eq_set ==> eq_set) natrec.
 do 4 red; intros.
 apply WFR_morph; auto with *.
- do 2 red; intros.
- rewrite H2,H3; reflexivity.
+ apply Rsub_morph.
 
  do 2 red; intros.
  apply natrec_body_morph; trivial.
@@ -494,27 +501,31 @@ red; red; reflexivity.
 Qed.
 
 Lemma N_acc n :
-  n ∈ N -> Acc (fun n m => n∈N /\ n<m) n.
+  n ∈ N -> Acc (fun n m => n ∈ subset N (fun n=>n<m)) n.
 intros ntyp.
-assert (forall m, m ∈ N -> m <= n -> Acc (fun n m=>n∈N/\n<m) m); eauto.
+assert (forall m, m ∈ N -> m <= n -> Acc (fun n m=>n∈subset N(fun n=>n<m)) m); eauto.
 apply N_ind with (4:=ntyp); intros.
  rewrite <- H0 in H3.
  generalize (H1 _ H2 H3).
  apply iff_impl; apply wf_morph with (eqA:=eq_set); auto with *.
  apply Rmorph.
 
- constructor; destruct 1.
- red in H0.
+ constructor; intros.
+ apply subset_ax in H1. 
+ destruct H1 as (?,(y',eqy,?)).
  apply le_case in H0; destruct H0.
   rewrite H0 in H2; apply empty_ax in H2; contradiction.
   apply empty_ax in H0; contradiction.
 
- constructor; destruct 1.
+ constructor; intros.
+ apply subset_ax in H3. 
+ destruct H3 as (?,(y',eqy,?)).
+ rewrite <- eqy in H4.
  assert (y <= n0); auto.
-  apply le_case in H2; destruct H2.
-   rewrite H2 in H4; trivial.
-   apply lt_trans with m; trivial.
-   apply succ_typ; trivial.
+ apply le_case in H2; destruct H2.
+ +rewrite H2 in H4; trivial.
+ +apply lt_trans with m; trivial.
+  apply succ_typ; trivial.
 Qed.
 
 Lemma natrec_0 f g :
@@ -522,8 +533,10 @@ Lemma natrec_0 f g :
 unfold natrec; rewrite WFR_eqn_norec.
  apply natrec_body0; auto with *.
 
- red; destruct 1.
- apply empty_ax in H0; contradiction.
+ red; intros.
+ apply subset_elim2 in H.
+ destruct H as (x',_,?).
+ apply empty_ax in H; contradiction.
 
  intros.
  rewrite natrec_body0; auto with *.
@@ -547,7 +560,7 @@ Lemma natrec_S_eq f g n k :
 intros.
 unfold natrec.
 rewrite WFR_eqn.
- unfold natrec_body at 1.
+*unfold natrec_body at 1.
  rewrite cond_set_mt.
  rewrite cond_set_ok.
  rewrite union2_mt_l.
@@ -559,16 +572,19 @@ rewrite WFR_eqn.
 
  rewrite H1; apply discr.
 
- apply Rmorph.
+*apply Rsub_morph.
 
- apply natrec_body_morph; auto with *.
+*apply natrec_body_morph; auto with *.
  
- intros.
+*intros.
  apply natrec_body_ext; trivial.
+ intros.
+ destruct H3.
+ apply H2; trivial.
+ apply subset_intro; trivial.
 
- constructor; intros.
- destruct H2.
- apply N_acc; trivial.
+*apply N_acc; trivial.
+ rewrite H1; apply succ_typ; trivial.
 Qed.
 
 Lemma natrec_S f g n :

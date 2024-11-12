@@ -62,10 +62,10 @@ split; intros.
 Qed.
 
 Lemma eq_set_def : forall x y,
-  (forall i, exists j, eq_set (elts x i) (elts y j)) ->
-  (forall j, exists i, eq_set (elts x i) (elts y j)) ->
+  (forall i, exists j, eq_set (elts x i) (elts y j)) /\
+  (forall j, exists i, eq_set (elts x i) (elts y j)) <->
   eq_set x y.
-destruct x; simpl; auto.
+destruct x; simpl; reflexivity.
 Qed.
 
 Definition in_set x y :=
@@ -108,10 +108,14 @@ unfold in_set; split; intros.
    exists x; apply eq_set_sym; trivial.
 Qed.
 
+Definition in_set_intro (x:set) (i:idx x) : in_set (elts x i) x :=
+  ex_intro _ i (eq_set_refl _).
+
 Definition elts' (x:set) (i:idx x) : {y|in_set y x}.
 exists (elts x i).
 abstract (exists i; apply eq_set_refl).
 Defined.
+
 
 Lemma in_reg : forall x x' y,
   eq_set x x' -> in_set x y -> in_set x' y.
@@ -271,78 +275,22 @@ split; intros.
  apply eq_set_sym; trivial.
 Qed.
 
-(* Fixpoint *)
-Fixpoint wfrec (F:(set->set)->set->set) (x:set) : set :=
-  F (fun y => union (sup {i:idx x|eq_set (elts x i) y}
-               (fun i => wfrec F (elts x (proj1_sig i))))) x.
-Section FixRec.
-Hypothesis F : (set->set)->set->set.
-Hypothesis Fext : forall x x' f f',
-  (forall y y', in_set y x -> eq_set y y' -> eq_set (f y) (f' y')) ->
-  eq_set x x' ->
-  eq_set (F f x) (F f' x').
-
-Instance wfrecm : Proper (eq_set==>eq_set) (wfrec F).
-do 2 red.
-induction x; destruct y; intros.
-simpl wfrec.
-apply Fext; trivial.
-simpl in H0; destruct H0.
-intros.
-apply union_morph.
-simpl.
-split; intros.
- clear H2; destruct i as (i,?); simpl.
- destruct (H0 i) as (j,?).
- assert (eq_set (f0 j) y').
-  apply eq_set_trans with y; trivial.
-  apply eq_set_trans with (f i); trivial.
-  apply eq_set_sym; trivial.
- exists (exist _ j H4); simpl.
- apply H; trivial.
-
- destruct H2 as (i,?H2); simpl in i,H2.
- destruct j as (j,?).
- exists (exist _ i (eq_set_sym _ _ H2)); simpl.
- apply H.
- apply eq_set_sym.
- apply eq_set_trans with y; trivial. 
- apply eq_set_trans with y'; trivial.
+(* A useful tool to hide some logical information in a set *)
+Lemma union_sup_eq X f x (d:forall P:Prop,(X->P)->P):
+  (forall i:X, eq_set (f i) x) ->
+  eq_set (union (sup X f)) x.
+intros; apply eq_set_ax; intros z.
+rewrite union_ax.
+split.
+*intros (b, inb, (i,ei)); simpl in *.
+ apply eq_elim with b; trivial.
+ apply eq_set_trans with (f i); trivial.
+*intros.
+ apply d; intros i. 
+ exists x; trivial.
+ exists i; simpl.
  apply eq_set_sym; trivial.
 Qed.
-
-Lemma wfrec_eqn x :
-  eq_set (wfrec F x) (F (wfrec F) x).
-destruct x; simpl.
-apply Fext.
-2:apply eq_set_refl.
-intros.
-rewrite eq_set_ax.
-intros z.
-rewrite union_ax.
-split; intros.
- destruct H1 as (b,?,?).
- destruct H2 as ((j,e),?).
- simpl in H2.
- apply eq_elim with b; trivial.
- apply eq_set_trans with (1:=H2).
- apply wfrecm.
- apply eq_set_trans with y; trivial.
-
- destruct H as (i,H).
- simpl in i,H.
- apply eq_set_sym in H0.
- exists (wfrec F (f i)).
-  apply eq_elim with (1:=H1).
-  apply wfrecm.
-  apply eq_set_trans with y; trivial.
-
-  apply eq_set_sym in H.
-  exists (exist _ i H).
-  simpl.
-  apply eq_set_refl.
-Qed.
-End FixRec.
 
 Definition subset (x:set) (P:set->Prop) :=
   sup {a|exists2 x', eq_set (elts x a) x' & P x'}
@@ -373,6 +321,20 @@ split; intros.
   (@exist _ (fun a=>exists2 x',eq_set (elts x a) x' & P x')
     x0 H2); simpl; trivial.
 Qed.
+
+  Lemma subset_morph : Proper (eq_set ==> (eq_set==>iff) ==> eq_set) subset.
+Proof.
+do 3 red; intros.
+apply eq_set_ax; intros z.
+do 2 rewrite subset_ax.
+apply and_iff_morphism. 
+*split; intros; apply eq_elim with (1:=H1); trivial.
+ apply eq_set_sym; trivial.
+*apply ex2_morph; red; intros.
+ +reflexivity.
+ +apply H0; apply eq_set_refl.
+Qed.
+
 
 Definition power (x:set) :=
   sup (idx x->Prop)
@@ -467,6 +429,25 @@ split; intros.
 Qed.
 
 
+Lemma replf_morph : Proper (eq_set ==> (eq_set==>eq_set) ==> eq_set) replf.
+do 3 red; intros.
+apply eq_set_ax; intros z.
+rewrite !replf_ax.
+*apply ex2_morph; red; intros.
+ +split; intros; apply eq_elim with (1:=H1); trivial.
+  apply eq_set_sym; trivial.
+ +split; intros; apply eq_set_trans with (1:=H1);[|apply eq_set_sym]; apply H0;
+    apply eq_set_refl.
+*intros.
+ apply eq_set_trans with (x0 z0);[apply eq_set_sym|];apply H0; trivial.
+ apply eq_set_refl.
+*intros.
+ apply eq_set_trans with (y0 z0);[|apply eq_set_sym];apply H0; trivial.
+  apply eq_set_refl.
+  apply eq_set_sym; trivial.
+Qed.
+
+
 Definition repl1 (x:set) (F:{y|in_set y x}->set) :=
   sup _ (fun i => F (elts' x i)).
 
@@ -536,6 +517,116 @@ apply eq_intro; intros.
  apply eq_set_trans with (1:=H3).
  apply eq_set_sym; apply H0; simpl; apply eq_set_refl.
 Qed.
+
+(* Well-founded recursion *)
+
+(* The same, building a (class-level) function by recursion.
+   This avoids the constrain that the parameter should range in a proper set... *)
+Section RelFixRecFamily.
+  Hypothesis R : set -> set.
+  Hypothesis Rm : Proper (eq_set==>eq_set) R.
+  Let R' x y := in_set x (R y).
+  Hypothesis F : forall{A:Type},(set->A->set)->set->A->set.
+  Hypothesis Fext : forall x x' z z' f f',
+    Acc R' x ->
+    (forall y y' z z',
+        R' y x -> eq_set y y' -> eq_set z z' -> eq_set (f y z) (f' y' z')) ->
+    eq_set x x' ->
+    eq_set z z' ->
+    eq_set (F f x z) (F f' x' z').
+
+  Fixpoint WFR_aux (x:set) (z:set) (h:Acc(fun x y => in_set x (R y)) x) : set :=
+    F (fun y z =>
+         union (sup {i:idx (R x)|eq_set (elts (R x) i) y}
+                  (fun i => WFR_aux (elts (R x) (proj1_sig i)) z
+                              (Acc_inv h (in_set_intro (R x) (proj1_sig i)))))) x z.
+
+  Definition WFR (x z:set) :=
+    union (sup (Acc (fun x y => in_set x (R y)) x) (fun h => WFR_aux x z h)).
+  
+  Lemma WFR_auxm x x' z z' (h:Acc R' x) (h':Acc R' x'):
+    eq_set x x' -> eq_set z z' ->
+    eq_set (WFR_aux x z h) (WFR_aux x' z' h').
+revert x x' z z' h h'.
+fix aux 5.
+destruct h; destruct h'; simpl.
+intros eqx eqz.
+apply Fext; [constructor;trivial| |trivial|trivial].
+clear z z' eqz.
+intros.
+destruct H as (i,?).
+assert (eR := Rm _ _ eqx).
+apply eq_set_def in eR.
+destruct eR as (i2j,j2i).
+apply union_sup_eq.
+{intros P h; apply h; exists i.
+ apply eq_set_sym; trivial. }
+intros (i', eqy); simpl.
+destruct (i2j i') as (j,?).
+apply eq_set_sym; apply union_sup_eq.
+{intros P h; apply h; exists j.
+ apply eq_set_trans with (2:=H0). 
+ apply eq_set_trans with (2:=eqy). 
+ apply eq_set_sym; trivial. }
+intros (j',eqy'); simpl.
+apply eq_set_sym; apply aux; trivial.
+apply eq_set_trans with (1:=eqy). 
+apply eq_set_trans with (1:=H0). 
+apply eq_set_sym; trivial.
+Qed.
+
+Lemma WFR_unfold x z (h:Acc R' x) : eq_set (WFR_aux x z h) (WFR x z).
+unfold WFR.
+apply eq_set_sym; apply union_sup_eq; [auto|].
+intros.
+apply WFR_auxm; apply eq_set_refl.
+Qed.
+
+Lemma WFR_eqn x z :
+  Acc R' x ->
+  eq_set (WFR x z) (F WFR x z).
+intros h.
+apply eq_set_trans with (1:=eq_set_sym _ _ (WFR_unfold _ _ h)).  
+revert x z h; fix aux 3; destruct h; simpl.
+apply Fext;[constructor;trivial| |apply eq_set_refl|apply eq_set_refl].
+clear z; intros.
+assert (r' : R' y' x).
+{apply in_reg with y; trivial. }
+apply eq_set_trans with (2:=WFR_unfold _ _ (a _ r')).
+destruct H as (i,?).
+apply union_sup_eq.
+*intros P h; apply h; exists i.
+ apply eq_set_sym; trivial.
+*intros; apply WFR_auxm; trivial.
+ apply eq_set_trans with y; trivial. 
+ apply (proj2_sig i0).
+Qed.
+
+End RelFixRecFamily.
+(*
+WFREC_eqn
+     : forall R : set -> set,
+       Proper (eq_set ==> eq_set) R ->
+       forall F : (set -> set) -> set -> set,
+       (forall (x x' : set) (f f' : set -> set),
+        Acc (fun x0 y : set => in_set x0 (R y)) x ->
+        (forall y y' : set, in_set y (R x) -> eq_set y y' -> eq_set (f y) (f' y')) ->
+        eq_set x x' -> eq_set (F f x) (F f' x')) ->
+       forall x : set, Acc (fun x0 y : set => in_set x0 (R y)) x -> eq_set (WFREC R F x) (F (WFREC R F) x)
+*)
+(*
+
+Parameter WFR : (set -> set -> Prop) -> ((set -> set) -> set -> set) -> set -> set.
+Parameter WFR_ax : forall R : set -> set -> Prop,
+       Proper (eq_set ==> eq_set ==> iff) R ->
+       forall F : (set -> set) -> set -> set,
+       Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) F ->
+       (forall (x : set) (f f' : set -> set),
+        Acc R x ->
+        (forall y y' : set, R y x -> eq_set y y' -> eq_set (f y) (f' y')) -> eq_set (F f x) (F f' x)) ->
+       forall x : set, Acc R x -> eq_set (WFR R F x) (F (WFR R F) x).
+*)
+
 
 (* We only use the following instance of unique choice for
    replacement: *)

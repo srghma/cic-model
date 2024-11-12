@@ -1039,14 +1039,14 @@ intros.
 symmetry.
 unfold Wi', Wi.
 transitivity (TIF Arg (W_Fd A B f) o (decode a empty)).
-2:apply TIF_morph; [reflexivity|apply Dec_mt with (A:=Arg)(B:=idx'); auto].
+2:apply TIF_morph; [reflexivity| apply Dec_mt with (A:=Arg); auto].
 generalize empty (Aenc_intro1 Arg idx' f' idx'm f'm  f'_typ _ H0).
 apply isOrd_ind with (2:=H).
 intros ord oord leo Hrec p typ.
 rewrite !TIF_eq; auto with *.
-2:apply W_Fd_morph; auto with *.
-2:apply Dec_typ with (B:=idx'); trivial.
-2:apply W_Fd'_morph.
+2:{apply W_Fd_morph; auto with *. }
+2:{apply Dec_typ with (B:=idx'); trivial. }
+2:{apply W_Fd'_morph. }
 apply sup_morph; auto with *.
 red; intros o' o'' o'lt eqo.
 unfold W_Fd.

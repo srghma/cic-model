@@ -187,15 +187,48 @@ Qed.
 
 (** Auxiliary result to build recursive function over an Arg' *)
 
-Definition Aenc_lt q q' := exists b, q' == couple b q.
+Definition Aenc_sub q := cond_set (isCouple q) (singl (snd q)).
+Definition Aenc_lt q q' := q ∈ Aenc_sub q'. (*exists b, q' == couple b q.*)
 Definition Aenc_acc q := Acc Aenc_lt q.
+
+Instance Aenc_sub_morph : morph1 Aenc_sub.
+do 2 red; intros.
+unfold Aenc_sub.
+rewrite H; reflexivity.
+Qed.
+
+Lemma Aenc_sub_def q q' : q' ∈ Aenc_sub q <-> exists b, q == couple b q'.
+unfold Aenc_sub.
+rewrite cond_set_ax.
+split; intros.
+*destruct H.
+ exists (fst q). 
+ apply singl_elim in H.
+ rewrite H.
+ assumption.
+*destruct H as (b,eqq). 
+ rewrite eqq.
+ unfold isCouple.
+ rewrite fst_def, snd_def.
+ split;[|reflexivity].
+ apply singl_intro. 
+Qed.
+
+Instance Aenc_ltm : Proper (eq_set ==> eq_set ==> iff) Aenc_lt.
+do 3 red; intros.
+unfold Aenc_lt.
+apply in_set_morph; trivial.
+apply Aenc_sub_morph; trivial.
+Qed.
+
+(*
 
 Instance Aenc_ltm : Proper (eq_set ==> eq_set ==> iff) Aenc_lt.
 do 3 red; intros.
 unfold Aenc_lt.
 apply ex_morph; intro b.
 rewrite H,H0; reflexivity.
-Qed.
+Qed.*)
 
 Instance Aenc_accm : Proper (eq_set ==> iff) Aenc_acc.
 do 2 red; intros.
@@ -210,115 +243,72 @@ pattern a, q; apply Aenc_ind with (a:=a) (q:=q); trivial.
  apply Aenc_accm; trivial.
 
  intros; constructor; intros.
+ apply Aenc_sub_def in H2.
  destruct H2 as (b,h).
  symmetry in h; apply couple_mt_discr in h; contradiction.
 
  intros.
  constructor; intros.
+ apply Aenc_sub_def in H5.
  destruct H5 as (b',h).
  apply couple_injection in h; destruct h as (_,h).
  rewrite <- h; trivial.
 Qed.
 
 Hint Resolve Aenc_accm Aenc_wf : core.
-     
+
 Section DecodePath.
+  
+Let F Frec q a :=
+    L_match q
+            (*q=[]:*)a
+            (*q=[x:y:q']:*)(fun b q' => Frec q' (f a b)).
 
-  Let K aq :=  exists a q, aq == couple a q /\ Aenc_acc q.
+  Definition Dec a(**∈A*) q(**∈Aenc a*) : set(*∈ A*) :=
+    ZFrepl.WFR eq_set Aenc_sub F q a.
 
-  Let R aq aq' := (*Arg'K (snd aq) /\*) Aenc_lt (snd aq) (snd aq').
 
-
-  Let F Frec aq :=
-    L_match (snd aq)
-            (*q=[]:*)(fst aq)
-            (*q=[x:y:q']:*)(fun b q' => Frec (couple (f (fst aq) b) q')).
-
-  Definition Dec a(**∈Arg*) q(**∈Arg' a*) : set(*∈ Arg*) :=
-    WFR R F (couple a q).
-
-  Let Km : Proper (eq_set ==> iff) K.
-do 2 red; intros.
-apply ex_morph; intros a.
-apply ex_morph; intros q.
-rewrite H; reflexivity.
-Qed.
-
-  Let Rm : Proper (eq_set ==> eq_set ==> iff) R.
-unfold R; do 3 red; intros.
-rewrite H,H0; reflexivity.
-Qed.
-
-  Let AccR aq : K aq -> Acc R aq.
-destruct 1 as (x,(y,(qeq,h))); trivial.
-red in h.
-(*apply Acc_incl with (fun aq aq' => Arg'lt (snd aq) (snd aq')).
- red; destruct 1; trivial.*)
-
- apply Acc_inverse_image with (f:=snd).
- rewrite qeq, snd_def; trivial.
-Qed.
-
-  Let Fm : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) F.
-unfold F; do 3 red; intros.
-apply if_prop_morph.
- apply ex_morph; intros b'.
+  Let Fm : Proper ((eq_set ==> eq_set ==> eq_set) ==> eq_set ==> eq_set ==> eq_set) F.
+unfold F; do 4 red; intros.
+apply if_prop_morph; trivial.
+*apply ex_morph; intros b'.
  apply ex_morph; intros q'.
  rewrite H0; reflexivity.
-
- apply H; rewrite H0; reflexivity.
-
- rewrite H0; reflexivity.
+*apply H; rewrite H0; [reflexivity|].
+ rewrite H1; reflexivity.
 Qed.
 
-  Let Fext x g g' :
-    K x ->
-    (forall y y', R y x -> y==y' -> g y == g' y') ->
-    F g x == F g' x.
+  Let Fext q a g g' :
+    (forall q' q'' b b' : set, Aenc_lt q' q -> q' == q'' -> b == b' -> g q' b == g' q'' b') ->
+    F g q a == F g' q a.
 unfold F; intros.
 apply union2_morph; apply cond_set_morph2; intros; auto with *.
-apply H0; auto with *.
-red; rewrite snd_def.
-red in H.
-destruct H as (a,(q,(h,_))).
-destruct H1 as (b',(q',h')).
-rewrite h, snd_def in h'|-*.
-rewrite h',!snd_def.
-exists b'; reflexivity.
+apply H; auto with *.
+apply Aenc_sub_def.
+destruct H0 as (b & q' & e).
+exists b.
+rewrite e, snd_def; reflexivity.
 Qed.
+
+  Hint Resolve Fm Fext : core.
   
-  Let KArg : forall a q, a ∈ A -> q ∈ Aenc a -> K (couple a q).
-red; intros.
-apply Aenc_wf in H0; trivial.
-exists a; exists q; split;[reflexivity|trivial].
-Qed.
-
-  Hint Resolve Km Rm AccR Fm Fext : core.
-
 
   Global Instance Dec_morph : morph2 Dec.
 do 3 red; intros.
-apply WFR_morph_gen2.
- reflexivity.
- apply couple_morph; trivial.
+apply ZFrepl.WFR_morph; auto with *.
+apply Aenc_sub_morph.
 Qed.
 
   Lemma Dec_mt a : a ∈ A -> Dec a empty == a.
 unfold Dec; intros.
-rewrite WFR_eqn_gen; auto.
- unfold F; rewrite L_match_mt.
-  apply fst_def.
-  apply snd_def.
-
-  intros; apply Fext; auto.
-  exists a; exists empty; split;[reflexivity|].
-  apply Aenc_wf with a; trivial.
-  apply Aenc_intro1; trivial.
-
-  apply AccR.
-  apply KArg; trivial.
- apply Aenc_intro1; trivial.
+rewrite ZFrepl.WFR_eqn; auto with *.
+*unfold F; apply L_match_mt; reflexivity.
+*constructor; intros.
+ apply Aenc_sub_def in H0. 
+ destruct H0 as (b,abs).
+ symmetry in abs; apply couple_mt_discr in abs; contradiction.
 Qed.
+
 
 Lemma Dec_cons a b q :
   a ∈ A ->
@@ -327,24 +317,13 @@ Lemma Dec_cons a b q :
   Dec a (couple b q) == Dec (f a b) q.
 intros.
 unfold Dec at 1.
-rewrite WFR_eqn_gen; auto.
- unfold F; rewrite L_match_cons with (b:=b) (q:=q).
-  apply Dec_morph; auto with *.
-  rewrite fst_def; reflexivity.
-
-  clear -fm; do 3 red; intros.
-  apply WFR_morph0.
-  rewrite H,H0; reflexivity.
-
-  apply snd_def.
-
-  intros; apply Fext; trivial.
-  exists a; exists (couple b q);split;[reflexivity|].
-  apply Aenc_wf with a; trivial.
-  apply Aenc_intro2; trivial.
-
- apply AccR.
- apply KArg; trivial.
+rewrite ZFrepl.WFR_eqn; auto with *.
+*unfold F; rewrite L_match_cons with (b:=b) (q:=q); [| |reflexivity].
+ +apply Dec_morph; auto with *.
+ +clear -fm; do 3 red; intros.
+  apply ZFrepl.WFR_morph0; auto with *.
+  rewrite H; reflexivity.
+*apply Aenc_wf with a; trivial.
  apply Aenc_intro2; trivial.
 Qed.
 End DecodePath.
@@ -387,26 +366,25 @@ apply if_prop_morph; auto with *.
 Qed.
 
   Let Fext b x g g' :
-    Aenc_acc x ->
     (forall y y', Aenc_lt y x -> y==y' -> g y == g' y') ->
     F b g x == F b g' x.
 unfold F; intros.
 apply union2_morph; apply cond_set_morph2; intros; auto with *.
  apply couple_morph; [reflexivity|].
- apply H0; auto with *.
- red.
- destruct H1 as (b1,(q1,h)).
+ apply H; auto with *.
+ apply Aenc_sub_def.
+ destruct H0 as (b1,(q1,h)).
  exists b1.
  apply transitivity with (1:=h).
  rewrite h,!snd_def; reflexivity.
 Qed. 
   
-  Definition extln q a : set := WFR Aenc_lt (F a) q.
+  Definition extln q a : set := WFR Aenc_sub (F a) q.
 
 Global Instance extln_morph : Proper (eq_set==>eq_set==>eq_set) extln.
 do 3 red; intros.
 apply WFR_morph; auto with *.
- apply Aenc_ltm.
+apply Aenc_sub_morph.
 Qed.
 
 Lemma extln_cons a b q b' :
@@ -417,19 +395,15 @@ Lemma extln_cons a b q b' :
   extln (couple b q) b' == couple b (extln q b').
 intros.
 unfold extln at 1.
-rewrite WFR_eqn_gen; auto with *.
- apply L_match_cons with (b:=b) (q:=q); auto with *.
+rewrite WFR_eqn; auto with *.
+*apply L_match_cons with (b:=b) (q:=q); auto with *.
  clear; do 3 red; intros.
  rewrite H,H0; reflexivity.
 
- apply Fm; reflexivity.
+*apply Fm; reflexivity.
 
- intros; apply Fext; trivial.
- apply Aenc_wf with a; trivial.
- eapply Aenc_intro2; eauto.
-
- eapply Aenc_wf; eauto.
- eapply Aenc_intro2; eauto.
+*apply Aenc_wf with a; trivial.
+ apply Aenc_intro2; trivial.
 Qed.
 
 Lemma extln_nil a b :
@@ -438,16 +412,12 @@ Lemma extln_nil a b :
   extln empty b == couple b empty.
 intros.
 unfold extln at 1.
-rewrite WFR_eqn_gen; auto with *.
- apply L_match_mt; auto with *.
+rewrite WFR_eqn; auto with *.
+*apply L_match_mt; auto with *.
 
- apply Fm; reflexivity.
+*apply Fm; reflexivity.
 
- intros; apply Fext; trivial.
- eapply Aenc_wf; eauto.
- eapply Aenc_intro1; trivial.
- 
- eapply Aenc_wf; eauto.
+*apply Aenc_wf with a; trivial.
  eapply Aenc_intro1; trivial.
 Qed.
 
@@ -510,26 +480,25 @@ Section UniverseFacts.
   Hypothesis BU : forall a, a ∈ A -> B a ∈ U.
 
   (* ... but [Aenc a] is in U *)
-  Lemma G_Aenc a : a ∈ A -> Aenc a ∈ U.
+  Lemma G_Aenc : forall a, a ∈ A -> Aenc a ∈ U.
 unfold Aenc.
-revert a; elim isOrd_omega using isOrd_ind; intros.
+elim isOrd_omega using isOrd_ind; intros.
 rewrite TIF_eq; auto.
 apply G_sup; trivial.
- do 2 red; intros; apply Lmorph; auto with *.
+*do 2 red; intros.
+ apply Lmorph; [|reflexivity].
  apply TIF_morph; trivial.
-
- apply G_incl with omega; trivial.
-
- intros.
+*apply G_incl with omega; trivial.
+*unfold L; intros.
  apply G_union2; trivial.
   apply G_singl; trivial.
   apply G_trans with omega; auto.
   apply zero_omega.
 
   apply G_sigma; auto.
-   do 2 red; intros.
-   apply TIF_morph; auto with *.
-   apply fm; auto with *.
+  do 2 red; intros.
+  apply TIF_morph; auto with *.
+  apply fm; auto with *.
 Qed.
 
 End UniverseFacts.
@@ -555,23 +524,18 @@ Instance Dec_morph_gen :
 assert (m1 := Aenc_ltm).
 do 4 red; intros.
 unfold Dec.
-apply WFR_morph.
- do 2 red; intros.
- rewrite H2,H3; reflexivity.
+apply ZFrepl.WFR_morph; auto with *.
+*red; intros.
+ apply Aenc_sub_morph; trivial.
 
- do 2 red; intros.
- apply if_prop_morph.
+*do 3 red; intros.
+ apply if_prop_morph; trivial.
   apply ex_morph; intros b'.
   apply ex_morph; intros q'.
   rewrite H3; reflexivity.
 
   apply H2.
-  apply couple_morph.
-   apply H; rewrite H3; reflexivity.
-
    rewrite H3; reflexivity.
-
-  rewrite H3; reflexivity.
-
- rewrite H0,H1; reflexivity.
+   apply H; trivial.
+   rewrite H3; reflexivity.
 Qed.

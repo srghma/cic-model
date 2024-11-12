@@ -1350,7 +1350,7 @@ apply cc_lam_ext; auto with *.
 Qed.
 
      
-Definition WSREC' := WFR R G.
+Definition WSREC' := WFR fsub G.
 
 Global Instance WSREC'_morph0 : morph1 WSREC'.
 apply WFR_morph0.
@@ -1389,7 +1389,7 @@ Lemma WSREC_eqn0' w :
   w ∈ O ->
   WSREC' w == F (fsub w) (λ w ∈ fsub w, WSREC' w) w.
 intros; unfold WSREC' at 1.
-apply WFR_eqn; auto.
+apply WFR_eqn; auto with *.
 Qed.
 
 Lemma Pmono' x y :
@@ -1411,29 +1411,29 @@ Qed.
   w ∈ O ->
   WSREC' w ∈ P (Wf (fsub w)) w.
 intros; unfold WSREC'.
-generalize H; eapply WFR_ind with (x:=w); intros; auto.
- do 3 red; intros.
+generalize H; eapply WFR_ind with (x:=w); intros; auto with *.
+*do 3 red; intros.
  rewrite H0,H1; reflexivity.
-apply f_typ.
- red; intros.
- apply fsub_elim with (3:=H3); auto.
- apply Ktrans; auto.
+*apply f_typ.
+ +red; intros.
+  apply fsub_elim with (3:=H3); auto.
+  apply Ktrans; auto.
 
- apply Kfsub; auto.
- apply KW' in H2; trivial.
-
- apply fsub_Wf_intro; auto.
- apply KW' in H2; trivial.
-
- apply cc_prod_intro; intros.
-  do 2 red; intros; apply WSREC'_morph0; trivial.
-  do 2 red; intros; apply Pm; auto with *.
- apply Pmono'; trivial.
+ +apply Kfsub; auto.
   apply KW' in H2; trivial.
 
-  apply H1; trivial.
-  apply (Ktrans _ KO) in H2; trivial.
-  apply fsub_elim with (3:=H3); trivial.
+ +apply fsub_Wf_intro; auto.
+  apply KW' in H2; trivial.
+
+ +apply cc_prod_intro; intros.
+   do 2 red; intros; apply WSREC'_morph0; trivial.
+   do 2 red; intros; apply Pm; auto with *.
+  apply Pmono'; trivial.
+   apply KW' in H2; trivial.
+
+   apply H1; trivial.
+   apply (Ktrans _ KO) in H2; trivial.
+   apply fsub_elim with (3:=H3); trivial.
 Qed.
 
 Lemma WSREC_typ' w :
@@ -1664,8 +1664,6 @@ Instance WSREC'_morph_gen :
 do 6 red; intros.
 unfold WSREC'.
 apply WFR_morph; trivial.
- do 2 red; intros.
- apply in_set_morph; trivial.
  apply fsub_morph_gen; trivial.
 
  do 2 red; intros.

@@ -239,10 +239,12 @@ unfold NAT_RECT_body.
 intros; apply NATCASE_mt'; trivial.
 Qed.
 
-Let R m n := n == SUCC m.
-Local Instance Rmorph : Proper (eq_set==>eq_set==>iff) R.
-unfold R; do 3 red; intros.
-rewrite H,H0; reflexivity.
+Let R n := subset (cc_bot NAT') (fun m => n == SUCC m).
+Local Instance Rmorph : morph1 R.
+unfold R; do 2 red; intros.
+apply subset_morph; [reflexivity|].
+red; intros.
+rewrite H; reflexivity.
 Qed.
 
 Definition NAT_RECT (f:set) (g:set->set->set) : set->set :=
@@ -284,14 +286,14 @@ Lemma NAT_RECT_mt f g :
   NAT_RECT f g empty == empty.
 unfold NAT_RECT.
 rewrite WFR_eqn_norec; intros.
- apply NATCASE_mt.
+*apply NATCASE_mt.
 
- unfold R; red; intros.
+*unfold R; red; intros.
+ apply subset_elim2 in H; destruct H.
+ symmetry in H0.
+ apply couple_mt_discr in H0; trivial.
 
- symmetry in H.
- apply couple_mt_discr in H; trivial.
-
- rewrite NAT_RECT_body_mt; auto with *.
+*rewrite NAT_RECT_body_mt; auto with *.
  rewrite NAT_RECT_body_mt; auto with *.
 Qed.
 
@@ -301,30 +303,35 @@ unfold NAT_RECT.
 rewrite WFR_eqn_norec; intros.
  apply NATCASE_ZERO.
 
- unfold R; red; intros.
- apply NATf_discr in H; trivial.
+*unfold R; red; intros.
+ apply subset_elim2 in H; destruct H.
+ apply NATf_discr in H0; trivial.
 
- rewrite NAT_RECT_body0; auto with *.
+*rewrite NAT_RECT_body0; auto with *.
  rewrite NAT_RECT_body0; auto with *.
 Qed.
 
 Lemma NATi_acc n o :
   isOrd o ->
   n ∈ cc_bot (TI NATf' o) ->
-  Acc R n.
+  Acc (fun n m => n ∈ R m) n.
 intros oo.
 revert n; elim oo using isOrd_ind; intros.
 apply cc_bot_ax in H2; destruct H2.
  constructor; intros.
  rewrite H2 in H3.
- red in H3; symmetry in H3; apply couple_mt_discr in H3; contradiction.
+ apply subset_elim2 in H3; destruct H3.
+ symmetry in H4.
+ apply couple_mt_discr in H4; contradiction.
 
  apply TI_elim in H2; auto with *.
  destruct H2 as (z,?,?).
  constructor; intros.
- red in H4; rewrite H4 in H3.
+ apply subset_elim2 in H4; destruct H4.
+ rewrite H5 in H3.
  apply SUCC_inv_typ_gen in H3.
  apply H1 with z; auto.
+ rewrite H4; trivial.
 Qed.
 
 Lemma NAT_RECT_SUCC f g n :
@@ -334,16 +341,19 @@ Lemma NAT_RECT_SUCC f g n :
 intros.
 unfold NAT_RECT at 1.
 rewrite WFR_eqn; auto with *.
- fold (NAT_RECT f g).
+*fold (NAT_RECT f g).
  unfold NAT_RECT_body; rewrite NATCASE_SUCC; auto with *.
  intros; apply H; auto with *.
  apply NAT_RECT_m1; trivial.
  
- apply NAT_RECT_body_morph; auto with *.
+*apply NAT_RECT_body_morph; auto with *.
 
- intros; apply NAT_RECT_body_ext; trivial.
-
- apply SUCC_typ' in H0.
+*intros; apply NAT_RECT_body_ext; trivial.
+ intros; apply H1; trivial.
+ apply subset_intro; trivial.
+ apply SUCC_inj in H2.
+ rewrite <- H2; trivial.
+*apply SUCC_typ' in H0.
  apply cc_bot_intro in H0.
  apply NATi_acc in H0; trivial.
 Qed.

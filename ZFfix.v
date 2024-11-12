@@ -456,7 +456,7 @@ apply cond_set_morph.
 Qed.
 
 
-Definition Fix_rec := WFR (fun b a => b ∈ fsub a) G'.
+Definition Fix_rec := WFR fsub G'.
 
 Instance Fix_rec_morph0 : morph1 Fix_rec.
 do 2 red; intros.
@@ -483,9 +483,7 @@ Lemma Fr_eqn : forall a o,
 intros.
 transitivity (G' Fix_rec a).
  unfold Fix_rec.
- apply WFR_eqn_gen; intros.
-  clear; do 3 red; intros; rewrite H,H0; reflexivity. 
-
+ apply WFR_eqn; intros; auto with *.
   apply G'm.
 
   apply G'ext; auto with *.
@@ -523,6 +521,7 @@ apply H.
 Qed.
 
 End Iter.
+Existing Instance Fix_rec_morph0.
 
   Definition F_a g x := osup (fsub x) (fun a => osucc (g a)).
 
@@ -720,16 +719,11 @@ apply cond_set_morph.
 Qed.
 *)
 
-Definition Fix_rec' :=
-  WFR (fun b a => b ∈ Fstages /\ b ∈ fsub a) G''.
+Definition Fix_rec' := WFR fsub G''.
 
 Instance Fix_rec_morph0' : morph1 Fix_rec'.
 do 2 red; intros.
-apply WFR_morph; auto with *.
- do 2 red; intros.
- rewrite H0,H1; reflexivity.
-
- apply G''m.
+apply WFR_morph0; auto with *.
 Qed.
 
 (*
@@ -752,22 +746,16 @@ Lemma Fr_eqn' : forall a o,
 intros.
 transitivity (G'' Fix_rec' a).
  unfold Fix_rec'.
- apply WFR_eqn; intros.
-  do 3 red; intros.
-  rewrite H1,H2; reflexivity. 
+ apply WFR_eqn; intros; auto with *.
   apply G''m.
 
   apply G''ext; auto with *.
-  clear H1; red; intros.
-  apply H2; auto.  
-  split; trivial.
-  apply Fstages_fsub_inv with x; trivial.
 
   revert a H0.
   elim H using isOrd_ind; intros.  
   constructor.
-  destruct 1; trivial.
-  destruct fsub_elim with (2:=H3) (3:=H5) as (z,ltx,tyy0); eauto.
+  intros.
+  destruct fsub_elim with (2:=H3) (3:=H4) as (z,ltx,tyy0); eauto.
 
  unfold G''; apply cond_set_ok.
  apply TI_Fstages in H0; trivial.  
@@ -960,9 +948,9 @@ Instance Fix_rec_morph :
   Proper ((E==>E)==>E==>((E==>E)==>E==>E)==>E==>E) Fix_rec. 
 do 5 red; intros.
 unfold Fix_rec.
-apply WFR_morph; trivial.
- do 2 red; intros.
- apply in_set_morph; trivial.
+apply WFR_morph; auto with *.
+trivial.
+ red; intros.
  apply fsub_morph_gen; trivial.
 
  do 2 red; intros.
@@ -1052,9 +1040,8 @@ apply osup_morph.
  red; intros.
  apply osucc_morph.
  apply WFR_morph; trivial.
-  do 2 red; intros.
-  rewrite <- H2.
-  apply in_set_morph; auto with *.
+  red; intros.
+  rewrite <- H1.
   apply fsub_indep.
 
   do 2 red; intros.

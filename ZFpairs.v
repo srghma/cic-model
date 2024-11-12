@@ -126,6 +126,19 @@ apply empty_ax with (x:=singl a).
 rewrite <- H; apply pair_intro1.
 Qed.
 
+Definition isCouple c := c == couple (fst c) (snd c).
+
+Global Instance isCouple_morph : Proper (eq_set==>iff) isCouple.
+do 2 red; intros; unfold isCouple.
+rewrite H; reflexivity.
+Qed.
+
+Lemma isCouple_couple a b : isCouple (couple a b).
+red.
+rewrite fst_def, snd_def; reflexivity.
+Qed.
+Hint Resolve isCouple_couple : core.
+
 (** 2- typing *)
 
 Definition prodcart A B :=

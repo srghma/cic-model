@@ -166,6 +166,7 @@ Section TransfiniteFunction.
 Variable F : (set->set)->set->set.
 Hypothesis Fm : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) F.
 
+(*
 Let K ox := exists o x, ox == couple o x /\ isOrd o.
 Let Km : Proper (eq_set==>iff) K.
 unfold K; do 2 red; intros.
@@ -194,66 +195,56 @@ apply H1 with o' x'; trivial.
 rewrite eqox,fst_def in lt; trivial.
 Qed.
 Hint Resolve AccR : core.
+ *)
+  Let AccR o : isOrd o -> Acc in_set o.
+intros.
+elim H using isOrd_ind; intros.
+constructor; trivial.
+Qed.
 
-   Let G f ox :=
-     F (fun y => lim (fst ox) (fun o' => f (couple o' y))) (snd ox).
-Let Gm : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) G.
-unfold G; do 3 red; intros.
-apply Fm.
- red; intros.
- apply lim_morph.
-  rewrite H0; reflexivity.
+   Let G f o x :=
+     F (fun y => lim o (fun o' => f o' y)) x.
 
-  red; intros.
-  apply H.
-  rewrite H1,H2; reflexivity.
-
- rewrite H0; reflexivity.
+   Let Gm : Proper ((eq_set==>eq_set==>eq_set)==>eq_set==>eq_set==>eq_set) G.
+unfold G; do 4 red; intros.
+apply Fm; trivial.
+red; intros.
+apply lim_morph; trivial.
+red; intros.
+apply H; trivial.
 Qed.
 Hint Resolve Gm : core.
 
-  Definition TRF o x := WFR R G (couple o x).
+  Definition TRF o x := ZFrepl.WFR eq_set (fun o=>o) G o x.
 
   Global Instance TRF_morph0 : morph2 TRF.
-do 3 red; intros; apply WFR_morph0.
-rewrite H,H0; reflexivity.
+do 3 red; intros; apply ZFrepl.WFR_morph0; trivial.
 Qed.
 
   Lemma TRF_eqn o x : isOrd o ->
        TRF o x == F (fun y => lim o (fun o' => TRF o' y)) x.
 intros.
 unfold TRF.
-rewrite WFR_eqn_gen; auto with *.
- unfold G.
- apply Fm;[|apply snd_def].
+rewrite ZFrepl.WFR_eqn; auto with *.
+*unfold G.
+ apply Fm;[|reflexivity].
  red; intros.
- apply lim_ext.
-  rewrite fst_def; trivial.
-  apply fst_def. 
-  red; intros.
-  rewrite fst_def in H1.
-  apply WFR_morph0.
-  rewrite H0,H2; reflexivity.
-
-  intros.
-  unfold G.  
-  apply Fm; auto with *.
-  red; intros.
-  apply lim_ext; auto with *.
-   rewrite fst_def; trivial.
-  red; intros.
-  apply H0.   
-   red.
-   exists x1; exists x0; auto with *.
-
-   apply couple_morph; trivial.
-
- apply AccR.
- exists o; exists x; auto with *.
+ apply lim_ext; auto with *.
+ red; intros.
+ apply ZFrepl.WFR_morph0; trivial.
+*intros.
+ unfold G.  
+ apply Fm; auto with *.
+ red; intros.
+ apply lim_ext; auto with *.
+ red; auto.
 Qed.
 
-(** Properties when the domain (T) of the function increases with the ordinal *)
+
+(* The domain of the function *)
 Variable T : set -> set.
+
+(** Properties when the domain (T) of the function increases with the ordinal *)
 Variable Tcont : forall o z, isOrd o ->
   (z ∈ T o <-> exists2 o', o' ∈ o & z ∈ T (osucc o')).
 Hypothesis Fext : forall o f f',
