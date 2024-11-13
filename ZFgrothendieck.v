@@ -592,60 +592,41 @@ split; intros.
  apply clos_repl; trivial; intros; eapply inter_elim; eauto.
 Qed.
 
-Lemma grot_intersection : forall (P:set->Prop) x,
-  grot_univ x -> P x ->
-  grot_univ (subset x (fun y => forall U, grot_univ U -> P U -> y ∈ U)).
-intros.
+(* The intersection of all Grothendieck universes satisfying P given
+   an superset UU (containing at least one universe satisfying P) *)
+Definition intersection_grot (UU:set) (P:set->Prop) :=
+  subset UU (fun y => forall V, grot_univ V -> P V -> y ∈ V).
+
+Lemma grot_intersection (P:set->Prop) UU :
+  (exists U, grot_univ U /\ P U /\ U ⊆ UU) ->
+  grot_univ (intersection_grot UU P).
+intros (U & gU & pU & Uincl).
+assert (Vdef : forall z, z ∈ intersection_grot UU P <-> forall V, grot_univ V -> P V -> z ∈ V).
+{unfold intersection_grot; intros.
+ split; intros. 
+ *destruct subset_elim2 with (1:=H) as (z',eqz,?); clear H.
+  rewrite eqz; auto.
+ *apply subset_intro; [|auto].
+  apply Uincl; auto. }
 split; intros.
-*apply subset_intro; intros.
-  apply G_trans with x0; trivial.
-  apply subset_elim1 with (1:=H2).
-
-  elim subset_elim2 with (1:=H2); intros.
-  apply G_trans with x0; auto.
-  rewrite H5; auto.
-
-*apply subset_intro; intros.
-  apply G_pair; trivial.
-   apply subset_elim1 with (1:=H1).
-   apply subset_elim1 with (1:=H2).
-
-  elim subset_elim2 with (1:=H1); intros.
-  elim subset_elim2 with (1:=H2); intros.
-  rewrite H5; rewrite H7.
-  apply G_pair; auto.
-   
-*apply subset_intro; intros.
-  apply G_power; trivial.
-  apply subset_elim1 with (1:=H1).
-
-  elim subset_elim2 with (1:=H1); intros.
-  rewrite H4.
-  apply G_power; auto.
-
-*apply subset_intro; intros.
-  apply G_union; trivial.
-  apply subset_elim1 with (1:=H1).
-
-  elim subset_elim2 with (1:=H1); intros.
-  rewrite H4.
-  apply G_union; auto.
-
-*apply subset_intro; intros.
-  apply G_repl_hidden; intros; trivial.
-   apply subset_elim1 with (1:=H2).
-   apply subset_elim1 with (1:=H3 _ _ H4 H5).
-
-  apply G_repl_hidden; intros; auto.
-   elim subset_elim2 with (1:=H2); intros.
-   rewrite H6; auto.
-
-   elim subset_elim2 with (1:=H3 _ _ H6 H7); intros.
-   rewrite H8; auto.
+*rewrite Vdef in H0|-*; intros.
+ apply G_trans with x; auto.
+*rewrite Vdef in H,H0|-*; intros.
+ apply G_pair; auto.
+*rewrite Vdef in H|-*; intros.
+ apply G_power; auto.
+*rewrite Vdef in H|-*; intros.
+ apply G_union; auto.
+*rewrite Vdef in H0|-*; intros.
+ assert (RV := fun x y tyx rxy => proj1 (Vdef y) (H1 x y tyx rxy)); clear H1.
+ apply G_repl_hidden; eauto.
 Qed.
+
 
 (** Successor *)
 
+(** [y] is the the successor of [x]
+    if it the least Grothendieck universe of which [x] is an element *)
 Definition grot_succ_pred x y :=
   grot_univ y /\ x ∈ y /\ forall U, grot_univ U -> x ∈ U -> y ⊆ U.
 
@@ -659,6 +640,42 @@ apply fa_morph; intros U.
 rewrite H; rewrite H0; reflexivity.
 Qed.
 
+(** Build the successor given an upper bound *)
+Definition grot_succ_ub UU x := intersection_grot UU (fun U => x ∈ U).
+
+Instance grot_succ_ub_morph : morph2 grot_succ_ub.
+do 3 red; intros; apply subset_morph; trivial.
+red; intros.
+apply fa_morph; intros z.
+rewrite H0; reflexivity.
+Qed.
+
+Lemma grot_succ_ub_sound UU x :
+  (exists U, grot_univ U /\ x ∈ U /\ U ⊆ UU) ->
+  grot_succ_pred x (grot_succ_ub UU x).
+intros has_ub.
+destruct (has_ub) as (U&gU&xin&ub).
+split;[|split]; intros.
+*apply grot_intersection; trivial.
+
+*apply subset_intro; auto.
+
+*red; intros.
+ unfold grot_succ_ub, intersection_grot in H1;
+   rewrite subset_ax in H1; destruct H1 as (_,(z',eqz,?)).
+ rewrite eqz; auto.
+Qed.
+
+
+(** The Tarski-Grothendieck set theory *)
+Definition grothendieck := forall x, exists2 U, grot_univ U & x ∈ U.
+
+
+
+(* Using uchoice: no need for an approximation *)
+
+Module WithUChoice.
+  
 Definition grot_succ U := ZFrepl.uchoice (grot_succ_pred U).
 
 Instance grot_succ_morph : morph1 grot_succ.
@@ -692,28 +709,6 @@ Qed.
 Definition grot_succ_U U x :=
   subset U (fun y => forall V, grot_univ V -> x ∈ V -> y ∈ V).
 
-Instance grot_succ_U_morph : morph2 grot_succ_U.
-do 3 red; intros; apply subset_morph; trivial.
-red; intros.
-apply fa_morph; intros z.
-rewrite H0; reflexivity.
-Qed.
-
-(** Build the successor from a larger universe *)
-Lemma grot_succ_from_U U x :
-  grot_univ U ->
-  x ∈ U ->
-  grot_succ_pred x (grot_succ_U U x).
-split;[|split]; intros.
- apply grot_intersection; trivial.
-
- apply subset_intro; auto.
-
- red; intros.
- unfold grot_succ_U in H3; rewrite subset_ax in H3; destruct H3 as (?,(z',eqz,?)).
- rewrite eqz; auto.
-Qed.
-
 Lemma grot_succ_ex x y :
   grot_succ_pred x y ->
   uchoice_pred (grot_succ_pred x).
@@ -746,15 +741,14 @@ Lemma grot_succ_U_lst U x :
   x ∈ U ->
   grot_succ x ⊆ U.
 intros.
-specialize grot_succ_from_U with (1:=H)(2:=H0); intro.
+assert (grot_succ_pred x (grot_succ_ub U x)).
+{apply grot_succ_ub_sound; eauto with *. }
 apply grot_succ_ex in H1.
 apply ZFrepl.uchoice_def in H1.
 destruct H1 as (_,(_,?)); auto.
 Qed.
 
 (** The Tarski-Grothendieck set theory *)
-
-Definition grothendieck := forall x, exists2 U, grot_univ U & x ∈ U.
 
 Section TarskiGrothendieck.
 
@@ -763,8 +757,9 @@ Variable gr : grothendieck.
 Lemma grot_inter_unique : forall x, uchoice_pred (grot_succ_pred x).
 intros.
 destruct (gr x) as (U, gU, xU).
-specialize grot_succ_from_U with (1:=gU) (2:=xU); intro.
-apply grot_succ_ex in H; trivial.
+assert (grot_succ_pred x (grot_succ_ub U x)).
+{apply grot_succ_ub_sound; eauto with *. }
+apply WithUChoice.grot_succ_ex in H; trivial.
 Qed.
 
 Lemma grot_succ_typ : forall x, grot_univ (grot_succ x).
@@ -780,3 +775,6 @@ apply grot_inter_unique.
 Qed.
 
 End TarskiGrothendieck.
+
+End WithUChoice.
+

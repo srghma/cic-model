@@ -188,7 +188,7 @@ Qed.
 (** Auxiliary result to build recursive function over an Arg' *)
 
 Definition Aenc_sub q := cond_set (isCouple q) (singl (snd q)).
-Definition Aenc_lt q q' := q ∈ Aenc_sub q'. (*exists b, q' == couple b q.*)
+Definition Aenc_lt q q' := q ∈ Aenc_sub q'.
 Definition Aenc_acc q := Acc Aenc_lt q.
 
 Instance Aenc_sub_morph : morph1 Aenc_sub.
@@ -220,15 +220,6 @@ unfold Aenc_lt.
 apply in_set_morph; trivial.
 apply Aenc_sub_morph; trivial.
 Qed.
-
-(*
-
-Instance Aenc_ltm : Proper (eq_set ==> eq_set ==> iff) Aenc_lt.
-do 3 red; intros.
-unfold Aenc_lt.
-apply ex_morph; intro b.
-rewrite H,H0; reflexivity.
-Qed.*)
 
 Instance Aenc_accm : Proper (eq_set ==> iff) Aenc_acc.
 do 2 red; intros.

@@ -56,10 +56,7 @@ Qed.
 Lemma cumul_Prop : forall e, sub_typ e prop (type 0).
 red; simpl; intros.
 red; intros.
-apply G_trans with props; trivial.
- apply (ecc_grot 0).
-
- apply (ecc_in1 0).
+apply ecc_incl_prop; trivial.
 Qed.
 
 Lemma typ_prod2 : forall e n T U,
@@ -96,12 +93,7 @@ Definition type (n:nat) := cst (ecc (S n)).
 
 Lemma typ_Prop : forall e, typ e prop (type 0).
 red; intros; simpl.
-apply G_trans with (grot_succ (ZFcoc.props)); auto.
- apply (ecc_grot 1).
-
- apply (ecc_in1 0).
-
- apply (ecc_in2 0).
+apply (ecc_in1 1).
 Qed.
 
 Lemma typ_Type : forall e n, typ e (type n) (type (S n)).
@@ -118,14 +110,8 @@ Qed.
 Lemma cumul_Prop : forall e, sub_typ e prop (type 0).
 red; simpl; intros.
 red; intros.
-apply G_trans with ZFcoc.props; trivial.
- apply (ecc_grot 1).
-apply G_trans with (grot_succ ZFcoc.props); trivial.
- apply (ecc_grot 1).
-
- apply (ecc_in1 0).
-
- apply (ecc_in2 0).
+apply (ecc_incl 0).
+apply ecc_incl_prop; trivial.
 Qed.
 
 Lemma typ_prod2 : forall e n T U,

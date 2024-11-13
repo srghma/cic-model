@@ -1,6 +1,20 @@
 Require Import ZF ZFpairs ZFnats ZFgrothendieck.
 Require Import ZFrelations ZFcoc.
 
+
+(** Statement that there exists a set containing infinitely many Grothendieck universes *)
+
+(** Actually, we should not need the existence of a set containing
+    infinitely many Grothendieck universes, but only the existence of a meta-function
+    ecc : nat -> set which is equivalent to introducing infinitely many symbols (one
+    for each universe).
+*)
+Definition infinitely_many_universes :=
+   { U:set | empty ∈ U /\ forall x, x ∈ U -> exists V, V ∈ U /\ grot_univ V /\ x ∈ V }.
+
+
+Section S.
+Import WithUChoice.
 Lemma grot_succ_hf : grot_succ empty == grot_succ props.
   apply ZFrepl.uchoice_morph_raw.
   red; intros.
@@ -28,17 +42,6 @@ Lemma grot_succ_hf : grot_succ empty == grot_succ props.
     apply G_power; trivial.
     apply G_singl; trivial.
 Qed.
-
-(** Statement that there exists a set containing infinitely many Grothendieck universes *)
-
-(** Actually, we should not need the existence of a set containing
-    infinitely many Grothendieck universes, but only the existence of a meta-function
-    ecc : nat -> set which is equivalent to introducing infinitely many symbols (one
-    for each universe).
-*)
-Definition infinitely_many_universes := { U:set | empty ∈ U /\ forall
-x, x ∈ U -> exists V, V ∈ U /\ grot_univ V /\ x ∈ V }.
-
 
 (** In Tarski-Grothendieck set theory, there exists an infinite sequence of universes *)
 Lemma tg_implies_ecc : grothendieck -> infinitely_many_universes.
@@ -70,6 +73,8 @@ split; intros.
   apply ZFord.TI_intro with o; auto with *.
 Qed.
 
+End S.
+
 (*
 (* We are in Tarski-Grothendieck set theory: *)
 Axiom gr : grothendieck.
@@ -77,77 +82,76 @@ Axiom gr : grothendieck.
 
 Axiom infinite_seq_of_grot_univ : infinitely_many_universes.
 
-Fixpoint ecc (n:nat) : set :=
-  match n with
-  | 0 => grot_succ props (* grot_succ props is included in HF *)
-  | S k => grot_succ (ecc k)
-  end.
+Definition UU := proj1_sig infinite_seq_of_grot_univ.
 
+Definition ecc_succ X := grot_succ_ub (union UU) X.
 
-Lemma prop_univ : ZFrepl.uchoice_pred (grot_succ_pred empty).
-destruct (proj2_sig infinite_seq_of_grot_univ) as (mtU, nextU).
-apply nextU in mtU; destruct mtU as (V,(VU,(gV,xV))).
-specialize grot_succ_from_U with (1:=gV) (2:=xV); intro.
-apply grot_succ_ex in H; trivial.
+Lemma ecc_succ_bounded X U :
+  X ⊆ U ->
+  grot_univ U ->
+  U ∈ UU ->
+  X ∈ ecc_succ X /\
+  grot_univ (ecc_succ X) /\
+  exists V, grot_univ V /\ ecc_succ X ⊆ V /\ V ∈ UU.
+destruct (proj2_sig infinite_seq_of_grot_univ) as (u0,uS).
+intros.
+destruct uS with (1:=H1) as (V & ? & ? & ?).  
+destruct grot_succ_ub_sound with (union UU) X as (?&?&?).
+{exists V; split;[trivial|split].
+  apply G_incl with U; trivial.
+  red; intros; apply union_ax; exists V; trivial. }
+split;[trivial|].
+split;[trivial|].
+exists V; split; [trivial|split;[|trivial]].
+apply H7; trivial.
+apply G_incl with U; trivial.
 Qed.
 
-Lemma prop_grot : grot_univ (grot_succ props).
-rewrite <- grot_succ_hf.
-apply grot_succ_U_typ.
-apply prop_univ.
-Qed.
 
-Lemma prop_in : props ∈ grot_succ props.
-assert (h := prop_grot).
+Lemma prop_grot : grot_univ (ecc_succ empty).
+apply ecc_succ_bounded with empty; auto with *.
+ apply grot_empty.
+ apply (proj2_sig infinite_seq_of_grot_univ).
+Qed.
+Hint Resolve prop_grot : core.
+
+Lemma prop_in : props ∈ ecc_succ empty.
+assert (empty ∈ ecc_succ empty).
+{apply ecc_succ_bounded with empty; auto with *.
+  apply grot_empty.
+  apply (proj2_sig infinite_seq_of_grot_univ). }
 apply G_power; trivial.
 apply G_singl; trivial.
-rewrite <- grot_succ_hf.
-apply grot_succ_U_in.
-apply prop_univ.
 Qed.
 
-Definition U := proj1_sig infinite_seq_of_grot_univ.
 
-Lemma grot_ecc_U : forall n, exists V, V ∈ U /\ grot_univ V /\ ecc n ∈ V.
-destruct (proj2_sig infinite_seq_of_grot_univ) as (mtU, nextU); fold U in *.
-induction n; simpl; intros.
- destruct nextU with (1:=mtU) as (V,(VU,(gV,nV))).
- destruct nextU with (1:=VU) as (V',(VU',(gV',nV'))).
- exists V'; split; trivial.
- split; trivial.
- apply G_incl with V; trivial.
- rewrite <- grot_succ_hf.
- apply grot_succ_U_lst; trivial.
+Fixpoint ecc n :=
+  match n with
+  | 0 => ecc_succ empty
+  | S k => ecc_succ (ecc k)
+  end.
 
- destruct IHn as (V,(VU,(gV,nV))).
- destruct nextU with (1:=VU) as (V',(VU',(gV',nV'))).
- exists V'; split; trivial.
- split; trivial.
- apply G_incl with V; trivial.
- apply grot_succ_U_lst; trivial.
+Lemma ecc_bounded n :
+  grot_univ (ecc n) /\
+  exists V, grot_univ V /\ ecc n ⊆ V /\ V ∈ UU.
+destruct (proj2_sig infinite_seq_of_grot_univ) as (u0,uS).
+induction n; simpl.
+*destruct uS with (1:=u0) as (U & ? & ? & ?).
+ apply ecc_succ_bounded with (U:=empty); auto with *.
+ apply grot_empty.
+*destruct IHn as (?,(V&?&?&?)).
+ apply ecc_succ_bounded with (U:=V); auto with *.
 Qed.
 
-Lemma ecc_defined : forall n, ZFrepl.uchoice_pred (grot_succ_pred (ecc n)).
-intros.
-destruct grot_ecc_U with n as (V,(_,(gV,nV))).
-specialize grot_succ_from_U with (1:=gV) (2:=nV); intro.
-apply grot_succ_ex in H; trivial.
-Qed.
-
-Lemma ecc_grot : forall n, grot_univ (ecc n).
-intros.
-destruct n; simpl.
- apply prop_grot.
-
- apply grot_succ_U_typ.
- apply ecc_defined.
+Lemma ecc_grot n : grot_univ (ecc n).
+apply ecc_bounded.
 Qed.
 Hint Resolve ecc_grot : core.
 
 Lemma ecc_in2 : forall n, ecc n ∈ ecc (S n).
 simpl; intros.
-apply grot_succ_U_in.
-apply ecc_defined.
+destruct (ecc_bounded n) as (_,(V&?&?&?)).
+apply ecc_succ_bounded with V; trivial.
 Qed.
 
 Lemma ecc_in1 : forall n, props ∈ ecc n.
@@ -160,6 +164,7 @@ induction n; simpl; intros.
   apply ecc_in2.
 Qed.
 
+(* Derived results *)
 Lemma ecc_incl : forall n x, x ∈ ecc n -> x ∈ ecc (S n).
 simpl; intros.
 apply G_trans with (ecc n); trivial.
@@ -177,9 +182,7 @@ Qed.
 Lemma ecc_incl_prop : forall x, x ∈ props -> x ∈ ecc 0.
 simpl; intros.
 apply G_trans with props; trivial.
- apply (ecc_grot 0).
-
- apply (ecc_in1 0).
+apply prop_in.
 Qed.
 
 Lemma ecc_prod : forall n X Y,
