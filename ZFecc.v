@@ -217,59 +217,28 @@ apply G_trans with ZFcoc.props; auto.
 apply ecc_in1.
 Qed.
 
-(* ecc 0 is the set of hereditarily finite sets, so we need to skip it. *)
-Lemma omega_incl_ecc n : ZFord.omega ⊆ ecc n.
+(* ecc 0 is the set of hereditarily finite sets, so it contains all finite ordinals,
+   but omega is in ecc 1 *)
+Lemma omega_incl_ecc : ZFord.omega ⊆ ecc_succ empty.
 red; intros.
 unfold ZFord.omega, ZFord.ord_sup in H.
-rewrite sup_ax in H.
- destruct H.
- rewrite ZFrepl.uchoice_ax in H0.
-  destruct H0.
-  destruct H0.
-  rewrite <- H2 in H1.
-  apply G_trans with (ZFord.nat2ordset x1); trivial.
-  elim x1; intros.
-   apply G_incl with ZFcoc.props; trivial.
-    apply ecc_in1.
-
-   apply G_subset; trivial.
-   apply G_power; auto.
-
-  (* Fch *)
-  split;[|split]; intros.
- revert H2; apply ex2_morph; red; intros; auto with *.
- rewrite H1; reflexivity.
-
- elim H using ZFnats.N_ind; intros.
-  revert H3; apply ex_morph.
-  red; intros.
-  apply ex2_morph; red; intros; auto with *.
-  rewrite H2; reflexivity.
-
-  exists (ZFord.nat2ordset 0); exists 0; simpl; auto with *.
-
-  destruct H2 as (y,(m,?,?)).
-  exists (ZFord.nat2ordset (S m)); exists (S m); simpl; auto with *.
-  apply ZFnats.succ_morph; trivial.
-
- destruct H1; destruct H2.
- rewrite <- H3; rewrite <- H4; rewrite H1 in H2; apply ZFnats.nat2set_inj in H2.
- rewrite H2; reflexivity.
-
- (* Fm *)
-do 2 red; intros.
-apply ZFrepl.uchoice_morph_raw.
-red; intros.
-apply ex2_morph.
- red; intros.
- rewrite H1; reflexivity.
-
- red; intros.
- rewrite H2; reflexivity.
+rewrite sup_ax in H; [|apply ZFord.omega_aux_m].
+destruct H as (n, tyn, tyz).
+apply G_trans with (2:=tyz); trivial.
+clear tyz.
+elim tyn using N_ind; intros.
+*rewrite <- H0; auto.
+*rewrite natrec_0.
+ apply (empty_in_ecc 0).
+*rewrite natrec_S; trivial.
+ 2:do 2 red; intros; apply ZFord.osucc_morph; trivial.
+ apply G_subset; auto.
+ apply G_power; auto.
 Qed.
 
 Lemma omega_in_ecc n : ZFord.omega ∈ ecc (S n).
-apply G_incl with (ecc n); auto.
+apply G_incl with (ecc 0); auto.
+ apply ecc_incl_le with 1; [auto with arith|].
  apply ecc_in2.
 
  apply omega_incl_ecc.

@@ -28,6 +28,9 @@ Qed.
 Instance LAMf_morph : Proper (eq_set ==> eq_set) LAMf.
 apply Fmono_morph; apply LAMf_mono.
 Qed.
+
+  Hint Resolve LAMf_mono LAMf_morph : core.
+  
   Definition Var n := couple zero n.
   Definition Cst x := couple (succ zero) x.
   Definition App a b := couple (succ (succ zero)) (couple a b).
@@ -101,76 +104,42 @@ apply couple_intro;[apply singl_intro|trivial].
 Qed.
 
 
-
-  Definition Lamn n := TI LAMf (nat2ordset n).
-
-  Lemma Lamn_initial : Lamn 0 == empty.
-unfold Lamn.
-apply TI_initial; trivial with *.
-Qed.
-    
-  Lemma Lamn_incl_succ : forall k, Lamn k ⊆ Lamn (S k).
-unfold Lamn; simpl; intros.
-apply TI_incl; auto with *.
-Qed.
-
-  Lemma Lamn_eq : forall k, Lamn (S k) == LAMf (Lamn k).
-unfold Lamn; simpl; intros.
-apply TI_mono_succ; auto with *.
-Qed.
-
-  Lemma Lamn_incl : forall k k', (k <= k')%nat -> Lamn k ⊆ Lamn k'.
-induction 1; intros.
- red; auto.
- red; intros.
- apply (Lamn_incl_succ m z); auto.
-Qed.
-
   Definition Lambda := TI LAMf omega.
 
-  Lemma Lambda_intro : forall k, Lamn k ⊆ Lambda.
-unfold Lambda, Lamn; intros.
-apply TI_incl; auto with *.
-apply isOrd_sup_intro with (S k); simpl; auto.
-apply lt_osucc; auto.
-Qed.
-
-  Lemma Lambda_elim : forall x,
-    x ∈ Lambda -> exists k, x ∈ Lamn k.
-unfold Lambda, Lamn; intros.
-apply TI_elim in H; auto with *.
-destruct H.
-apply isOrd_sup_elim in H; destruct H.
-exists x1.
-apply TI_intro with x0; auto with *.
-Qed.
-
-  Lemma Lamn_case : forall k (P : set -> Prop),
-    Proper (eq_set ==> iff) P ->
-    (forall n, n ∈ N -> P (Var n)) ->
-    (forall x, x ∈ A -> P (Cst x)) ->
-    (forall a b k', (k' < k)%nat -> a ∈ Lamn k' -> b ∈ Lamn k' -> P (App a b)) ->
-    (forall a k', (k' < k)%nat -> a ∈ Lamn k' -> P (Abs a)) ->
-    forall a, a ∈ Lamn k -> P a.
-destruct k; intros.
- rewrite Lamn_initial in H4.
- elim empty_ax with (1:=H4).
-
- rewrite Lamn_eq in H4.
- elim H4 using LAMf_ind; eauto.
-Qed.
-
-
-  Lemma Lambda_fix : forall (P:set->Prop),
-    (forall k,
-     (forall k' x, (k' < k)%nat -> x ∈ Lamn k' -> P x) ->
-     (forall x, x ∈ Lamn k -> P x)) ->
-    forall x, x ∈ Lambda -> P x.
-intros.
-apply Lambda_elim in H0; destruct H0.
-revert x H0.
-elim (lt_wf x0); intros.
-eauto.
+  Lemma Lambda_eqn : Lambda == LAMf Lambda.
+apply eq_intro; intros.
+*unfold Lambda.
+ rewrite <- TI_mono_succ; auto.
+ revert H; apply TI_incl; auto.
+*elim H using LAMf_ind; intros.
+ +do 2 red; intros.
+  rewrite H0; reflexivity.
+ +apply TI_intro with (osucc zero); auto.
+  apply Var_typ; trivial.
+ +apply TI_intro with (osucc zero); auto.
+  apply Cst_typ; trivial.
+ +apply TI_elim in H0; auto.
+  destruct H0 as (o1,tyo1,tya).  
+  assert (oo1 : isOrd o1) by eauto using isOrd_inv.
+  apply TI_elim in H1; auto.
+  destruct H1 as (o2,tyo2,tyb).  
+  assert (oo2 : isOrd o2) by eauto using isOrd_inv.
+  assert (oo : isOrd(osucc (o1 ⊔ o2))) by auto using isOrd_osup2.
+  rewrite <- TI_mono_succ in tya,tyb; eauto using isOrd_inv.
+  apply TI_intro with (osucc (o1 ⊔ o2)); auto.
+   apply osucc_omega.
+   apply osup2_lt; trivial.
+  apply App_typ; trivial.
+  revert tya; apply TI_mono; auto with *.
+  apply osucc_mono; auto using isOrd_osup2, osup2_incl1.
+  revert tyb; apply TI_mono; auto with *.
+  apply osucc_mono; auto using isOrd_osup2, osup2_incl2.
+ +apply TI_elim in H0; auto.
+  destruct H0 as (o,tyo,tyl).  
+  apply TI_intro with (osucc o); auto.
+  apply Abs_typ; trivial.
+  rewrite TI_mono_succ; auto.
+  apply isOrd_inv with omega; trivial.  
 Qed.
 
   Lemma Lambda_ind : forall P : set -> Prop,
@@ -181,49 +150,20 @@ Qed.
     (forall a, a ∈ Lambda -> P a -> P (Abs a)) ->
     forall a, a ∈ Lambda -> P a.
 intros.
-elim H4 using Lambda_fix; intros.
-elim H6 using Lamn_case; intros; eauto.
- apply H2; eauto.
-  apply Lambda_intro in H8; trivial.
-  apply Lambda_intro in H9; trivial.
- apply H3; eauto.
-  apply Lambda_intro in H8; trivial.
-Qed.
-
-  Lemma Lambda_eqn : Lambda == LAMf Lambda.
-apply eq_intro; intros.
- apply Lambda_elim in H; destruct H.
- apply Lamn_incl_succ in H.
- rewrite Lamn_eq in H.
- eapply LAMf_mono with (Lamn x); trivial.
- apply Lambda_intro.
-
- elim H using LAMf_ind; intros.
-  do 2 red; intros.
-  rewrite H0; reflexivity.
-
-  apply Lambda_intro with 1; rewrite Lamn_eq.
-  apply Var_typ; trivial.
-
-  apply Lambda_intro with 1; rewrite Lamn_eq.
-  apply Cst_typ; trivial.
-
-  apply Lambda_elim in H0; destruct H0 as (k,H0).
-  apply Lambda_elim in H1; destruct H1 as (k',H1).
-  destruct (le_gt_dec k k').
-   assert (Lamn k ⊆ Lamn k').
-    apply Lamn_incl; trivial.
-   apply Lambda_intro with (S k'); rewrite Lamn_eq.
-   apply App_typ; auto.
-
-   assert (Lamn k' ⊆ Lamn k).
-    apply Lamn_incl; auto with arith.
-   apply Lambda_intro with (S k); rewrite Lamn_eq.
-   apply App_typ; auto.
-
-  apply Lambda_elim in H0; destruct H0 as (k,H0).
-  apply Lambda_intro with (S k); rewrite Lamn_eq.
-  apply Abs_typ; auto.
+revert a H4.
+unfold Lambda.
+elim isOrd_omega using isOrd_ind; intros.
+apply TI_elim in H7; auto.
+destruct H7 as (o,oo,tya).
+elim tya using LAMf_ind; intros; auto.
+*apply H2; eauto.
+ revert H7; apply TI_incl; auto.
+ apply H5; trivial.
+ revert H8; apply TI_incl; auto.
+ apply H5; trivial.
+*apply H3; eauto.
+ revert H7; apply TI_incl; auto.
+ apply H5; trivial.
 Qed.
 
   Lemma Var_typ0 : forall n,

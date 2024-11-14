@@ -139,9 +139,12 @@ GenModel.vos GenModel.vok GenModel.required_vos: GenModel.v lib/basic.vos lib/Va
 ModelCC_em.vo ModelCC_em.glob ModelCC_em.v.beautified ModelCC_em.required_vo: ModelCC_em.v lib/basic.vo lib/Sublogic.vo Models.vo GenModelSyntax.vo ZF.vo ZFcoc.vo constructions/Term.vo constructions/Env.vo constructions/TypeJudge.vo template/Library.v
 ModelCC_em.vio: ModelCC_em.v lib/basic.vio lib/Sublogic.vio Models.vio GenModelSyntax.vio ZF.vio ZFcoc.vio constructions/Term.vio constructions/Env.vio constructions/TypeJudge.vio template/Library.v
 ModelCC_em.vos ModelCC_em.vok ModelCC_em.required_vos: ModelCC_em.v lib/basic.vos lib/Sublogic.vos Models.vos GenModelSyntax.vos ZF.vos ZFcoc.vos constructions/Term.vos constructions/Env.vos constructions/TypeJudge.vos template/Library.v
-ModelCC.vo ModelCC.glob ModelCC.v.beautified ModelCC.required_vo: ModelCC.v lib/basic.vo lib/Sublogic.vo Models.vo GenModelSyntax.vo ZF.vo ZFrelations.vo ZFcoc.vo ModelZF.vo ZFrepl.vo constructions/Term.vo constructions/Env.vo constructions/TypeJudge.vo template/Library.v
-ModelCC.vio: ModelCC.v lib/basic.vio lib/Sublogic.vio Models.vio GenModelSyntax.vio ZF.vio ZFrelations.vio ZFcoc.vio ModelZF.vio ZFrepl.vio constructions/Term.vio constructions/Env.vio constructions/TypeJudge.vio template/Library.v
-ModelCC.vos ModelCC.vok ModelCC.required_vos: ModelCC.v lib/basic.vos lib/Sublogic.vos Models.vos GenModelSyntax.vos ZF.vos ZFrelations.vos ZFcoc.vos ModelZF.vos ZFrepl.vos constructions/Term.vos constructions/Env.vos constructions/TypeJudge.vos template/Library.v
+ModelCC.vo ModelCC.glob ModelCC.v.beautified ModelCC.required_vo: ModelCC.v lib/basic.vo lib/Sublogic.vo Models.vo GenModelSyntax.vo ZF.vo ZFrelations.vo ZFcoc.vo ModelZF.vo constructions/Term.vo constructions/Env.vo constructions/TypeJudge.vo template/Library.v
+ModelCC.vio: ModelCC.v lib/basic.vio lib/Sublogic.vio Models.vio GenModelSyntax.vio ZF.vio ZFrelations.vio ZFcoc.vio ModelZF.vio constructions/Term.vio constructions/Env.vio constructions/TypeJudge.vio template/Library.v
+ModelCC.vos ModelCC.vok ModelCC.required_vos: ModelCC.v lib/basic.vos lib/Sublogic.vos Models.vos GenModelSyntax.vos ZF.vos ZFrelations.vos ZFcoc.vos ModelZF.vos constructions/Term.vos constructions/Env.vos constructions/TypeJudge.vos template/Library.v
+sketches/ModelCC_choice.vo sketches/ModelCC_choice.glob sketches/ModelCC_choice.v.beautified sketches/ModelCC_choice.required_vo: sketches/ModelCC_choice.v lib/basic.vo lib/Sublogic.vo ZF.vo ZFrelations.vo ZFcoc.vo ModelZF.vo ModelCC.vo ZFrepl.vo
+sketches/ModelCC_choice.vio: sketches/ModelCC_choice.v lib/basic.vio lib/Sublogic.vio ZF.vio ZFrelations.vio ZFcoc.vio ModelZF.vio ModelCC.vio ZFrepl.vio
+sketches/ModelCC_choice.vos sketches/ModelCC_choice.vok sketches/ModelCC_choice.required_vos: sketches/ModelCC_choice.v lib/basic.vos lib/Sublogic.vos ZF.vos ZFrelations.vos ZFcoc.vos ModelZF.vos ModelCC.vos ZFrepl.vos
 ModelECC_oldstyle.vo ModelECC_oldstyle.glob ModelECC_oldstyle.v.beautified ModelECC_oldstyle.required_vo: ModelECC_oldstyle.v lib/IntMap.vo constructions/TypeECC.vo Models.vo constructions/TypeJudgeECC.vo ZF.vo ZFcoc.vo ModelZF.vo ZFecc.vo
 ModelECC_oldstyle.vio: ModelECC_oldstyle.v lib/IntMap.vio constructions/TypeECC.vio Models.vio constructions/TypeJudgeECC.vio ZF.vio ZFcoc.vio ModelZF.vio ZFecc.vio
 ModelECC_oldstyle.vos ModelECC_oldstyle.vok ModelECC_oldstyle.required_vos: ModelECC_oldstyle.v lib/IntMap.vos constructions/TypeECC.vos Models.vos constructions/TypeJudgeECC.vos ZF.vos ZFcoc.vos ModelZF.vos ZFecc.vos
@@ -274,9 +277,9 @@ ZFord_equiv.vos ZFord_equiv.vok ZFord_equiv.required_vos: ZFord_equiv.v ZFord.vo
 ZFord_plump.vo ZFord_plump.glob ZFord_plump.v.beautified ZFord_plump.required_vo: ZFord_plump.v lib/basic.vo ZF.vo ZFnats.vo ZFrepl.vo
 ZFord_plump.vio: ZFord_plump.v lib/basic.vio ZF.vio ZFnats.vio ZFrepl.vio
 ZFord_plump.vos ZFord_plump.vok ZFord_plump.required_vos: ZFord_plump.v lib/basic.vos ZF.vos ZFnats.vos ZFrepl.vos
-ZFord.vo ZFord.glob ZFord.v.beautified ZFord.required_vo: ZFord.v ZFnats.vo ZFwf.vo ZFwfr.vo ZF.vo ZFpairs.vo ZFrelations.vo ZFrepl.vo
-ZFord.vio: ZFord.v ZFnats.vio ZFwf.vio ZFwfr.vio ZF.vio ZFpairs.vio ZFrelations.vio ZFrepl.vio
-ZFord.vos ZFord.vok ZFord.required_vos: ZFord.v ZFnats.vos ZFwf.vos ZFwfr.vos ZF.vos ZFpairs.vos ZFrelations.vos ZFrepl.vos
+ZFord.vo ZFord.glob ZFord.v.beautified ZFord.required_vo: ZFord.v ZFnats.vo ZFwf.vo ZFwfr.vo ZF.vo ZFpairs.vo ZFrelations.vo
+ZFord.vio: ZFord.v ZFnats.vio ZFwf.vio ZFwfr.vio ZF.vio ZFpairs.vio ZFrelations.vio
+ZFord.vos ZFord.vok ZFord.required_vos: ZFord.v ZFnats.vos ZFwf.vos ZFwfr.vos ZF.vos ZFpairs.vos ZFrelations.vos
 ZFplump.vo ZFplump.glob ZFplump.v.beautified ZFplump.required_vo: ZFplump.v lib/basic.vo ZF.vo ZFnats.vo ZFrepl.vo
 ZFplump.vio: ZFplump.v lib/basic.vio ZF.vio ZFnats.vio ZFrepl.vio
 ZFplump.vos ZFplump.vok ZFplump.required_vos: ZFplump.v lib/basic.vos ZF.vos ZFnats.vos ZFrepl.vos

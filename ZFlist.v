@@ -23,6 +23,8 @@ apply Fmono_morph.
 apply LISTf_mono.
 Qed.
 
+  Hint Resolve LISTf_morph LISTf_mono : core.
+  
   Lemma LISTf_ind : forall X (P : set -> Prop),
     Proper (eq_set ==> iff) P ->
     P Nil ->
@@ -87,131 +89,25 @@ intuition.
  unfold Cons; rewrite fst_def; rewrite snd_def; reflexivity.
 Qed.
 
-(*
-Require Import ZFcont.
-  Lemma LISTf_cont : continuous omega LISTf.
-red; intros.
-unfold LISTf.
-rewrite <- sup_cont.
- rewrite <- cst_cont.
- 2:exists zero; apply zero_omega.
- apply union2_morph; auto with *.
- rewrite sigma_nodep.
-
-  Lemma prodcart_cont : forall o F G,
-    ext_fun o F ->
-    ext_fun o G ->
-    prodcart (sup o F) (sup o G) == sup o (fun y => prodcart (F y) (G y)).
-intros.
-apply eq_intro; intros.
- rewrite sup_ax; trivial.
- 2:do 2 red; intros; apply prodcart_morph; auto.
- assert (h1 := fst_typ _ _ _ H1).
- assert (h2 := snd_typ _ _ _ H1).
- rewrite sup_ax in h1, h2; trivial.
- destruct h1; destruct h2.
- exists (x ⊔ x0).
-  apply osup2_lt; trivial.
-isOrd_dir.
-
- assert (snd z ∈ sup dom (f (fst z))).
-  apply snd_typ_sigma with (2:=H0); auto with *.
-  do 2 red; intros.
-  apply sup_morph; auto with *.
-  red; intros; apply H; trivial.
- rewrite sup_ax in H1.
- 2:do 2 red; intros; apply H;auto with *.
- destruct H1.
- exists x; trivial.
- rewrite surj_pair with (1:=subset_elim1 _ _ _ H0).
- apply couple_intro_sigma; trivial.
-  do 2 red; intros; apply H; auto with *.
- apply fst_typ_sigma in H0; trivial.
-
- rewrite sup_ax in H0; trivial.
- destruct H0.
- rewrite surj_pair with (1:=subset_elim1 _ _ _ H1).
- apply couple_intro_sigma; trivial.
-  do 2 red; intros.
-  apply sup_morph; auto with *.
-  red; intros; apply H; trivial.
-
-  apply fst_typ_sigma in H1; trivial.
-
-  rewrite sup_ax.
-  2:do 2 red; intros; apply H; auto with *.
-  exists x; trivial.
-  apply snd_typ_sigma with (2:=H1); auto with *.
-  do 2 red; intros; apply H; auto with *.
-Qed.
-
-*)
-
-  Definition Lstn n := TI LISTf (nat2ordset n).
-
-  Lemma Lstn_incl_succ : forall k, Lstn k ⊆ Lstn (S k).
-unfold Lstn; simpl; intros.
-apply TI_incl; auto with *.
-Qed.
-
-  Lemma Lstn_eq : forall k, Lstn (S k) == LISTf (Lstn k).
-unfold Lstn; simpl; intros.
-apply TI_mono_succ; auto with *.
-Qed.
-
-  Lemma Lstn_incl : forall k k', (k <= k')%nat -> Lstn k ⊆ Lstn k'.
-induction 1; intros.
- red; auto.
- red; intros.
- apply (Lstn_incl_succ m z); auto.
-Qed.
-
-
   Definition List := TI LISTf omega.
 
-  Lemma List_intro : forall k, Lstn k ⊆ List.
-unfold List, Lstn; intros.
-apply TI_incl; auto with *.
-apply isOrd_sup_intro with (S k); simpl; auto.
-apply lt_osucc; auto.
-Qed.
-
-  Lemma List_elim : forall x,
-    x ∈ List -> exists k, x ∈ Lstn k.
-unfold List, Lstn; intros.
-apply TI_elim in H; auto with *.
-destruct H.
-apply isOrd_sup_elim in H; destruct H.
-exists x1.
-apply TI_intro with x0; auto with *.
-Qed.
-
-  Lemma Lstn_case : forall k (P : set -> Prop),
-    Proper (eq_set ==> iff) P ->
-    P Nil ->
-    (forall x l k', (k' < k)%nat -> x ∈ A -> l ∈ Lstn k' -> P (Cons x l)) ->
-    forall a, a ∈ Lstn k -> P a.
-destruct k; intros.
- unfold Lstn in H2.
- rewrite TI_initial in H2; auto with *.
- elim empty_ax with (1:=H2).
-
- rewrite Lstn_eq in H2.
- elim H2 using LISTf_ind; eauto.
-Qed.
-
-
-
-  Lemma List_fix : forall (P:set->Prop),
-    (forall k,
-     (forall k' x, (k' < k)%nat -> x ∈ Lstn k' -> P x) ->
-     (forall x, x ∈ Lstn k -> P x)) ->
-    forall x, x ∈ List -> P x.
-intros.
-apply List_elim in H0; destruct H0.
-revert x H0.
-elim (lt_wf x0); intros.
-eauto.
+  Lemma List_eqn : List == LISTf List.
+apply eq_intro; intros.
+*unfold List.
+ rewrite <- TI_mono_succ; auto.
+ revert H; apply TI_incl; auto.
+*elim H using LISTf_ind.
+ +do 2 red; intros.
+  rewrite H0; reflexivity.
+ +apply TI_intro with (osucc zero); auto.
+  apply Nil_typ0.
+ +intros.
+  apply TI_elim in H1; auto.
+  destruct H1 as (o,tyo,tyl).  
+  apply TI_intro with (osucc o); auto.
+  apply Cons_typ0; trivial.
+  rewrite TI_mono_succ; auto.
+  apply isOrd_inv with omega; trivial.  
 Qed.
 
   Lemma List_ind : forall P : set -> Prop,
@@ -220,30 +116,16 @@ Qed.
     (forall x l, x ∈ A -> l ∈ List -> P l -> P (Cons x l)) ->
     forall a, a ∈ List -> P a.
 intros.
-elim H2 using List_fix; intros.
-elim H4 using Lstn_case; intros; eauto.
+revert a H2.
+unfold List.
+elim isOrd_omega using isOrd_ind; intros.
+apply TI_elim in H5; auto.
+destruct H5 as (o,oo,tya).
+elim tya using LISTf_ind; trivial.
+intros.
 apply H1; eauto.
-apply List_intro in H7; trivial.
-Qed.
- 
-  Lemma List_eqn : List == LISTf List.
-apply eq_intro; intros.
- apply List_elim in H; destruct H.
- apply Lstn_incl_succ in H.
- rewrite Lstn_eq in H.
- eapply LISTf_mono with (Lstn x); trivial.
- apply List_intro.
-
- elim H using LISTf_ind; intros.
-  do 2 red; intros.
-  rewrite H0; reflexivity.
-
-  apply List_intro with 1; rewrite Lstn_eq.
-  apply Nil_typ0; trivial.
-
-  apply List_elim in H1; destruct H1 as (k,H1).
-  apply List_intro with (S k); rewrite Lstn_eq.
-  apply Cons_typ0; auto.
+revert H6; apply TI_incl; auto.
+apply H3; trivial.
 Qed.
 
   Lemma Nil_typ : Nil ∈ List.

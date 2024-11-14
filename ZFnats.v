@@ -151,7 +151,24 @@ assert (n ∈ subset N P).
  rewrite <- H4; trivial.
  symmetry; trivial.
 Qed.
-
+ 
+Lemma Nle_ind m P :
+  Proper (eq_set==>iff) P ->
+  P m ->
+  (forall n, n ∈ N -> P n -> P (succ n)) ->
+  forall n, m ∈ N -> n ∈ N -> le m n -> P n.
+intros Pm Hm HS n tym tyn Hle.
+revert m tym Hm Hle; elim tyn using N_ind; intros.
+*rewrite <- H0 in Hle|-*; eauto.
+*revert Hm Hle; elim tym using N_ind; intros; trivial.
+ +rewrite <- H0 in Hm, Hle; auto.
+ +apply le_case in Hle; destruct Hle as [Hle|Hle];
+    [apply discr in Hle|apply empty_ax in Hle]; contradiction.
+*apply le_case in Hle; destruct Hle.
+ +rewrite H1 in Hm; trivial.
+ +apply HS; trivial.
+  apply H0 with m; trivial.
+Qed.
 
 Lemma lt_trans : forall m n p, p ∈ N -> m < n -> n < p -> m < p.
 Proof.

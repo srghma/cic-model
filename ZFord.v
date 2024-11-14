@@ -1927,117 +1927,66 @@ End OrdinalUpperBound.
 
 (********************************************************************)
 
-Require Import ZFrepl.
-
 Section LimOrd.
 
-  Variable f : nat -> set.
-  Variable ford : forall n, isOrd (f n).
-  Variable fmono : forall m n, (m <= n)%nat -> f m ⊆ f n.
+  Variable f : set -> set.
+  Hypothesis fm : ext_fun N f.
+  Hypothesis ford : forall n, n ∈ N -> isOrd (f n).
+  Hypothesis fmono : forall m n, m ∈ N -> n ∈ N -> le m n -> f m ⊆ f n.
 
-  Let F x := uchoice (fun y => exists2 n, x == nat2set n & f n == y).
+  Definition ord_sup := sup N f.
 
-  Let Fm : morph1 F.
-do 2 red; intros.
-apply uchoice_morph_raw.
-red; intros.
-apply ex2_morph.
- red; intros.
- rewrite H; reflexivity.
-
- red; intros.
- rewrite H0; reflexivity.
-Qed.
-
-  Let Fch : forall x, x ∈ N ->
-    uchoice_pred (fun y => exists2 n, x == nat2set n & f n == y).
-intros.
-split;[|split]; intros.
- revert H1; apply ex2_morph; red; intros; auto with *.
- rewrite H0; reflexivity.
-
- elim H using N_ind; intros.
-  revert H2; apply ex_morph.
-  red; intros.
-  apply ex2_morph; red; intros; auto with *.
-  rewrite H1; reflexivity.
-
-  exists (f 0); exists 0; simpl; auto with *.
-
-  destruct H1 as (y,(m,?,?)).
-  exists (f (S m)); exists (S m); simpl; auto with *.
-  apply succ_morph; trivial.
-
- destruct H0; destruct H1.
- rewrite <- H2; rewrite <- H3; rewrite H0 in H1; apply nat2set_inj in H1.
- rewrite H1; reflexivity.
-Qed.
-
-  Definition ord_sup := sup N F.
-
-  Lemma isOrd_sup_intro : forall n, f n ⊆ ord_sup.
+  Lemma isOrd_sup_intro : forall n, n ∈ N -> f n ⊆ ord_sup.
 unfold ord_sup.
 red; intros.
 rewrite sup_ax; trivial.
-2:do 2 red; intros; apply Fm; trivial.
-exists (nat2set n).
- apply nat2set_typ.
-
- destruct (uchoice_def _ (Fch _ (nat2set_typ n))).
- unfold F; rewrite <- H1.
- apply nat2set_inj in H0; rewrite <- H0; trivial.
+exists n; trivial.
 Qed.
 
-  Lemma isOrd_sup_elim : forall x, x < ord_sup -> exists n, x < f n.
+  Lemma isOrd_sup_elim : forall x, x < ord_sup -> exists2 n, n ∈ N & x < f n.
 unfold ord_sup; intros.
-rewrite sup_ax in H.
-2:do 2 red; intros; apply Fm; trivial.
-destruct H.
-destruct (uchoice_def _ (Fch _ H)).
-exists x1; rewrite H2; trivial.
+rewrite sup_ax in H; trivial.
 Qed.
 
   Lemma isOrd_sup : isOrd ord_sup.
 apply isOrd_intro; intros.
- elim isOrd_sup_elim with (1:=H1); intros.
- apply isOrd_sup_intro with x.
+*elim isOrd_sup_elim with (1:=H1); intros.
+ apply isOrd_sup_intro with x; trivial.
  apply isOrd_plump with b; auto.
 
- red; intros.
+*red; intros.
  apply isOrd_sup_elim in H; destruct H.
  apply isOrd_sup_elim in H0; destruct H0.
  assert (xo : isOrd x).
-  apply isOrd_inv with (f x0); trivial.
+ {apply isOrd_inv with (f x0); auto. }
  exists (x ⊔ y).
-  destruct (isOrd_dir _ (ford (x0+x1)) x y).
+ +destruct (isOrd_dir _ (ford (max x0 x1) (max_typ _ _ H H0)) x y).
    apply (fmono x0); auto with arith.
    apply (fmono x1); auto with *.
 
-   destruct H2.
-   apply (isOrd_sup_intro (x0+x1)).
+   destruct H4.
+   apply (isOrd_sup_intro (max x0 x1));[auto|].
    apply isOrd_plump with x2; auto.
     apply isOrd_osup2; eauto using isOrd_inv.
 
     apply osup2_lub; eauto using isOrd_inv.
 
-  split.
+ +split.
    apply osup2_incl1; trivial.
    apply osup2_incl2; trivial.
 
- elim isOrd_sup_elim with (1:=H); intros.
- apply isOrd_inv with (f x); trivial.
+*elim isOrd_sup_elim with (1:=H); intros.
+ apply isOrd_inv with (f x); auto.
 Qed.
 
 
   Lemma ord_sup_typ X :
-    (forall n, f n ∈ X) ->
-    (forall g, morph1 g -> (forall n, n ∈ N -> g n ∈ X) -> sup N g ∈ X) ->
+    (forall n, n ∈ N -> f n ∈ X) ->
+    (forall g, ext_fun N g -> (forall n, n ∈ N -> g n ∈ X) -> sup N g ∈ X) ->
     ord_sup ∈ X.
 unfold ord_sup.
 intros.
 apply H0; trivial; intros.
-destruct (uchoice_def _ (Fch _ H1)).
-unfold F; rewrite <- H3; trivial.
 Qed.
 
 End LimOrd.
@@ -2081,44 +2030,62 @@ apply isOrd_intro; intros.
  eauto using isOrd_inv.
 Qed.
 
-Fixpoint nat2ordset n :=
-  match n with
-  | 0 => zero
-  | S k => osucc (nat2ordset k)
-  end.
-
-Lemma nat2ordset_typ : forall n, isOrd (nat2ordset n).
-induction n; simpl; intros.
- apply isOrd_zero.
- apply isOrd_succ; trivial.
-Qed.
-Hint Resolve nat2ordset_typ : core.
-
 (** Ordinal omega *)
 
-Definition omega := ord_sup nat2ordset.
+Definition omega := sup N (natrec zero (fun _ o => osucc o)).
+
+Lemma omega_aux_ord n :
+  n ∈ N -> isOrd (natrec zero (fun _ o => osucc o) n).
+intros.
+elim H using N_ind; intros.
++rewrite <- H1; trivial.
++rewrite natrec_0; auto.
++rewrite natrec_S; auto.
+ do 3 red; intros.  
+ rewrite H3; reflexivity.
+Qed.
+Lemma omega_aux_m : ext_fun N (natrec zero (fun _ o : set => osucc o)).
+do 2 red; intros.
+rewrite H0; reflexivity.
+Qed.
+  Hint Resolve omega_aux_ord omega_aux_m : core.
 
 Lemma isOrd_omega : isOrd omega.
-apply isOrd_sup; trivial.
-induction 1; intros; auto with *.
-simpl.
-transitivity (nat2ordset m0); trivial.
-red; intros.
-apply isOrd_trans with (2:=H0); auto.
+apply isOrd_sup; auto.
+intros.
+elim H1 using Nle_ind; trivial.
+ +do 2 red; intros.
+  rewrite H2; reflexivity.
+ +reflexivity.
+ +clear n H0 H1; intros.
+  rewrite natrec_S; trivial.
+   rewrite H1.
+   red; intros.
+   apply isOrd_trans with (2:=H2); auto.
+
+   do 3 red; intros.
+   rewrite H3; reflexivity.
 Qed.
 #[global]Hint Resolve isOrd_omega : core.
 
 Lemma zero_omega : lt zero omega.
-apply isOrd_sup_intro with 1; simpl.
-apply lt_osucc; trivial.
+apply isOrd_sup_intro with (n:=succ zero); auto.
+*apply succ_typ; apply zero_typ.
+*rewrite natrec_S;[|do 3 red; intros; apply osucc_morph;trivial|apply zero_typ].
+ rewrite natrec_0.  
+ apply lt_osucc; auto.
 Qed.
 #[global]Hint Resolve zero_omega : core.
 
 Lemma osucc_omega : forall n, lt n omega -> lt (osucc n) omega.
 intros.
-apply isOrd_sup_elim in H; destruct H.
-apply isOrd_sup_intro with (S x); simpl.
-apply lt_osucc_compat; auto.
+apply isOrd_sup_elim in H; trivial.
+destruct H as (k,tyk,?).
+apply isOrd_sup_intro with (succ k); trivial.
+*apply succ_typ; trivial.
+*rewrite natrec_S; trivial.
+ apply lt_osucc_compat; auto.
+ do 3 red; intros; apply osucc_morph; trivial.
 Qed.
 #[global]Hint Resolve osucc_omega : core.
 
@@ -2128,7 +2095,7 @@ Qed.
 Hint Resolve omega_limit_ord : core.
 
 (* f^w(o) *)
-Definition iter_w (f:set->set) o :=
+(*Definition iter_w (f:set->set) o :=
   ord_sup(nat_rect(fun _=>set) o (fun _ => f)).
 
 Lemma isOrd_iter_w : forall f o,
@@ -2156,7 +2123,7 @@ apply isOrd_sup.
 Qed.
 
 Definition plus_w := iter_w osucc.
-
+*)
 (** ** Indexed supremum of arbitrary family *)
 
 Section DirOrdinalSup.
@@ -2168,10 +2135,16 @@ Section DirOrdinalSup.
 
   (** Taking the supremum pairwise *)
   Definition osupf X := sup X (fun x => replf X (fun y => x ⊔ y)).
-  Definition osupfn n := nat_rect (fun _ => set) (sup I f) (fun _ => osupf) n.
+  Definition osupfn n := natrec (sup I f) (fun _ => osupf) n.
   (** Iterating ω times, we get a fixpoint *)
   Definition osup := ord_sup osupfn.
 
+
+  Let osupfn_ext : ext_fun N osupfn.
+do 2 red; intros.
+rewrite H0; reflexivity.
+Qed.
+  
   Lemma osupf_def X z : z ∈ osupf X <-> exists2 x, x ∈ X & exists2 y, y ∈ X & z == x ⊔ y.
 unfold osupf; rewrite sup_ax.
  apply ex2_morph.
@@ -2186,7 +2159,7 @@ unfold osupf; rewrite sup_ax.
  do 2 red; intros; apply replf_morph; auto with *.
  red; intros; apply osup2_morph; trivial.
 Qed.
-
+  
   Lemma osupf_mono X Y :
     X ⊆ Y ->
     osupf X ⊆ osupf Y.
@@ -2196,89 +2169,111 @@ destruct H0 as (x,?,(y,?,?)); exists x; auto.
 exists y; auto.
 Qed.
 
-  Lemma osupfn_mono m n : (m <= n)%nat -> osupfn m ⊆ osupfn n.
-revert n; induction m; simpl; intros.
- clear H; induction n; simpl; auto with *.
- apply osupf_mono in IHn.
- red; intros; apply IHn.
+  Lemma osup0 : osupfn zero == sup I f.
+apply natrec_0.
+Qed.
+
+  Lemma osupS n : n ∈ N -> osupfn (succ n) == osupf (osupfn n).
+intros.
+apply natrec_S; trivial.
+do 2 red; intros.
+apply Fmono_morph.
+do 2 red; intros.
+apply osupf_mono; trivial.
+Qed.
+
+  Lemma isOrd_osupfn : forall n x, n ∈ N -> x ∈ osupfn n -> isOrd x.
+intros n x tyn; revert x; elim tyn using N_ind; intros.
+*rewrite <- H0 in H2; auto.
+*rewrite osup0 in H.
+ rewrite sup_ax in H; auto.
+ destruct H; eauto using isOrd_inv.
+*rewrite osupS in H1; auto.
+ rewrite osupf_def in H1.
+ destruct H1 as (y,?,(y',?,?)).
+ rewrite H3; apply isOrd_osup2; eauto using isOrd_inv.
+Qed.
+  
+  Lemma osupfn_mono m n : m ∈ N -> n ∈ N -> le m n -> osupfn m ⊆ osupfn n.
+intros tym tyn Hle.
+elim Hle using Nle_ind; trivial.
+*do 2 red; intros.
+ rewrite H; reflexivity.
+*reflexivity.
+*clear n tyn Hle; intros.
+ rewrite H0.
+ rewrite osupS; trivial.
+ red; intros.
  rewrite osupf_def.
  exists z; trivial.
  exists z; trivial.
  symmetry; apply osup2_refl.
- rewrite sup_ax in H; trivial.
- destruct H.
- apply isOrd_inv with (f x); auto.
-
- destruct n; simpl.
-  inversion H.
- apply osupf_mono; apply IHm; auto with arith.
+ apply isOrd_osupfn with n; trivial.
 Qed.
 
   Lemma osup_intro : forall x, x ∈ I -> f x ⊆ osup.
 red; intros.
 unfold osup.
-apply isOrd_sup_intro with (n:=0); simpl.
-rewrite sup_ax; eauto.
+apply isOrd_sup_intro with (n:=zero); simpl; auto with *.
+*apply zero_typ.
+*rewrite osup0.
+ rewrite sup_ax; eauto.
 Qed.
 
-  Lemma isOrd_osupfn : forall n x, x ∈ osupfn n -> isOrd x.
-induction n; simpl; intros.
- rewrite sup_ax in H; trivial.
- destruct H; eauto using isOrd_inv.
-
- rewrite osupf_def in H.
- destruct H as (y,?,(y',?,?)).
- rewrite H1; apply isOrd_osup2; eauto using isOrd_inv.
-Qed.
 
   Lemma isOrd_osup : isOrd osup.
 unfold osup.
 apply isOrd_intro; intros.
- apply isOrd_sup_elim in H1.
- destruct H1 as (n,?).
- apply isOrd_sup_intro with n.
+*apply isOrd_sup_elim in H1; trivial.
+ destruct H1 as (n,tyn,?).
+ apply isOrd_sup_intro with n; trivial.
  revert a b H H0 H1.
- induction n; simpl; intros.
+ elim tyn using N_ind; intros.
+ +rewrite <- H0 in H4|-*; eauto.
+ +rewrite osup0 in H1|-*.
   rewrite sup_ax in H1|-*; trivial.
   destruct H1.
   exists x; trivial.
   apply isOrd_plump with b; auto.
-
-  rewrite osupf_def in H1|-*.
-  destruct H1 as (x,?,(y,?,?)).
+ +rewrite osupS in H3|-*; auto.
+  rewrite osupf_def in H3|-*.
+  destruct H3 as (x,?,(y,?,?)).
   assert (xo : isOrd x).
-   apply isOrd_osupfn in H1; trivial.
+   apply isOrd_osupfn in H3; trivial.
   assert (yo : isOrd y).
-   apply isOrd_osupfn in H2; trivial.
+   apply isOrd_osupfn in H4; trivial.
   exists (a ∩ x).
-   apply IHn with x; trivial.
+   apply H0 with x; trivial.
     apply isOrd_inter2; trivial.
 
     apply inter2_incl2.
 
   exists (a ∩ y).
-   apply IHn with y; trivial.
+   apply H0 with y; trivial.
     apply isOrd_inter2; trivial.
 
     apply inter2_incl2.
 
    destruct osup2_proof with x y as (_,?); trivial.
-   rewrite <- H4; trivial.
+   rewrite <- H6; trivial.
    apply eq_intro; intros.
     rewrite inter2_def; split; trivial.
-    rewrite <- H3; auto.
+    rewrite <- H5; auto.
 
-    rewrite inter2_def in H5; destruct H5; trivial.
+    rewrite inter2_def in H7; destruct H7; trivial.
 
- red; intros.
- apply isOrd_sup_elim in H; destruct H as (n,?).
- apply isOrd_sup_elim in H0; destruct H0 as (m,?).
+*red; intros.
+ apply isOrd_sup_elim in H; [destruct H as (n,tyn,?)|trivial].
+ apply isOrd_sup_elim in H0; [destruct H0 as (m,tym,?)|trivial].
  assert (xo : isOrd x).
   apply isOrd_osupfn in H; trivial.
  assert (yo : isOrd y).
    apply isOrd_osupfn in H0; trivial.
  exists (x ⊔ y).
-  apply isOrd_sup_intro with (S(n+m)); simpl.
+  apply isOrd_sup_intro with (succ(max n m)); simpl; trivial.
+   apply succ_typ.
+   apply max_typ; trivial.
+  rewrite osupS; auto.
   rewrite osupf_def; exists x.
    revert H; apply osupfn_mono; auto with arith.
   exists y; auto with *.
@@ -2288,7 +2283,7 @@ apply isOrd_intro; intros.
    apply osup2_incl1; apply xo.
    apply osup2_incl2; apply xo.
 
- apply isOrd_sup_elim in H; destruct H as (n,?).
+*apply isOrd_sup_elim in H; [destruct H as (n,tyn,?)|trivial].
  apply isOrd_osupfn in H; trivial.
 Qed.
 
@@ -2297,14 +2292,16 @@ Qed.
     (forall x, x ∈ I -> f x ⊆ z) ->
     osup ⊆ z.
 red; intros.
-apply isOrd_sup_elim in H1; destruct H1 as (n,?).
-revert z0 H1; induction n; simpl; intros.
+apply isOrd_sup_elim in H1; [destruct H1 as (n,tyn,?)|trivial].
+revert z0 H1; elim tyn using N_ind; simpl; intros.
+*rewrite <- H2 in H4; auto.
+*rewrite osup0 in H1.
  rewrite sup_ax in H1; trivial.
  destruct H1.
  revert H2; apply H0; trivial.
-
- rewrite osupf_def in H1; destruct H1 as (x,?,(y,?,?)).
- rewrite H3; apply osup2_lt; auto.
+*rewrite osupS in H3; trivial.
+  rewrite osupf_def in H3; destruct H3 as (x,?,(y,?,?)).
+ rewrite H5; apply osup2_lt; auto.
 Qed.
 
   Lemma osup_univ U :
@@ -2317,8 +2314,12 @@ Qed.
     osup ∈ U.
 intros.
 unfold osup.
-apply ord_sup_typ; intros.
- induction n; simpl; intros; auto.
+apply ord_sup_typ; intros; auto.
+elim H4 using N_ind; intros.
+*rewrite <- H6; auto.
+*rewrite osup0.
+ apply H; auto.
+*rewrite osupS; trivial.
  unfold osupf.
  apply H; intros; trivial.
   do 2 red; intros; apply replf_morph; auto with *.
@@ -2331,10 +2332,8 @@ apply ord_sup_typ; intros.
    do 2 red; intros; apply singl_morph; apply osup2_morph; auto with *.
 
    intros.
-   apply H0 with (1:=IHn); trivial.
-   apply isOrd_osupfn in H4; auto.
- apply H; trivial.
- do 2 red; intros; apply H4; trivial.
+   apply H0 with (1:=H6); trivial.
+   apply isOrd_osupfn in H7; auto.
 Qed.
 
 End DirOrdinalSup.
@@ -2360,17 +2359,16 @@ Qed.
 unfold osup, ord_sup; intros.
 apply sup_morph; auto with *.
 red; intros.
-apply uchoice_morph_raw.
-red; intros.
-apply ex2_morph; red; intros.
- rewrite H2; reflexivity.
-
- assert (osupfn x f a == osupfn x' f' a).
-  induction a; simpl; intros.
-   apply sup_morph; auto.
-
-   apply incl_eq; apply osupf_mono; rewrite IHa; reflexivity.
- rewrite H4; rewrite H3; reflexivity.
+unfold osupfn.
+apply natrec_morph; trivial.
+ apply sup_morph; trivial.
+ do 2 red; intros; auto with *.
+ unfold osupf.
+ apply sup_morph; trivial.
+ red; intros.
+ apply replf_morph; trivial.
+ red; intros. 
+ apply osup2_morph; trivial.
 Qed.
 
 (** * Projection toward ordinals *)

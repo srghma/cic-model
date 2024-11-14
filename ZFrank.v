@@ -388,16 +388,15 @@ Definition bound_ord A o :=
 
 
 Lemma VN_ord_sup F o :
+  ext_fun N F ->
   isOrd o ->
   VN_regular o ->
   omega ∈ o ->
-  (forall n, F n ∈ VN o) ->
+  (forall n, n ∈ N -> F n ∈ VN o) ->
   ord_sup F ∈ VN o.
-intros.
+intros Fext oo oreg oinf H.
 apply ord_sup_typ; trivial; intros.
-apply H0; trivial.
- do 2 red; intros; apply H3; trivial.
-
+apply oreg; trivial.
  apply VN_incl with (VN omega); trivial.
   apply VN_N.
 
