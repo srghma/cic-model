@@ -897,7 +897,45 @@ setoid_replace (Prod Nat Nat) with (subst m (Prod Nat (lift 2 Nat))) using relat
 apply typ_app with (V:=Nat); [trivial|apply typ_Add|discriminate|discriminate].
 Qed.
 
+Lemma add_aux_m :
+  morph2 (fun x x0 => natrec x
+                        (fun n0 y : set => app (app (lam (mkTY N cNAT)
+                                                       (fun _ : X => lam (mkTY N cNAT) succ)) n0) y) x0).
+do 3 red; intros.
+apply natrec_morph; auto.
+do 2 red; intros.
+apply cc_app_morph; trivial.
+apply cc_app_morph; trivial.
+apply cc_lam_ext; [reflexivity|].
+red; intros.
+apply cc_lam_ext; [reflexivity|].
+red; intros; apply succ_morph; trivial.
+Qed.
 
+Lemma add_aux_ext1 :
+  ext_fun N
+    (fun x : X =>
+     lam (mkTY N cNAT)
+       (fun x0 : X =>
+        natrec x
+          (fun n0 y : set => app (app (lam (mkTY N cNAT) (fun _ : X => lam (mkTY N cNAT) succ)) n0) y) x0)).
+do 2 red; intros.
+apply cc_lam_ext; [reflexivity|].
+red; intros.
+apply add_aux_m; trivial.
+Qed.
+
+Lemma add_aux_ext2 f :
+  ext_fun N
+   (fun x : X =>
+    natrec f
+      (fun n0 y : set => app (app (lam (mkTY N cNAT) (fun _ : X => lam (mkTY N cNAT) succ)) n0) y) x).
+do 2 red; intros.
+apply add_aux_m; auto with *.
+Qed.
+
+
+  
 Lemma int_Add : forall n m i mm nn,  
   int m i ∈ N ->
   int n i ∈ N ->
@@ -910,10 +948,11 @@ rewrite beta_nat_eq; trivial.
  rewrite beta_nat_eq; trivial.
   revert nn Hn.
   elim Hin using N_ind; intros; auto.
-   rewrite <- H1.
+  rewrite <- H1.
    2:rewrite H0; trivial.
-   apply natrec_morph_gen2; auto with *.
-
+   rewrite H0 in H.
+   apply add_aux_ext2; auto with *.
+   
    rewrite natrec_0.
    rewrite <- Hn, add0; trivial.
 
@@ -925,15 +964,8 @@ rewrite beta_nat_eq; trivial.
    apply add_typ; trivial.
    rewrite <-Hm; trivial.
 
-    do 2 red; intros.
-    apply natrec_morph_gen2; auto with *.
-    do 2 red; intros.
-    apply lam_ext; auto with *.
-    red; intros.
-    apply ZFwfr.WFR_morph_gen2; trivial.
-red; red; intros.
-rewrite H0.
-reflexivity.
+  apply add_aux_ext2.
+ apply add_aux_ext1.
 Qed.
 
 End TheorySig.
@@ -987,10 +1019,26 @@ apply typ_conv with (T := App (Abs Nat prop) (Ref 0)); [|apply H|discriminate|di
    [apply typ_var; trivial|simpl; split; red; reflexivity].
 Qed.
 
+Lemma discr_aux :
+  ext_fun N
+    (fun x : X =>
+     natrec (prod props (fun x0 : X => prod x0 (fun _ : X => x0)))
+       (fun n y : set =>
+        app
+          (app (lam (mkTY N cNAT) (fun _ : X => lam props (fun _ : X => prod props (fun x0 : X => x0)))) n)
+          y) x).
+do 2 red; intros.
+apply natrec_morph; [reflexivity| |trivial].
+do 2 red; intros.
+apply cc_app_morph; [|trivial].
+apply cc_app_morph; [|trivial].
+reflexivity.
+Qed.
+
 Lemma ax1_aux_0 : forall e, eq_typ e True_symb (App ax1_aux Zero).
 red; intros e i j Hok; simpl.
 rewrite beta_nat_eq; [rewrite natrec_0; auto;try reflexivity| |apply zero_typ].
-do 2 red; intros; apply natrec_morph_gen2; trivial.
+apply discr_aux.
 Qed.
 
 Lemma ax1_aux_S : forall e n, typ e n Nat -> 

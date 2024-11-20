@@ -30,6 +30,27 @@ destruct H as (?,_,abs).
 apply NATf_discr in abs; trivial.
 Qed.
 
+Let WFRle_zero x y :
+  ZFrepl.WFRle (fun m : set => subset NAT (fun n : set => m == SUCC n)) x y ->
+  y == ZERO -> x == ZERO.
+induction 1; auto.
+destruct H; [rewrite H;trivial|].
+intros.
+apply subset_elim2 in H.
+destruct H.
+rewrite H0 in H1.
+apply NATf_discr in H1; contradiction.
+Qed.
+
+Let WFRle_typ x y :
+  ZFrepl.WFRle (fun m : set => subset NAT (fun n : set => m == SUCC n)) x y ->
+  y ∈ NAT -> x ∈ NAT.
+induction 1; auto.
+destruct H; [rewrite H;trivial|].
+intros.
+apply subset_elim1 in H; trivial.
+Qed.
+
 Instance NATREC_morph :
   Proper (eq_set ==> (eq_set ==> eq_set ==> eq_set) ==> eq_set ==> eq_set) NAT_REC.
 do 4 red; intros.
@@ -86,36 +107,32 @@ Qed.
 
   Let caseext f g :
     morph2 g ->
-    forall x F F', x ∈ NAT ->
+    forall x x' F F', x ∈ NAT -> x==x' ->
     (forall y y' : set, y ∈ subset NAT (fun y => x == SUCC y) -> y == y' -> F y == F' y') ->
     NATCASE f (fun m : set => g m (F m)) x ==
-    NATCASE f (fun m : set => g m (F' m)) x.
+    NATCASE f (fun m : set => g m (F' m)) x'.
 intros.
 apply NATCASE_morph_gen; intros; auto with *.
-apply H; trivial; apply H1; trivial.
+apply H; trivial; apply H2; trivial.
 apply subset_intro; trivial.
 rewrite NAT_eq in H0.
 apply SUCC_inv_typ_gen.
-rewrite <- H2; trivial.
+rewrite <- H3; trivial.
 Qed.
 
   Lemma NATREC_0 f g : NAT_REC f g ZERO == f.
 unfold NAT_REC; intros.
-rewrite WFR_eqn_norec; auto.
- apply NATCASE_ZERO.
-
- apply Rzero.
-
- intros.
- rewrite NATCASE_ZERO.
- unfold NATCASE.
-  rewrite cond_set_ok; auto with *.
-  rewrite cond_set_mt.
-  symmetry; apply union2_mt_r.
-
-  red; destruct 1.
-  rewrite <- H in H0.
-  apply NATf_discr in H0; trivial.
+rewrite WFR_eqn; auto.
+*apply NATCASE_ZERO.
+*apply Rm.
+*intros.
+ apply WFRle_zero in H; [|reflexivity].
+ rewrite NATCASE_ZERO_eq; trivial.
+ rewrite H1 in H.
+ rewrite NATCASE_ZERO_eq; trivial.
+ reflexivity.
+*apply AccN.
+ apply ZERO_typ; trivial.
 Qed.
 
 Lemma NATREC_S : forall f g n, morph2 g -> n ∈ NAT ->
@@ -126,13 +143,14 @@ rewrite WFR_eqn; auto.
   reflexivity.
 
   intros; apply H; trivial.
-  apply WFR_morph0; trivial.
-
+  apply NATREC_morph; auto with *.
+  
 *do 2 red; intros.
  apply Rm; trivial.
   
 *intros; apply caseext; trivial.
-  apply SUCC_typ; trivial.
+ apply WFRle_typ in H1; auto.
+ apply SUCC_typ; trivial.
 
 *apply AccN.
  apply SUCC_typ; trivial.

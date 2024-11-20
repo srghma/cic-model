@@ -291,7 +291,7 @@ apply and_split; simpl; intros.
 Qed.
 
 Definition ChE (X C:term) : term.
-  left; exists (fun i => ZFrepl.uchoice (fun x => x ∈ Elt (int X i)))
+  left; exists (fun i => ZFrepl.uchoice (fun x => x ∈ Elt (int X i))) (*commented out *)
                (fun j => Lc.App (tm C j) (Lc.Abs (Lc.Abs (Lc.Ref 1)))).
   admit.
   admit.
@@ -323,7 +323,7 @@ apply and_split; intros.
 
  simpl.
  red in H; simpl in H.
- set (w:=ZFrepl.uchoice (fun x => x ∈ Elt(int X i))) in *.
+ set (w:=ZFrepl.uchoice (fun x => x ∈ Elt(int X i))) in *.  (*commented out *)
  clearbody w.
  apply depSAT_elim' in satW.
  red in satW.

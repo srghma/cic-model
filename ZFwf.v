@@ -223,27 +223,14 @@ do 2 red; intros; unfold trClos.
 apply ZFrepl.WFR_morph0; trivial.
 Qed.
 
-
-Lemma tc_auxm : 
-  Proper ((eq_set ==> eq ==> eq_set) ==> eq_set ==> eq ==> eq_set)
-    (fun f y (_ : unit) => singl y ∪ sup y (fun z => f z tt)).
-do 4 red; intros.
-apply union2_morph; [rewrite H0; reflexivity|].  
-apply sup_morph; trivial.
-red; intros.
-apply H; trivial.
-Qed.
-
-
 Lemma trClos_eqn x :
   Acc in_set x ->
   trClos x == singl x ∪ sup x trClos.
 intros.
 unfold trClos; rewrite ZFrepl.WFR_eqn; auto with *.
-*apply tc_auxm.
-*intros.
- apply union2_morph; [reflexivity|].  
- apply sup_morph; [reflexivity|].
+intros.
+apply union2_morph; [rewrite H2;reflexivity|].  
+ apply sup_morph; [rewrite H2; reflexivity|].
  red; intros; auto.
 Qed.
 

@@ -48,6 +48,14 @@ Qed.
 Definition L_match q f g :=
   if_prop (exists b q', q == couple b q') (g (fst q) (snd q)) f.
 
+Lemma Lmatch_aux_morph :
+  Proper (eq_set ==> iff) (fun x => exists b q', x == couple b q').
+do 2 red; intros.
+apply ex_morph; intros b.  
+apply ex_morph; intros q'.  
+rewrite H; reflexivity.
+Qed.
+
 Lemma L_match_mt l f0 g :
   l==empty ->
   L_match l f0 g == f0.
@@ -262,23 +270,26 @@ Let F Frec q a :=
   Let Fm : Proper ((eq_set ==> eq_set ==> eq_set) ==> eq_set ==> eq_set ==> eq_set) F.
 unfold F; do 4 red; intros.
 apply if_prop_morph; trivial.
-*apply ex_morph; intros b'.
- apply ex_morph; intros q'.
- rewrite H0; reflexivity.
+*apply Lmatch_aux_morph; trivial.
 *apply H; rewrite H0; [reflexivity|].
  rewrite H1; reflexivity.
 Qed.
-
-  Let Fext q a g g' :
+    
+  Let Fext q q' a a' g g' :
     (forall q' q'' b b' : set, Aenc_lt q' q -> q' == q'' -> b == b' -> g q' b == g' q'' b') ->
-    F g q a == F g' q a.
+    q == q' ->
+    a == a' ->
+    F g q a == F g' q' a'.
 unfold F; intros.
 apply union2_morph; apply cond_set_morph2; intros; auto with *.
-apply H; auto with *.
-apply Aenc_sub_def.
-destruct H0 as (b & q' & e).
-exists b.
-rewrite e, snd_def; reflexivity.
+*apply Lmatch_aux_morph; trivial.
+*apply H; [|apply snd_morph;trivial|rewrite H0,H1; reflexivity].
+ apply Aenc_sub_def.
+ destruct H2 as (b & q'' & e).
+ exists b.
+ rewrite e, snd_def; reflexivity.
+*apply impl_morph; [|reflexivity].
+ apply Lmatch_aux_morph; trivial.
 Qed.
 
   Hint Resolve Fm Fext : core.
@@ -356,18 +367,24 @@ apply if_prop_morph; auto with *.
  rewrite H; reflexivity.
 Qed.
 
-  Let Fext b x g g' :
+  Let Fext b b' x x' g g' :
+    b == b' ->
     (forall y y', Aenc_lt y x -> y==y' -> g y == g' y') ->
-    F b g x == F b g' x.
+    x == x' ->
+    F b g x == F b' g' x'.
 unfold F; intros.
 apply union2_morph; apply cond_set_morph2; intros; auto with *.
- apply couple_morph; [reflexivity|].
- apply H; auto with *.
+*apply Lmatch_aux_morph; trivial.
+*apply couple_morph; [rewrite H1; reflexivity|].
+ apply H0; [|rewrite H1; reflexivity].
  apply Aenc_sub_def.
- destruct H0 as (b1,(q1,h)).
+ destruct H2 as (b1,(q1,h)).
  exists b1.
  apply transitivity with (1:=h).
  rewrite h,!snd_def; reflexivity.
+*apply impl_morph;[|reflexivity].
+ apply Lmatch_aux_morph; trivial.
+*rewrite H; reflexivity.
 Qed. 
   
   Definition extln q a : set := WFR Aenc_sub (F a) q.
@@ -388,11 +405,10 @@ intros.
 unfold extln at 1.
 rewrite WFR_eqn; auto with *.
 *apply L_match_cons with (b:=b) (q:=q); auto with *.
- clear; do 3 red; intros.
- rewrite H,H0; reflexivity.
-
-*apply Fm; reflexivity.
-
+ do 3 red; intros.
+ apply couple_morph; [trivial|].
+ apply WFR_morph; auto with *.
+ apply Aenc_sub_morph.
 *apply Aenc_wf with a; trivial.
  apply Aenc_intro2; trivial.
 Qed.
@@ -405,9 +421,6 @@ intros.
 unfold extln at 1.
 rewrite WFR_eqn; auto with *.
 *apply L_match_mt; auto with *.
-
-*apply Fm; reflexivity.
-
 *apply Aenc_wf with a; trivial.
  eapply Aenc_intro1; trivial.
 Qed.

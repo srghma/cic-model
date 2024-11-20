@@ -36,7 +36,7 @@ apply Fmorph; trivial.
 apply H; trivial.
 Qed.
 
-Let Gmorph : forall o f f', eq_fun o f f' -> G f o == G f' o.
+Let Gmorph : forall o o' f f', o==o' -> eq_fun o f f' -> G f o == G f' o'.
 unfold G; intros.
 apply sup_morph; auto with *.
 red; intros.

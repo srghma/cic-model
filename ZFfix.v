@@ -482,19 +482,21 @@ Lemma Fr_eqn : forall a o,
     Fix_rec a == G Fix_rec a.
 intros.
 transitivity (G' Fix_rec a).
- unfold Fix_rec.
+*unfold Fix_rec.
  apply WFR_eqn; intros; auto with *.
-  apply G'm.
-
-  apply G'ext; auto with *.
+ +apply G'ext; auto with *.
   apply Fstages_def.
   exists o; trivial.  
-
-  revert a H0; elim H using isOrd_ind; intros.
+  revert o H H0.
+  elim H1; intros; auto.
+  destruct H; [rewrite H; trivial|].  
+  destruct fsub_elim with (2:=H4) (3:=H) as (z,ltx,tyy0); eauto.
+  revert tyy0; apply TI_incl; auto.
+ +revert a H0; elim H using isOrd_ind; intros.
   constructor; intros. 
   destruct fsub_elim with (2:=H3) (3:=H4) as (z,ltx,tyy0); eauto.
 
- unfold G'; apply cond_set_ok.
+*unfold G'; apply cond_set_ok.
  apply TI_Fstages in H0; trivial.  
 Qed.
 
@@ -747,8 +749,6 @@ intros.
 transitivity (G'' Fix_rec' a).
  unfold Fix_rec'.
  apply WFR_eqn; intros; auto with *.
-  apply G''m.
-
   apply G''ext; auto with *.
 
   revert a H0.

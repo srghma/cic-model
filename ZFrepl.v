@@ -229,44 +229,59 @@ apply eq_intro; intros.
 *)
 
 (** Building well-founded recursor using uchoice *)
-
 Section PolymorphicWellFoundedRecursion.
+  Context {A : Type} (Aeq : relation A) {Aeqv : Equivalence Aeq}.
 
-  Context {A : Type} (Aeq : relation A) {Arefl : Equivalence Aeq}.
-  
 Section WellFoundedRecursion.
 
   Variable Rsub : set -> set.
-  Hypothesis Rsubm : morph1 Rsub.
-
+  Hypothesis Rsubm : Proper (eq_set==>eq_set) Rsub.
   Let R x y := x ∈ Rsub y.
+
   Local Instance Rm : Proper (eq_set==>eq_set==>iff) R.
 do 3 red; intros.
 unfold R; rewrite H,H0; reflexivity.
 Qed.
 
-  Variable F : (set -> A -> set) -> set -> A -> set.
-  Hypothesis Fm :
-      Proper ((eq_set ==> Aeq ==> eq_set) ==> eq_set ==> Aeq ==> eq_set) F.
+  Definition WFRle := clos_trans _ (fun x y => x==y \/ R x y).
 
-  Let F' f x a := F (fun y a => cond_set (R y x) (f y a)) x a.
-
-  Local Instance Fm' :
-      Proper ((eq_set ==> Aeq ==> eq_set) ==> eq_set ==> Aeq ==> eq_set) F'.
-do 4 red; intros.   
-unfold F'.
-apply Fm; trivial.
-do 2 red; intros.
-apply cond_set_morph; auto.
- apply Rm; trivial.
- apply H; trivial.
+  Instance WFRle_refl : Reflexive WFRle.
+red; intros; apply t_step; auto with *.
+Qed.
+  
+  Local Instance WFRlem : Proper (eq_set==>eq_set==>iff) WFRle.
+apply morph_impl_iff2; auto with *.
+do 4 red; intros.
+revert y y0 H H0; induction H1; intros.
+*apply t_step.
+ unfold R; rewrite <-H0, <-H1; trivial.
+*apply t_trans with y.
+ apply IHclos_trans1; auto with *.
+ apply IHclos_trans2; auto with *.
 Qed.
 
-  Let Fext' x a f f' :
-    (forall y y' a a', R y x -> y==y' -> Aeq a a' -> f y a == f' y' a') -> F' f x a == F' f' x a.
+  Variable F : (set -> A -> set) -> set -> A -> set.
+
+  Variable xx : set.
+  
+  Hypothesis Fext : forall x x' a a' f f',
+    WFRle x xx ->
+    (forall y y' a a', R y x -> y==y' -> Aeq a a' -> f y a == f' y' a') ->
+    x==x' ->
+    Aeq a a' ->
+    F f x a == F f' x' a'.
+
+  Definition F' f x a := F (fun y a => cond_set (R y x) (f y a)) x a.
+
+  Lemma Fext' x x' a a' f f' :
+    WFRle x xx ->
+    (forall y y' a a', R y x -> y==y' -> Aeq a a' -> f y a == f' y' a') ->
+    x==x' ->
+    Aeq a a' ->
+    F' f x a == F' f' x' a'.
 unfold F'; intros.
-apply Fm; auto with *.
-do 2 red; intros.
+apply Fext; trivial.
+intros.
 apply cond_set_morph2; intros; auto.
 apply Rm; auto with *.
 Qed.
@@ -293,89 +308,68 @@ Qed.
     Proper (eq_set==>Aeq==>eq_set) f ->
     (forall y a, R y x -> WFR_rel y a (f y a)) ->
     WFR_rel x a (F' f x a).
-red; intros.
-apply H2; auto with *.
+red; intros fm Hsub P Pm Hrec.
+apply Hrec; auto with *.
 intros.
-apply H0; trivial.
+apply Hsub; trivial.
 Qed.
 
-  Lemma WFR_rel_inv x a y :
+  Lemma WFR_rel_inv x a y (r:WFRle x xx):
     WFR_rel x a y ->
     exists2 f, Proper (eq_set==>Aeq==>eq_set) f &
       (forall y a, R y x -> WFR_rel y a (f y a)) /\
       y == F' f x a.
 intros.
 apply (@proj2 (WFR_rel x a y)).
+revert r.
 apply H; intros.
- do 4 red; intros.
+*do 4 red; intros.
+ apply impl_morph; [rewrite H0; reflexivity|intros lex].
+ apply and_iff_morphisml; [apply WFR_rel_morph; auto with *|].
+ intros w _.
+ apply ex2_morph'; intros f; [auto with *|intros fm].
  apply and_iff_morphism.
-  apply WFR_rel_morph; auto with *.
+  apply fa_morph; intros y3.
+  apply fa_morph; intros a'.
+  rewrite H0; reflexivity.
 
-  apply ex2_morph'; intros; auto with *.
-  apply and_iff_morphism.
-   apply fa_morph; intros y3.
-   apply fa_morph; intros z3.
-   rewrite H0; reflexivity.
-   apply eq_set_morph; trivial.
-   apply Fm; trivial.
-   do 2 red; intros.
-   apply cond_set_morph; intros; auto.
-    apply Rm; trivial.
-    apply H3; trivial.
-assert (WFR_relsub := fun x z h => proj1 (H1 x z h)); clear H1.
-split.
- apply WFR_rel_intro; trivial.
-
- exists f; auto with *.
-Qed.
-
-  (** Particular case of bottom values (do not rely on Fm) *)
-  Lemma WFR_rel_inv_norec x a y f0 :
-    WFR_rel x a y ->
-    (forall f' x' a', x==x' -> Aeq a a' -> F f0 x a == F f' x' a') ->
-    y == F f0 x a.
-intros r Fext.
-generalize (@reflexivity _ eq_set _ x) (@reflexivity _ Aeq _ a).
-pattern x at 1, a at 1, y.
-apply r; intros.
- do 4 red; intros.
- rewrite H,H0,H1; reflexivity.
-symmetry; apply Fext; auto with *.
+  apply eq_set_morph; trivial.
+  apply Fext'; [trivial| |trivial|trivial].
+  intros; apply fm; trivial.
+*assert (WFR_relsub := fun x a h =>
+                         proj1 (H1 x a h (t_trans _ _ _ _ _ (t_step _ _ _ _ (or_intror _ h)) r))); clear H1.
+ split.
+  apply WFR_rel_intro; intros; auto.
+  exists f; auto with *.
 Qed.
   
-  Lemma WFR_rel_fun :
-    forall x a y, WFR_rel x a y -> forall y', WFR_rel x a y' -> y == y'.
-intros x a y H.
-apply H; intros.
+  Lemma WFR_rel_fun x a y (r:WFRle x xx) : WFR_rel x a y -> forall y', WFR_rel x a y' -> y == y'.
+intros H.
+revert r; apply H; intros.
  do 4 red; intros.
+ apply impl_morph; [rewrite H0;reflexivity|intros].
  apply fa_morph; intros y'.
  rewrite H0,H1,H2; reflexivity.
-apply WFR_rel_inv in H2; destruct H2 as (f',fm',(?,?)).
+apply WFR_rel_inv in H2; [destruct H2 as (f',fm',(?,?))|trivial].
 rewrite H3; clear y' H3.
 apply Fext'; intros; auto with *.
 apply H1; trivial.
+ apply t_trans with x'; auto with *.
 rewrite H4 in H3|-*; rewrite H5; auto with *.
 Qed.
 
-  Lemma WFR_rel_repl_rel :
-    forall x a, repl_rel x (fun x' y => WFR_rel x' a y).
-split; intros.
- rewrite <-H0,<-H1; trivial.
-
- apply WFR_rel_fun with x0 a; trivial.
-Qed.
-
-  Lemma WFR_rel_def x a: Acc R x -> exists y, WFR_rel x a y.
-intros kx; revert a; generalize kx.
+  Lemma WFR_rel_def x a (r:WFRle x xx): Acc R x -> exists y, WFR_rel x a y.
+intros kx; revert r a; generalize kx.
 induction kx; intros.
 assert (forall x' a', R x' x -> uchoice_pred (fun y => WFR_rel x' a' y)).
 {intros.
- destruct H0 with x' a'; eauto.
+ destruct H0 with x' a';[ trivial|eauto using Acc_inv|apply t_trans with x; auto|].
  split; intros.
   rewrite <- H3; trivial.
  split; intros.
   exists x0; trivial.
- apply WFR_rel_fun with x' a'; trivial. }
+  apply WFR_rel_fun with x' a'; trivial.
+  apply t_trans with x; auto. }
 exists (F' (fun x' a' => uchoice (fun y => WFR_rel x' a' y)) x a).
 apply WFR_rel_intro; intros; trivial.
  do 3 red; intros.
@@ -384,7 +378,7 @@ apply WFR_rel_intro; intros; trivial.
 apply uchoice_def; auto.
 Qed.
 
-  Lemma WFR_rel_choice_pred : forall x a, Acc R x ->
+  Lemma WFR_rel_choice_pred x a (r:WFRle x xx) : Acc R x ->
     uchoice_pred (fun y => WFR_rel x a y).
 split; intros.
  rewrite <- H0; trivial.
@@ -395,6 +389,7 @@ Qed.
 
   Definition WFR x a := uchoice (fun y => WFR_rel x a y).
 
+  (* TODO avoid relying on this: *)
   Global Instance WFR_morph0 : Proper (eq_set ==> Aeq ==> eq_set) WFR.
 do 3 red; intros.
 unfold WFR.
@@ -403,63 +398,62 @@ red; intros.
 apply WFR_rel_morph; trivial.
 Qed.
 
-  (** Particular case of bottom values: needs less assumptions... *)
-  Lemma WFR_eqn_norec x a :
-    (forall y, ~ R y x) ->
-    (forall f' x' a', x==x' -> Aeq a a' -> F (fun _ _ => empty) x a == F f' x' a') ->
-    WFR x a == F (fun _ _ => empty) x a.
-clear Rsubm Fm.
-intros bot Fext.
-assert (WFR_rel x a (F (fun _ _ => empty) x a)).
-{red; intros.
- setoid_replace (F (fun _ _ => empty) x a) with (F' (fun _ _ => empty) x a).
- apply H0; [do 3 red; reflexivity|].
-  intros.
-  elim bot with (1:=H1).
- apply Fext; reflexivity. }
-assert (u: forall y y', WFR_rel x a y -> WFR_rel x a y' -> y==y').
-{intros.
- transitivity (F (fun _ _ => empty) x a).
-  apply WFR_rel_inv_norec with (1:=H0); trivial.
-  symmetry; eapply WFR_rel_inv_norec with (1:=H1); trivial. }
-symmetry; apply ZFrepl.uchoice_ext; trivial.
-split;[|split];trivial; intros.
- revert H1; apply WFR_rel_morph; auto with *.
- econstructor; apply H.
-Qed.
-
-  Lemma WFR_eqn0 x a : Acc R x -> WFR x a == F' WFR x a.
+  Lemma WFR_eqn' x a (r:WFRle x xx) :
+    Acc R x -> WFR x a == F' WFR x a.
 intros.
-specialize WFR_rel_choice_pred with (1:=H)(a:=a); intro.
+specialize WFR_rel_choice_pred with (1:=r)(2:=H)(a:=a); intro.
 apply uchoice_def in H0.
-apply WFR_rel_inv in H0.
-destruct H0 as (f,fm,(?,?)).
-unfold WFR at 1; rewrite H1.
+apply WFR_rel_inv in H0; trivial.
+destruct H0 as (f,fm,(?,ch)).
+unfold WFR at 1; rewrite ch.
 apply Fext'; intros; auto with *.
 eapply WFR_rel_fun with y a0; auto.
-rewrite H3.
+ apply t_trans with x; auto.
+rewrite H2.
 unfold WFR.
-rewrite H4.
+rewrite H3.
 apply uchoice_def.
 apply WFR_rel_choice_pred.
+ rewrite <-H2; apply t_trans with x; auto.
 apply Acc_inv with x; trivial.
-rewrite <- H3; trivial.
+rewrite <- H2; trivial.
 Qed.
 
-  Lemma WFR_eqn x a :
-    (forall f f',
-     (forall y y' a a', R y x -> y==y' -> Aeq a a' -> f y a == f' y' a') ->
-     F f x a == F f' x a) ->
-    Acc R x -> WFR x a == F WFR x a.
-intros Fext wfx.
-rewrite WFR_eqn0; trivial.
-unfold F'; apply Fext; trivial.
+  Lemma WFR_ext xx' a a' : Acc R xx -> xx == xx' -> Aeq a a' -> WFR xx a == WFR xx' a'.
+Proof using Aeqv Rsubm Fext.
 intros.
-rewrite cond_set_ok; trivial.
-apply WFR_morph0; auto with *.
+unfold WFR.
+apply uchoice_morph_raw.
+red; intros.
+apply WFR_rel_morph; trivial.
 Qed.
 
+
+  Lemma WFR_eqn0 x a (r:WFRle x xx): Acc R x -> WFR x a == F WFR x a.
+intros wfx.
+rewrite WFR_eqn'; [|trivial|trivial].
+unfold F'; apply Fext; auto with *.
+intros.
+rewrite cond_set_ok; [|trivial].
+apply WFR_morph0; trivial.
+Qed.
+    
 End WellFoundedRecursion.
+
+
+Definition WFR_eqn Rsub Rsubm F x Fext a :=
+  WFR_eqn0 Rsub Rsubm F x Fext x a (WFRle_refl _ x).
+(*
+WFR_eqn
+     : forall Rsub : set -> set,
+       morph1 Rsub ->
+       forall (F : (set -> A -> set) -> set -> A -> set) (x : set),
+       (forall (x0 x' : set) (a a' : A) (f f' : set -> A -> set),
+        WFRle Rsub x0 x ->
+        (forall (y y' : set) (a0 a'0 : A), y ∈ Rsub x0 -> y == y' -> Aeq a0 a'0 -> f y a0 == f' y' a'0) ->
+        x0 == x' -> Aeq a a' -> F f x0 a == F f' x' a') ->
+       forall a : A, Acc (fun x0 y : set => x0 ∈ Rsub y) x -> WFR Rsub F x a == F (WFR Rsub F) x a
+*)
 
 Local Notation E:=eq_set (only parsing).
 
@@ -491,7 +485,7 @@ apply cond_set_morph; [|apply fm; trivial].
 apply in_set_morph; [trivial|].
  apply H; auto with *.
 Qed.
-  
+(*  unused:
 Global Instance WFR_morph_gen2 R : Proper
   (pointwise_relation _ (pointwise_relation set (pointwise_relation A eq_set)) ==> E==>pointwise_relation A E) (WFR R).
 intros F F' eqF x y e a.
@@ -516,14 +510,12 @@ Qed.
   (forall f f' y a,
    Proper (eq_set==>Aeq==>eq_set) f ->
    Proper (eq_set==>Aeq==>eq_set) f' ->
-(*   clos_refl_trans _ R y x ->*)
    (forall z a, z ∈ R y -> f z a == f' z a) ->
    F f y a == F' f' y a) ->
   x == x' ->
-  a = a' ->
+  Aeq a a' ->
   WFR R F x a == WFR R' F' x' a'.
 intros eqR eqF eqx eqa.
-subst a'.
 apply ZFrepl.uchoice_morph_raw.
 red; intros x1 x1' eqx1.
 unfold WFR_rel.
@@ -531,6 +523,7 @@ apply fa_morph; intro P.
 apply fa_morph; intro Pm.
 apply impl_morph; intros.
 2:apply Pm; auto with *.
+clear a a' eqa.
 apply fa_morph; intro x'0.
 apply fa_morph; intro a'.
 apply fa_morph; intro f.
@@ -556,5 +549,6 @@ apply eqF; auto with *.
 apply in_set_morph; [reflexivity|].
  apply eqR; reflexivity.
 Qed.
+*)
   
 End PolymorphicWellFoundedRecursion.

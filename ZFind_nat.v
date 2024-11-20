@@ -215,13 +215,18 @@ apply union2_morph; apply cond_set_morph; auto with *.
 Qed.
 
 
-Lemma NATCASE_ZERO : NATCASE ZERO == fZ.
+Lemma NATCASE_ZERO_eq n : n == ZERO -> NATCASE n == fZ.
+intros eqn.
 unfold NATCASE.
 apply eq_set_ax; intros z.
 rewrite union2_ax; do 2 rewrite cond_set_ax.
 intuition auto with *.
 destruct H1.
-apply NATf_discr in H0; contradiction.
+rewrite eqn in H0; apply NATf_discr in H0; contradiction.
+Qed.
+
+Lemma NATCASE_ZERO : NATCASE ZERO == fZ.
+apply NATCASE_ZERO_eq; reflexivity.
 Qed.
 
 
@@ -246,17 +251,26 @@ split; intros.
   exists n; reflexivity.
 Qed.
 
-Lemma NATCASE_mt :
-  NATCASE empty == empty.
+Lemma NATCASE_mt_eq n :
+  n == empty ->
+  NATCASE n == empty.
 unfold NATCASE.
+intros eqn.
 apply empty_ext; red; intros.
 rewrite union2_ax in H; do 2 rewrite cond_set_ax in H.
 destruct H as [(_,?)|(_,(k,?))].
  (* ~ empty == ZERO *)
+ rewrite eqn in H.
  apply ZFpairs.discr_mt_couple in H; trivial.
 
  (* ~ empty == SUCC _ *)
+ rewrite eqn in H.
  apply ZFpairs.discr_mt_couple in H; trivial.
+Qed.
+
+Lemma NATCASE_mt :
+  NATCASE empty == empty.
+apply NATCASE_mt_eq; reflexivity.
 Qed.
 
 Lemma NATCASE_typ :

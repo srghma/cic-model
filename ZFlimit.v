@@ -233,6 +233,8 @@ rewrite ZFrepl.WFR_eqn; auto with *.
  red; intros.
  apply ZFrepl.WFR_morph0; trivial.
 *intros.
+ apply WFRle_ord_incl in H0; trivial.
+ destruct H0.
  unfold G.  
  apply Fm; auto with *.
  red; intros.

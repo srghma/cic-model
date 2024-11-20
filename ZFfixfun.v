@@ -38,7 +38,7 @@ red; intros.
 apply cc_app_morph; auto with *.
 Qed.
 
-  Let F'ext : forall o f f', isOrd o -> eq_fun o f f' -> F' f o == F' f' o.
+  Let F'ext : forall o o' f f', isOrd o -> o==o' -> eq_fun o f f' -> F' f o == F' f' o'.
 intros.
 unfold F'.
 apply cc_lam_ext; intros; auto with *.

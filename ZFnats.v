@@ -457,23 +457,51 @@ apply union2_morph.
    rewrite H2; reflexivity.
 Qed.
 
-Lemma natrec_body_ext f g x F F' :
-   morph2 g ->
-   (forall y y', y ∈ N /\ y ∈ x -> y == y' -> F y == F' y') ->
-   natrec_body f g F x == natrec_body f g F' x.
-intros gm Feq.
-apply union2_morph; auto with *.
-apply cond_set_morph2; auto with *.
-intros (k,tyk,eqx).
-apply gm; auto with *.
-apply Feq; auto with *.
-rewrite eqx.
-rewrite pred_succ_eq; auto.
-split; trivial.
-apply succ_intro1.
-reflexivity.
+Lemma natrec_body_ext  f g :
+  morph2 g ->
+  forall (x x' : set) (F F' : set -> set),
+  (forall y y' : set, y ∈ subset N (fun n0 : set => n0 < x) -> y == y' -> F y == F' y') ->
+  x == x' ->
+  natrec_body f g F x == natrec_body f g F' x'.
+intros gm x x' F F' eqF eqx.
+apply union2_morph.
+*apply cond_set_morph2; auto with *.
+ rewrite eqx; reflexivity.
+*apply cond_set_morph2; auto with *.
+ +apply ex2_morph; [red; reflexivity| intro; rewrite eqx; reflexivity].
+ +intros (k,tyk,xsuc).
+  apply gm; [rewrite eqx; reflexivity|].
+  apply eqF; [|rewrite eqx; reflexivity].
+  rewrite xsuc.
+  rewrite pred_succ_eq; auto.
+  apply subset_intro; trivial.
+  rewrite xsuc.  
+  apply succ_intro1.
+  reflexivity.
 Qed.
 
+(*
+                                       Lemma natrec_body_ext f g x x' F F' :
+   morph2 g ->
+   (forall y y', y ∈ N /\ y ∈ x -> y == y' -> F y == F' y') ->
+   x == x' ->
+   natrec_body f g F x == natrec_body f g F' x'.
+intros gm Feq eqx.
+apply union2_morph.
+*apply cond_set_morph2; auto with *.
+ rewrite eqx; reflexivity.
+*apply cond_set_morph2; auto with *.
+ +apply ex2_morph; [red; reflexivity| intro; rewrite eqx; reflexivity].
+ +intros (k,tyk,xsuc).
+  apply gm; [rewrite eqx; reflexivity|].
+  apply Feq; [|rewrite eqx; reflexivity].
+  rewrite xsuc.
+  rewrite pred_succ_eq; auto.
+  split; trivial.
+  apply succ_intro1.
+  reflexivity.
+Qed.
+*)
 Lemma natrec_body0 f g F n :
   n==zero -> natrec_body f g F n == f.
 unfold natrec_body.
@@ -512,11 +540,6 @@ apply WFR_morph; auto with *.
  apply natrec_body_morph; trivial.
 Qed.
 
-Global Instance natrec_morph_gen2 f g : morph1 (natrec f g).
-apply WFR_morph_gen2.
-red; red; reflexivity.
-Qed.
-
 Lemma N_acc n :
   n ∈ N -> Acc (fun n m => n ∈ subset N (fun n=>n<m)) n.
 intros ntyp.
@@ -545,28 +568,37 @@ apply N_ind with (4:=ntyp); intros.
   apply succ_typ; trivial.
 Qed.
 
-Lemma natrec_0 f g :
-  natrec f g zero == f.
-unfold natrec; rewrite WFR_eqn_norec.
- apply natrec_body0; auto with *.
-
- red; intros.
- apply subset_elim2 in H.
- destruct H as (x',_,?).
- apply empty_ax in H; contradiction.
-
- intros.
- rewrite natrec_body0; auto with *.
- rewrite natrec_body0; auto with *.
+Lemma zero_min x y : ZFrepl.WFRle (fun m => subset N(fun n=>n<m)) x y -> y==zero -> x==zero.
+induction 1; intros;auto.
+destruct H; [rewrite H; trivial|].  
+apply subset_elim2 in H; destruct H.
+rewrite H0 in H1.
+apply empty_ax in H1; contradiction.
 Qed.
 
 Lemma natrec_0_eq f g n :
-  morph2 g ->
   n == zero ->
   natrec f g n == f.
-intros.
-rewrite H0.
-apply natrec_0.
+intros eqn.
+unfold natrec; rewrite WFR_eqn.
+*apply natrec_body0; auto with *.
+
+*apply Rsub_morph.
+
+*intros.
+ apply zero_min in H; [|trivial].
+ rewrite natrec_body0; trivial.
+ rewrite H1 in H.
+ rewrite natrec_body0; trivial.
+ reflexivity.
+
+*apply N_acc; trivial.
+ rewrite eqn; apply zero_typ.
+Qed.
+
+Lemma natrec_0 f g :
+  natrec f g zero == f.
+apply natrec_0_eq; reflexivity.
 Qed.
 
 Lemma natrec_S_eq f g n k :
@@ -583,22 +615,25 @@ rewrite WFR_eqn.
  rewrite union2_mt_l.
  apply pred_morph in H1; rewrite pred_succ_eq in H1; trivial.
  apply H; trivial.
- apply WFR_morph0; trivial.
+ apply WFR_ext; trivial.
+  apply Rsub_morph.
+  rewrite <- H1 in H0.
+  intros; apply natrec_body_ext; trivial.
+
+  rewrite <- H1 in H0.
+  apply N_acc; trivial.
+(*
+  intros.
+  apply natrec_body_ext; auto with *.*)
 
  exists k; auto with *.
 
  rewrite H1; apply discr.
 
 *apply Rsub_morph.
-
-*apply natrec_body_morph; auto with *.
  
 *intros.
  apply natrec_body_ext; trivial.
- intros.
- destruct H3.
- apply H2; trivial.
- apply subset_intro; trivial.
 
 *apply N_acc; trivial.
  rewrite H1; apply succ_typ; trivial.
@@ -628,34 +663,6 @@ elim H1 using N_ind; intros.
 Qed.
 
 End Natrec.
- (*
-Lemma natrec_ext f f' g g' :
-  f == f' ->
-  (forall n n', n ∈ N -> n==n' -> forall x x', x==x' -> g n x == g' n' x') ->
-  (eq_set==>eq_set)%signature (natrec f g) (natrec f' g').
-red; intros.
-unfold natrec.
-apply ZFwf.WellFoundedRecursion2.WFR_morph; trivial.
- clear; do 2 red; intros.
- rewrite H,H0; reflexivity.
-
- do 2 red; intros.
- apply union2_morph.
-  rewrite H,H3; reflexivity.
-
-  apply cond_set_morph2.
-   apply ex2_morph.  
-    reflexivity.
-    red; intros.
-    rewrite H3; reflexivity.
-
-   intros (k,tyk,eqx1).
-   apply H0.
-    rewrite eqx1,pred_succ_eq; trivial.
-    rewrite H3; reflexivity.
-    apply H2; rewrite H3; reflexivity.
-Qed.
-*)
 
 (** Addition *)
 
@@ -663,9 +670,18 @@ Definition add m n := natrec m (fun _ => succ) n.
 
 Instance add_morph : morph2 add.
 do 3 red; intros.
-apply WFR_morph_gen2; auto with *.
-red; red; intros.
-rewrite H; reflexivity.
+apply WFR_morph; auto with *.
+*red; intros.
+ apply subset_morph; [reflexivity|].
+ red; intros.
+ rewrite H1; reflexivity.
+*red; red; intros.
+ apply union2_morph; [rewrite H,H2; reflexivity|].
+ apply cond_set_morph.
+  apply ex2_morph; [reflexivity|intro; rewrite H2; reflexivity].
+ apply succ_morph.
+ apply H1.
+ rewrite H2; reflexivity.
 Qed.
 
 Lemma add0 n : add n zero == n.

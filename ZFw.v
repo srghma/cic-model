@@ -1339,14 +1339,15 @@ apply Fm; trivial.
 Qed.  
 Hint Resolve Rm Gm : core.
 
-Let Gext x f f' :
-   Acc R x ->
-   (forall y y', R y x -> y == y' -> f y == f' y') ->
-   G f x == G f' x.
+Let Gext x x' f f' :
+  x==x' ->
+  (forall y y', R y x -> y == y' -> f y == f' y') ->
+  G f x == G f' x'.
 intros.
 unfold G.
-apply Fm; auto with *.
+apply Fm; [rewrite H;reflexivity| |trivial].
 apply cc_lam_ext; auto with *.
+rewrite H; reflexivity.
 Qed.
 
      
@@ -1411,7 +1412,7 @@ Qed.
   w ∈ O ->
   WSREC' w ∈ P (Wf (fsub w)) w.
 intros; unfold WSREC'.
-generalize H; eapply WFR_ind with (x:=w); intros; auto with *.
+generalize H; eapply WFR_ind with (xx:=w); intros; auto with *.
 *do 3 red; intros.
  rewrite H0,H1; reflexivity.
 *apply f_typ.

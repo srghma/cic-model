@@ -6,6 +6,7 @@ Require Import ZF ZFnats ZFord ZFstable ZFfix.
 Instance VN_morph : morph1 VN.
 do 2 red; intros.
 apply TI_morph; trivial.
+(*apply power_morph.*)
 Qed.
 
   Lemma VN_def : forall x z,

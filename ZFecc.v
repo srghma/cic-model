@@ -222,7 +222,8 @@ Qed.
 Lemma omega_incl_ecc : ZFord.omega ⊆ ecc_succ empty.
 red; intros.
 unfold ZFord.omega, ZFord.ord_sup in H.
-rewrite sup_ax in H; [|apply ZFord.omega_aux_m].
+assert (aux := ZFord.omega_aux_m).
+rewrite sup_ax in H; [|apply ZFord.omega_aux_ext].
 destruct H as (n, tyn, tyz).
 apply G_trans with (2:=tyz); trivial.
 clear tyz.

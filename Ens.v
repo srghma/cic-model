@@ -519,40 +519,72 @@ apply eq_intro; intros.
 Qed.
 
 (* Well-founded recursion *)
+(*
+Parameter WFR
+     : forall {A}, relation A -> (set -> set) -> ((set -> A -> set) -> set -> A -> set) -> set -> A -> set
+Parameter WFR_eqn
+     : forall {A : Type} (Aeq : relation A),
+       Equivalence Aeq ->
+       forall R : set -> set,
+       Proper (eq_set ==> eq_set) R ->
+       forall (F : (set -> A -> set) -> set -> A -> set) (xx : set),
+       (forall (x x' : set) (a a' : A) (f f' : set -> A -> set),
+        clos_refl_trans set (fun x y => in_set x (R y)) x xx ->
+        Acc (fun x y => in_set x (R y)) x ->
+        (forall (y y' : set) (a a' : A),
+         in_set y (R x) -> eq_set y y' -> Aeq a a' -> eq_set (f y a) (f' y' a')) ->
+        eq_set x x' -> Aeq a a' -> eq_set (F f x a) (F f' x' a')) ->
+       forall a : A, Acc (fun x y : set => in_set x (R y)) xx -> eq_set (WFR R F xx a) (F (WFR R F) xx a)
+WFR_eqn
+     : forall Rsub : set -> set,
+       morph1 Rsub ->
+       forall (F : (set -> A -> set) -> set -> A -> set) (x : set),
+       (forall (x0 x' : set) (a a' : A) (f f' : set -> A -> set),
+        WFRle Rsub x0 x ->
+        (forall (y y' : set) (a0 a'0 : A), y ∈ Rsub x0 -> y == y' -> Aeq a0 a'0 -> f y a0 == f' y' a'0) ->
+        x0 == x' -> Aeq a a' -> F f x0 a == F f' x' a') ->
+       forall a : A, Acc (fun x0 y : set => x0 ∈ Rsub y) x -> WFR Rsub F x a == F (WFR Rsub F) x a
 
-(* The same, building a (class-level) function by recursion.
-   This avoids the constrain that the parameter should range in a proper set... *)
-Section RelFixRecFamily.
+
+*)
+Section WellFoundedRecursion.
+  Context {A : Type} (Aeq : relation A) {Arefl : Equivalence Aeq}.
+
   Hypothesis R : set -> set.
   Hypothesis Rm : Proper (eq_set==>eq_set) R.
   Let R' x y := in_set x (R y).
-  Hypothesis F : forall{A:Type},(set->A->set)->set->A->set.
-  Hypothesis Fext : forall x x' z z' f f',
-    Acc R' x ->
-    (forall y y' z z',
-        R' y x -> eq_set y y' -> eq_set z z' -> eq_set (f y z) (f' y' z')) ->
-    eq_set x x' ->
-    eq_set z z' ->
-    eq_set (F f x z) (F f' x' z').
+  Hypothesis F : (set -> A -> set) -> set -> A -> set.
+  Variable xx : set.
 
-  Fixpoint WFR_aux (x:set) (z:set) (h:Acc(fun x y => in_set x (R y)) x) : set :=
-    F (fun y z =>
-         union (sup {i:idx (R x)|eq_set (elts (R x) i) y}
-                  (fun i => WFR_aux (elts (R x) (proj1_sig i)) z
-                              (Acc_inv h (in_set_intro (R x) (proj1_sig i)))))) x z.
-
-  Definition WFR (x z:set) :=
-    union (sup (Acc (fun x y => in_set x (R y)) x) (fun h => WFR_aux x z h)).
+  Let Rle := clos_trans _ (fun x y => eq_set x y\/R' x y).
   
-  Lemma WFR_auxm x x' z z' (h:Acc R' x) (h':Acc R' x'):
-    eq_set x x' -> eq_set z z' ->
-    eq_set (WFR_aux x z h) (WFR_aux x' z' h').
-revert x x' z z' h h'.
+  Hypothesis Fext : forall x x' a a' f f',
+    Rle x xx ->
+    (forall y y' a a',
+        R' y x -> eq_set y y' -> Aeq a a' -> eq_set (f y a) (f' y' a')) ->
+    eq_set x x' ->
+    Aeq a a' ->
+    eq_set (F f x a) (F f' x' a').
+
+  Fixpoint WFR_aux (x:set) (a:A) (h:Acc R' x) : set :=
+    F (fun y a =>
+         union (sup {i:idx (R x)|eq_set (elts (R x) i) y}
+                  (fun i => WFR_aux (elts (R x) (proj1_sig i)) a
+                              (Acc_inv h (in_set_intro (R x) (proj1_sig i))))))
+      x a.
+
+  Definition WFR (x:set)(a:A) :=
+    union (sup (Acc R' x) (fun h => WFR_aux x a h)).
+  
+  Lemma WFR_auxm x x' a a' (h:Acc R' x) (h':Acc R' x') (r:Rle x xx) :
+    eq_set x x' -> Aeq a a' ->
+    eq_set (WFR_aux x a h) (WFR_aux x' a' h').
+revert x x' a a' h h' r.
 fix aux 5.
 destruct h; destruct h'; simpl.
-intros eqx eqz.
-apply Fext; [constructor;trivial| |trivial|trivial].
-clear z z' eqz.
+intros lexx eqx eqa.
+apply Fext; [trivial| |trivial|trivial].
+clear a a' eqa.
 intros.
 destruct H as (i,?).
 assert (eR := Rm _ _ eqx).
@@ -569,64 +601,97 @@ apply eq_set_sym; apply union_sup_eq.
  apply eq_set_trans with (2:=eqy). 
  apply eq_set_sym; trivial. }
 intros (j',eqy'); simpl.
-apply eq_set_sym; apply aux; trivial.
+apply eq_set_sym; apply aux; [| |trivial].
+{apply t_trans with x; [|trivial].
+ apply t_step; right; exists i'; apply eq_set_refl. }
 apply eq_set_trans with (1:=eqy). 
 apply eq_set_trans with (1:=H0). 
 apply eq_set_sym; trivial.
 Qed.
 
-Lemma WFR_unfold x z (h:Acc R' x) : eq_set (WFR_aux x z h) (WFR x z).
+Lemma WFR_unfold x a (h:Acc R' x) (r:Rle x xx) : eq_set (WFR_aux x a h) (WFR x a).
 unfold WFR.
 apply eq_set_sym; apply union_sup_eq; [auto|].
 intros.
-apply WFR_auxm; apply eq_set_refl.
+apply WFR_auxm; [trivial|apply eq_set_refl | reflexivity].
 Qed.
 
-Lemma WFR_eqn x z :
-  Acc R' x ->
-  eq_set (WFR x z) (F WFR x z).
+Lemma WFR_eqn a :
+  Acc R' xx ->
+  eq_set (WFR xx a) (F WFR xx a).
 intros h.
-apply eq_set_trans with (1:=eq_set_sym _ _ (WFR_unfold _ _ h)).  
-revert x z h; fix aux 3; destruct h; simpl.
-apply Fext;[constructor;trivial| |apply eq_set_refl|apply eq_set_refl].
-clear z; intros.
-assert (r' : R' y' x).
+assert (r:Rle xx xx) by (apply t_step; left; apply eq_set_refl).
+apply eq_set_trans with (1:=eq_set_sym _ _ (WFR_unfold _ _ h r)).  
+clear r.
+destruct h as (acc); simpl.
+apply Fext;[apply t_step;left;apply eq_set_refl| |apply eq_set_refl|reflexivity].
+clear a; intros.
+assert (r' : R' y' xx).
 {apply in_reg with y; trivial. }
-apply eq_set_trans with (2:=WFR_unfold _ _ (a _ r')).
+assert (r: Rle y' xx) by (apply t_step;right; trivial).
+apply eq_set_trans with (2:=WFR_unfold _ _ (acc _ r') r).
 destruct H as (i,?).
 apply union_sup_eq.
 *intros P h; apply h; exists i.
  apply eq_set_sym; trivial.
 *intros; apply WFR_auxm; trivial.
+ {destruct i0 as (i',ei'); simpl.
+  apply t_step; right; exists i'; apply eq_set_refl. }
  apply eq_set_trans with y; trivial. 
  apply (proj2_sig i0).
 Qed.
 
-End RelFixRecFamily.
-(*
-WFREC_eqn
-     : forall R : set -> set,
-       Proper (eq_set ==> eq_set) R ->
-       forall F : (set -> set) -> set -> set,
-       (forall (x x' : set) (f f' : set -> set),
-        Acc (fun x0 y : set => in_set x0 (R y)) x ->
-        (forall y y' : set, in_set y (R x) -> eq_set y y' -> eq_set (f y) (f' y')) ->
-        eq_set x x' -> eq_set (F f x) (F f' x')) ->
-       forall x : set, Acc (fun x0 y : set => in_set x0 (R y)) x -> eq_set (WFREC R F x) (F (WFREC R F) x)
-*)
-(*
+End WellFoundedRecursion.
 
-Parameter WFR : (set -> set -> Prop) -> ((set -> set) -> set -> set) -> set -> set.
-Parameter WFR_ax : forall R : set -> set -> Prop,
-       Proper (eq_set ==> eq_set ==> iff) R ->
-       forall F : (set -> set) -> set -> set,
-       Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) F ->
-       (forall (x : set) (f f' : set -> set),
-        Acc R x ->
-        (forall y y' : set, R y x -> eq_set y y' -> eq_set (f y) (f' y')) -> eq_set (F f x) (F f' x)) ->
-       forall x : set, Acc R x -> eq_set (WFR R F x) (F (WFR R F) x).
-*)
+Local Notation E:=eq_set (only parsing).
 
+Lemma WFR_morph {A} (Aeq:relation A) {Aeqv : Equivalence Aeq} :
+    Proper ((E==>E)==>((E==>Aeq==>E)==>E==>Aeq==>E)==>E==>Aeq==>E) WFR.
+intros Rs Rs' eqRs F F' eqF x x' eqx a a' eqa.
+pose (R:= fun x y => in_set x (Rs y)).
+pose (R':= fun x y => in_set x (Rs' y)).
+assert (accm : (eq_set ==> iff)%signature (Acc R) (Acc R')). 
+{intros y y' eqy.
+ split; intros acc.
+ *revert y' eqy; induction acc; constructor; intros.
+  apply H0 with y; [|apply eq_set_refl].
+  apply eq_elim with (Rs' y'); trivial.
+  apply eq_set_sym; apply eqRs; trivial.
+ *revert y eqy; induction acc; constructor; intros.
+  apply H0 with y0; [|apply eq_set_refl].
+  apply eq_elim with (Rs y); trivial.
+  apply eqRs; trivial. }
+assert (aux : forall h h', eq_set (WFR_aux Rs F x a h) (WFR_aux Rs' F' x' a' h')).
+{revert x x' eqx a a' eqa; fix aux 7; destruct h; destruct h'; simpl.
+ apply eqF; trivial.
+ clear a a' eqa.
+ intros y y' eqy a a' eqa.
+ apply union_morph.
+ simpl.
+ apply eqRs in eqx.
+ split.
+ *intros (i,iny); simpl.
+  destruct eq_elim with (x:=elts (Rs x) i) (2:=eqx) as (j,iny').
+   exists i; apply eq_set_refl.
+  exists (exist _ j (eq_set_trans _ _ _ (eq_set_sym _ _ iny') (eq_set_trans _ _ _ iny eqy))); simpl.
+  apply aux; trivial.
+ *intros (j,iny'); simpl.
+  destruct eq_elim with (x:=elts (Rs' x') j) (2:=eq_set_sym _ _ eqx) as (i,iny).
+   exists j; apply eq_set_refl.
+  exists (exist _ i (eq_set_trans _ _ _ (eq_set_sym _ _ iny) (eq_set_trans _ _ _ iny' (eq_set_sym _ _ eqy)))); simpl.
+  apply aux; trivial.
+  apply eq_set_sym; trivial. }
+unfold WFR.
+apply union_morph.
+simpl.
+split; intros.
+*assert (j : Acc R' x').
+ {apply (accm _ _ eqx); exact i. }
+ exists j; trivial.
+*assert (i : Acc R x).
+ {apply (accm _ _ eqx); exact j. }
+ exists i; trivial.
+Qed.
 
 (* We only use the following instance of unique choice for
    replacement: *)

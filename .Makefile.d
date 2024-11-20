@@ -277,9 +277,9 @@ ZFord_equiv.vos ZFord_equiv.vok ZFord_equiv.required_vos: ZFord_equiv.v ZFord.vo
 ZFord_plump.vo ZFord_plump.glob ZFord_plump.v.beautified ZFord_plump.required_vo: ZFord_plump.v lib/basic.vo ZF.vo ZFnats.vo ZFrepl.vo
 ZFord_plump.vio: ZFord_plump.v lib/basic.vio ZF.vio ZFnats.vio ZFrepl.vio
 ZFord_plump.vos ZFord_plump.vok ZFord_plump.required_vos: ZFord_plump.v lib/basic.vos ZF.vos ZFnats.vos ZFrepl.vos
-ZFord.vo ZFord.glob ZFord.v.beautified ZFord.required_vo: ZFord.v ZFnats.vo ZFwf.vo ZFwfr.vo ZF.vo ZFpairs.vo ZFrelations.vo
-ZFord.vio: ZFord.v ZFnats.vio ZFwf.vio ZFwfr.vio ZF.vio ZFpairs.vio ZFrelations.vio
-ZFord.vos ZFord.vok ZFord.required_vos: ZFord.v ZFnats.vos ZFwf.vos ZFwfr.vos ZF.vos ZFpairs.vos ZFrelations.vos
+ZFord.vo ZFord.glob ZFord.v.beautified ZFord.required_vo: ZFord.v ZFnats.vo ZFwf.vo ZFwfr.vo ZF.vo ZFpairs.vo
+ZFord.vio: ZFord.v ZFnats.vio ZFwf.vio ZFwfr.vio ZF.vio ZFpairs.vio
+ZFord.vos ZFord.vok ZFord.required_vos: ZFord.v ZFnats.vos ZFwf.vos ZFwfr.vos ZF.vos ZFpairs.vos
 ZFplump.vo ZFplump.glob ZFplump.v.beautified ZFplump.required_vo: ZFplump.v lib/basic.vo ZF.vo ZFnats.vo ZFrepl.vo
 ZFplump.vio: ZFplump.v lib/basic.vio ZF.vio ZFnats.vio ZFrepl.vio
 ZFplump.vos ZFplump.vok ZFplump.required_vos: ZFplump.v lib/basic.vos ZF.vos ZFnats.vos ZFrepl.vos

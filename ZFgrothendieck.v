@@ -291,7 +291,7 @@ Opaque dep_func func cc_prod lam app cc_lam cc_app.
 
   Lemma G_TR F o :
     Proper ((eq_set==>eq_set)==>eq_set==>eq_set) F ->
-    (forall o f f', isOrd o -> eq_fun o f f' -> F f o == F f' o) ->
+    (forall o o' f f', isOrd o -> o==o' -> eq_fun o f f' -> F f o == F f' o') ->
     isOrd o ->
     o ∈ U ->
     (forall f o, ext_fun o f -> o ∈ U ->

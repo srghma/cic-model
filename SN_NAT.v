@@ -319,12 +319,12 @@ apply in_int_not_kind in H.
 2:discriminate.
 destruct H.
 red in H; rewrite ElNat_eq in H.
+assert (aux : morph2(fun n0 y => app (app (int g i) n0) y)).
+{do 3 red; intros.
+ rewrite H2,H3; reflexivity.  }
 rewrite beta_eq.
  rewrite NAT_RECT_SUCC; trivial.
   reflexivity.
-
-  do 3 red; intros.
-  rewrite H2,H3; reflexivity. 
 
  red; intros; apply ZFsum.inr_morph; trivial.
 
