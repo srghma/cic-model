@@ -712,3 +712,73 @@ apply natrec_typ with (P:=fun _=>N); auto with *.
  do 3 red; intros; apply succ_morph; trivial.  
 intros; apply succ_typ; trivial.
 Qed.
+
+(* Bijection NxN = N *)
+Require Import Arith Lia.
+
+Require Import ZFpairs.
+
+Definition NN2N xy :=
+  union (subset N (fun z => exists x' y', fst xy==nat2set x' /\ snd xy==nat2set y' /\
+                                            z=nat2set (nn2n x' y'))).
+
+Instance NN2N_morph : morph1 NN2N.
+unfold NN2N; intros ?? h.
+apply union_morph; apply subset_morph;[reflexivity|].
+intros ??.
+apply ex_morph; intros x'.
+apply ex_morph; intros y'.
+rewrite h; reflexivity.
+Qed.
+
+Lemma NN2N_def x y :
+  NN2N (couple (nat2set x) (nat2set y)) == nat2set(nn2n x y).
+apply union_subset_singl with (2:=reflexivity _).
+*apply nat2set_typ.
+*exists x; exists y.
+ rewrite fst_def, snd_def; auto with *.
+*intros. 
+ destruct H1 as (x1&y1&?&?&?).
+ destruct H2 as (x2&y2&?&?&?).
+ rewrite H4, H6.
+ rewrite H1 in H2; rewrite H3 in H5.
+ apply nat2set_inj in H2.
+ apply nat2set_inj in H5.
+ subst x2 y2; reflexivity.
+Qed.
+
+Lemma NN2N_typ : typ_fun NN2N (prodcart N N) N.
+red; intros.
+rewrite surj_pair with (1:=H).
+destruct (nat2set_reflect (fst x)); [apply fst_typ in H; trivial|].
+destruct (nat2set_reflect (snd x)); [apply snd_typ in H; trivial|].
+rewrite H0,H1.
+rewrite NN2N_def.
+apply nat2set_typ.
+Qed.
+
+Lemma NN2N_inj xy1 xy2 :
+  xy1 ∈ prodcart N N -> xy2 ∈ prodcart N N -> NN2N xy1 == NN2N xy2 -> xy1 == xy2.
+intros.
+rewrite surj_pair with (1:=H) in H1|-*.
+rewrite surj_pair with (1:=H0) in H1|-*.
+destruct (nat2set_reflect (fst xy1)); [apply fst_typ in H; trivial|].
+destruct (nat2set_reflect (snd xy1)); [apply snd_typ in H; trivial|].
+destruct (nat2set_reflect (fst xy2)); [apply fst_typ in H0; trivial|].
+destruct (nat2set_reflect (snd xy2)); [apply snd_typ in H0; trivial|].
+rewrite H2,H3,H4,H5 in H1|-*.
+rewrite !NN2N_def in H1.
+apply nat2set_inj in H1.
+apply nn2n_inj in H1.
+destruct H1; subst x1 x2; reflexivity.
+Qed.
+
+Lemma NN2N_surj n : n ∈ N -> exists xy, xy ∈ prodcart N N /\ n == NN2N xy.
+intros.
+destruct (nat2set_reflect n) as (k,?); [trivial|].
+destruct (nn2n_surj k) as (x & y & e).
+exists (couple (nat2set x)(nat2set y)); split.
+apply couple_intro; apply nat2set_typ.
+rewrite H0; subst k.
+symmetry; apply NN2N_def.
+Qed.

@@ -176,8 +176,8 @@ ZFecc.vo ZFecc.glob ZFecc.v.beautified ZFecc.required_vo: ZFecc.v ZF.vo ZFpairs.
 ZFecc.vos ZFecc.vok ZFecc.required_vos: ZFecc.v ZF.vos ZFpairs.vos ZFnats.vos ZFgrothendieck.vos ZFrelations.vos ZFcoc.vos
 ZFbot.vo ZFbot.glob ZFbot.v.beautified ZFbot.required_vo: ZFbot.v ZFpairs.vo ZFrelations.vo
 ZFbot.vos ZFbot.vok ZFbot.required_vos: ZFbot.v ZFpairs.vos ZFrelations.vos
-ZFnats.vo ZFnats.glob ZFnats.v.beautified ZFnats.required_vo: ZFnats.v ZF.vo ZFwfr.vo ZFwf.vo
-ZFnats.vos ZFnats.vok ZFnats.required_vos: ZFnats.v ZF.vos ZFwfr.vos ZFwf.vos
+ZFnats.vo ZFnats.glob ZFnats.v.beautified ZFnats.required_vo: ZFnats.v ZF.vo ZFwfr.vo ZFwf.vo ZFpairs.vo
+ZFnats.vos ZFnats.vok ZFnats.required_vos: ZFnats.v ZF.vos ZFwfr.vos ZFwf.vos ZFpairs.vos
 ZFordcl.vo ZFordcl.glob ZFordcl.v.beautified ZFordcl.required_vo: ZFordcl.v ZFnats.vo ZFrepl.vo
 ZFordcl.vos ZFordcl.vok ZFordcl.required_vos: ZFordcl.v ZFnats.vos ZFrepl.vos
 ZFord_equiv.vo ZFord_equiv.glob ZFord_equiv.v.beautified ZFord_equiv.required_vo: ZFord_equiv.v ZFord.vo ZFplump.vo ZFordcl.vo

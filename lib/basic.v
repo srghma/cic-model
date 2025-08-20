@@ -3,12 +3,13 @@
 
 Set Implicit Arguments.
 (*Require Export Utf8_core.*)
-Require Export Peano_dec Compare_dec.
-Require Export List.
-Require Export Relations Relation_Operators Transitive_Closure.
-Require Import Wellfounded.
-Require Export Coq.Program.Basics.
-Require Export Setoid Morphisms Morphisms_Prop.
+Require Export
+  Peano_dec Compare_dec
+  List
+  Relations Relation_Operators Transitive_Closure
+  Setoid Morphisms Morphisms_Prop
+  Program.Basics.
+Require Import Wellfounded. (* do not export: sup conflicts with ZF.sup *)
 Export ProperNotations.
 
 Hint Resolve t_step rt_step rt_refl: core.
@@ -80,6 +81,11 @@ destruct H0.
 exists x0.
 apply H; trivial.
 Qed.*)
+
+Lemma ex_ex2 A P Q : @ex2 A P Q <-> exists x:A, P x /\ Q x.
+split; destruct 1; [eauto|].
+destruct H; eauto.
+Qed.
 
 Instance ex_morph : forall A,
   Proper (pointwise_relation A iff ==> iff) (@ex A).
@@ -334,3 +340,122 @@ revert n; induction m; simpl; intros; auto.
 rewrite IHm; trivial.
 rewrite plus_n_Sm; trivial.
 Qed.
+
+(* Bijection between nat² or list nat and nat *)
+
+Fixpoint nat_sum (f:nat->nat) n :=
+  match n with
+  | 0 => 0
+  | S k => nat_sum f k + f k
+  end.
+
+Lemma nat_sum_mono f m n : (m<=n)%nat -> (nat_sum f m <= nat_sum f n)%nat.
+induction 1; simpl; auto with arith.
+Qed.
+ 
+(* nn2n1 : iso NxN -> {(x,y) | y<=x} *)
+Definition nn2n1 (x y:nat) := (x+y, y).
+ 
+Lemma nn2n1_inj x1 x2 y1 y2 : nn2n1 x1 y1 = nn2n1 x2 y2 -> x1=x2 /\ y1=y2.
+unfold nn2n1.
+intros; injection H; intros.
+lia.
+Qed.
+
+Lemma nn2n1_surj xy : (snd xy <= fst xy)%nat -> exists x y, nn2n1 x y = xy.
+unfold nn2n1.
+exists (fst xy - snd xy); exists (snd xy).
+destruct xy as (x0,y0); simpl in *.
+  f_equal.
+apply PeanoNat.Nat.sub_add; trivial.
+Qed.
+ 
+(* nn2n2 : iso {(x,y)|y<=x} -> N *)
+Definition nn2n2 (xy:nat*nat) :=
+  nat_sum (fun x=>x) (S (fst xy)) + snd xy.
+
+Lemma nn2n2_surj : forall m, exists x y, (y<=x)%nat /\ nn2n2 (x,y) = m.
+unfold nn2n2.
+induction m; [exists 0;exists 0; split; [|simpl]; auto with arith|].
+destruct IHm as (x & y & ? & ?).
+destruct (Peano_dec.eq_nat_dec x y).
+*subst y.
+ exists (S x); exists 0; simpl in *; split; [auto with arith|].
+ rewrite <-plus_n_Sm.
+ rewrite H0; auto with arith.
+*exists x; exists (S y); simpl in *; lia.
+Qed.   
+
+Lemma nn2n2_inj x1 x2 y1 y2 :
+  (y1 <= x1)%nat -> (y2 <= x2)%nat -> nn2n2 (x1,y1) = nn2n2 (x2,y2) -> x1=x2 /\ y1=y2.
+unfold nn2n2; simpl; intros.
+assert (x1=x2\/x1<x2\/x2<x1)%nat by lia.
+destruct H2 as [?|[?|?]].
+*subst x2; lia.
+*specialize nat_sum_mono with (f:=fun x=>x) (1:=H2); simpl; intros.
+ lia.
+*specialize nat_sum_mono with (f:=fun x=>x) (1:=H2); simpl; intros.
+ lia.
+Qed.
+
+Definition nn2n x y := nn2n2 (nn2n1 x y).
+
+Lemma nn2n_inj x1 x2 y1 y2 : nn2n x1 y1 = nn2n x2 y2 -> x1=x2 /\ y1=y2.
+unfold nn2n; intros.
+apply nn2n1_inj.
+apply nn2n2_inj in H; auto with arith.
+unfold nn2n1; f_equal; lia.
+Qed.
+
+Lemma nn2n_surj n : exists x y, n = nn2n x y.
+intros.
+destruct (nn2n2_surj n) as (x & y & ? & ?).
+destruct (nn2n1_surj (x,y)) as (x' & y' & e); simpl; auto.
+exists x'; exists y'.
+unfold nn2n.
+rewrite e, H0; trivial.
+Qed.
+
+Fixpoint listn2N (l:list nat) : nat :=
+  match l with
+  | x::nil => x
+  | x::l => nn2n x (listn2N l)
+  | _ => 0
+  end.
+
+Lemma listn2N_inj l1 l2 : length l1=length l2 -> listn2N l1 = listn2N l2 -> l1 = l2.
+revert l2; induction l1; destruct l2; simpl; intros; try discriminate; [trivial|].
+destruct l1; destruct l2; simpl in *; try discriminate; [f_equal; trivial|].
+apply nn2n_inj in H0; destruct H0.
+f_equal; auto with arith.
+Qed.
+
+Lemma listn2N_surj n m : exists l, length l=S n /\ listn2N l = m.
+revert m; induction n; intros.
+*exists (m::nil); simpl; auto.
+*destruct (nn2n_surj m) as (x&m'&e).
+ destruct (IHn m') as (l&?&?).
+ exists (x::l); simpl; split; [auto|].
+ destruct l;[discriminate|subst m; auto].
+Qed.
+
+Definition list2N (l:list nat) : nat :=
+  match l with nil => 0 | _ => S (nn2n (Peano.pred (length l)) (listn2N l)) end.
+
+Lemma list2N_inj l1 l2 : list2N l1 = list2N l2 -> l1=l2.
+destruct l1; destruct l2; simpl; intros; try discriminate; [trivial|].
+injection H; clear H; intros H.
+apply nn2n_inj in H; destruct H.
+apply listn2N_inj; simpl; auto.
+Qed.
+
+Lemma list2N_surj n : exists l, list2N l = n.
+destruct n as [|n]; simpl; [exists nil; reflexivity|].
+destruct (nn2n_surj n) as (k & m & e).
+destruct (listn2N_surj k m) as (l & ? & ?).
+exists l.
+destruct l; simpl; [discriminate H|].
+simpl in H; injection H; clear H; intros.
+subst n k m; reflexivity.
+Qed.
+ 

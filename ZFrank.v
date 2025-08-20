@@ -374,6 +374,96 @@ elim H using N_ind; simpl; intros.
 Qed.
 
 
+Section VN_Universes.
+
+  Variable U : set.
+
+  Hypothesis U_trans : forall x y, y ∈ x -> x ∈ U -> y ∈ U.
+  Hypothesis U_pair : forall x y, x ∈ U -> y ∈ U -> pair x y ∈ U.
+  Hypothesis U_union : forall x, x ∈ U -> union x ∈ U.
+  Hypothesis U_power : forall x, x ∈ U -> power x ∈ U.
+
+  Lemma U_incl : forall x y, y ⊆ x -> x ∈ U -> y ∈ U.
+intros.
+apply U_trans with (power x); auto.
+apply power_intro; trivial.
+Qed.
+  
+(*  Hypothesis U_incl : forall x y, y ⊆ x -> x ∈ U -> y ∈ U.*)
+
+  Definition VN_ord := subset U isOrd.
+
+  Lemma VN_ord_ax z : z ∈ VN_ord <-> z ∈ U /\ isOrd z.
+unfold VN_ord; rewrite subset_ax.
+apply and_iff_morphism; [reflexivity|].
+apply exists_eq_intro; intros.
+rewrite H; reflexivity.
+Qed.
+(*
+  Lemma U_osup2 x y : isOrd x -> isOrd y -> x ∈ U -> y ∈ U -> x⊔y ∈ U.
+    Admitted.
+
+    Lemma VN_osup2' o :
+  isOrd o ->
+  forall x y,
+  x ∈ o ->
+  y ∈ o ->
+  x ∈ U ->
+  y ∈ U ->
+  x ⊔ y ∈ U.
+induction 1 using isOrd_ind; intros.
+assert (xo : isOrd x) by eauto using isOrd_inv.
+assert (yo : isOrd y0) by eauto using isOrd_inv.
+rewrite osup2_def; trivial.
+apply U_union; apply U_pair.
+ apply U_union; apply U_pair; trivial.
+
+rewrite VN_def in H2,H3|-*; trivial.
+destruct H2.
+destruct H3.
+exists (x0 ⊔ x1).
+ apply osup2_lt; trivial.
+
+ red; intros.
+ rewrite osup2_ax in H6; trivial.
+ assert (x ⊆ VN (x0 ⊔ x1)).
+  red; intros.
+  apply H4 in H7; revert H7; apply VN_mono_le.
+   apply isOrd_inv with y; trivial.
+   apply isOrd_osup2; eauto using isOrd_inv.
+   apply osup2_incl1; eauto using isOrd_inv.
+ assert (y0 ⊆ VN (x0 ⊔ x1)).
+  red; intros.
+  apply H5 in H8; revert H8; apply VN_mono_le.
+   apply isOrd_inv with y; trivial.
+   apply isOrd_osup2; eauto using isOrd_inv.
+   apply osup2_incl2; eauto using isOrd_inv.
+ destruct H6 as [?|[?|(x',?,(y',?,?))]]; auto.
+ rewrite H10; apply H1; auto.
+ 2:apply isOrd_inv with x; trivial.
+ apply osup2_lt; trivial.
+Qed. *)
+(*
+  Lemma isOrd_VN_ord : isOrd VN_ord.
+apply isOrd_intro; intros.
+*rewrite VN_ord_ax in H1|-*.
+ destruct H1.
+ split; trivial.
+ apply U_incl with b; trivial.
+*red; intros.
+ rewrite VN_ord_ax in H,H0.
+ destruct H; destruct H0.
+ exists (x⊔y); [|split;[apply osup2_incl1|apply osup2_incl2];trivial].
+ rewrite VN_ord_ax; split; [|apply isOrd_osup2;trivial].
+ apply U_osup2; trivial.
+*rewrite VN_ord_ax in H; destruct H; trivial.
+Qed.
+ *)
+  
+End VN_Universes.
+
+
+(* Regularity and inaccessible cardinals.  *)
 Definition VN_regular o :=
   forall x F,
   ext_fun x F ->
