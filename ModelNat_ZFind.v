@@ -16,21 +16,21 @@ Definition NAT_REC f g n :=
   WFR (fun m => subset NAT (fun n => m == SUCC n))
       (fun F n => NATCASE f (fun m => g m (F m)) n) n.
 
-Let Rm : morph1 (fun m => subset NAT (fun n => m == SUCC n)).
+#[local]Lemma Rm : morph1 (fun m => subset NAT (fun n => m == SUCC n)).
 do 2 red; intros.
 apply subset_morph; [reflexivity|].  
 red; intros.
 rewrite H; reflexivity.
 Qed.
 
-Let Rzero : forall y : set, ~ y ∈ subset NAT (fun n : set => ZERO == SUCC n).
+#[local]Lemma Rzero : forall y : set, ~ y ∈ subset NAT (fun n : set => ZERO == SUCC n).
 red; intros.
 apply subset_elim2 in H.
 destruct H as (?,_,abs).
 apply NATf_discr in abs; trivial.
 Qed.
 
-Let WFRle_zero x y :
+#[local]Lemma WFRle_zero x y :
   ZFrepl.WFRle (fun m : set => subset NAT (fun n : set => m == SUCC n)) x y ->
   y == ZERO -> x == ZERO.
 induction 1; auto.
@@ -42,7 +42,7 @@ rewrite H0 in H1.
 apply NATf_discr in H1; contradiction.
 Qed.
 
-Let WFRle_typ x y :
+#[local]Lemma WFRle_typ x y :
   ZFrepl.WFRle (fun m : set => subset NAT (fun n : set => m == SUCC n)) x y ->
   y ∈ NAT -> x ∈ NAT.
 induction 1; auto.

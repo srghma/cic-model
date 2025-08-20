@@ -839,7 +839,7 @@ Class isClass {X} (R:X->X->Prop) (P:X->Type) := mkCl {
  
 Class isRel {X} (R:X->X->Prop) := {
   isP : forall x y, isProp (R x y);
-  isR :> Equivalence R
+  isR : Equivalence R
   }.
 #[global] Existing Instance isR.
 
@@ -1069,7 +1069,7 @@ Class isClass {X} (R:X->X->Prop) (P:X->Type) := mkCl {
  
 Class isRel {X} (R:X->X->Prop) := {
   isP : forall x y, isProp (R x y);
-  isR :> Equivalence R
+  isR : Equivalence R
   }.
 #[global]Existing Instance isR.
 
