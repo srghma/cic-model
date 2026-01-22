@@ -1,4 +1,5 @@
-Require Import Lia ModelTheory.
+From Stdlib Require Import Lia.
+Require Import ModelTheory.
 Export GenLemmas.
 Import ZF Sat ZFuniv_real ZFcoc CC_Real SN_CC_Real SN_nat.
 Import SN_CC_Real.SN.Notations.

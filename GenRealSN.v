@@ -1,5 +1,5 @@
 Set Implicit Arguments.
-Require Import List Compare_dec.
+From Stdlib Require Import List Compare_dec.
 Require Import basic.
 Require Import Sat.
 Require Import Models.

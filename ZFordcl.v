@@ -1,4 +1,4 @@
-Require Import Classical.
+From Stdlib Require Import Classical.
 Require Import ZFnats.
 
 (** Classical ordinals: hereditarily transitive well-founded sets *)

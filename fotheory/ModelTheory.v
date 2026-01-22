@@ -1,4 +1,5 @@
-Require Export Lia basic.
+From Stdlib Require Export Lia.
+Require Export basic.
 
 (******************************************************************************************)
 (*It is the syntax model of the theory*)

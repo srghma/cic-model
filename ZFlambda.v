@@ -1,4 +1,4 @@
-Require Import Setoid Compare_dec Wf_nat.
+From Stdlib Require Import Setoid Compare_dec Wf_nat.
 Require Import Lambda.
 Require Import ZF ZFpairs ZFnats ZFord ZFgrothendieck.
 Require Import ZFfix.

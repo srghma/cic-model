@@ -1,4 +1,4 @@
-Require Import Lia Compare_dec List.
+From Stdlib Require Import Lia Compare_dec List.
 Require Import AbsTheorySyn.
 
 (*Instantiate Module sig*)

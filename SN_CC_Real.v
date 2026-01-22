@@ -1,4 +1,4 @@
-Require Import Relations Wellfounded.
+From Stdlib Require Import Relations Wellfounded.
 Require Import Sat.
 Require Import ZFcoc ZFuniv_real.
 Require Import ZFlambda.

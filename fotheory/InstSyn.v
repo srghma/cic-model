@@ -1,4 +1,5 @@
-Require Import Lia ModelTheory.
+From Stdlib Require Import Lia.
+Require Import ModelTheory.
 
 (*Instantiate the syntax of First Order Theory with Presburger*)
 Module PresburgerSyn <: TheorySyn.

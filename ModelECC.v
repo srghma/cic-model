@@ -2,7 +2,8 @@
     ZF + infinitely many Grothendieck universes.
 *)
 
-Require Import List Bool Models TypModels.
+From Stdlib Require Import List Bool.
+Require Import Models TypModels.
 Require Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck ZFcoc ZFecc.
 Require Import ModelCC.
 

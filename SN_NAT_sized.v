@@ -1031,29 +1031,27 @@ Qed.
 Proof.
 intros.
 apply val_push_var; auto with *.
- apply val_push_ord; auto with *.
-  apply val_mono_refl; trivial.
-
-  split;[|apply varSAT].
+*apply val_push_ord; auto with *.
+ +apply val_mono_refl; trivial.
+ +split;[|apply varSAT].
   red; rewrite El_int_osucct.
   apply ole_lts; auto.
   transitivity y'; trivial.
-
-  split;[|apply varSAT].
+ +split;[|apply varSAT].
   red; rewrite El_int_osucct.
   apply ole_lts; auto.
-
- split;[|apply varSAT].
+ +discriminate.
+*split;[|apply varSAT].
  red; simpl; rewrite El_def.
  revert H5; apply cc_bot_mono.
  apply TI_incl; simpl; auto with *.
-
- split;[|apply varSAT].
+*split;[|apply varSAT].
  red; simpl; rewrite El_def.
  rewrite <- H6.
  revert H5; apply cc_bot_mono.
  apply TI_incl; simpl; auto with *.
  apply ole_lts; trivial.
+*discriminate.
 Qed.
 
 

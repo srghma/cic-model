@@ -1,7 +1,7 @@
 
-Require Export Lia Arith.
-Require Export Compare_dec.
-Require Export Relations.
+From Stdlib Require Export Lia Arith.
+From Stdlib Require Export Compare_dec.
+From Stdlib Require Export Relations.
 
 Hint Resolve t_step rt_step rt_refl: core.
 Hint Unfold transp: core.

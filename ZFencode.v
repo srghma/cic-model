@@ -1,4 +1,4 @@
-Require Import Inverse_Image.
+From Stdlib Require Import Inverse_Image.
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord.
 Require Import ZFgrothendieck.
 Require Import ZFlist ZFfixfun.

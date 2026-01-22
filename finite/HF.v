@@ -1,8 +1,7 @@
 (** Set theory without infinity axiom: hereditarily finite sets *)
 
-Require Export Setoid Morphisms.
-Require Import List.
-Require Import Bool.
+From Stdlib Require Export Setoid Morphisms.
+From Stdlib Require Import List Bool.
 
 Lemma in_map_inv : forall (A B:Set) (f:A->B) x l,
   In x (map f l) -> exists2 y, In y l & x = f y.

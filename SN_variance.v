@@ -187,7 +187,7 @@ apply H in H0.
 rewrite H0; reflexivity.
 Qed.
 
-Require Import Bool.
+From Stdlib Require Import Bool.
 
 Definition spec_var e n :=
   ords e n || match fixs e n with Some _ => true | _ => false end.

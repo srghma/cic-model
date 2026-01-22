@@ -1,5 +1,5 @@
 
-Require Import Arith Lia.
+From Stdlib Require Import Arith Lia.
 Require Export basic.
 
 (** Pure lambda terms *)

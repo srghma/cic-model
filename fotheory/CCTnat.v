@@ -1,5 +1,5 @@
-Require Import basic Lia.
-Require Import Explicit_sub.
+From Stdlib Require Import Lia.
+Require Import basic Explicit_sub.
 Require Import FOTheory.
 Import ZFind_basic.
 Import ZFnats.

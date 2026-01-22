@@ -1,5 +1,5 @@
 
-Require Import Relation_Operators.
+From Stdlib Require Import Relation_Operators.
 Require Import TypeECC.
 
 Section Typage.

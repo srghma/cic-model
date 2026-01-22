@@ -1,4 +1,4 @@
-Require Import Arith List.
+From Stdlib Require Import Arith List.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

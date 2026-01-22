@@ -1,6 +1,6 @@
 Set Implicit Arguments.
 
-Require Export Compare_dec.
+From Stdlib Require Export Compare_dec.
 
 Section Map.
 

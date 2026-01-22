@@ -1,6 +1,6 @@
-Require Export Lia.
-Require Export List MyList.
-Require Export Term.
+From Stdlib Require Export Lia.
+From Stdlib Require Export List.
+Require Export MyList Term.
 
   Definition env := list term.
 

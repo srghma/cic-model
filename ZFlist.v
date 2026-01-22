@@ -1,4 +1,4 @@
-Require Import Wf_nat.
+From Stdlib Require Import Wf_nat.
 Require Import ZF ZFpairs ZFnats.
 Require Import ZFord ZFfix.
 

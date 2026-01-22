@@ -1,5 +1,5 @@
-Require Export basic Lia.
-Require Import Models.
+From Stdlib Require Export Lia.
+Require Import basic Models.
 Require Import VarMap.
 Require Lambda.
 Module Lc := Lambda.

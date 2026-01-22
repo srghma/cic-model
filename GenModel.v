@@ -1,7 +1,7 @@
-
+From Stdlib Require Import List.
 Require Import basic.
 Require Import VarMap.
-Require Import Models TypModels List.
+Require Import Models TypModels.
 
 (** A general model construction of a model of CC given an
     abstract model. *)
@@ -259,6 +259,7 @@ Lemma sub_nk t s :
   t <> None <->
   Sub t s <> None.
 destruct t as [(t,tm)|]; simpl; auto with *.
+split; intros; discriminate.
 Qed.
 
 (** Relocations *)
@@ -293,6 +294,7 @@ Lemma lift_rec_nk n t k :
   t <> None <->
   lift_rec n k t <> None.
 destruct t as [(t,tm)|]; simpl; auto with *.
+split; intros; discriminate.
 Qed.
 
 Definition lift1 n := lift_rec n 1.
@@ -413,6 +415,7 @@ Lemma subst_rec_nk a t k :
   t <> None <->
   subst_rec a k t <> None.
 destruct t as [(t,tm)|]; simpl; auto with *.
+split; intros; discriminate.
 Qed.
 
 Lemma int_subst_rec_eq : forall arg k T i,

@@ -1,4 +1,4 @@
-Require Export Lia Relations Wellfounded Compare_dec.
+From Stdlib Require Export Lia Relations Wellfounded Compare_dec.
 Require Import Sat.
 Require Import ZF ZFcoc.
 Require Import ZFlambda.

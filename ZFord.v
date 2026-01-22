@@ -1,4 +1,4 @@
-Require Import Arith.
+From Stdlib Require Import Arith.
 Require Import ZFnats ZFwf ZFwfr.
 Require Export ZF.
 

@@ -1,6 +1,6 @@
 
-Require Import Setoid Morphisms.
-Require Import Arith Compare_dec Lia.
+From Stdlib Require Import Setoid Morphisms.
+From Stdlib Require Import Arith Compare_dec Lia.
 
 Module Type Eqv.
   Parameter Inline t : Type.

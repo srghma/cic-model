@@ -1,4 +1,4 @@
-Require Import Lia.
+From Stdlib Require Import Lia.
 Require Import ZF ZFcoc ZFuniv_real Sat.
 Require Import GenLemmas AbsTheorySem.
 Require Import SN_CC_Real SN_nat.

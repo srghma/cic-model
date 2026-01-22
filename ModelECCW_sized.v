@@ -1,7 +1,8 @@
 (** Model of ECC+W in the type-based termination presentation.
 *)
 
-Require Import List Bool Models TypModels.
+From Stdlib Require Import List Bool.
+Require Import Models TypModels.
 Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck.
 Require Import ZFfunext ZFind_w ZFfixrec.
 Require Import ModelCC ModelECC.

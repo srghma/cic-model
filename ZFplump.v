@@ -1,5 +1,5 @@
-Require Export Lia basic ZF.
-Require Import ZFnats.
+From Stdlib Require Export Lia.
+Require Import basic ZF ZFnats.
 Require ZFrepl.
 
 (* Directed set (finite union) *)
@@ -1199,8 +1199,8 @@ split; auto.
 Qed.
 Hint Resolve omega_limit_ord : core.
 
-Require Import Peano_dec.
-Require Import Compare_dec.
+From Stdlib Require Import Peano_dec.
+From Stdlib Require Import Compare_dec.
 
   Lemma isDir_omega : isDir omega.
 red; intros.

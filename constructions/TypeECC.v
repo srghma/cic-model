@@ -1,6 +1,6 @@
 Require Export ConvECC.
 Require Export EnvECC.
-Require Import Peano_dec.
+From Stdlib Require Import Peano_dec.
 
 Section Typage.
 

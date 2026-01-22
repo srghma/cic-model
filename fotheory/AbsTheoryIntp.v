@@ -4,7 +4,7 @@
 (************************************************************************************)
 (************************************************************************************)
 
-Require Import Lia.
+From Stdlib Require Import Lia.
 Require Export GenLemmas.
 Require Import AbsTheorySyn.
 Require Import AbsTheorySem.

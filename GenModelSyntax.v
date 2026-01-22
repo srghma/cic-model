@@ -1,4 +1,4 @@
-Require Import Lia List.
+From Stdlib Require Import Lia List.
 Require Import Models.
 Require Import TypeJudge.
 Require GenModel.

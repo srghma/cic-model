@@ -1,4 +1,4 @@
-Require Import Lia Inverse_Image.
+From Stdlib Require Import Lia Inverse_Image.
 Require Lambda.
 Require Import ZF ZFuniv_real Sat SN_ECC_Real.
 

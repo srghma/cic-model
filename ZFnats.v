@@ -714,7 +714,7 @@ intros; apply succ_typ; trivial.
 Qed.
 
 (* Bijection NxN = N *)
-Require Import Arith Lia.
+From Stdlib Require Import Arith Lia.
 
 Require Import ZFpairs.
 

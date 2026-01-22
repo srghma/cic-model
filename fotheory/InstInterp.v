@@ -1,4 +1,5 @@
-Require Import Lia GenLemmas ModelTheory.
+From Stdlib Require Import Lia.
+Require Import GenLemmas ModelTheory.
 Require Import InstSyn.
 Require Import InstSem.
 Import ZF CC_Real SN_CC_Real.

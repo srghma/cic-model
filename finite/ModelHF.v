@@ -3,7 +3,7 @@
     finite sets.
  *)
 
-Require Import Bool List.
+From Stdlib Require Import Bool List.
 Require Import HFcoc.
 Require Import Models GenModelSyntax.
 

@@ -1,5 +1,5 @@
 (*This files are the defintions and lemmas about general SN model*)
-Require Import Lia.
+From Stdlib Require Import Lia.
 Require Export basic ZF SN_CC_Real ZFuniv_real.
 Import SN.Notations.
 Module Lc := Lambda.

@@ -1,6 +1,6 @@
-Require Export Lia.
-Require Export List MyList.
-Require Export TermECC.
+From Stdlib Require Export Lia.
+From Stdlib Require Export List.
+Require Export MyList TermECC.
 
   Definition env := list term.
 

@@ -3,13 +3,13 @@
 
 Set Implicit Arguments.
 (*Require Export Utf8_core.*)
-Require Export
+From Stdlib Require Export
   Peano_dec Compare_dec
   List
   Relations Relation_Operators Transitive_Closure
   Setoid Morphisms Morphisms_Prop
   Program.Basics.
-Require Import Wellfounded. (* do not export: sup conflicts with ZF.sup *)
+From Stdlib Require Import Wellfounded. (* do not export: sup conflicts with ZF.sup *)
 Export ProperNotations.
 
 Hint Resolve t_step rt_step rt_refl: core.
@@ -313,7 +313,7 @@ Qed.
 
 (******************************************************************)
 (** More arithmetics... *)
-Require Import Lia.
+From Stdlib Require Import Lia.
 
 Lemma succ_max_distr : forall n m, S (max n m) = max (S n) (S m).
 induction n; destruct m; simpl; reflexivity.

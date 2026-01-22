@@ -1,6 +1,4 @@
-Require Export Arith.
-Require Export Lia.
-Require Export List.
+From Stdlib Require Export Arith Lia List.
 
 Inductive foterm :=
 | Var : nat -> foterm

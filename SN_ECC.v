@@ -1,4 +1,4 @@
-Require Export Lia Relations Wellfounded.
+From Stdlib Require Export Lia Relations Wellfounded.
 Require Import Sat.
 Require Import ZF ZFcoc ZFuniv ZFecc.
 Require Import ZFlambda.

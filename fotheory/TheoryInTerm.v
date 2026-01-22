@@ -2,8 +2,7 @@ Require Export ZFtheory.
 Require Export GenModel.
 Require Export ZFcoc.
 Require Export ModelZF.
-Require Export List.
-Require Import Lia.
+From Stdlib Require Export List Lia.
 
 Module BuildModel := GenModel.MakeModel(CCM).
 Import BuildModel.

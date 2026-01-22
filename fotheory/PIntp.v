@@ -1,5 +1,5 @@
-Require Import Lia GenLemmas AbsTheoryIntp.
-Require Import PSyn PSem.
+From Stdlib Require Import Lia.
+Require Import PSyn PSem GenLemmas AbsTheoryIntp.
 Import ZF ZFuniv_real.
 Import SN_CC_Real SN_nat.
 

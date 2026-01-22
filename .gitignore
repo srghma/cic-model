@@ -1,4 +1,8 @@
-*.vo
+*.vo*
 *.glob
 *.v.d
-
+*.aux
+.lia.cache
+*~
+Ens0.v
+EnsEm0.v
