@@ -215,11 +215,10 @@ Qed.
 Lemma pair_morph :
   forall a a', eq_set a a' -> forall b b', eq_set b b' ->
   eq_set (pair a b) (pair a' b').
-unfold pair.
-simpl; intros.
-split; intros.
- exists i; destruct i; trivial.
- exists j; destruct j; trivial.
+intros.
+apply eq_set_ax; intros z.
+rewrite !pair_ax.
+split; destruct 1; eauto using eq_set_trans, eq_set_sym.
 Qed.
 
 Definition union (x:set) :=
@@ -246,33 +245,11 @@ Qed.
 
 Lemma union_morph :
   forall a a', eq_set a a' -> eq_set (union a) (union a').
-unfold union.
-simpl; intros.
-split; intros.
- destruct i; simpl.
- assert (in_set (elts a x) a').
-  apply eq_elim with a; trivial.
-  exists x; apply eq_set_refl.
- destruct H0.
- assert (in_set (elts (elts a x) i) (elts a' x0)).
-  apply eq_elim with (elts a x); trivial.
-  exists i; apply eq_set_refl. 
- destruct H1.
- exists (existT (fun i=>idx (elts a' i)) x0 x1); simpl.
- trivial.
-
- destruct j; simpl.
- generalize (eq_set_sym _ _ H); clear H; intro.
- assert (in_set (elts a' x) a).
-  apply eq_elim with a'; trivial.
-  exists x; apply eq_set_refl.
- destruct H0.
- assert (in_set (elts (elts a' x) i) (elts a x0)).
-  apply eq_elim with (elts a' x); trivial.
-  exists i; apply eq_set_refl. 
- destruct H1.
- exists (existT (fun i=>idx (elts a i)) x0 x1); simpl.
- apply eq_set_sym; trivial.
+intros.
+apply eq_set_ax; intros z.
+rewrite !union_ax.
+apply ex2_morph; intros w; [reflexivity|].
+apply eq_set_ax; trivial.
 Qed.
 
 (* A useful tool to hide some logical information in a set *)

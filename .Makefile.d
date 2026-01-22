@@ -76,6 +76,8 @@ EnsUniv.vo EnsUniv.glob EnsUniv.v.beautified EnsUniv.required_vo: EnsUniv.v Ens.
 EnsUniv.vos EnsUniv.vok EnsUniv.required_vos: EnsUniv.v Ens.vos Ens0.vos lib/basic.vos /home/barras/.opam/default/lib/rocq-runtime/rocqworker
 EnsZ.vo EnsZ.glob EnsZ.v.beautified EnsZ.required_vo: EnsZ.v ZFskol.vo lib/Sublogic.vo /home/barras/.opam/default/lib/rocq-runtime/rocqworker
 EnsZ.vos EnsZ.vok EnsZ.required_vos: EnsZ.v ZFskol.vos lib/Sublogic.vos /home/barras/.opam/default/lib/rocq-runtime/rocqworker
+GEns.vo GEns.glob GEns.v.beautified GEns.required_vo: GEns.v ZFskol.vo lib/Choice.vo lib/Sublogic.vo /home/barras/.opam/default/lib/rocq-runtime/rocqworker
+GEns.vos GEns.vok GEns.required_vos: GEns.v ZFskol.vos lib/Choice.vos lib/Sublogic.vos /home/barras/.opam/default/lib/rocq-runtime/rocqworker
 hEns.vo hEns.glob hEns.v.beautified hEns.required_vo: hEns.v EnsZ.vo ZFskol.vo hott.vo lib/Sublogic.vo paths.vo /home/barras/.opam/default/lib/rocq-runtime/rocqworker
 hEns.vos hEns.vok hEns.required_vos: hEns.v EnsZ.vos ZFskol.vos hott.vos lib/Sublogic.vos paths.vos /home/barras/.opam/default/lib/rocq-runtime/rocqworker
 hott.vo hott.glob hott.v.beautified hott.required_vo: hott.v lib/Sublogic.vo paths.vo /home/barras/.opam/default/lib/rocq-runtime/rocqworker
