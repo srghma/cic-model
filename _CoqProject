@@ -12,8 +12,9 @@ Models.v
 SnModels.v
 TypModels.v
 ZFdef.v
-ZFskolEm.v
+Zskol.v
 ZFskol.v
+ZFskolEm.v
 
 finite/HFcoc.v
 finite/HFrelation.v
@@ -44,7 +45,6 @@ EnsEmUniv.v
 EnsLogic.v
 EnsUniv.v
 EnsZ.v
-GEns.v
 hEns.v
 hott.v
 paths.v
