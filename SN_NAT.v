@@ -8,12 +8,12 @@
 Set Implicit Arguments.
 Require Import basic Can Sat SATnat SN_CC_Real.
 Require Import TypModels.
-Require Import ZF ZFsum ZFcoc ZFuniv_real ZFind_natbot.
+Require Import ZF Zsum Zcoc ZFuniv_real ZFind_natbot.
 Module Lc:=Lambda.
 
 (* Building the realizability on the nats of ZFind_natbot *)
-Require ModelZF.
-Module natARG <: SimpleNats ModelZF.ZFsets.
+Require ModelZ.
+Module natARG <: SimpleNats ModelZ.Zsets.
   Definition N := NAT'.
   Definition Nbot := cc_bot NAT'.
   Definition N_Nbot : N ⊆ Nbot := cc_bot_intro NAT'.
@@ -24,12 +24,12 @@ Module natARG <: SimpleNats ModelZF.ZFsets.
 
   Definition zero := ZERO.
   Definition succ := SUCC.
-  Definition succ_morph := ZFsum.inr_morph.
+  Definition succ_morph := inr_morph.
 
   Definition zero_typ := ZERO_typ'.
   Definition succ_typ := SUCC_typ'.
 End natARG.
-Module SAT_nat := SATnat.Make ModelZF.ZFsets natARG.
+Module SAT_nat := SATnat.Make ModelZ.Zsets natARG.
 Import SAT_nat.
 Import CC_Real.
 
@@ -255,7 +255,7 @@ apply and_split; intros.
     reflexivity.
 
     red; intros.
-    apply ZFsum.inr_morph; trivial.
+    apply inr_morph; trivial.
 
    rewrite NAT_RECT_SUCC; auto.
    2:rewrite (ElNat_eq i) in tyk; trivial.
@@ -326,7 +326,7 @@ rewrite beta_eq.
  rewrite NAT_RECT_SUCC; trivial.
   reflexivity.
 
- red; intros; apply ZFsum.inr_morph; trivial.
+ red; intros; apply inr_morph; trivial.
 
  red; rewrite El_def; trivial.
 Qed.

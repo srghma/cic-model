@@ -63,7 +63,7 @@ ModelNat_sized.v
 ModelNat.v
 ModelNat_ZFind.v
 Model_variance.v
-ModelZF.v
+ModelZ.v
 
 SATtypes.v
 SATnat.v
@@ -86,19 +86,29 @@ SN_variance.v
 SN_W.v
 
 Z.v
+Zstable.v
+Zpairs.v
+Zsum.v
+Zrelations.v
+Ziso.v
+Znats.v
+Zlist.v
+Zbot.v
+Zcoc.v
+Zfunext.v
+Ztarski.v
+Zfix.v
+Zuniv.v
+Zw.v
+
 ZF.v
 ZFrepl.v
 ZFreplf_deriv.v
 ZFcoll.v
 ZFwfr.v
 ZFwf.v
-ZFsum.v
-ZFpairs.v
-ZFrelations.v
 ZFiso.v
-ZFcoc.v
 ZFecc.v
-ZFbot.v
 ZFnats.v
 ZFordcl.v
 ZFord_equiv.v
@@ -111,18 +121,16 @@ ZFuniv_real.v
 ZFuniv.v
 ZFcofix.v
 ZFcont.v
-ZFtarski.v
-ZFstable.v
 ZFrank.v
 ZFrecbot.v
 ZFfixfun.v
 ZFfixrec.v
 ZFfix.v
 ZFlimit.v
-ZFfunext.v
 ZFlambda.v
 ZFlist.v
 
+Zwdom.v
 ZFencode.v
 ZFwdom.v
 ZFw.v

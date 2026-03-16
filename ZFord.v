@@ -593,13 +593,13 @@ Qed.
 Lemma isOrd_eq : forall o, isOrd o -> o == sup o osucc.
 intros.
 apply eq_intro; intros.
- rewrite sup_ax.
+ rewrite sup_def.
  2:do 2 red; intros; apply osucc_morph; trivial.
  exists z; auto.
  apply lt_osucc.
  apply isOrd_inv with o; trivial.
 
- rewrite sup_ax in H0.
+ rewrite sup_def in H0.
  2:do 2 red; intros; apply osucc_morph; trivial.
  destruct H0.
  apply le_lt_trans with x; trivial.
@@ -824,25 +824,6 @@ End Examples.
 
 
 (** Increasing sequences *)
-
-Definition increasing_bounded o F :=
-  forall x x', x < o -> x' < o -> x ⊆ x' -> F x ⊆ F x'.
-
-Lemma increasing_bounded_is_ext F o :
-  isOrd o ->
-  increasing_bounded o F ->
-  ext_fun o F.
-intros oo Fincr.
-red; red; intros.
-apply eq_intro.
-*apply Fincr; trivial.
- rewrite <- H0; trivial.
- rewrite H0; reflexivity.
-*apply Fincr; trivial.
- rewrite <- H0; trivial.
- rewrite H0; reflexivity.
-Qed.
-#[global]Hint Resolve increasing_bounded_is_ext : core.
 
 Definition increasing F :=
   forall x y, isOrd x -> isOrd y -> y ⊆ x -> F y ⊆ F x.
@@ -1119,7 +1100,7 @@ Qed.
     x ∈ TI o.
 intros.
 rewrite TI_eq; trivial.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 exists o'; trivial.
 Qed.
 
@@ -1129,7 +1110,7 @@ Qed.
     exists2 o', o' < o & x ∈ F (TI o').
 intros.
 rewrite TI_eq in H0; trivial.
-rewrite sup_ax in H0; auto.
+rewrite sup_def in H0; auto.
 Qed.
 
   Lemma TI_mono : increasing TI.
@@ -1192,7 +1173,7 @@ Qed.
 (** * Supremum of directed ordinals *)
 
 (** ** Binary supremum *)
-Require Import ZFpairs.
+Require Import Zpairs.
 
 Section BinarySup.
 
@@ -1293,9 +1274,9 @@ split; intros.
  apply union2_elim in H; destruct H.
   apply union2_elim in H; destruct H; auto.
 
-  rewrite sup_ax in H.
+  rewrite sup_def in H.
    destruct H.
-   rewrite replf_ax in H0.
+   rewrite replf_def in H0.
     destruct H0; eauto.
 
     red; red; intros.
@@ -1314,9 +1295,9 @@ split; intros.
   apply union2_intro2.
   destruct H.
   destruct H0.
-  rewrite sup_ax.
+  rewrite sup_def.
    exists x0; trivial.
-   rewrite replf_ax.
+   rewrite replf_def.
     exists x1; trivial.
 
     red; red; intros.
@@ -1679,13 +1660,13 @@ Section OrdinalUpperBound.
 
   Lemma isOrd_supf_intro : forall n, n ∈ I -> f n ⊆ sup I f.
 red; intros.
-rewrite sup_ax; trivial.
+rewrite sup_def; trivial.
 exists n; trivial.
 Qed.
 
   Lemma isOrd_supf_elim : forall x, x < sup I f -> exists2 n, n ∈ I & x < f n.
 intros.
-rewrite sup_ax in H; trivial.
+rewrite sup_def in H; trivial.
 Qed.
 
   (* Directed union: *)
@@ -1694,14 +1675,14 @@ Qed.
 
   Lemma isDir_ord_sup : isDir (sup I f).
 red; intros.
-rewrite sup_ax in H; trivial; destruct H.
-rewrite sup_ax in H0; trivial; destruct H0.
+rewrite sup_def in H; trivial; destruct H.
+rewrite sup_def in H0; trivial; destruct H0.
 assert (xo : isOrd x).
  apply isOrd_inv with (f x0); auto.
 destruct supf_dir with x0 x1; trivial.
 destruct H4.
 exists (x ⊔ y).
- rewrite sup_ax; trivial.
+ rewrite sup_def; trivial.
  exists x2; trivial.
  apply osup2_lt; auto.
 
@@ -1739,13 +1720,13 @@ Section LimOrd.
   Lemma isOrd_sup_intro : forall n, n ∈ N -> f n ⊆ ord_sup.
 unfold ord_sup.
 red; intros.
-rewrite sup_ax; trivial.
+rewrite sup_def; trivial.
 exists n; trivial.
 Qed.
 
   Lemma isOrd_sup_elim : forall x, x < ord_sup -> exists2 n, n ∈ N & x < f n.
 unfold ord_sup; intros.
-rewrite sup_ax in H; trivial.
+rewrite sup_def in H; trivial.
 Qed.
 
   Lemma isOrd_sup : isOrd ord_sup.
@@ -1951,12 +1932,12 @@ Section DirOrdinalSup.
 
 
   Lemma osupf_def X z : z ∈ osupf X <-> exists2 x, x ∈ X & exists2 y, y ∈ X & z == x ⊔ y.
-unfold osupf; rewrite sup_ax.
+unfold osupf; rewrite sup_def.
  apply ex2_morph.
   red; reflexivity.
 
   red; intros.
-  rewrite replf_ax.
+  rewrite replf_def.
    reflexivity.
 
    do 2 red; intros; apply osup2_morph; auto with *.
@@ -2006,7 +1987,7 @@ intros n x tyn; revert x; elim tyn using N_ind; intros.
  revert H2; apply in_set_morph;[reflexivity|].
  apply osupfn_ext; trivial.
 *rewrite osup0 in H.
- rewrite sup_ax in H; auto.
+ rewrite sup_def in H; auto.
  destruct H; eauto using isOrd_inv.
 *rewrite osupS in H1; auto.
  rewrite osupf_def in H1.
@@ -2051,7 +2032,7 @@ apply isOrd_intro; intros.
  elim tyn using N_ind; intros.
  +rewrite <- H0 in H4|-*; eauto.
  +rewrite osup0 in H1|-*.
-  rewrite sup_ax in H1|-*; trivial.
+  rewrite sup_def in H1|-*; trivial.
   destruct H1.
   exists x; trivial.
   apply isOrd_plump with b; auto.
@@ -2116,7 +2097,7 @@ apply isOrd_sup_elim in H1; [destruct H1 as (n,tyn,?)|trivial].
 revert z0 H1; elim tyn using N_ind; simpl; intros.
 *rewrite <- H2 in H4; auto.
 *rewrite osup0 in H1.
- rewrite sup_ax in H1; trivial.
+ rewrite sup_def in H1; trivial.
  destruct H1.
  revert H2; apply H0; trivial.
 *rewrite osupS in H3; trivial.
@@ -2147,7 +2128,6 @@ elim H4 using N_ind; intros.
 
   intros.
   rewrite replf_is_sup.
-  2:do 2 red; intros; apply osup2_morph; auto with *.
   apply H; eauto.
    do 2 red; intros; apply singl_morph; apply osup2_morph; auto with *.
 

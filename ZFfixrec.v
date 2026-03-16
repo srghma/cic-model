@@ -1,7 +1,7 @@
 (** Specialized version of transfinite recursion where the case of limit
    ordinals is union and the stage ordinal is fed to the step function.  *)
 
-Require Import ZF ZFrelations ZFnats ZFord ZFfunext.
+Require Import ZF Zrelations Znats ZFord Zfunext.
 
 Definition continuous (T:set->set) :=
   forall o, isOrd o -> T o == sup o (fun o' => T (osucc o')).
@@ -11,8 +11,6 @@ Lemma cont_is_mono X :
 intros Xm Xcont o o' oo oo' leo.
 rewrite (Xcont o'); trivial.
 apply sup_lub; intros.
- do 2 red; intros.
- rewrite H0; reflexivity.
 rewrite (Xcont o); trivial.
 apply sup_incl with (F:=fun o'=>X(osucc o')); auto.
 do 2 red; intros.
@@ -73,7 +71,7 @@ Qed.
     x ∈ REC o.
 intros.
 rewrite REC_eq; trivial.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 exists o'; trivial.
 Qed.
 
@@ -83,7 +81,7 @@ Qed.
     exists2 o', lt o' o & x ∈ F o' (REC o').
 intros.
 rewrite REC_eq in H0; trivial.
-rewrite sup_ax in H0; auto.
+rewrite sup_def in H0; auto.
 Qed.
 
   Lemma REC_mono : increasing REC.
@@ -345,7 +343,7 @@ Qed.
     T (osucc o') ⊆ T o.
 red; intros.
 red in Tcont; rewrite Tcont; trivial.
-rewrite sup_ax.
+rewrite sup_def.
  exists o'; trivial.
 
  do 2 red; intros; apply Tm; apply osucc_morph; trivial.
@@ -660,7 +658,7 @@ assert (Tcont := RXcont _ _ _ _ _ frec).
 red in Tcont; rewrite Tcont in H2; auto.
 assert (leyo' : y ⊆ o') by (transitivity o; auto).
 apply sup_ax in H2; auto with *.
- destruct H2 as (z,?,?).
+ destruct H2 as (z,?,(_,?)).
  assert (zo : isOrd z) by eauto using isOrd_inv.
  assert (x ∈ T y).
   revert H3; apply cont_is_mono; auto with *.
@@ -684,10 +682,6 @@ apply sup_ax in H2; auto with *.
  red; intros; apply isOrd_plump with z; auto.
   eauto using isOrd_inv.
   apply olts_le; auto.
-
-do 2 red; intros.
-apply (RXm _ _ _ _ _ frec). 
-rewrite H5; reflexivity.
 Qed.
 
   Lemma recursor_ext :
@@ -727,7 +721,6 @@ split; intros.
  split.
   rewrite cc_eta_eq with (1:=H0).
   apply is_cc_fun_lam.
-  do 2 red; intros; apply cc_app_morph; auto with *.
 
   red; intros.
   apply cc_prod_elim with (1:=H0); trivial.
@@ -856,7 +849,7 @@ intros.
 red; intros.
 red in RHXcont; rewrite RHXcont in H3; trivial.
 apply sup_ax in H3.
- destruct H3 as (o',?,?).
+destruct H3 as (o',?,(_,?)).
 generalize (H2 _ H3 _ H4).
 apply RHUmono; eauto using isOrd_inv with *.
  red; intros.
@@ -864,7 +857,6 @@ apply RHUmono; eauto using isOrd_inv with *.
  apply olts_le in H5; trivial.
 
  apply ole_lts; auto.
-do 2 red; intros; apply RHXm; apply osucc_morph; trivial.
 Qed.
 
 Let Q'typ : forall o f,
@@ -1027,7 +1019,7 @@ Section HigherRecursor.
     T (osucc o') ⊆ T o.
 red; intros.
 red in Tcont; rewrite Tcont; trivial.
-rewrite sup_ax.
+rewrite sup_def.
  exists o'; trivial.
 
  do 2 red; intros; apply Tm; apply osucc_morph; trivial.
@@ -1100,8 +1092,6 @@ Qed.
 intros.
 split.
  apply is_cc_fun_lam.
- do 2 red; intros; apply Fm; trivial.
- red; intros; apply cc_app_morph; auto with *.
 
  apply Qext with (F (cc_app f)); auto with *.
   red; intros.
@@ -1233,12 +1223,9 @@ apply RECf_step; eauto using isOrd_inv with *.
 assert (oo:isOrd o).
  eauto using isOrd_inv.
 red in Tcont; rewrite Tcont in H2; trivial.
-rewrite sup_ax in H2;[destruct H2|].
- revert H3; apply Tmono'; auto.
- eauto using isOrd_inv.
-
- do 2 red; intros.
- rewrite H4; reflexivity.
+rewrite sup_ax in H2;destruct H2 as (?,?,(_,?)).
+revert H3; apply Tmono'; auto.
+eauto using isOrd_inv.
 Qed.
     
   Lemma RECf_indep o o' x :
@@ -1286,13 +1273,10 @@ intros.
 
   red in Tcont; rewrite Tcont in H4; trivial.
   rewrite sup_ax in H4.
-   destruct H4.
-   revert H6; apply Tmono'; auto.
-   apply isOrd_trans with o; auto.
-   apply ole_lts; auto.
-
-   do 2 red; intros.
-   rewrite H7; reflexivity.
+  destruct H4 as (?,?,(_,?)).
+  revert H6; apply Tmono'; auto.
+  apply isOrd_trans with o; auto.
+  apply ole_lts; auto.
 Qed.
 
   Lemma RECf_eqn o x :
@@ -1315,7 +1299,7 @@ Qed.
   Lemma RECF_def x z :
     z ∈ RECF x <->
     exists2 o', o' ∈ ord /\ x ∈ T (osucc o') & z ∈ F (RECf o') x.
-unfold RECF; rewrite sup_ax.
+unfold RECF; rewrite sup_def.
  apply ex2_morph; red; intros; try reflexivity.
  rewrite subset_ax.
  apply and_iff_morphism;[reflexivity|].
@@ -1364,14 +1348,11 @@ apply eq_intro; intros.
 
    red in Tcont; rewrite Tcont in H0; trivial.
    rewrite sup_ax in H0.
-    destruct H0.
-    revert H1; apply Tmono'; auto.
-     apply isOrd_osup2; trivial.
+   destruct H0 as (?,?,(_,?)).
+   revert H1; apply Tmono'; auto.
+    apply isOrd_osup2; trivial.
 
-     revert H0; apply osup2_incl1; auto.
-
-    do 2 red; intros.
-    rewrite H2; reflexivity.
+    revert H0; apply osup2_incl1; auto.
 
   symmetry.
   apply Fext with (o:=o'); auto with *.
@@ -1382,14 +1363,11 @@ apply eq_intro; intros.
 
    red in Tcont; rewrite Tcont in H0; trivial.
    rewrite sup_ax in H0.
-    destruct H0.
-    revert H1; apply Tmono'; auto.
-     apply isOrd_osup2; trivial.
+   destruct H0 as (?,?,(_,?)).
+   revert H1; apply Tmono'; auto.
+    apply isOrd_osup2; trivial.
 
-     revert H0; apply osup2_incl2; auto.
-
-    do 2 red; intros.
-    rewrite H2; reflexivity.
+    revert H0; apply osup2_incl2; auto.
 Qed.
 
 

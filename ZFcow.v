@@ -1,8 +1,73 @@
-Require Import ZF ZFpairs ZFnats ZFrelations ZFord ZFcoc.
+Require Import ZF Zpairs Znats Zrelations ZFord Zcoc.
 Require Import ZFgrothendieck.
 Require Import ZFfix ZFcofix.
 Require Import ZFfixfun.
 Require Import ZFwdom.
+
+
+(* Ordinal interval [o'; o[ *)
+Definition ord_intv o' o  :=
+  subset o (fun o'' => o' ⊆ o'').
+
+Lemma ord_intv_def o' o z :
+  z ∈ ord_intv o' o <-> o' ⊆ z /\ z ∈ o.
+Proof.
+unfold ord_intv; rewrite subset_ax.
+split.
+*intros (?,(z',eqz,?)).
+ rewrite eqz in H|-*; auto.
+*intros (?,?); split;[|exists z]; auto with *.
+Qed.
+
+Lemma ord_intv_intro1 o o' :
+  isOrd o ->
+  o' ∈ o ->
+  o' ∈ ord_intv o' o.
+Proof.
+intros; rewrite ord_intv_def; auto with *.
+Qed.
+  Hint Resolve ord_intv_intro1 : core.
+
+Lemma ord_intv_dir o o' i j :
+  isOrd o ->
+  i ∈ ord_intv o' o ->
+  j ∈ o ->
+  exists2 k, k ∈ ord_intv o' o & i ⊆ k /\ j ⊆ k.
+Proof.
+intros oo tyi tyj.
+rewrite ord_intv_def in tyi; trivial.
+destruct tyi.
+exists (i ⊔ j);[|split].
+*rewrite ord_intv_def; split.
+ +rewrite H; apply osup2_incl1; eauto using isOrd_inv.
+ +apply osup2_lt; trivial.
+*apply osup2_incl1; eauto using isOrd_inv.
+*apply osup2_incl2; eauto using isOrd_inv.
+Qed.
+
+Lemma ord_intv_sup o o' f :
+  increasing_bounded o f ->
+  isOrd o  ->
+  o' ∈ o ->
+  sup o f == sup (ord_intv o' o) f.
+Proof.
+intros fincr oo lto.
+assert (oo' : isOrd o') by eauto using isOrd_inv.
+apply eq_set_ax; intros z.
+rewrite !sup_def; auto.
+*split.
+ +intros (y,?,?). 
+  destruct (ord_intv_dir o o' o' y) as (k,?,(?,?)); auto.
+  exists k; auto.
+  rewrite ord_intv_def in H1; destruct H1.
+  revert H0; apply fincr; trivial.
+ +intros (y,?,?); exists y; trivial.
+  rewrite ord_intv_def in H; apply H.
+*do 2 red; intros.
+ apply increasing_bounded_is_ext in fincr.
+ rewrite ord_intv_def in H; destruct H; auto.
+Qed.
+
 
 Section CoW.
 
@@ -12,12 +77,12 @@ Variable A : set.
 Variable B : set -> set.
 Hypothesis Bm : morph1 B.
 
-Notation Wdom := (ZFwdom.Wdom A B).
-Notation Wf := (ZFwdom.Wf A B).
-Notation Wsup := ZFwdom.Wsup.
-Notation Wfst := ZFwdom.Wfst.
-Notation Wsnd_fun := ZFwdom.Wsnd_fun.
-Existing Instance ZFwdom.Wf_mono.
+Notation Wdom := (Zwdom.Wdom A B).
+Notation Wf := (Zwdom.Wf A B).
+Notation Wsup := Zwdom.Wsup.
+Notation Wfst := Zwdom.Wfst.
+Notation Wsnd_fun := Zwdom.Wsnd_fun.
+Existing Instance Zwdom.Wf_mono.
 
 Let Wdom_compl I f :
   ext_fun I f -> (forall i : set, i ∈ I -> f i ∈ Wdom) -> sup I f ∈ Wdom.
@@ -25,7 +90,7 @@ intros.
 apply power_intro.
 intros.
 apply sup_ax in H1; trivial.
-destruct H1.
+destruct H1 as (?,?,(_,?)).
 apply power_elim with (2:=H2); auto.
 Qed.
 
@@ -79,9 +144,10 @@ apply COWi_typ; trivial.
 Qed.
   
   Lemma Wf_stable_COWi : stable_class (fun X => exists2 o, isOrd o & X == COWi o) Wf.
-apply ZFwdom.Wf_stable_gen; trivial.
-intros X (o,oo,eqX); rewrite eqX.
-apply COWi_typ; trivial.
+red; intros; apply Zwdom.Wf_stable; trivial.
+red; intros.
+apply H in H0; destruct H0 as (o,oo,eqX); rewrite eqX.
+apply power_def; apply COWi_typ; trivial.
 Qed.
   
   Lemma COWi_closure : COW ⊆ Wf COW.
@@ -126,7 +192,7 @@ rewrite COW_eqn; apply Wf_mono; trivial.
 apply COW_typ.  
 Qed.
 Lemma Wf1_Wdom : Wf Wdom ⊆ Wdom.
-apply ZFwdom.Wf_typ; [trivial|reflexivity].
+apply Zwdom.Wf_typ; [trivial|reflexivity].
 Qed.
 Hint Resolve COW_typ COW_eqn COW_Wf1 Wf1_Wdom : core.
 
@@ -138,13 +204,13 @@ Section W_Univ.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : ZFord.omega ∈ U.  
+  Hypothesis Unontriv : N ∈ U.  
 
   Hypothesis aU : A ∈ U.
   Hypothesis bU : forall a, a ∈ A -> B a ∈ U.
 
   Let Gdom : Wdom ∈ U.
-apply ZFwdom.G_Wdom; trivial.
+apply ZFwdom.G_Wdom; auto.
 Qed.
     
   Lemma G_COWi o : isOrd o -> COWi o ∈ U.
@@ -162,41 +228,113 @@ End W_Univ.
 (*******************************************************************************************)
 (* Co-recursion... *)
 
-Lemma COWi_complete o o' : isOrd o -> isOrd o' -> complete o' (COWi o).
-intros oo oo'; elim oo using isOrd_ind; intros.
+Lemma COWi_complete o I i0 :
+  i0 ∈ I ->
+  (forall i j : set, i ∈ I -> j ∈ I -> exists2 k : set, k ∈ I & i ⊆ k /\ j ⊆ k) ->
+  isOrd o ->
+  complete I (COWi o).
+Proof.
+intros tyi0 dirI oo.
+elim oo using isOrd_ind; intros.
 red.
-assert (aux := fun o => isOrd_inv _ o oo').
-assert (aux' := fun o => isOrd_inv _ o H).
-intros f fincr (o0, lto', limf).
+assert (aux := fun o => isOrd_inv _ o H).
+intros f tyf fincr.
 apply COTI_intro; intros; auto with *.
-+apply Wdom_complete; auto.
- exists o0; auto.
- intros.
+*apply Wdom_complete; auto.
+ red; intros.
  apply COWi_typ with (o:=y); auto. 
-+apply Wf_complete; auto.
-  apply COTI_bound; auto with *.
-
-  exists o0; trivial.
-  intros.
+*apply Wf_complete with i0; auto.
+ +apply COTI_bound; auto with *.
+ +red; intros.
   rewrite <- COTI_mono_succ; auto with *.
-  generalize (limf _ H3 H4).
+  generalize (tyf _ H3).
   apply COTI_mono; auto with *.
   apply olts_le; apply lt_osucc_compat; trivial.
 Qed.
+
+(*Lemma COWi_sup_intro f o o' :
+  increasing_bounded o f ->
+  isOrd o ->
+  o' ∈ o ->
+  (forall o'', o' ⊆ o'' -> o'' ∈ o -> f o'' ∈ X) ->
+  complete I 
+  sup o f ∈ COWi o'.
+Proof.
+intros fincr oo lto Hrec.
+assert (oo' : isOrd o') by eauto using isOrd_inv.
+rewrite (ord_intv_sup o o' f); trivial.
+apply COWi_complete with o'; auto.
+*intros.
+ apply ord_intv_def in H0; destruct H0.
+ apply ord_intv_dir; trivial.
+*red; intros.
+ rewrite ord_intv_def in H; destruct H; auto.
+*red; intros.
+ rewrite ord_intv_def in H; destruct H.
+ rewrite ord_intv_def in H0; destruct H0.
+ apply fincr; auto.
+Qed.
+
 
 Lemma COWi_sup_intro f o o' :
   increasing_bounded o f ->
   isOrd o ->
   o' ∈ o ->
+  (forall o'', o' ⊆ o'' -> o'' ∈ o -> f o'' ∈ X) ->
+  compl
+  sup o f ∈ X.
+Proof.
+intros fincr oo lto Hrec.
+assert (oo' : isOrd o') by eauto using isOrd_inv.
+rewrite (ord_intv_sup o o' f); trivial.
+apply COWi_complete with o'; auto.
+*intros.
+ apply ord_intv_def in H0; destruct H0.
+ apply ord_intv_dir; trivial.
+*red; intros.
+ rewrite ord_intv_def in H; destruct H; auto.
+*red; intros.
+ rewrite ord_intv_def in H; destruct H.
+ rewrite ord_intv_def in H0; destruct H0.
+ apply fincr; auto.
+Qed.*)
+
+Lemma COWi_sup_intro f o o' x :
+  isOrd x ->
+  increasing_bounded o f ->
+  isOrd o ->
+  o' ∈ o ->
+  (forall o'', o' ⊆ o'' -> o'' ∈ o -> f o'' ∈ COWi x) ->
+  sup o f ∈ COWi x.
+Proof.
+intros xo fincr oo lto Hrec.
+assert (oo' : isOrd o') by eauto using isOrd_inv.
+rewrite (ord_intv_sup o o' f); trivial.
+apply COWi_complete with o'; auto.
+*intros.
+ apply ord_intv_def in H0; destruct H0.
+ apply ord_intv_dir; trivial.
+*red; intros.
+ rewrite ord_intv_def in H; destruct H; auto.
+*red; intros.
+ rewrite ord_intv_def in H; destruct H.
+ rewrite ord_intv_def in H0; destruct H0.
+ apply fincr; auto.
+Qed.
+
+Lemma COWi_sup_intro_succ f o o' :
+  increasing_bounded o f ->
+  isOrd o ->
+  o' ∈ o ->
   (forall o'', o' ⊆ o'' -> o'' ∈ o -> f o'' ∈ Wf (COWi o')) ->
   sup o f ∈ Wf (COWi o').
+Proof.
 intros fincr oo lto Hrec.
 assert (oo' : isOrd o') by eauto using isOrd_inv.
 rewrite <- COWi_succ; auto with *.
-apply COWi_complete; auto.
-exists o'; trivial.
+apply COWi_sup_intro with o'; auto.
 intros.
-rewrite COWi_succ; auto.
+ rewrite COWi_succ; auto with *.
 Qed.
 
 (* Simple co-recursion *)
@@ -232,13 +370,13 @@ revert H1; apply Fmono; auto.
 Qed.
 
   Lemma TI_WF_typ_gen o o' : isOrd o -> isOrd o' -> o' ⊆ o -> TI F o ∈ COWi o'.
+Proof.
 intros; eapply TI_typ_COTI_gen; auto.
-
-red; intros.
-apply Fty; trivial.
-
-intros.
-apply COWi_complete; trivial.
+*red; intros.
+ apply Fty; trivial.
+*intros.
+ destruct H6.
+ apply COWi_sup_intro with x; trivial.
 Qed.
   
 Lemma TI_WF_typ o : isOrd o -> TI F o ∈ COWi o.
@@ -327,11 +465,18 @@ red; reflexivity.
 Qed.
 
 Lemma mono_bounded_cstr X x f :
-  (forall w, w ∈ X -> is_cc_fun (B x) (f w)) ->
+  (forall w, w ∈ X -> isWfun (f w)) ->
+  (forall w, w ∈ X -> rel_domain (f w) ⊆ B x) ->
   (forall i, i ∈ B x -> mono_bounded X (fun w => cc_app (f w) i)) ->
   mono_bounded X (fun w => Wsup x (f w)).
-unfold mono_bounded; intros fty fprod; intros.
-apply ZFwdom.Wsup_mono with (B:=B); auto with *.
+unfold mono_bounded; intros fty fdom fprod; intros.
+apply Zwdom.Wsup_mono; auto with *.
+intros.
+assert (i ∈ B x).
+{apply fdom with (1:=H).
+ rewrite rel_domain_ax; eauto. }
+rewrite couple_in_app in H2|-*.
+revert H2; apply fprod; auto.
 Qed.
 
 End SimpleCorecursion.
@@ -372,8 +517,8 @@ intros oo; induction oo using isOrd_ind; red; intros.
 rewrite TIF_eq; auto with *.
 apply power_intro.
 intros.
-apply sup_ax in H2. 2:do 2 red; intros; apply Fm; auto with *; apply TIF_morph; trivial.
- destruct H2.
+apply sup_ax in H2.
+ destruct H2 as (?,?,(_,?)).
  apply power_elim with (2:=H3).
  apply Wf_typ with (X:=Wdom); auto with *.
  apply Fty with (X:=Wdom); auto with *.
@@ -425,11 +570,13 @@ apply COTI_intro; auto with *.
  assert (eqC: Wf (COWi o'') == COWi (osucc o'')).
   symmetry; apply COTI_mono_succ; auto with *.
  rewrite TIF_eq; auto.
- apply COWi_sup_intro; auto.
+ rewrite eqC.
+ apply COWi_sup_intro with o''; auto.
   apply increasing_bounded_weaker; trivial.
   apply FTIF_mono; trivial.
 
   intros.
+  rewrite <- eqC.
   apply FTIF_typ; auto.
   apply TIF_morph; auto with *.
 Qed.

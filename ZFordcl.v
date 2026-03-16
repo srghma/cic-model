@@ -133,12 +133,12 @@ Qed.
 Lemma isOrd_eq : forall o, isOrd o -> o == sup o succ.
 intros.
 apply eq_intro; intros.
- rewrite sup_ax.
+ rewrite sup_def.
  2:do 2 red; intros; apply succ_morph; trivial.
  exists z; trivial.
  apply le_refl.
 
- rewrite sup_ax in H0.
+ rewrite sup_def in H0.
  2:do 2 red; intros; apply succ_morph; trivial.
  destruct H0.
  apply le_lt_trans with x; trivial.
@@ -885,7 +885,7 @@ Qed.
     x ∈ TI o.
 intros.
 rewrite TI_eq; trivial.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 exists o'; trivial.
 Qed.
 
@@ -895,7 +895,7 @@ Qed.
     exists2 o', lt o' o & x ∈ F (TI o').
 intros.
 rewrite TI_eq in H0; trivial.
-rewrite sup_ax in H0; auto.
+rewrite sup_def in H0; auto.
 Qed.
 
   Lemma TI_initial : TI zero == empty.

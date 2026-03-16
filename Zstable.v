@@ -1,19 +1,20 @@
 
 Require Export ZF.
 
+(** Warning: uses unbounded quantifications *)
+
 (** Stable functions *)
 
-Definition stable_class (P:set->Prop) (F:set->set) :=
-  forall X, (forall x, x∈X -> P x) -> inter (replf X F) ⊆ F (inter X).
+Definition stable_set (K:set) (F:set->set) :=
+  forall X, X ⊆ K -> inter (replf X F) ⊆ F (inter X).
 
-#[global]Instance stable_class_morph :
-  Proper (pointwise_relation set iff==>(eq_set==>eq_set)==>iff) stable_class.
+#[global]Instance stable_set_morph :
+  Proper (eq_set==>(eq_set==>eq_set)==>iff) stable_set.
 Proof.
 do 3 red; intros.
 apply fa_morph; intros X.
 apply impl_morph;[|intros].
-+apply fa_morph; intros a.
- rewrite (H a); reflexivity.
++apply incl_set_morph; auto with *.
 +apply incl_set_morph.
  *apply inter_morph.
   apply replf_morph;[reflexivity|].
@@ -22,8 +23,8 @@ apply impl_morph;[|intros].
 Qed.
 
 (* Could be generalized with eq_index *)
-#[global]Instance stable_class_mono :
-  Proper (pointwise_relation set impl-->(eq_set==>eq_set)==>impl) stable_class.
+#[global]Instance stable_set_mono :
+  Proper (incl_set-->(eq_set==>eq_set)==>impl) stable_set.
 Proof.
 intros K1 K2 eqK F1 F2 eqF stbl X Xok.
 rewrite <- (eqF (inter X) (inter X));[|reflexivity].
@@ -32,64 +33,57 @@ rewrite <- (stbl X).
  apply inter_morph.
  apply replf_morph; auto with *.
  red; intros; symmetry; apply eqF; auto with *.
-+intros; apply eqK; auto.
++intros; rewrite Xok; auto.
 Qed.
 
-Lemma cst_stable_class A K : stable_class K (fun _ => A).
+Lemma cst_stable_set A K : stable_set K (fun _ => A).
 red; red; intros.
 apply inter_elim with (1:=H0) (y:=A).
-destruct inter_wit with (2:=H0).
- red; red; reflexivity.
+destruct inter_wit with (1:=H0).
 rewrite replf_ax; auto.
 exists x; auto with *.
 Qed.
 
-Lemma id_stable_class K : stable_class K (fun x => x).
+Lemma id_stable_set K : stable_set K (fun x => x).
 red; red; intros.
-destruct inter_wit with (2:=H0).
- red; red; auto.
+destruct inter_wit with (1:=H0).
 apply inter_intro; eauto.
 intros.
 apply inter_elim with (1:=H0).
 rewrite replf_ax.
-2:red; red; auto.
 exists y;auto with *.
 Qed.
 
-Lemma compose_stable_class K1 K2 F G :
-  Proper (eq_set ==> iff) K1 ->
+
+Lemma compose_stable_set K1 K2 F G :
   Proper (incl_set ==> incl_set) F ->
   morph1 G ->
-  stable_class K1 F ->
-  stable_class K2 G ->
-  (forall x, K2 x -> K1 (G x)) ->
-  stable_class K2 (fun o => F (G o)).
-intros K1m Fm Gm Fs Gs Gty.
+  stable_set K1 F ->
+  stable_set K2 G ->
+  typ_fun G K2 K1 ->
+  stable_set K2 (fun o => F (G o)).
+intros Fm Gm Fs Gs Gty.
 red; intros.
 transitivity (F (inter (replf X G))).
- red; intros.
+*red; intros.
  apply Fs.
-  intros.
+ +red; intros.
   rewrite replf_ax in H1; auto with *.
-  destruct H1.
-  rewrite H2; auto.
-
-  rewrite compose_replf; trivial.
+  destruct H1 as (x,?,(?,?)).
+  rewrite H3; auto.
+ +rewrite compose_replf; trivial.
    red; red; intros; apply Gm; trivial.
-
-   apply Fmono_morph in Fm.
-   red; red; intros; apply Fm; trivial.
-
- apply Fm.
+  apply Fmono_morph in Fm.
+  red; red; intros; apply Fm; trivial.
+*apply Fm.
  apply Gs; trivial.
 Qed.
 
-Lemma power_stable K : stable_class K power.
+Lemma power_stable K : stable_set K power.
 red; red; intros.
 apply power_intro; intros.
 destruct inter_non_empty with (1:=H0).
 rewrite replf_ax in H2.
-2:red;red;intros;apply power_morph; trivial.
 destruct H2.
 apply inter_intro; eauto.
 clear H3 H4 H2 x0 x.
@@ -97,7 +91,6 @@ intros.
 assert (z ∈ power y).
  apply inter_elim with (1:=H0).
  rewrite replf_ax.
- 2:red;red;intros;apply power_morph; trivial.
  exists y; auto with *.
 rewrite power_ax in H3; auto.
 Qed.
@@ -105,23 +98,19 @@ Qed.
 Lemma union2_stable_disjoint K F G :
   morph1 F ->
   morph1 G ->
-  stable_class K F ->
-  stable_class K G ->
-  (forall X Y z, K X -> K Y -> z ∈ F X -> z ∈ G Y -> False) ->
-  stable_class K (fun X => F X ∪ G X).
+  stable_set K F ->
+  stable_set K G ->
+  (forall X Y z, X ∈ K -> Y ∈ K -> z ∈ F X -> z ∈ G Y -> False) ->
+  stable_set K (fun X => F X ∪ G X).
 intros Fm Gm Fs Gs disj.
 intros X KX z zty.
-destruct inter_wit with (2:=zty) as (w,winX).
- do 2 red; intros.
- rewrite H; reflexivity.
+destruct inter_wit with (1:=zty) as (w,winX).
 assert (forall x, x ∈ X -> z ∈ F x ∪ G x).
- intros.
+{intros.
  apply inter_elim with (1:=zty).
  rewrite replf_ax.
-  exists x; auto with *.
-
-  red; red; intros.
-  rewrite H1; reflexivity.
+ exists x; [|split]; auto with *.
+ red; intros; rewrite H0; reflexivity. }
 clear zty.
 assert (z ∈ F w ∪ G w) by auto.
 apply union2_elim in H0; destruct H0.
@@ -130,8 +119,7 @@ apply union2_elim in H0; destruct H0.
  apply inter_intro.
   intros.
   rewrite replf_ax in H1.
-  2:red;red;intros;apply Fm; trivial.
-  destruct H1.
+  destruct H1 as (?,?,(_,?)).
   rewrite H2; clear H2 y.
   assert (z ∈ F x ∪ G x) by auto.
   apply union2_elim in H2; destruct H2; trivial.
@@ -139,7 +127,6 @@ apply union2_elim in H0; destruct H0.
 
   exists (F w).
   rewrite replf_ax.
-  2:red;red;intros;apply Fm;trivial.
   exists w; auto with *.
 
  apply union2_intro2.
@@ -147,8 +134,7 @@ apply union2_elim in H0; destruct H0.
  apply inter_intro.
   intros.
   rewrite replf_ax in H1.
-  2:red;red;intros;apply Gm; trivial.
-  destruct H1.
+  destruct H1 as (?,?,(_,?)).
   rewrite H2; clear H2 y.
   assert (z ∈ F x ∪ G x) by auto.
   apply union2_elim in H2; destruct H2; trivial.
@@ -156,9 +142,20 @@ apply union2_elim in H0; destruct H0.
 
   exists (G w).
   rewrite replf_ax.
-  2:red;red;intros;apply Gm;trivial.
   exists w; auto with *.
 Qed.
 
 
+Definition stable_class (K:set->Prop) (F:set->set) :=
+  forall X, (forall x, x∈X -> K x) -> inter (replf X F) ⊆ F (inter X).
+
+Lemma stable_class_eqv K F :
+  stable_class K F <->
+    forall X, (forall x, x ∈ X -> K x) -> stable_set X F.
+Proof.
+unfold stable_set, stable_class.
+split; intros; eauto.
+apply H with X; auto with *.
+Qed.
+  
 Definition stable := stable_class (fun _ => True).

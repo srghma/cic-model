@@ -1,4 +1,4 @@
-Require Import ZF ZFpairs ZFrelations ZFcoc ZFlist ZFord ZFfix.
+Require Import ZF Zpairs Zrelations Zcoc Zlist ZFord ZFfix.
 Require Import ZFwdom.
 Require ZFw.
 
@@ -17,8 +17,7 @@ split; intros.
  apply H3.
  {red; intros ? h.
   rewrite replf_ax in h.
-  2:do 2 red; intros; apply cc_app_morph; auto with *.
-  destruct h as (i,tyi,eqz).
+  destruct h as (i,tyi,(_,eqz)).
   rewrite eqz.
   specialize cc_prod_elim with (1:=H1)(2:=tyi).
   apply H. }
@@ -26,13 +25,12 @@ split; intros.
   rewrite cc_eta_eq with (1:=H1).
   apply cc_prod_intro; intros; auto with *.
    do 2 red; intros; apply cc_app_morph; auto with *.
-  rewrite replf_ax.
+  rewrite replf_def.
   2:do 2 red; intros; apply cc_app_morph; auto with *.
   exists x0; auto with *. }
 
 +rewrite replf_ax in H2.
- 2:do 2 red; intros; apply cc_app_morph; auto with *.
- destruct H2 as (i,tyi,eqz).
+ destruct H2 as (i,tyi,(_,eqz)).
  split.
  {rewrite eqz.
   specialize cc_prod_elim with (1:=H1)(2:=tyi).
@@ -42,19 +40,12 @@ split; intros.
  rewrite eqz.
  apply Wf_elim in H3; trivial.
  destruct H3 as (x',tyx,(f',tyf',eqs)).
- apply Wsup_inj with (A:=A)(B:=B) in eqs; trivial.
- +destruct eqs as (eqx,eqf).
-  rewrite eqf; trivial.
-  apply cc_prod_elim with (1:=tyf').
-  rewrite <- eqx; trivial.
- +intros.
-  specialize cc_prod_elim with (1:=H1)(2:=H3) as ty.
-  apply H in ty.
-  revert ty; apply Fstages_inA.
- +intros.
-  specialize cc_prod_elim with (1:=tyf')(2:=H3) as ty.
-  apply H2 in ty.
-  revert ty; apply Fstages_inA. }
+ apply Wsup_inj_typ with (A:=A)(B:=B)(3:=H1)(4:=tyf') in eqs;
+   [|rewrite H;apply Fstages_inA|rewrite H2;apply Fstages_inA].
+ destruct eqs as (eqx,eqf).
+ rewrite eqf; trivial.
+ apply cc_prod_elim with (1:=tyf').
+ rewrite <- eqx; trivial. }
 Qed.
     
 Section Wsimulation.
@@ -78,12 +69,12 @@ Section Wsimulation.
   
   Notation Wd  := (Wdom A B).
   Notation Wd' := (Wdom A' B').
-  Notation Wf  := (ZFwdom.Wf A B).
-  Notation Wf' := (ZFwdom.Wf A' B').
+  Notation Wf  := (Zwdom.Wf A B).
+  Notation Wf' := (Zwdom.Wf A' B').
   
   Lemma eq_index : sup A B ⊆ sup A' B'.
 red; intros z.
-rewrite ! sup_ax; auto.
+rewrite ! sup_def; auto.
 intros (x,tyx,inB); exists (f x); auto.                        
 rewrite <-Beq; trivial.
 Qed.
@@ -106,40 +97,57 @@ Qed.
   Lemma Wfmap_typ : typ_fun Wfmap Wd Wd'.
 intros w tyw.
 apply power_intro; intros.
-unfold Wfmap in H; rewrite replf_ax in H; trivial.
-destruct H as (p,inw,eqz).
+unfold Wfmap in H; rewrite replf_ax in H.
+destruct H as (p,inw,(_,eqz)).
 rewrite eqz.
 specialize power_elim with (1:=tyw) (2:=inw); intro.
 apply couple_intro.
 +apply fst_typ in H.
  revert H; apply List_mono; trivial.
-
 +apply snd_typ in H; auto.
 Qed.
 
   Lemma Wfmap_def w z :
-    w ∈ Wd ->
+    isWobj w ->
     z ∈ Wfmap w <-> exists2 x, z == couple (fst z) (f x) & couple (fst z) x ∈ w.
+Proof using Wfmapm.
 intros tyw.
-unfold Wfmap; rewrite replf_ax; trivial.
+unfold Wfmap; rewrite replf_def; trivial.
 split; intros.    
 +destruct H as (p,?,eqz).
  exists (snd p); rewrite eqz.
  *rewrite fst_def; reflexivity.
  *rewrite fst_def.
-  specialize power_elim with (1:=tyw) (2:=H); intro.
-  rewrite <- surj_pair with (1:=H0); trivial.
+  assert (pc := proj1 (tyw _ H)).
+  red in pc; rewrite <- pc; trivial.
 +destruct H as (x,eqz,inw).
  exists (couple (fst z) x); trivial.
  rewrite fst_def, snd_def; trivial.
 Qed.
 
-  Lemma Wfmap_sup X x g :
+  Lemma Wfmap_Wobj w :
+    isWobj w ->
+    isWobj (Wfmap w).
+Proof using Wfmapm.
+clear ftyp Beq.  
+intros ww p inmap.
+rewrite Wfmap_def in inmap; [|trivial].
+destruct inmap as (x,eqp,inw).
+rewrite eqp.
+apply ww in inw.
+destruct inw as (_,lst); rewrite fst_def in lst.
+split; [trivial|].
+rewrite fst_def; trivial.
+Qed.
+
+Lemma Wfmap_sup X x g :
     X ⊆ Wd ->
     x ∈ A ->
     g ∈ (Π __∈B x, X) ->
     Wfmap (Wsup x g) == Wsup (f x) (cc_lam (B' (f x)) (fun i => Wfmap (cc_app g i))).
 intros tyX tyx tyg.
+assert (gw : isWfun g).
+{apply cc_prod_Wfun with (1:=tyX)(2:=tyg). }
 assert (m : ext_fun (B' (f x))
    (fun i0 : set => replf (cc_app g i0) (fun p : set => couple (fst p) (f (snd p))))).
 {do 2 red; intros.
@@ -148,11 +156,15 @@ assert (m : ext_fun (B' (f x))
  rewrite H2; reflexivity. }
 unfold Wfmap.
 apply eq_set_ax; intros z.
-rewrite replf_ax; auto.
+rewrite replf_def; auto.
 rewrite Wsup_def.
+2:{apply isWfun_cc_lam; [trivial|].
+   intros.
+   apply Wfmap_Wobj.
+   apply isWobj_cc_app; trivial. }
 split ;intros.
 +destruct H as (p,insup,eqz).
- rewrite Wsup_def in insup.
+ rewrite Wsup_def in insup;[|trivial].
  destruct insup as [eqp|(i&l&y&inlam&eqp)].
  {left.
   rewrite eqz,eqp,fst_def,snd_def; reflexivity. }
@@ -171,25 +183,25 @@ split ;intros.
   exists i.
    rewrite  <-Beq; trivial.
   exists (couple l (f y));[|reflexivity].
-  rewrite replf_ax; auto.
+  rewrite replf_def; auto.
   exists (couple l y); trivial.
  rewrite fst_def, snd_def; reflexivity. }
 +destruct H as [eqz|(i&l&y&inlam&eqz)].
  {exists (couple Nil x).
-   apply Wsup_def; left;reflexivity.
-   rewrite eqz,fst_def,snd_def; reflexivity. }
+  apply Wsup_def; [trivial|left;reflexivity].
+  rewrite eqz,fst_def,snd_def; reflexivity. }
  {rewrite cc_lam_def in inlam; trivial.
   destruct inlam as (i',tyi,(y',tyy,eqc)).
   apply couple_injection in eqc; destruct eqc as (eqi,eqc).
   rewrite <- eqc in tyy.
   rewrite replf_ax in tyy; auto.
-  destruct tyy as (p,inw,eqc').
+  destruct tyy as (p,inw,(_,eqc')).
   apply couple_injection in eqc'; destruct eqc' as (eql,eqy).
   rewrite eqy in eqz.
   rewrite <- eqi in tyi,inw.
   exists (couple (Cons i l) (snd p)).
   2:rewrite fst_def, snd_def; trivial.
-  rewrite Wsup_def; right.
+  rewrite Wsup_def; [right|trivial].
   exists i; exists l; exists (snd p); split;[|reflexivity].
   rewrite <-Beq in tyi; trivial.
   apply cc_prod_elim with (2:=tyi) in tyg.
@@ -248,20 +260,19 @@ Lemma Wfmap_fsub o w :
   w ∈ Wf (TI Wf o) ->
   typ_fun Wfmap (fsub Wf Wd w) (fsub Wf' Wd' (Wfmap w)).
 red; intros.
-apply Wf_elim in H0; [|auto].
+apply Wf_elim in H0.
 destruct H0 as (x',tyx',(f',tyf',eqw)).
 rewrite eqw in H1.
 rewrite wsup_fsub with (3:=tyx')(4:=tyf') in H1; auto.
 2:apply TI_Fstages; auto with *.
 rewrite replf_ax in H1.
-2:do 2 red; intros; apply cc_app_morph; auto with *.
-destruct H1 as (i,tyi,eqx).
+destruct H1 as (i,tyi,(_,eqx)).
 rewrite eqx; clear x eqx.
 rewrite eqw.
 rewrite Wfmap_sup with (2:=tyx')(3:=tyf').
 2:{apply TI_pre_fix; auto with *. }
 rewrite wsup_fsub with (X:=TI Wf' o); auto.
-+rewrite replf_ax.
++rewrite replf_def.
  2:do 2 red; intros; apply cc_app_morph; auto with *.
  rewrite Beq in tyi; trivial.
  exists i; trivial.

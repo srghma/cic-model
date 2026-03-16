@@ -1,6 +1,6 @@
 From Stdlib Require Import Setoid Compare_dec Wf_nat.
 Require Import Lambda.
-Require Import ZF ZFpairs ZFnats ZFord ZFgrothendieck.
+Require Import ZF Zpairs Znats ZFord ZFgrothendieck.
 Require Import ZFfix.
 Require Import Sat.
 
@@ -337,7 +337,7 @@ Lemma replSAT_ax : forall f z,
   (z ∈ replSAT f <-> exists A, z == f A).
 unfold replSAT.
 intros.
-rewrite replf_ax.
+rewrite replf_def.
  split; intros.
   destruct H0 as (y,isSet,img).
   exists (sSAT y); trivial.
@@ -356,15 +356,13 @@ Qed.
 
 Lemma G_CCLam U :
   grot_univ U ->
-  omega ∈ U ->
+  N ∈ U ->
   CCLam ∈ U.
 intros.
 assert (U_singl := G_singl _ H).
-assert (U_N : ZFnats.N ∈ U).
- apply G_N; trivial.
-assert (U_0 : ZFnats.zero ∈ U).
+assert (U_0 : zero ∈ U).
  apply G_inf_nontriv; trivial.
-assert (U_succ : forall n, n ∈ U -> ZFnats.succ n ∈ U).
+assert (U_succ : forall n, n ∈ U -> succ n ∈ U).
  intros.
  apply G_union2; auto.
 unfold CCLam.
@@ -374,6 +372,8 @@ apply G_TI; trivial.
  unfold Lam.LAMf.
  rewrite H1; reflexivity.
 
+ apply G_omega; trivial.
+ 
  intros.
  unfold Lam.LAMf.
  auto 20 using G_union2, G_prodcart.

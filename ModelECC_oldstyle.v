@@ -472,11 +472,11 @@ End MakeModel.
 
 (** Now we show that we have a model in Tarski-Grothendieck *)
 
-Require Import ZF ZFcoc ModelZF ZFecc.
+Require Import ZF Zcoc ModelZ ZFecc.
 
 Module ECC <: ECC_Model.
 
-  Module CC := ModelZF.CCM.
+  Module CC := ModelZ.CCM.
 
   Definition u_card := ecc.
   

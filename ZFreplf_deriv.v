@@ -15,7 +15,7 @@ Lemma replf_der_ub a f b :
 Proof.
 intros fext ub.
 apply eq_set_ax; intros z.
-rewrite replf_ax; trivial.
+rewrite replf_def; trivial.
 rewrite subset_ax.
 split.
 *intros (x,tyx,eqz).
@@ -39,8 +39,8 @@ Lemma replf_der_cst a b :
   replf a (fun _ => b) ⊆ singl b.
 Proof.
 red; intros.
-rewrite replf_ax in H; [| auto with *].
-destruct H as (x,tyx,eqz).
+rewrite replf_ax in H.
+destruct H as (x,tyx,(_,eqz)).
 apply singl_intro_eq; trivial.
 Qed.
 
@@ -49,22 +49,22 @@ Lemma replf_der_pair a F G :
   ext_fun a G ->
   replf a (fun x => pair (F x) (G x)) ⊆ power (replf a F ∪ replf a G).
 intros Fext Gext z.
-rewrite replf_ax; [|do 2 red; intros; apply pair_morph; auto].
+rewrite replf_def; [|do 2 red; intros; apply pair_morph; auto].
 intros (x,tyx,eqz).
 rewrite eqz. clear z eqz.
 rewrite power_ax; intros z tyz.
 rewrite pair_ax in tyz; destruct tyz as [eqz|eqz].
 *apply union2_intro1.
- rewrite replf_ax; eauto.
+ rewrite replf_def; eauto.
 *apply union2_intro2.
- rewrite replf_ax; eauto.
+ rewrite replf_def; eauto.
 Qed.
 
 Lemma replf_der_union a F :
   ext_fun a F ->
   replf a (fun x => union (F x)) ⊆ power (union (union (replf a F))).
 intros Fext z.
-rewrite replf_ax; [|do 2 red; intros; apply union_morph; auto].
+rewrite replf_def; [|do 2 red; intros; apply union_morph; auto].
 intros (x,tyx,eqz).
 rewrite eqz. clear z eqz.
 rewrite power_ax; intros z tyz.
@@ -80,7 +80,7 @@ Lemma replf_der_power a F :
   ext_fun a F ->
   replf a (fun x => power (F x)) ⊆ power (power (union (replf a F))).
 intros Fext z.
-rewrite replf_ax; [|do 2 red; intros; apply power_morph; auto].
+rewrite replf_def; [|do 2 red; intros; apply power_morph; auto].
 intros (x,tyx,eqz).
 rewrite eqz. clear z eqz.
 rewrite power_ax; intros z tyz.
@@ -96,7 +96,7 @@ Lemma replf_der_subset a F P :
   (forall x x' y, x ∈ a -> x==x' -> y ∈ F x -> (P x y <-> P x' y)) ->
   replf a (fun x => subset (F x) (P x)) ⊆ power (union (replf a F)).
 intros Fext Pext z.
-rewrite replf_ax.
+rewrite replf_def.
 2:{do 2 red; intros.
    apply subset_morph; auto.
    red; auto. }
@@ -110,7 +110,7 @@ exists (F x); [auto|].
 apply replf_intro with x; auto with *.
 Qed.
 
-Require Import ZFpairs.
+Require Import Zpairs.
 (* NB: prodcart, fst and snd are defined in Zermelo *)
 
 Lemma replf_der_replf a F G :
@@ -119,20 +119,20 @@ Lemma replf_der_replf a F G :
   replf a (fun x => replf (F x) (G x)) ⊆ 
     power (replf (prodcart a (union (replf a F))) (fun p => G (fst p) (snd p))).
 intros Fext Gext z.
-rewrite replf_ax.
+rewrite replf_def.
 2:{do 2 red; intros.
    apply replf_morph; auto.
    red; auto. }
 intros (x,tyx,eqz).
 rewrite eqz. clear z eqz.
 rewrite power_ax; intros z tyz.
-rewrite replf_ax in tyz; auto.
+rewrite replf_def in tyz; auto.
 2:do 2 red; intros; auto with *.
 destruct tyz as (y,tyy,eqz).
 assert (y ∈ union (replf a F)).
 {apply union_intro with (F x); trivial.
  apply replf_intro with x; auto with *. }
-rewrite replf_ax.
+rewrite replf_def.
 *exists (couple x y); [apply couple_intro; trivial|].
  rewrite eqz.
  apply Gext; trivial.

@@ -1,7 +1,7 @@
 Require Export ZFtheory. 
 Require Export GenModel.
-Require Export ZFcoc.
-Require Export ModelZF.
+Require Export Zcoc.
+Require Export ModelZ.
 From Stdlib Require Export List Lia.
 
 Module BuildModel := GenModel.MakeModel(CCM).
@@ -213,7 +213,7 @@ intros.
 do 2 red in H0; simpl in H0; specialize H0 with (1:=H2).
 do 2 red in H1; simpl in H1; specialize H1 with (1:=H2).
 destruct P. 2 : elim H; trivial.
- unfold props in H1. unfold ZFcoc.props in H1.
+ unfold props in H1. unfold Zcoc.props in H1.
  rewrite power_ax in H1. specialize H1 with (1:=H0).
  apply singl_elim; trivial.
 Qed.
@@ -242,7 +242,7 @@ apply cond_set_morph; try rewrite H; reflexivity.
 Defined.
 
 Lemma EQ_trm_typ : forall e x y, typ e (EQ_trm x y) prop.
-do 2 red; simpl; intros. unfold props. unfold ZFcoc.props.
+do 2 red; simpl; intros. unfold props. unfold Zcoc.props.
 rewrite power_ax; intros. 
 unfold EQ in H0. unfold cond_set in H0.
 rewrite subset_ax in H0.
@@ -560,8 +560,7 @@ do 2 rewrite <- lift_split in H0. rewrite lift_prop in H0.
 generalize (lift_Somen _ 2 0 H); intro Hlift; 
 fold (lift 2 C) in Hlift.
 apply union_elim in H1; destruct H1.
-apply replf_elim in H4. 2 : do 2 red; 
-intros u v _ Ht; rewrite Ht; reflexivity.
+apply replf_elim in H4.
 destruct H4. rewrite H5 in H1.
 assert (N == int T i). simpl; reflexivity. rewrite H6 in H4.
 generalize (vcons_add_var _ _ _ _ H3 H4); intros.

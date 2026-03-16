@@ -1,11 +1,11 @@
 Require Import basic.
 Require Import Sublogic.
 Require Import Models GenModelSyntax.
-Require Import ZF ZFcoc.
+Require Import ZF Zcoc.
 
-(** Set-theoretical model of the Calculus of Constructions in IZF *)
+(** Set-theoretical model of the Calculus of Constructions in IZ *)
 
-Module ZFsets <: Sets.
+Module Zsets <: Sets.
 
 Definition X := set.
 Definition inX : X -> X -> Prop := in_set.
@@ -22,13 +22,13 @@ Proof in_set_morph.
 Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
 
-End ZFsets.
+End Zsets.
 
 (** * Instantiation of the abstract model of CC *)
 
 Module CCM <: CC_Model.
 
-Include ZFsets.
+Include Zsets.
 
 Definition props : X := props.
 Definition app : X -> X -> X := cc_app.

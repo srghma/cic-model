@@ -1,9 +1,8 @@
 
-Require Import ZF ZFpairs ZFsum Sat.
-Require Import ZFrelations ZFfixrec ZFrecbot.
+Require Import ZF Zpairs Zsum Sat.
+Require Import Zrelations ZFfixrec ZFrecbot.
 Require Import ZFlambda.
 Require Import ZFord.
-(*Require Import ZFcoc.*)
 Require Import Lambda.
 
 Set Implicit Arguments.
@@ -623,8 +622,8 @@ Lemma Real_sigma_elim X Y RX RY a C t b :
            (fun x => piSAT0 (fun y => y ∈ Y x) (RY x) (fun y => C(couple x y)))) ->
   inSAT (App t b) (C a).
 intros.
-apply sigma_elim in H1; auto with *.
-destruct H1 as (eqa,(ty1,ty2)).
+apply sigma_ax in H1.
+destruct H1 as (eqa,(ty1,(_,ty2))).
 apply cartSAT_case with (1:=H2).
 apply prodSAT_intro'.
 intros ta asat.
@@ -632,7 +631,7 @@ apply piSAT0_elim with (2:=ty1)(3:=asat) in H3.
 apply prodSAT_intro'.
 intros tb bsat.
 apply piSAT0_elim with (2:=ty2)(3:=bsat) in H3.
-rewrite <- eqa in H3.
+red in eqa; rewrite <- eqa in H3.
 trivial.
 Qed.
 

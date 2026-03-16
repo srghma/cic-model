@@ -176,31 +176,26 @@ Lemma isTransClos_intro a f :
   (forall b, b ∈ a -> isTransClos b (f b)) ->
   isTransClos a (singl a ∪ sup a f).
 split; intros.
- split; intros.
-  apply union2_intro1.
-  apply singl_intro.
-
-  apply union2_intro2.
-  rewrite sup_ax; auto with *.
+*split; intros.
+ +apply union2_intro1;apply singl_intro.
+ +apply union2_intro2.
+  rewrite sup_ax.
   apply union2_elim in H2; destruct H2.
-   apply singl_elim in H2.
-   rewrite H2 in H1.
-   exists a0; trivial.
-   apply H0; trivial.
-
-   rewrite sup_ax in H2; auto with *.
-   destruct H2.
-   exists x; trivial.
-   destruct H0 with (1:=H2).
-   destruct H4; eauto.
-
- red; intros.
+  ++apply singl_elim in H2.
+    rewrite H2 in H1.
+    exists a0; [|split]; auto.
+    apply H0; trivial.
+  ++rewrite sup_def in H2; auto.
+    destruct H2.
+    exists x; [|split]; auto.
+    destruct H0 with (1:=H2).
+    destruct H4; eauto.
+*red; intros.
  destruct H1.
  apply union2_elim in H2; destruct H2.
-  apply singl_elim in H2.
+ +apply singl_elim in H2.
   rewrite H2; trivial.
-
-  rewrite sup_ax in H2; auto with *.
+ +rewrite sup_def in H2; auto with *.
   destruct H2.
   destruct H0 with (1:=H2).
   apply H6; auto.
@@ -340,8 +335,7 @@ split; intros.
   rewrite (trClos_eqn x); [|constructor;auto].
   red; intros.
   apply union2_intro2.
-  apply sup_ax.
-  do 2 red; intros; apply ZFrepl.WFR_morph0; trivial.
+  apply sup_def; auto with *.
   exists z; trivial.
 *destruct H as (c,?,?).
  destruct H.

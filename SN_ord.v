@@ -1,4 +1,4 @@
-Require Import ZF ZFnats ZFord ZFcoc.
+Require Import ZF Znats ZFord Zcoc.
 Require Import Sat.
 Require Import ZFuniv_real SN_ECC_Real.
 Module Lc := Lambda.

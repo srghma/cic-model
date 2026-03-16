@@ -1,6 +1,6 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix ZFfixfun.
-Require Import ZFstable ZFiso ZFind_w ZFspos.
-Require Import ZFcoc.
+Require Import ZF Zpairs Zsum Zrelations ZFord ZFfix ZFfixfun.
+Require Import Zstable ZFiso ZFind_w ZFspos.
+Require Import Zcoc.
 Require Import ZFgrothendieck.
 
 
@@ -240,20 +240,12 @@ apply couple_morph.
   apply w3typ; trivial.
   apply fst_typ_sigma in ty; trivial.
 
-  eapply snd_typ_sigma in ty;[| |reflexivity].
-   apply cc_prod_elim with (1:=ty); trivial.
+  eapply snd_typ_sigma in ty;[|reflexivity].
+  apply cc_prod_elim with (1:=ty); trivial.
 
-   do 2 red; intros.
-   apply cc_prod_morph.
-    apply w2m; auto with *.
-
-    red; intros.
-    apply H0.
-    apply w3m; auto with *.
-
-   apply cc_app_morph; trivial.
-   apply snd_morph.
-   apply dpm; auto with *.
+  apply cc_app_morph; trivial.
+  apply snd_morph.
+  apply dpm; auto with *.
 Qed.
 
 Let isow p := TIF_iso Arg (dp_oper p) (wiso p).
@@ -467,11 +459,10 @@ Qed.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.
+  Hypothesis Unontriv : Znats.N ∈ U.
 
   Let Unonmt : empty ∈ U.
-apply G_trans with omega; trivial.
-apply zero_omega.
+apply G_inf_nontriv; trivial.
 Qed.
 
   Variable p : dpositive.
@@ -1114,27 +1105,19 @@ constructor; simpl; intros.
   apply H0 in H7.
   apply eq_dop; auto with *.
 
-  do 2 red; intros. 
-  apply H0 in H7.
-  apply eq_dop; auto with *.
-
   intros.
   transitivity (dp_oper (F x) Y a).
    apply H1 in H6; trivial.
    apply dpmono; auto.
 
-   apply H0 in H7.
+   apply H1 in H6; trivial.
    red; intro; apply eq_elim.
    apply eq_dop; auto with *.
 
- apply sigma_elim in H3.
-  destruct H3 as (_ & x1 & x2).
-  specialize H1 with (1:=H2) (2:=x1).
-  apply w3typ; trivial.
-
-  do 2 red; intros.
-  apply H0 in H6.
-  apply eq_dw1; auto with *.
+ apply sigma_ax in H3.
+ destruct H3 as (_ & x1 & _ & x2).
+ specialize H1 with (1:=H2) (2:=x1).
+ apply w3typ; trivial.
 
  apply iso_arg_norec with (P:=A) (A:=fun a y => w1 (F y) a)
    (B:=fun a y => w2 (F y) a) (f:=fun a y => w3 (F y) a); auto.
@@ -1186,14 +1169,10 @@ split; simpl; intros.
   apply H2 in H4; trivial.
   apply H4; trivial.
 
- apply sigma_elim in H4.
-  destruct H4 as (_ & ty1 & ty2).
-  apply H2 in ty1; trivial.
-  apply ty1; trivial.
-
-  do 2 red; intros.
-  assert (tmp :=H0 _ _ H6).
-  apply eq_dw1; auto with *.
+ apply sigma_ax in H4.
+ destruct H4 as (_ & ty1 & _ & ty2).
+ apply H2 in ty1; trivial.
+ apply ty1; trivial.
 Qed.
 
 Definition dpos_param (A:set->set) (F:set->dpositive) :=
@@ -1379,16 +1358,11 @@ constructor; simpl; intros.
   apply H1 in H6; trivial.
   apply dpmono; auto.
 
- apply sigma_elim in H4.
-  destruct H4 as (_ & x1 & x2).
-  specialize H1 with (1:=H2) (2:=x1).
-  apply w3typ; trivial.
-  apply cc_prod_elim with (1:=H3); trivial.
-
-  do 2 red; intros.
-  assert (eqp := H0 _ _ H6).
-  apply eq_dw2; auto with *.
-  apply cc_app_morph; auto with *.
+ apply sigma_ax in H4.
+ destruct H4 as (_ & x1 & _ & x2).
+ specialize H1 with (1:=H2) (2:=x1).
+ apply w3typ; trivial.
+ apply cc_prod_elim with (1:=H3); trivial.
 
  apply iso_param with (P:=A) (A:=fun a y => w1 (F y) a)
    (B:=fun a y => w2 (F y) a) (f:=fun a y => w3 (F y) a); auto.
@@ -1493,7 +1467,7 @@ Qed.
 
 (** Examples *)
 
-Require Import ZFnats.
+Require Import Znats.
 Module Vectors.
 
 Definition vect A :=
@@ -1541,7 +1515,7 @@ Lemma nil_typ A X :
   nil ∈ dp_oper (vect A) X zero.
 simpl; intros.
 apply inl_typ.
-unfold ZFcoc.P2p.
+unfold P2p.
 rewrite cond_set_ax; split.
  apply singl_intro.
  reflexivity.
@@ -1562,12 +1536,12 @@ apply couple_intro_sigma; trivial.
  do 2 red; intros.
  apply prodcart_morph; auto with *.
  apply prodcart_morph; auto with *.
- apply ZFcoc.P2p_morph.
+ apply P2p_morph.
  rewrite H4; reflexivity.
 
  apply couple_intro; trivial.
  apply couple_intro; trivial.
- unfold ZFcoc.P2p.
+ unfold P2p.
  rewrite cond_set_ax; split.
   apply singl_intro.
   reflexivity.

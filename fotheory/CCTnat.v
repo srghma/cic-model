@@ -286,7 +286,7 @@ Qed.
 Lemma fofml_in_props : forall f e, 
   typ e (int_fofml f) prop.
 induction f; do 2 red; simpl; intros; unfold props; 
-unfold ZFcoc.props; rewrite power_ax; intros; trivial.
+unfold Zcoc.props; rewrite power_ax; intros; trivial.
  unfold EQ in H0. unfold cond_set in H0.
  rewrite subset_ax in H0. destruct H0; trivial.
  
@@ -295,18 +295,18 @@ unfold ZFcoc.props; rewrite power_ax; intros; trivial.
  revert y H0. rewrite <- power_ax. apply impredicative_prod.
   red; reflexivity.
 
-  unfold props; unfold ZFcoc.props; intros.
+  unfold props; unfold Zcoc.props; intros.
   rewrite power_ax; intros.
   apply empty_ax in H1; contradiction.
 
  do 2 red in IHf1; simpl in IHf1.
  rewrite subset_ax in H0. destruct H0. destruct H1. destruct H2.
  rewrite H1. clear H1 H3. revert x H2. rewrite <- power_ax.
- fold ZFcoc.props. fold props. apply IHf1 with (e:=e); trivial.
+ fold Zcoc.props. fold props. apply IHf1 with (e:=e); trivial.
  
 
  apply union2_elim in H0. destruct H0; revert y H0; 
- rewrite <- power_ax; fold ZFcoc.props; fold props; 
+ rewrite <- power_ax; fold Zcoc.props; fold props; 
      [do 2 red in IHf1; simpl in IHf1; apply IHf1 with (e:=e) 
        | do 2 red in IHf1; simpl in IHf1; apply IHf2 with (e:=e)]; 
      trivial.
@@ -329,8 +329,6 @@ unfold ZFcoc.props; rewrite power_ax; intros; trivial.
   destruct H1. revert y H0. rewrite <- power_ax. rewrite H2. 
   do 2 red in IHf; simpl in IHf; apply IHf with (e:=(T::e)).
    apply vcons_add_var; simpl; trivial.
-
-  do 2 red. intros. rewrite H3; reflexivity.
 Qed.
 
 Lemma P_ax_intro5_ex : forall P, eq_term 

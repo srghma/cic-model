@@ -1,4 +1,4 @@
-Require Import ZF ZFpairs ZFnats ZFord.
+Require Import ZF Zpairs Znats ZFord.
 
 Section Limit.
 
@@ -16,7 +16,7 @@ Lemma lim_def z :
 intros.
 unfold lim.
 rewrite subset_ax.
-rewrite sup_ax; auto with *.
+rewrite sup_def; auto with *.
 split; intro.
  destruct H as (_,(z',eqz,(o',o'lt,zin))).
  exists o'; intros; trivial.
@@ -122,7 +122,7 @@ Qed.
 Lemma lim_def_mono : lim o F == sup o F.
 apply eq_set_ax; intros z.
 rewrite lim_def; auto with *.
-rewrite sup_ax; trivial.
+rewrite sup_def; trivial.
 split; destruct 1.
  exists x; auto with *.
 
@@ -132,7 +132,7 @@ Qed.
 
 Lemma lim_mono z :
   z ∈ lim o F <-> exists2 o', o' ∈ o & z ∈ F o'.
-rewrite lim_def_mono; rewrite sup_ax; auto with *.
+rewrite lim_def_mono; rewrite sup_def; auto with *.
 Qed.
 
 End LimitMono.

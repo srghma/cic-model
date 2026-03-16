@@ -3,8 +3,8 @@
 
 From Stdlib Require Import List Bool.
 Require Import Models TypModels.
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck.
-Require Import ZFfunext ZFind_w ZFfixrec.
+Require Import ZF Zpairs Zsum Znats Zrelations ZFord ZFfix ZFgrothendieck.
+Require Import Zfunext ZFind_w ZFfixrec.
 Require Import ModelCC ModelECC.
 
 
@@ -30,7 +30,7 @@ Lemma tyord_inv : forall e i o o',
   val_ok e i ->
   isOrd (int o i) /\ int o i < o'.
 unfold typ; simpl; intros.
-unfold ZFnats.lt.
+unfold lt.
 red in H0.
 split; auto.
 apply isOrd_inv with o'; trivial.
@@ -234,11 +234,9 @@ rewrite TI_mono_succ in H1; auto with *.
 assert (fst (int n i) ∈ Aw i).
  apply fst_typ_sigma in H1; trivial.
  assert (snd (int n i) ∈ cc_arr (Bw i (fst (int n i))) (TI (WF' i) (int O i))).
-  apply snd_typ_sigma with (y:=fst(int n i)) in H1; auto with *.
-  do 2 red; intros.
-  rewrite H7; reflexivity.
+ {apply snd_typ_sigma with (y:=fst(int n i)) in H1; auto with *. }
  assert (int n i == couple (fst (int n i)) (snd (int n i))).
-  apply (surj_pair _ _ _ (subset_elim1 _ _ _ H1)).
+ {apply (surj_pair _ _ _ (subset_elim1 _ _ _ H1)). }
  unfold W_CASE, sigma_case.
  rewrite cond_set_ok; trivial.
  specialize cc_prod_elim with (1:=H0) (2:=H5); clear H0; intro H0.
@@ -834,6 +832,6 @@ apply ZFind_w.G_Wi; trivial.
 
  apply (ZFecc.ecc_grot (S n)).
 
- change (omega ∈ ZFecc.ecc (S n)); auto.
- apply ZFecc.omega_in_ecc.
+ change (N ∈ ZFecc.ecc (S n)); auto.
+ apply ZFecc.N_in_ecc.
 Qed.

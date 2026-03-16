@@ -1,6 +1,6 @@
 From Stdlib Require Export Lia Relations Wellfounded Compare_dec.
 Require Import Sat.
-Require Import ZF ZFcoc.
+Require Import ZF Zcoc.
 Require Import ZFlambda.
 
 (** Another strong normalization proof of the Calculus of Constructions *)
@@ -15,7 +15,6 @@ Proof.
 intros.
 apply singl_ext; intros.
  rewrite <- (cc_impredicative_lam dom (fun x => prf_trm)); intros.
- 2:do 2 red; reflexivity.
   apply cc_prod_intro; intros; auto.
   apply H0 in H1; rewrite H1.
   apply singl_intro.
@@ -24,9 +23,6 @@ apply singl_ext; intros.
 
  rewrite cc_eta_eq with (1:=H1).
  apply cc_impredicative_lam; intros.
-  do 2 red; intros.
-  rewrite H3; reflexivity.
-
   apply singl_elim.
   fold prf_trm.
   rewrite <- (H0 _ H2).
@@ -202,8 +198,7 @@ setoid_replace daimon with (cc_lam (El props) (fun _ => prf_trm)).
 
  symmetry.
  apply cc_impredicative_lam; intros.
-  do 2 red; intros; reflexivity.
-  reflexivity.
+ reflexivity.
 Qed.
 
 (*Notation "x ∈ y" := (inX x y).

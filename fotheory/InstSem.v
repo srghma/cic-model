@@ -1,7 +1,7 @@
 From Stdlib Require Import Lia.
 Require Import ModelTheory.
 Export GenLemmas.
-Import ZF Sat ZFuniv_real ZFcoc CC_Real SN_CC_Real SN_nat.
+Import ZF Sat ZFuniv_real Zcoc CC_Real SN_CC_Real SN_nat.
 Import SN_CC_Real.SN.Notations.
 
 Lemma beta_nat_eq f n :

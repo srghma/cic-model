@@ -1,7 +1,8 @@
 
 (** The semantic construction *)
 
-Require Import Lia basic SN_CC_Real.
+From Stdlib Require Import Lia.
+Require Import basic SN_CC_Real.
 Import ZFuniv_real CC_Real.
 
 (***********************************************************************************************)

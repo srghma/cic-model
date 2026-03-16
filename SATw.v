@@ -1,16 +1,16 @@
 
-Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix ZFgrothendieck.
+Require Import ZF Zpairs Zsum Zrelations ZFord ZFfix ZFgrothendieck.
 Require Import ZFlambda Sat SATtypes.
 Require Import Lambda.
 Module Lc:=Lambda.
-Require Import ZFcoc.
+Require Import Zcoc.
 Require Models.
 
 (** The abstract set-theoretical model of W-types, upon which the realizability
     interpretation is built.
 
     We only assume the existence of a cartesian product (only isomorphic to
-    the construction in ZFpairs).
+    the construction in Zpairs).
  *)
 (*
 Module Type CCforWaddon (Import S:Models.CC_Model).

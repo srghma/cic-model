@@ -3,7 +3,7 @@
 (* Work in progress. *)
 
 Require Import List Bool Models.
-Require Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix ZFgrothendieck.
+Require Import ZF Zsum ZFnats Zrelations ZFord ZFfix ZFgrothendieck.
 Require Import ZFfunext ZFind_wnup ZFspos_nup.
 Require Import ModelZF ModelECC.
 
@@ -72,7 +72,7 @@ Qed.
 
 (** Syntax for telescopes *)
 
-Require Import ZFpairs.
+Require Import Zpairs.
 
 Definition Sigma (A B:term) : term.
 (*begin show*)
@@ -2941,7 +2941,7 @@ Qed.
 
 (** Constructor *)
 
-Require Import ZFpairs.
+Require Import Zpairs.
 
 Definition Wc (x:term) (f:term) : term.
 (* begin show *)

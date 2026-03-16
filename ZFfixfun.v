@@ -2,7 +2,7 @@
     transfinite iteration. No fixpoint theorem here.
  *)
 
-Require Import ZF ZFrelations ZFnats ZFord.
+Require Import ZF Zrelations Znats ZFord.
     
 (** Order on families *)
 Definition incl_fam A X Y :=
@@ -88,7 +88,7 @@ Qed.
     x ∈ TIF o a.
 intros.
 rewrite TIF_eq; trivial.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
  exists o'; trivial.
 
  do 2 red; intros; apply m2; auto with *.
@@ -102,7 +102,7 @@ Qed.
     exists2 o', lt o' o & x ∈ F (TIF o') a.
 intros.
 rewrite TIF_eq in H1; trivial.
-rewrite sup_ax in H1; auto.
+rewrite sup_def in H1; auto.
 do 2 red; intros; apply m2; auto with *.
 apply isOrd_inv with o; trivial.
 Qed.
@@ -154,7 +154,7 @@ assert (Fext : ext_fun (osucc o) (fun o' => F (TIF o') a)).
  apply isOrd_inv with (osucc o); auto.
 rewrite TIF_eq; auto.
 apply eq_intro; intros.
- rewrite sup_ax in H1; trivial.
+ rewrite sup_def in H1; trivial.
  destruct H1.
  revert H2; apply Fmono; auto with *.
  red; intros.
@@ -162,7 +162,7 @@ apply eq_intro; intros.
   apply isOrd_inv with (osucc o); auto.
   apply olts_le; trivial.
 
- rewrite sup_ax; trivial.
+ rewrite sup_def; trivial.
  exists o; trivial.
  apply lt_osucc; trivial.
 Qed.

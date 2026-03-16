@@ -28,6 +28,16 @@ split; intros.
  rewrite H1; rewrite H2; reflexivity.
 Qed.
 
+Lemma repl_ext_rel_fun : forall x f,
+  repl_rel x (fun a b => ext f a /\ b == f a).
+split; intros.
+*destruct H2.
+ rewrite <-(H2 x'); [|trivial].
+ rewrite <-H1,<-H0; auto.
+*destruct H0; destruct H1.
+ rewrite H2,H3; reflexivity.
+Qed.
+           
 Lemma repl_intro : forall a R y x,
   repl_rel a R -> y ∈ a -> R y x -> x ∈ repl a R.
 Proof.
@@ -86,7 +96,24 @@ elim repl_elim with (2:=H); intros.
   elim empty_ax with x0; trivial.
 Qed.
 
-(* unique choice *)
+(* replf as a special case of repl *)
+Lemma replf_repl a f :
+  replf a f == repl a (fun x y => ext f x /\ y==f x).
+intros; apply eq_set_ax; intros z.
+rewrite replf_ax.
+rewrite repl_ax.
+*reflexivity.
+*intros.
+ destruct H2.
+rewrite <-H1,H3. 
+split; auto.
+rewrite <-H0; trivial.
+*intros.
+ destruct H0; destruct H1.
+ rewrite H2, H3; reflexivity.
+Qed.
+
+ (* unique choice *)
 Definition uchoice (P : set -> Prop) : set :=
   union (repl (singl empty) (fun _ => P)).
 

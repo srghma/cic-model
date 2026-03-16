@@ -1,4 +1,4 @@
-Require Import ZFrelations ZFbot ZFfunext ZFord ZFfixrec.
+Require Import Zrelations Zbot Zfunext ZFord ZFfixrec.
 
 Section Recursor.
 
@@ -327,8 +327,7 @@ apply union2_ax in H2; destruct H2.
  destruct oko' as (_,_,_,tyo',_,eqno').
  red in Xcont; rewrite Xcont in H2; trivial.
  apply sup_ax in H2.
- 2:do 2red; intros; apply Xm; apply osucc_morph; trivial.
- destruct H2 as (o'',?,?).
+ destruct H2 as (o'',?,(_,?)).
  assert (o_o'' : isOrd o'') by eauto using isOrd_inv.
  assert (o''_y : osucc o'' ⊆ y).
   red; intros; apply le_lt_trans with o''; auto.

@@ -8,8 +8,8 @@ Set Implicit Arguments.
  *)
 
 Require Import basic Models.
-Require Import ZF ZFsum ZFwfr ZFind_nat.
-Require Import ModelZF.
+Require Import ZF Zsum ZFwfr ZFind_nat.
+Require Import ModelZ.
 
 (** All that remains to build is the recursor *)
 Definition NAT_REC f g n :=
@@ -179,7 +179,7 @@ Module ZFind_Nats <: Models.Nat_Model CCM.
 Definition N := NAT.
 Definition zero := ZERO.
 Definition succ := SUCC.
-Definition succ_morph := ZFsum.inr_morph.
+Definition succ_morph := inr_morph.
 
 Definition zero_typ := ZERO_typ.
 Definition succ_typ := SUCC_typ.

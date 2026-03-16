@@ -1,6 +1,6 @@
 Require Import basic.
 Require Import Sublogic.
-Require Import ZF ZFrelations ZFcoc ModelZF.
+Require Import ZF Zrelations Zcoc ModelZ.
 Require Import ModelCC.
 Require Import ZFrepl.
 

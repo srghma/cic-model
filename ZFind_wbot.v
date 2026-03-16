@@ -1,6 +1,6 @@
-Require Import ZF ZFpairs ZFnats ZFrelations ZFord ZFfix ZFstable.
+Require Import ZF Zpairs Znats Zrelations ZFord ZFfix Zstable.
 Require Import ZFgrothendieck.
-Require Import ZFcoc.
+Require Import ZFiso Zcoc.
 Require Export ZFind_w.
 
 (** In this file we develop an alternative model of W-types where all stages are non-empty
@@ -14,8 +14,8 @@ Variable A : set.
 Variable B : set -> set.
 Hypothesis Bm : morph1 B.
 
-Local Notation Wd := (ZFwdom.Wdom A B).
-Local Notation Wfb := (ZFwdom.Wfbot A B).
+Local Notation Wd := (Zwdom.Wdom A B).
+Local Notation Wfb := (Zwdom.Wfbot A B).
 
 Hint Resolve Wintro_ext : core.
   
@@ -56,9 +56,9 @@ Lemma Wintro_inj_bot : forall X Y x x',
   x' ∈ W_Fbot Y ->
   Wintro x == Wintro x' -> x == x'.
 intros X Y x x' tyf tyf' H H0 H1.
-apply Wintro_inj with (4:=H) (5:=H0) (6:=H1); trivial.
- apply ZFwdom.Wdom_cc_bot; trivial.
- apply ZFwdom.Wdom_cc_bot; trivial.
+apply Wintro_inj with (3:=H) (4:=H0) (5:=H1); trivial.
+ apply Zwdom.Wdom_cc_bot; trivial.
+ apply Zwdom.Wdom_cc_bot; trivial.
 Qed.
 
 Lemma W_F_Wf_iso_bot X :
@@ -100,14 +100,13 @@ assert (eqbot : eq_fun (cc_bot X) (fbot f) (fbot f')).
  apply eqf_fbot; trivial.
 apply Wintro_morph; trivial.
 apply WFmap_ext with (A:=A); intros; trivial.
- apply W_F_elim with (2:=H1); trivial.
+ apply W_F_elim with (1:=H1).
 
  rewrite H2; reflexivity.
 
  apply eqbot.
- apply W_F_elim with (2:=H1); trivial.
-
- rewrite H2; rewrite H4; reflexivity.
+  apply W_F_elim with (1:=H1); trivial.
+  rewrite H2; rewrite H4; reflexivity.
 Qed.
 
 Let wisobotm : Proper ((eq_set ==> eq_set) ==> eq_set ==> eq_set) (fun f => wiso B (fbot f)).
@@ -134,7 +133,7 @@ Qed.
 
   Lemma Wbot_fix : Wbot == W_Fbot Wbot.
 unfold Wbot, Wibot.
-rewrite TI_iso_fixpoint with (2:=ZFwdom.Wfbot_mono A _ Bm) (g:=fun f => wiso B (fbot f)); auto with *.
+rewrite TI_iso_fixpoint with (2:=Zwdom.Wfbot_mono A _ Bm) (g:=fun f => wiso B (fbot f)); auto with *.
  apply TI_closure_ordinal; auto.
   apply ZFw.Wbot_ord_clos; trivial.
  
@@ -162,7 +161,7 @@ Section W_Univ.
 (* Universe facts *)
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.  
+  Hypothesis Unontriv : N ∈ U.  
 
   Hypothesis aU : A ∈ U.
   Hypothesis bU : forall a, a ∈ A -> B a ∈ U.

@@ -1,5 +1,5 @@
 Require Import Sat.
-Require Import ZF ZFcoc ZFord ZFgrothendieck.
+Require Import ZF Zcoc ZFord ZFgrothendieck.
 Require Import ZFlambda.
 
 Set Implicit Arguments.
@@ -49,12 +49,9 @@ Qed.
 Lemma sort_repl_morph2 :
   Proper (eq_set ==> eq_set) (fun P => replSAT(fun A => mkTY P A)).
 do 2 red; intros.
-apply ZFrepl.repl_morph_raw; auto with *.
-do 2 red; intros.
-rewrite H1.
-unfold mkTY; rewrite H.
-rewrite (iSAT_morph _ _ (sSAT_morph _ _ H0)).
-reflexivity.
+apply replf_morph; [reflexivity|].
+red; intros.
+unfold mkTY; rewrite H1,H; reflexivity.
 Qed.
 Hint Resolve sort_repl_morph sort_repl_morph2 : core.
 
@@ -62,7 +59,7 @@ Lemma sn_sort_intro K T A :
   T ∈ K -> mkTY T A ∈ El (sn_sort K).
 intros.
 unfold sn_sort; rewrite El_mkTY; apply union2_intro2.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 exists T; trivial.
 rewrite replSAT_ax; auto.
 2:apply sort_repl_morph; reflexivity.
@@ -77,7 +74,7 @@ apply union2_elim in H; destruct H.
  apply singl_elim in H; auto.
 
  rewrite sup_ax in H; auto.
- destruct H as (U,?,?).
+ destruct H as (U,?,(_,?)).
  rewrite replSAT_ax in H0.
  2:apply sort_repl_morph; reflexivity.
  destruct H0 as (A,?).
@@ -107,7 +104,7 @@ Qed.
 
 Lemma sn_sort_in_type K1 K2 :
   grot_univ K2 ->
-  omega ∈ K2 ->
+  Znats.N ∈ K2 ->
   K1 ∈ K2 ->
   sn_sort K1 ∈ El (sn_sort K2).
 intros.

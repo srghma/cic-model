@@ -1,4 +1,4 @@
-Require Import ZF ZFsum ZFcoc ZFfix ZFnats ZFord.
+Require Import ZF Zsum Zcoc ZFfix Znats ZFord.
 Require Import ZFind_basic.
 Require Import ZFind_nat.
 

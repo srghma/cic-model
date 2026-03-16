@@ -1,5 +1,5 @@
 Require Import Sat.
-Require Import ZF ZFcoc ZFord ZFgrothendieck.
+Require Import ZF Zcoc ZFord ZFgrothendieck.
 Require Import ZFlambda.
 Require Import Models SnModels.
 
@@ -86,10 +86,10 @@ Lemma sn_sort_ax T K:
 unfold sn_sort; rewrite El_def.
 rewrite cc_bot_ax.
 apply or_iff_morphism; [reflexivity|].
-rewrite sup_ax.
+rewrite sup_def.
  apply ex2_morph; auto with *.
  intros P.
- rewrite replf_ax.
+ rewrite replf_def.
   split; intros.
    destruct H as (R,tyR,eqT).
    exists (fun x => sSAT (cc_app R x)).
@@ -170,7 +170,7 @@ Qed.
 
 Lemma sn_sort_in_type K1 K2 :
   grot_univ K2 ->
-  omega ∈ K2 ->
+  Znats.N ∈ K2 ->
   K1 ∈ K2 ->
   sn_sort K1 ∈ El (sn_sort K2).
 intros.

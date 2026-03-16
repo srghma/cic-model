@@ -1,5 +1,5 @@
-Require Import ZF ZFpairs ZFnats ZFgrothendieck.
-Require Import ZFrelations ZFcoc.
+Require Import ZF Zpairs ZFnats ZFgrothendieck.
+Require Import Zrelations Zcoc.
 
 
 (** Statement that there exists a set containing infinitely many Grothendieck universes *)
@@ -208,23 +208,40 @@ Qed.
 (* *)
 
 Lemma empty_in_ecc n : empty ∈ ecc n.
-apply G_trans with ZFcoc.props; auto.
+apply G_trans with props; auto.
 apply ecc_in1.
 Qed.
 
 Lemma one_in_ecc n : singl empty ∈ ecc n.
-apply G_trans with ZFcoc.props; auto.
+apply G_trans with props; auto.
 apply ecc_in1.
 Qed.
 
 (* ecc 0 is the set of hereditarily finite sets, so it contains all finite ordinals,
    but omega is in ecc 1 *)
+Lemma N_incl_ecc : N ⊆ ecc_succ empty.
+red; intros n tyn.
+elim tyn using N_ind; intros.
+*rewrite <- H0; auto.
+*apply (empty_in_ecc 0).
+*apply G_union2; auto.
+ apply G_pair; auto.
+Qed.
+
+Lemma N_in_ecc n : N ∈ ecc (S n).
+apply G_incl with (ecc 0); auto.
+ apply ecc_incl_le with 1; [auto with arith|].
+ apply ecc_in2.
+
+ apply N_incl_ecc.
+Qed.
+
 Lemma omega_incl_ecc : ZFord.omega ⊆ ecc_succ empty.
 red; intros.
 unfold ZFord.omega, ZFord.ord_sup in H.
 assert (aux := ZFord.omega_aux_m).
-rewrite sup_ax in H; [|apply ZFord.omega_aux_ext].
-destruct H as (n, tyn, tyz).
+rewrite sup_ax in H.
+destruct H as (n, tyn, (_, tyz)).
 apply G_trans with (2:=tyz); trivial.
 clear tyz.
 elim tyn using N_ind; intros.
@@ -245,9 +262,4 @@ apply G_incl with (ecc 0); auto.
  apply omega_incl_ecc.
 Qed.
 
-Lemma N_in_ecc n : ZFnats.N ∈ ecc (S n).
-apply G_N; trivial.
-apply omega_in_ecc.
-Qed.
-
-Hint Resolve empty_in_ecc one_in_ecc omega_in_ecc N_in_ecc : core.
+Hint Resolve empty_in_ecc one_in_ecc omega_in_ecc N_incl_ecc N_in_ecc : core.

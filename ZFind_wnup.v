@@ -1,6 +1,6 @@
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
+Require Import ZF Zpairs Zsum Znats Zrelations ZFord ZFfix Zstable.
 Require Import ZFgrothendieck.
-Require Import ZFlist ZFfixfun.
+Require Import ZFfixfun.
 Require Import ZFiso.
 Require Import ZFlimit.
 Require Import ZFwsimul ZFencode.
@@ -62,17 +62,11 @@ Lemma W_Fd_mono : mono_fam Arg W_Fd.
 do 2 red; intros.
 unfold W_Fd.
 apply sigma_mono; intros; auto with *.
- do 2 red; intros; apply cc_prod_morph;[apply Bm|red; intros;apply H; apply fm]; auto with *.
- do 2 red; intros; apply cc_prod_morph;[apply Bm|red; intros;apply H0; apply fm]; auto with *.
+ do 2 red; intros; apply cc_prod_morph;
+ [apply Bm|red; intros;apply H0; apply fm]; auto with *.
 
  apply cc_prod_covariant; auto with *.
   do 2 red; intros; apply H0; apply fm; auto with *.
-
-  apply Bm; auto with *.
-
-  intros.
-  rewrite <- H4.
-  auto.
 Qed.
 Hint Resolve W_Fd_mono : core.
 
@@ -87,12 +81,6 @@ transitivity (couple (fst w) (snd w)).
  apply couple_morph;[reflexivity|].
  apply snd_typ_sigma with (y:=fst w) in H0; auto with *.
   apply cc_eta_eq with (1:=H0).
-
-  do 2 red; intros.
-  apply cc_prod_ext.
-   apply Bm; auto with *.
-
-   red; intros; apply H; apply fm; auto with *.
 Qed.
 
 Lemma W_Fd_intro X x x' a a' g :
@@ -126,19 +114,12 @@ Lemma W_Fd_elim X a w :
   fst w ∈ A a /\
   (forall i, i ∈ B a (fst w) -> cc_app (snd w) i ∈ X (f a (fst w) i)).
 intros.
-apply sigma_elim in H0.
- destruct H0 as (?&?&?).
- split; trivial.
- split; trivial.
- intros.
- apply cc_prod_elim with (1:=H2); trivial.
-
- do 2 red; intros.
- apply cc_prod_ext.
-  apply Bm; auto with *.
-
-  red; intros.
-  apply H; apply fm; auto with *.
+apply sigma_ax in H0.
+destruct H0 as (?&?&_&?).
+split; trivial.
+split; trivial.
+intros.
+apply cc_prod_elim with (1:=H2); trivial.
 Qed.
 
 Definition W_Fd_map g a w :=
@@ -212,11 +193,11 @@ destruct W_Fd_map_eq with (4:=wty') (g:=g) as (wm1',wm2'); trivial.
 assert (eqw1 : fst w == fst w').
  rewrite <- wm1, <- wm1'.
  rewrite eqw; reflexivity.
-apply sigma_elim in wty.
-destruct wty as (e & w1 & w2).
-apply sigma_elim in wty'.
-destruct wty' as (e' & w1' & w2').
-rewrite e,e'.
+apply sigma_ax in wty.
+destruct wty as (e & w1 & _ & w2).
+apply sigma_ax in wty'.
+destruct wty' as (e' & w1' & _ & w2').
+red in e,e'; rewrite e,e'.
 rewrite cc_eta_eq with (1:=w2).
 rewrite cc_eta_eq with (1:=w2').
 apply couple_morph; trivial.
@@ -235,19 +216,6 @@ apply ginj with (f a (fst w) x); auto.
  rewrite <- wm2'; trivial.
  rewrite eqw; reflexivity.
  rewrite <- eqw1; trivial.
-
-do 2 red; intros.
-apply cc_prod_ext.
- apply Bm; auto with *.
-
- red; intros.
- apply Xm; apply fm; auto with *.
-do 2 red; intros.
-apply cc_prod_ext.
- apply Bm; auto with *.
-
- red; intros.
- apply Xm; apply fm; auto with *.
 Qed.
 
 Lemma W_Fd_map_surj X Y g :
@@ -282,14 +250,7 @@ exists (couple (fst w')
  unfold W_Fd_map; apply couple_morph.
   rewrite fst_def; reflexivity.
 
-  destruct sigma_elim with (2:=wty') as (_ & _ & w2).
-do 2 red; intros.
-apply cc_prod_ext.
- apply Bm; auto with *.
-
- red; intros.
- apply Ym; apply fm; auto with *.
-
+  apply sigma_ax in wty'; destruct wty' as (_ & _ & _ & w2).
   symmetry.
   rewrite cc_eta_eq with (1:=w2).
   apply cc_lam_ext.
@@ -419,7 +380,7 @@ Let tr_cont o z :
   (exists2 o', o' ∈ o & z ∈ TI (W0.W_F A' B') (osucc o'))).
 intros.
 rewrite TI_mono_eq; auto.
-rewrite sup_ax; auto with *.
+rewrite sup_def; auto with *.
 do 2 red; intros; apply TI_morph.
 rewrite H1; reflexivity.
 Qed.
@@ -545,12 +506,6 @@ constructor; intros.
  specialize fst_typ_sigma with (1:=H2); intros ty1.
  assert (eqy := surj_pair _ _ _ (subset_elim1 _ _ _ H2)).
  apply snd_typ_sigma with (y:=fst y) in H2; auto with *.
-2:{
-do 2 red; intros; apply cc_prod_morph.
- rewrite H4; reflexivity.
- red; intros.
- rewrite H4; rewrite H5; reflexivity. }
-
  assert (bm : ext_fun (B' (couple a (fst y)))
     (fun i => iso_inv (subset X (P (f a (fst y) i))) g (cc_app (snd y) i))).
   do 2 red; intros.
@@ -774,7 +729,7 @@ Section W_Univ.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.  
+  Hypothesis Unontriv : N ∈ U.  
 
   (** The size of Arg matters: *)
   Hypothesis ArgU : Arg ∈ U.
@@ -823,11 +778,6 @@ apply G_TR; trivial.
 
  intros.
  apply G_cc_lam; trivial; intros.
-  do 2 red; intros; apply sup_morph; auto with *.
-  red; intros.
-  apply W_Fd_morph; auto with *.
-  apply cc_app_morph; auto with *.
-
   apply G_sup; trivial.
    do 2 red; intros.
    apply W_Fd_morph; auto with *.
@@ -953,9 +903,8 @@ Let fenc a x y := extln a (couple x y).
 
 Let f'_typ a b : a ∈ Arg -> b ∈ idx' a -> f' a b ∈ Arg.
 unfold f'; intros tya tyi.
-apply sigma_elim in tyi; auto with *.
-2:do 2 red; intros; apply Bm; auto with *.
-destruct tyi as (_ & ? & ?).
+apply sigma_ax in tyi; auto with *.
+destruct tyi as (_ & ? & _ & ?).
 apply ftyp; trivial.
 Qed.
 Local Instance idx'm : morph1 idx'.
@@ -1087,8 +1036,8 @@ apply Wfmap_W_ord with (f:=fun p => couple (decode a (fst p)) (snd p)); intros; 
 +do 2 red; intros.
  rewrite H0; reflexivity.
 +red; intros.
- apply sigma_elim in H0; auto with *.
- destruct H0 as (eqx&typ&tyx).
+ apply sigma_ax in H0.
+ destruct H0 as (eqx&typ&_&tyx).
  apply couple_intro_sigma; auto with *.
  apply Dec_typ with (A:=Arg)(B:=idx'); trivial. 
 +unfold B''.
@@ -1136,7 +1085,7 @@ Qed.
 Section UniverseFacts.
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.  
+  Hypothesis Unontriv : N ∈ U.  
 
   (** We don't assume Arg is in U... *)
   Hypothesis aU : forall a, a ∈ Arg -> A a ∈ U.

@@ -1,5 +1,5 @@
 From Stdlib Require Import Wf_nat.
-Require Import ZF ZFpairs ZFnats.
+Require Import ZF Zpairs Znats ZFiso.
 Require Import ZFord ZFfix.
 
 Section ListDefs.

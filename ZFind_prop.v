@@ -1,7 +1,6 @@
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFtarski ZFstable.
-Require Import ZFgrothendieck ZFcoc.
-Require Import ZFlist.
-Require Import ZFfunext ZFfixrec.
+Require Import ZF Zpairs Zsum Znats Zrelations Ztarski Zstable.
+Require Import ZFgrothendieck Zcoc ZFord ZFfix.
+Require Import Zfunext ZFfixrec.
 
 (** In this file we develop the theory of W-types in Prop:
     - typing
@@ -32,7 +31,7 @@ Lemma W_F_intro X a f :
   (forall i, i ∈ B a -> f i ∈ X) ->
   cc_lam (B a) f ∈ W_F X.
 intros.
-unfold W_F; rewrite sup_ax; auto.
+unfold W_F; rewrite sup_def; auto.
 exists a; trivial.
 apply cc_arr_intro; intros; auto with *.
 Qed.
@@ -43,8 +42,8 @@ Lemma W_F_elim X x :
   (forall i, i ∈ B w -> cc_app x i ∈ X) /\
   x == cc_lam (B w) (cc_app x). 
 intros.
-unfold W_F in H; rewrite sup_ax in H; auto.
-destruct H as (w,?,?); exists w; trivial.
+unfold W_F in H; rewrite sup_ax in H.
+destruct H as (w,?,(_,?)); exists w; trivial.
 split; intros.
  apply cc_arr_elim with (1:=H0); trivial.
 
@@ -73,7 +72,6 @@ destruct H as (w,?,(?,?)).
 rewrite H1.
 apply singl_intro_eq.
 apply cc_impredicative_lam.
- do 2 red; intros; apply cc_app_morph; auto with *.
 
  intros.
  apply singl_elim; auto.
@@ -92,7 +90,7 @@ Definition W := FIX incl_set inter (singl prf_trm) props W_F.
   Lemma W_typ : W ∈ props.
 apply power_intro.
 change (W ⊆ singl prf_trm).
-apply lfp_typ; auto with *.
+apply FIX_typ; auto with *.
 apply W_F_typ.
 Qed.
 

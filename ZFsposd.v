@@ -1,5 +1,5 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix ZFfixfun.
-Require Import ZFstable ZFiso ZFind_w ZFspos.
+Require Import ZF Zpairs Zsum Zrelations ZFord ZFfix ZFfixfun.
+Require Import Zstable ZFiso ZFind_w ZFspos.
 
 (** Inductive families. Indexes are modelled as a constraint over an inductive
     type defined without considering the index values.
@@ -137,7 +137,6 @@ apply TI_intro with y'; trivial.
  apply Fmono_morph; apply dp.
 revert H4; apply dp.
 apply sup_lub.
-do 2 red; intros; apply TIF_morph; auto with *.
 intros.
 apply H1; trivial.
 Qed.
@@ -169,7 +168,6 @@ clear eqx x.
 assert (x_wf := H6).
 apply dp in x_wf.
 apply W_F_elim in x_wf.
-2:apply dp.
 assert (forall i, i ∈ w2 p (fst (wf p x')) ->
                       cc_app (snd (wf p x')) i ∈ TIF Arg (dpos_oper p) o'' (w3 p (fst (wf p x')) i)).
 {intros.
@@ -189,7 +187,6 @@ assert (iso2 := w_iso _ (dpos_pos _ dp) (TI (pos_oper p) o'')).
 apply iso_fun_narrow with (1:=iso1)(2:=iso2); trivial.
 +apply dp.
  apply sup_lub.
- do 2 red; intros; apply TIF_morph; auto with *.
  intros.
  apply dINDi_INDi; trivial.
  apply isOrd_inv with o'; trivial.
@@ -199,7 +196,7 @@ apply iso_fun_narrow with (1:=iso1)(2:=iso2); trivial.
  apply dp.
  do 2 red; intros; apply cc_app_morph; auto with *.
  intros.
- rewrite sup_ax; auto with *.
+ rewrite sup_def; auto with *.
  2:do 2 red; intros; apply TIF_morph; auto with *.
  exists (w3 p (fst (wf p x')) i).
  apply dp; auto.
@@ -226,7 +223,6 @@ apply incl_eq.
   rewrite IND_eq; [|apply dp].
   revert tyz; apply dp.
   apply sup_lub.
-  do 2 red; intros; apply TIF_morph; auto with *.
   intros.
   apply dINDi_INDi; trivial.
 Qed.
@@ -350,7 +346,7 @@ constructor; simpl; intros; trivial.
   rewrite snd_def in h; rewrite cc_beta_eq in h; trivial.
   apply singl_intro.
 
-  rewrite sup_ax; trivial.
+  rewrite sup_def; trivial.
   exists j; trivial.
 
   exists x; [reflexivity|].
@@ -682,16 +678,12 @@ constructor; simpl; intros.
   apply H in H6.
   apply H6; auto with *.
 
-  do 2 red; intros. 
-  apply H in H6.
-  apply H6; auto with *.
-
   intros.
   transitivity (dpos_oper (F x) Y a).
    apply H0; trivial.
 
    red; intro; apply eq_elim.
-   apply (H _ _ H6); auto with *.
+   apply H; auto with *.
 
 *do 3 red; intros.
  assert (ef := fst_morph _ _ H1).
@@ -710,10 +702,6 @@ constructor; simpl; intros.
 *assert (fty := fst_typ_sigma _ _ _ H1).
  apply snd_typ_sigma with (y:=fst x) in H1; auto with *.
   apply H0; trivial.
-
-  do 2 red; intros.
-  apply H in H4.
-  apply H4.
 
 *rewrite subset_sigma.
  2:{do 2 red; intros.
@@ -807,12 +795,8 @@ constructor; simpl; intros.
 
 *assert (fty := fst_typ_sigma _ _ _ H2).
  apply snd_typ_sigma with (y:=fst i) in H2; auto with *.
-  apply H0; trivial.
-  apply cc_prod_elim with (1:=H1); trivial.
-
-  do 2 red; intros.
-  apply H; trivial.
-  rewrite H4; reflexivity.
+ apply H0; trivial.
+ apply cc_prod_elim with (1:=H1); trivial.
 
 *set (P:=fun y w => let w0 := wf (F y) w in
                        w4 (F y) (fst w0) a /\
@@ -860,11 +844,8 @@ constructor; simpl; intros.
     revert H5; apply in_set_morph; symmetry.
     apply cc_app_morph; [reflexivity|trivial].
     apply H1.
-    {apply sigma_elim in H3.
-     2:{do 2 red; intros.
-        apply H; trivial.
-        apply cc_app_morph; [reflexivity|trivial]. }
-     destruct H3 as (eqc & tyx & tyy).
+    {apply sigma_ax in H3.
+     destruct H3 as (eqc & tyx & _ & tyy).
      specialize H0 with (1:=tyx).
      destruct (H0) as (Fp,Fdm,Fdmo,F3m,F4m,Fty,_).
      destruct (Fp) as (opm,w2m,wiso).
@@ -931,11 +912,10 @@ Section InductiveUniverse.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.
+  Hypothesis Unontriv : Znats.N ∈ U.
 
   Let Unonmt : empty ∈ U.
-apply G_trans with omega; trivial.
-apply zero_omega.
+apply G_inf_nontriv; trivial.
 Qed.
 
   Variable Arg : set.

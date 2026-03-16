@@ -6,9 +6,9 @@
 Require Import basic Models.
 Require SN_ECC_Real.
 Import ZFgrothendieck.
-Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix.
+Import ZF Zsum Znats Zrelations ZFord ZFfix.
 Require Import ZFind_natbot.
-Require Import ZFfunext ZFcoc ZFecc SATtypes SATnat_real.
+Require Import Zfunext Zcoc ZFecc SATtypes SATnat_real.
 Require Import ZFrecbot.
 
 Import ZFuniv_real SN_ECC_Real.

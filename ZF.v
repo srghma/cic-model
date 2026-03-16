@@ -186,82 +186,72 @@ Notation "x ∈ y" := (in_set x y).
 
 (*Parameter replf : set -> (set->set) -> set.*)
 Definition replf (a:set) (F:set->set) : set :=
-  repl a (fun x y => y == F x).
+  repl a (fun x y => ext F x /\ y == F x).
 
-
-Instance replf_mono_raw :
-  Proper (incl_set ==> (eq_set ==> eq_set) ==> incl_set) replf.
-unfold replf.
-do 4 red; intros.
-assert (xm : morph1 x0).
- do 2 red; intros.
- transitivity (y0 y1); auto.
- symmetry; apply H0; reflexivity.
-assert (ym : morph1 y0).
- do 2 red; intros.
- transitivity (x0 x1); auto.
- symmetry; apply H0; reflexivity.
-rewrite repl_ax in H1.
- rewrite repl_ax.
-  destruct H1.
-  exists x1; auto.
-  rewrite H2; apply H0; reflexivity.
-
-  intros.
-  rewrite <- H4; rewrite H5; auto.
-
-  intros.
-  rewrite H3; rewrite H4; reflexivity.
-
- intros.
- rewrite <- H4; rewrite H5; auto.
-
- intros.
- rewrite H3; rewrite H4; reflexivity.
+Lemma replf_ax : forall a F z,
+  (z ∈ replf a F <-> exists2 x, x ∈ a & ext F x /\ z == F x).
+unfold replf; intros.
+apply repl_ax; intros.
+*destruct H2.
+ assert(e : F x == F x') by (apply H2;auto).
+ rewrite <-e, <-H0, <-H1; auto.
+*rewrite (proj2 H1); apply H0.
+Qed.
+#[global]Opaque replf.
+(*Lemma replf_ax' : forall a F z,
+  ext F ->
+  (z ∈ replf a F <-> exists2 x, x ∈ a & z == F x).
+unfold replf; intros.
+rewrite repl_ax; intros.
+*apply ex2_morph'; [reflexivity|intros].
+ rewrite extf_ok; [reflexivity|].
+ apply ext_ext with (1:=H); trivial.
+*rewrite <- H2,H3,H1; reflexivity.
+*rewrite H2; trivial.
+Qed.*)
+Lemma replf_def : forall a F z,
+  ext_fun a F ->
+  (z ∈ replf a F <-> exists2 x, x ∈ a & z == F x).
+intros.
+rewrite replf_ax.
+apply ex2_morph'; [reflexivity|intros].
+split;[destruct 1|split]; trivial.
+apply ext_ext with (1:=H); trivial.
 Qed.
 
+Instance replf_mono :
+  Proper (incl_set ==> (eq_set ==> eq_set) ==> incl_set) replf.
+do 4 red; intros.
+rewrite replf_ax in H1|-*.
+destruct H1 as (x',tyx',(ex',eqz)).
+rewrite H0 in ex'.
+exists x';[|split]; auto.
+rewrite eqz; auto with *.
+Qed.
 Instance replf_morph_raw :
   Proper (eq_set ==> (eq_set ==> eq_set) ==> eq_set) replf.
 do 3 red; intros.
 apply eq_intro.
- apply replf_mono_raw; auto.
+ apply replf_mono; auto.
  rewrite H; reflexivity.
 
  symmetry in H0.
- apply replf_mono_raw; auto.
+ apply replf_mono; auto.
  rewrite H; reflexivity.
-Qed.
-
-Lemma replf_ax : forall a F z,
-  ext_fun a F ->
-  (z ∈ replf a F <-> exists2 x, x ∈ a & z == F x).
-unfold replf; intros.
-rewrite repl_ax; intros.
- split; intros.
-  destruct H0.
-  exists x; trivial.
-
-  destruct H0.
-  exists x; trivial.
-
- rewrite <- H2; rewrite H3; auto.
-
- rewrite H2; trivial.
 Qed.
 
 Lemma replf_intro : forall a F y x,
   ext_fun a F -> x ∈ a -> y == F x -> y ∈ replf a F.
 Proof.
 intros a F y x Fext H1 H2.
-rewrite replf_ax; trivial.
+rewrite replf_def; trivial.
 exists x; trivial.
 Qed.
 
-Lemma replf_elim : forall a F y,
-  ext_fun a F -> y ∈ replf a F -> exists2 x, x ∈ a & y == F x.
+Lemma replf_elim a F y :
+  y ∈ replf a F -> exists2 x, x ∈ a & y == F x.
 Proof.
-intros a F y Fext H1.
-rewrite replf_ax in H1; trivial.
+rewrite replf_ax; intros (x,?,(_,?)); eauto.
 Qed.
 
 Lemma replf_ext : forall p a F,
@@ -278,34 +268,27 @@ apply eq_intro; intros.
  rewrite H3; auto.
 Qed.
 
-Lemma replf_mono2 : forall x y F,
-  ext_fun y F ->
+Lemma replf_mono_dom x y F :
   x ⊆ y ->
   replf x F ⊆ replf y F.
-red; intros.
-assert (ext_fun x F).
- do 2 red; auto.
-apply replf_elim in H1; trivial.
-destruct H1.
-apply replf_intro with x0; auto.
+intros lexy z; rewrite !replf_ax.
+intros (x',?,?); exists x'; auto.
 Qed.
 
-Lemma replf_morph_gen : forall x1 x2 F1 F2, 
-  ext_fun x1 F1 ->
-  ext_fun x2 F2 ->
+Lemma replf_morph_gen x1 x2 F1 F2 :
   eq_index x1 F1 x2 F2 ->
   replf x1 F1 == replf x2 F2.
 Proof.
-destruct 3.
-apply replf_ext; intros; trivial.
- apply H2 in H3; destruct H3.
- apply replf_intro with x0; trivial.
- symmetry; trivial.
-
- apply replf_elim in H3; trivial; destruct H3.
- apply H1 in H3; destruct H3.
- rewrite H5 in H4.
- exists x0; auto.
+intros (inc1,inc2).
+apply eq_set_ax; intros z.
+rewrite !replf_ax.
+split.
+*intros (x,tyx1,(ex,eqz)).
+ destruct inc1 with (1:=tyx1)(2:=ex) as (y,tyy,(ey,e)).
+ rewrite e in eqz; eauto.
+*intros (x,tyx2,(ex,eqz)).
+ destruct inc2 with (1:=tyx2)(2:=ex) as (y,tyy,(ey,e)).
+ rewrite <-e in eqz; eauto.
 Qed.
 
 Lemma replf_morph : forall x1 x2 F1 F2, 
@@ -314,19 +297,12 @@ Lemma replf_morph : forall x1 x2 F1 F2,
   replf x1 F1 == replf x2 F2.
 intros.
 apply replf_morph_gen; intros.
- apply eq_fun_ext in H0; trivial.
- 
- do 2 red; intros.
- rewrite <- H in H1.
- transitivity (F1 x); auto.
- symmetry; apply H0; trivial; reflexivity.
-
- apply eq_index_eq; trivial.
+apply eq_index_eq; trivial.
 Qed.
 
 Lemma replf_id x : replf x (fun y => y) == x.
 apply eq_set_ax; intros z.
-rewrite replf_ax;[|auto with *].
+rewrite replf_def;[|auto with *].
 split; intros.
 *destruct H as (z',?,e).
  rewrite e; trivial.
@@ -339,11 +315,8 @@ intros.
 apply empty_ext.
 red; intros.
 apply replf_elim in H.
- destruct H.
- elim empty_ax with (1:=H).
-
- do 2 red; intros.
- elim empty_ax with (1:=H0).
+destruct H.
+elim empty_ax with (1:=H).
 Qed.
 
 Lemma compose_replf : forall A F G,
@@ -352,26 +325,26 @@ Lemma compose_replf : forall A F G,
   replf (replf A F) G == replf A (fun x => G (F x)).
 intros.
 assert (eGF : ext_fun A (fun x => G (F x))).
- red; red; intros.
+{red; red; intros.
  apply H0; auto.
- rewrite replf_ax; trivial.
- exists x; auto with *.
+ rewrite replf_def; trivial.
+ exists x; auto with *. }
 apply eq_intro; intros.
- rewrite replf_ax in H1; trivial.
+ rewrite replf_def in H1; trivial.
  destruct H1.
- rewrite replf_ax in H1; trivial.
+ rewrite replf_def in H1; trivial.
  destruct H1.
- rewrite replf_ax; trivial.
+ rewrite replf_def; trivial.
  exists x0; trivial.
  rewrite H2; apply H0; trivial.
- rewrite replf_ax; trivial.
+ rewrite replf_def; trivial.
  exists x0; trivial.
 
- rewrite replf_ax in H1; trivial.
+ rewrite replf_def in H1; trivial.
  destruct H1.
- rewrite replf_ax; trivial.
+ rewrite replf_def; trivial.
  exists (F x); trivial.
- rewrite replf_ax; trivial.
+ rewrite replf_def; trivial.
  exists x; auto with *.
 Qed.
 
@@ -380,19 +353,26 @@ Qed.
 Definition sup x F := union (replf x F).
 
 Lemma sup_ax : forall x F z,
-  ext_fun x F ->
-  (z ∈ sup x F <-> exists2 y, y ∈ x & z ∈ F y).
+  (z ∈ sup x F <-> exists2 y, y ∈ x & ext F y /\ z ∈ F y).
 intros.
 unfold sup.
 rewrite union_ax.
 split; destruct 1; intros.
- apply replf_elim in H1; auto; destruct H1.
- rewrite H2 in H0; clear H2.
- exists x1; trivial.
-
+*apply replf_ax in H0; destruct H0 as (a,tya,(ea,eqx0)).
+ rewrite eqx0 in H; clear x0 eqx0.
+ exists a; auto.
+*destruct H0.
  exists (F x0); trivial.
- apply replf_intro with x0; trivial.
- reflexivity.
+ rewrite replf_ax; exists x0; auto with *.
+Qed.
+Lemma sup_def : forall x F z,
+  ext_fun x F ->
+  (z ∈ sup x F <-> exists2 y, y ∈ x & z ∈ F y).
+intros.
+rewrite sup_ax.
+apply ex2_morph'; [reflexivity|intros y].
+split;[destruct 1|split]; trivial.
+apply ext_ext with (1:=H); trivial.
 Qed.
 
 Lemma sup_ext : forall y a F,
@@ -402,9 +382,9 @@ Lemma sup_ext : forall y a F,
   y == sup a F.
 intros.
 apply eq_intro; intros.
- rewrite sup_ax; auto.
+ rewrite sup_def; auto.
 
- rewrite sup_ax in H2; trivial; destruct H2.
+ rewrite sup_def in H2; trivial; destruct H2.
  apply H0 in H3; trivial.
 Qed.
 
@@ -437,61 +417,55 @@ Lemma sup_incl : forall a F x,
   ext_fun a F -> x ∈ a -> F x ⊆ sup a F.
 intros.
 red; intros.
-rewrite sup_ax; trivial.
+rewrite sup_def; trivial.
 exists x; trivial.
 Qed.
 Hint Resolve sup_incl : core.
 
 Lemma sup_lub x f A :
-  ext_fun x f ->
   (forall y, y ∈ x -> f y ⊆ A) ->
   sup x f ⊆ A.
 red; intros.
-apply sup_ax in H1; trivial.
-destruct H1 as (y,?,?).
-apply H0 with (y:=y); trivial.
+apply sup_ax in H0; trivial.
+destruct H0 as (y,?,(ey,?)).
+apply H with (y:=y); trivial.
 Qed.
-
 
 Lemma replf_is_sup A F :
-  ext_fun A F ->
   replf A F == sup A (fun x => singl (F x)).
 intros.
-assert (fm : ext_fun A (fun x => singl (F x))).
- do 2 red; intros; apply singl_morph; apply H; trivial.
-apply eq_intro; intros.
- rewrite sup_ax; trivial.
- rewrite replf_ax in H0; trivial.
- revert H0; apply ex2_morph; red; intros; auto with *.
- split; intros.
-  apply singl_elim in H0; trivial.
-  rewrite H0; apply singl_intro.
-
- rewrite replf_ax; trivial.
- rewrite sup_ax in H0; trivial.
- revert H0; apply ex2_morph; red; intros; auto with *.
- split; intros.
-  rewrite H0; apply singl_intro.
-  apply singl_elim in H0; trivial.
+apply eq_set_ax; intros z.
+rewrite replf_ax, sup_ax.
+apply ex2_morph; [reflexivity|intros x].
+rewrite singl_ax.
+apply and_iff_morphism;[|reflexivity].
+unfold ext.
+apply fa_morph; intros x'.
+apply fa_morph; intros eqx.
+split; intros.
+*rewrite H; reflexivity.
+*apply eq_elim with (x:=F x) in H; [|apply singl_intro].
+ apply singl_ax in H; trivial.
 Qed.
+
 
 Lemma union_is_sup a :
   union a == sup a (fun x => x).
 apply eq_intro; intros.
- rewrite sup_ax;[|do 2 red; auto].
+ rewrite sup_def;[|do 2 red; auto].
  apply union_elim in H; destruct H.
  eauto.
 
- rewrite sup_ax in H;[|do 2 red; auto].
+ rewrite sup_def in H;[|do 2 red; auto].
  destruct H; eauto using union_intro.
 Qed.
 
-Lemma inter_wit : forall X F, morph1 F -> 
- forall x, x ∈ inter (replf X F) ->
- exists y, y ∈ X.
+Lemma inter_wit X F x :
+  x ∈ inter (replf X F) ->
+  exists y, y ∈ X.
 intros.
-destruct inter_non_empty with (1:=H0).
-rewrite replf_ax in H1.
-2:red;red;intros; apply H; trivial.
-destruct H1; eauto.
+destruct inter_non_empty with (1:=H).
+rewrite replf_ax in H0.
+destruct H0 as (y,?,_); eauto.
 Qed.
+

@@ -283,7 +283,7 @@ Qed.
 
 (* Hartog numbers *)
 
-Require Import ZFrelations.
+Require Import Zrelations.
 
 Require Import Relations.
 
@@ -535,7 +535,7 @@ Record iso_rel R o f := {
   equiv : forall x y, rel_app R x y <-> f x ∈ f y
 }.
 
-Definition wo := subset (ZFrelations.rel X X)
+Definition wo := subset (Zrelations.rel X X)
   (fun R => exists o, exists2 f, ext_fun X f & iso_rel R o f).
 
 Definition hartog := repl wo (fun R => uchoice (fun o => exists2 f, ext_fun X f & iso_rel R o f)).

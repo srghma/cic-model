@@ -1,4 +1,4 @@
-Require Import ZF ZFnats ZFord ZFstable ZFfix.
+Require Import ZF Zpairs Znats ZFord Zstable ZFfix.
 
   (* Von Neumann universes *)
   Definition VN := TI power.
@@ -69,11 +69,9 @@ Qed.
 
   Lemma VN_stable : stable_ord VN.
 unfold VN.
-apply TI_stable with (fun _ => True); auto with *.
+red; intros.
+eapply TI_stable; auto with *.
  apply power_mono.
-
- do 2 red; reflexivity.
-
  apply power_stable.
 Qed.
  
@@ -224,16 +222,16 @@ exists (osucc (x0 ⊔ x1)).
 Qed.
 
 
-Require Import ZFrelations.
+Require Import Zrelations.
 
-Local Transparent ZFpairs.couple ZFpairs.prodcart.
+Local Transparent couple prodcart.
 Lemma VNlim_couple o x y :
   limitOrd o ->
   x ∈ VN o ->
   y ∈ VN o ->
-  ZFpairs.couple x y ∈ VN o.
+  couple x y ∈ VN o.
 intros.
-unfold ZFpairs.couple.
+unfold couple.
 apply VNlim_pair; trivial.
  apply VNlim_pair; trivial.
  apply VNlim_pair; trivial.
@@ -242,9 +240,9 @@ Lemma VNlim_prodcart o A B :
   limitOrd o ->
   A ∈ VN o ->
   B ∈ VN o ->
-  ZFpairs.prodcart A B ∈ VN o.
+  prodcart A B ∈ VN o.
 intros.
-unfold ZFpairs.prodcart.
+unfold prodcart.
 assert (oo := proj1 H).
 apply VN_subset; trivial.
 apply VNlim_power; trivial.
@@ -257,9 +255,9 @@ Lemma VN_prodcart o A B :
     isOrd o ->
     A ∈ VN o ->
     B ∈ VN o ->
-    ZFpairs.prodcart A B ∈ VN (osucc (osucc (osucc o))).
+    prodcart A B ∈ VN (osucc (osucc (osucc o))).
 intros.
-unfold ZFpairs.prodcart.
+unfold prodcart.
 apply VN_subset; auto.
 apply VNsucc_power; auto.
 apply VNsucc_power; auto.
@@ -267,7 +265,7 @@ unfold union2.
 apply VN_union; auto.
 apply VNsucc_pair; trivial.
 Qed.
-Opaque ZFpairs.couple ZFpairs.prodcart.
+Opaque couple prodcart.
 
 Local Transparent func.
 Lemma VN_func : forall o A B,
@@ -351,7 +349,7 @@ induction x; simpl.
  apply union2_intro2.
  rewrite replf_ax.
  2:do 2 red; intros; apply succ_morph; trivial.
- exists (ZFnats.nat2set x); auto with *.
+ exists (Znats.nat2set x); auto with *.
  apply TI_intro with x0; auto.
   eauto using isOrd_inv.
 
@@ -555,10 +553,10 @@ Section UnionClosure.
 
   Lemma VN_regular_weaker : VN_regular mu.
 red; intros.
+unfold sup; rewrite replf_repl; trivial.
 apply mu_reg; trivial; intros.
- apply repl_rel_fun; trivial.
-
- rewrite H3; auto.
+*apply repl_ext_rel_fun; auto with *.
+*destruct H3 as (_,H3); rewrite H3; auto.
 Qed.
 
 Let mul : limitOrd mu := conj mu_ord mu_lim.

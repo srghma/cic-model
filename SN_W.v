@@ -4,8 +4,8 @@
 Require Import basic Models.
 Require SN_ECC_Real.
 Import ZFgrothendieck.
-Import ZF ZFsum ZFnats ZFrelations ZFord ZFfix.
-Require Import ZFfunext ZFcoc ZFrecbot ZFecc ZFuniv_real SATtypes SATw.
+Import ZF Zsum Znats Zrelations ZFord ZFfix.
+Require Import Zfunext Zcoc ZFrecbot ZFecc ZFuniv_real SATtypes SATw.
 
 Import SN_ECC_Real.
 Opaque Real.
@@ -60,7 +60,7 @@ Module Type W_PartialModel.
        (forall a, a ∈ A -> B a ∈ U) ->
        forall X, X ∈ U -> W_F A B X ∈ U.
   Parameter G_W_ord : forall A B, morph1 B ->
-    forall U, grot_univ U -> omega ∈ U ->
+    forall U, grot_univ U -> N ∈ U ->
     A ∈ U -> (forall a : set, a ∈ A -> B a ∈ U) -> W_ord A B ∈ U.
 
   Parameter WREC : (set -> set -> set) -> set -> set.
@@ -1660,7 +1660,7 @@ Module W_Model : W_PartialModel.
     x ∈ W_F A B X ->
     w1 x ∈ A /\ w2 x ∈ (Π __ ∈ B (w1 x), cc_bot X) /\ x == mkw (w1 x) (w2 x).
 intros Bm X x tyx.
-destruct sigma_elim with (2:=tyx) as (eqx,(ty1,ty2)); auto.
+apply sigma_ax in tyx; destruct tyx as (eqx&ty1&_&ty2); auto.
 Qed.
   Lemma W_F_intro A B :
     morph1 B ->

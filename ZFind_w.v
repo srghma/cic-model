@@ -1,6 +1,6 @@
-Require Import ZF ZFpairs ZFrelations ZFord ZFstable.
+Require Import ZF Zpairs Zrelations ZFord Zstable.
 Require Import ZFgrothendieck.
-Require Import ZFfunext ZFfix ZFfixrec.
+Require Import Zfunext ZFfix ZFfixrec.
 Require Import ZFw.
 Require Import ZFiso.
 
@@ -65,15 +65,15 @@ Instance W_F_morph : morph1 W_F.
 apply Fmono_morph; auto with *.
 Qed.
 
-Lemma W_F_stable : stable W_F.
+Lemma W_F_stable X : stable_set X W_F.
 unfold W_F.
-apply sigma2_stable_class; auto with *.
+apply sigma2_stable_set; auto with *.
  intros; apply cc_prod_ext; auto with *.
  red; trivial.
 
  intros.
- apply cc_prod_stable_class; intros; auto.
- apply id_stable_class.
+ apply cc_prod_stable_set; intros; auto.
+ apply id_stable_set.
 Qed.
 
 Lemma WFi_ext a a' f f' :
@@ -266,7 +266,7 @@ Lemma Wf_elim a X :
   exists2 x, x ∈ W_F X &
   a == Wintro x.
 intros.
-apply Wf_elim in H;[|trivial].
+apply Wf_elim in H.
 destruct H as (x,tyx,(f,tyf,eqa)).
 exists (couple x f).
 +rewrite cc_eta_eq with (1:=tyf).
@@ -286,21 +286,22 @@ Lemma Wintro_inj X X' x x' :
   Wintro x == Wintro x' ->
   x==x'.
 intros tyX tyX' tyx tyx' eqWi.
+assert (isc := proj1 (proj1 (sigma_ax _ _ _) tyx)).
+assert (isc' := proj1 (proj1 (sigma_ax _ _ _) tyx')).
+red in isc,isc'; rewrite isc,isc'.
 apply W_F_elim in tyx.
 destruct tyx as (tyx1,(tyx2,eqx)).
 apply W_F_elim in tyx'.
 destruct tyx' as (tyx'1,(tyx'2,eqx')).
-apply Wsup_inj with (A:=A)(B:=B) in eqWi; trivial.
-destruct eqWi as (eq1,eq2).
-+rewrite eqx, eqx'; apply couple_morph; [trivial|].
- apply cc_lam_ext; [rewrite eq1;reflexivity|].
- red; intros.
- rewrite (eq2 x0); trivial.
- apply cc_app_morph;[reflexivity|trivial].
-+intros.
- apply tyX; apply tyx2; trivial.
-+intros.
- apply tyX'; apply tyx'2; trivial.
+eapply Wsup_inj_typ with (A:=A)(B:=B)(1:=tyX)(2:=tyX') in eqWi.
+*destruct eqWi as (eq1,eq2).
+ apply couple_morph; trivial.
+*rewrite eqx,snd_def.
+ apply cc_arr_intro;[|trivial].
+ intros ????; apply cc_app_morph; auto with *.
+*rewrite eqx',snd_def.
+ apply cc_arr_intro;[|trivial].
+ intros ????; apply cc_app_morph; auto with *.
 Qed.
  
  Lemma W_F_Wf_iso X :
@@ -325,7 +326,7 @@ Definition wiso f := comp_iso (WFmap f) Wintro.
 Lemma W_F_Wf_mapiso o f :
   isOrd o ->
   iso_fun (TI W_F o) (Wi A B o) f ->
-  iso_fun (W_F (TI W_F o)) (ZFwdom.Wf A B (Wi A B o)) (wiso f).
+  iso_fun (W_F (TI W_F o)) (Zwdom.Wf A B (Wi A B o)) (wiso f).
 intros.
 apply iso_fun_trans with (W_F (Wi A B o)).
  apply WFmap_iso; trivial.
@@ -700,16 +701,12 @@ rewrite TI_mono_succ in H1; auto with *.
   apply fst_typ_sigma in H1; trivial.
 
   eapply snd_typ_sigma in H1.
-  3:reflexivity.
+  2:reflexivity.
   revert H1; apply cc_prod_covariant.   
   do 2 red; reflexivity.
   reflexivity.   
   intros.
   apply W_post; trivial.
-  do 2 red; intros.
-  apply cc_arr_morph.
-  auto.
-  reflexivity.
 
   apply cc_prod_intro.
    do 2 red; intros.
@@ -719,12 +716,8 @@ rewrite TI_mono_succ in H1; auto with *.
    intros.
    apply H0.
    eapply snd_typ_sigma in H1.
-   3:reflexivity.
+   2:reflexivity.
    apply cc_prod_elim with (1:=H1); trivial.
-   do 2 red; intros.
-   apply cc_arr_morph.
-   auto.
-   reflexivity.
 
  apply Pm.
  apply surj_pair with (1:=subset_elim1 _ _ _ H1).
@@ -756,12 +749,8 @@ rewrite <- H3.
 apply H0.
 rewrite TI_mono_succ in H1; auto with *.
 eapply snd_typ_sigma in H1.
-3:reflexivity.
+2:reflexivity.
 apply cc_prod_elim with (1:=H1); trivial.
-do 2 red; intros.
-apply cc_arr_morph.
-auto.
-reflexivity.
 
 do 2 red; intros.
 apply lam_m1; trivial.
@@ -817,7 +806,7 @@ Section W_Univ.
 (* Universe facts *)
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.  
+  Hypothesis Unontriv : Znats.N ∈ U.  
 
   Hypothesis aU : A ∈ U.
   Hypothesis bU : forall a, a ∈ A -> B a ∈ U.

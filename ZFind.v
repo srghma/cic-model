@@ -1,4 +1,4 @@
-Require Import ZF ZFpairs ZFrelations ZFord ZFstable ZFfixfun.
+Require Import ZF Zpairs Zrelations ZFord Zstable ZFfixfun.
 Require Import ZFfixrec.
 Require Import ZFgrothendieck.
 
@@ -284,10 +284,10 @@ Let wi_elim x o :
   snd (fst x) ∈ Arg (fst (fst x)) /\
   snd x ∈ Wi o (fst x).
 intros.
-destruct sigma_elim with (2:=H0) as (x_eta & x1ty & x2ty); auto.
-destruct sigma_elim with (2:=x1ty) as (x1_eta & mty & ity); auto.
+apply sigma_ax in H0; destruct H0 as (x_eta & x1ty & _ & x2ty).
+apply sigma_ax in x1ty; destruct x1ty as (x1_eta & mty & _ & ity).
 split; auto.
-rewrite <- x1_eta; trivial.
+red in x1_eta; rewrite <- x1_eta; trivial.
 Qed.
 
 Let succ_elim0 x o :
@@ -301,14 +301,9 @@ Let succ_elim0 x o :
 intros.
 destruct wi_elim with (2:=H0) as (x_eta & mty & ity & wty); auto.
 rewrite Wi_succ in wty; trivial.
-destruct sigma_elim with (2:=wty) as (w_eta & aty & bty); auto.
- do 2 red; intros.
- apply cc_prod_morph.
-  rewrite H2; reflexivity.
-  red; intros.
-  rewrite H2,H3; reflexivity.
+apply sigma_ax in wty; destruct wty as (w_eta & aty & _ & bty); auto.
 split.
- rewrite <- w_eta; trivial.
+ red in w_eta; rewrite <- w_eta; trivial.
 split; trivial.
 split; trivial.
 split; trivial.
@@ -481,7 +476,6 @@ apply mkTypedRec; auto with *.
 
   revert H6; apply sigma_mono; auto with *.
   intros.
-  rewrite <- H7.
   apply TIF_mono; auto with *.
    apply W0.W_Fd_morph; auto.
    eauto using isOrd_inv.
@@ -562,7 +556,6 @@ revert tyw; apply sigma_mono; auto.
 
  intros.
  unfold Wi,W0.Wi.
- rewrite <- H5.
  apply TIF_incl; trivial.
   apply W0.W_Fd_morph; auto.
 
@@ -579,7 +572,7 @@ Qed.
 
     Variable U : set.
     Hypothesis Ugrot : grot_univ U.
-    Hypothesis Uinf : omega ∈ U.
+    Hypothesis Uinf : Znats.N ∈ U.
 
     Hypothesis Atyp : forall i, i ∈ m -> A i ∈ U.
     Hypothesis Btyp : forall i x, i ∈ m -> x ∈ A i -> B i x ∈ U.

@@ -272,7 +272,7 @@ Require Import SN_nat.
 
 (*Require Import SATnat.*)
 
-Import ZFnats Sat SAT_nat.
+Import Znats Sat SAT_nat.
 
 (*Import ZFind_nat.*)
 

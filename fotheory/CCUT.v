@@ -1,6 +1,6 @@
 Require Import Models.
 Require Import GenModelSN.
-Require Import ZF.
+Require Import ZF Zpairs.
 Require Import ZFind_nat ZFlambda Sat.
 
 Require Import SN_CC.
@@ -8,7 +8,7 @@ Require Import SN_CC.
 Import SN SN.J.
 
 Existing Instance app_ext.
-Existing Instance ZFpairs.fst_morph.
+Existing Instance fst_morph.
 
 Parameter Symb : Type.
 Parameter isCstr : Symb -> Prop.
@@ -27,7 +27,7 @@ Lemma inSAT_Real : forall x t S,
   inSAT t (Real (mkTY x S)).
 intros.
 unfold Real, mkTY.
-rewrite ZFpairs.snd_def.
+rewrite snd_def.
 rewrite ZFlambda.iSAT_id; trivial.
 Qed.
 
@@ -40,7 +40,7 @@ destruct H.
 pose (S' := exist _ x0 i : SAT).
 apply (fun h => H0 (exist _ S' h)).
 intros.
-unfold mkTY in H2; rewrite ZFpairs.snd_def in H2.
+unfold mkTY in H2; rewrite snd_def in H2.
 apply subset_elim2 in H2.
 destruct H2.
 destruct H3.
@@ -142,7 +142,7 @@ split.
  split.
   simpl.
   unfold inX, El, mkTY. 
-  rewrite ZFpairs.fst_def.
+  rewrite fst_def.
   apply singl_intro.
 
   simpl int.
@@ -173,7 +173,7 @@ split.
   unfold Lambda.subst; simpl Lambda.subst_rec.
   apply interSAT_intro; intros.
    exists empty.
-   unfold El, mkTY; rewrite ZFpairs.fst_def.
+   unfold El, mkTY; rewrite fst_def.
    apply singl_intro.
   apply inSAT_Real.
 unfold natSAT.
@@ -219,7 +219,7 @@ split.
   apply H in H3.
   destruct H3 as (_,(H3,_)).
   simpl in H3.
-  unfold inX, El, mkTY in H3; rewrite ZFpairs.fst_def in H3.
+  unfold inX, El, mkTY in H3; rewrite fst_def in H3.
   apply singl_elim in H3; trivial.
  apply H1 in H3.
  destruct H3.
@@ -233,7 +233,7 @@ split.
  specialize (H _ _ H3).
  destruct H as (_,(n_ty,H)). 
  simpl in n_ty.
- unfold inX, El, mkTY in n_ty; rewrite ZFpairs.fst_def in n_ty.
+ unfold inX, El, mkTY in n_ty; rewrite fst_def in n_ty.
  apply singl_elim in n_ty.
  simpl int in H.
  apply inSAT_Real_rev in H.
@@ -288,14 +288,14 @@ split.
      rewrite beta_eq; auto with *.
       red; intros; auto.
 
-      unfold inX, El, mkTY; rewrite ZFpairs.fst_def.
+      unfold inX, El, mkTY; rewrite fst_def.
       rewrite n_ty; apply singl_intro.
 
     rewrite int_cons_lift_eq.
     rewrite n_ty.
     trivial.
 
-  unfold inX, El, mkTY; rewrite ZFpairs.fst_def.
+  unfold inX, El, mkTY; rewrite fst_def.
   rewrite n_ty; apply singl_intro.
 Qed.
 
@@ -310,7 +310,7 @@ simpl in H.
 specialize (H0 _ _ H1).
 destruct H0 as (_,(H0,_)).
 simpl in H0.
-unfold inX, El, mkTY in H,H0; rewrite ZFpairs.fst_def in H,H0.
+unfold inX, El, mkTY in H,H0; rewrite fst_def in H,H0.
 apply singl_elim in H; apply singl_elim in H0.
 rewrite H; rewrite H0; reflexivity.
 Qed.

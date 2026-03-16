@@ -9,8 +9,8 @@ Require Import Models TypModels.
 Require Import GenModel.
 
 (*
-Require Import ZFnats ModelZF.
-Module NN <: Nat_Model CCM := ZFnats.
+Require Import Znats ModelZF.
+Module NN <: Nat_Model CCM := Znats.
 *)
 
 Module Type CCNat_Rules := Judge <+ Nat_Rules.

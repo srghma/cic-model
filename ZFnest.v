@@ -1,8 +1,8 @@
 Require Import ZF.
-Require Import ZFstable ZFpairs ZFsum ZFrelations ZFord ZFfix ZFlimit.
+Require Import Zstable Zpairs Zsum Zrelations ZFord ZFfix ZFlimit.
 Require Import ZFiso.
 Require Import ZFind_w.
-Require Import ZFlist.
+Require Import Zlist.
 
 Section NestedInductive.
 
@@ -29,16 +29,12 @@ apply sigma_mono.
  do 2 red; intros.
  rewrite H2; reflexivity.
 
- do 2 red; intros.
- rewrite H2; reflexivity.
-
  reflexivity.
 
  intros.
  apply prodcart_mono.
   apply cc_prod_covariant; auto with *.
 
-  rewrite H2.
   apply cc_prod_covariant; auto with *.
 Qed.
 
@@ -146,9 +142,6 @@ apply snd_typ_sigma with (y:=fst x) in H; auto with *.
    rewrite <- H1.
    rewrite cc_beta_eq; auto with *.
    do 2 red; intros; apply cc_app_morph; auto with *.
-
- do 2 red; intros.
- rewrite <- H1; reflexivity.
 Qed.
   
 Lemma F_intro a fb fc X Y :
@@ -192,6 +185,14 @@ Inductive B_ok (x':set) (b:set) : Prop :=
    b == Cons i b' ->
    B_ok x' b.
 
+Lemma B_ok_list x b :
+  B_ok x b ->
+  isList b.
+induction 1.
+*rewrite H0; auto.
+*rewrite H1; auto.
+Qed.
+
 Definition B' x' := subset B'0 (B_ok x').
 
 Instance B'm : morph1 B'.
@@ -207,15 +208,24 @@ assert (Proper (eq_set ==> eq_set ==> impl) B_ok).
 split; apply H0; auto with *.
 Qed.
 
-Lemma B'notmt x' z : z ∈ B' x' -> ~ z == Nil.
+Lemma B'notnil x' z : z ∈ B' x' -> exists i b, isList b /\ z == Cons i b.
+intros.
+apply subset_elim2 in H.
+destruct H as (z',eqz,zok).
+destruct zok.
+*rewrite <-eqz in H0; eauto.
+*apply B_ok_list in zok.
+ rewrite <-eqz in H0; eauto.
+Qed.
+(*Lemma B'notmt x' z : z ∈ B' x' -> ~ z == Nil.
 red; intros.
 rewrite H0 in H; clear z H0.
 unfold B' in H; rewrite subset_ax in H; destruct H.
 destruct H0.
 destruct H1.
- rewrite H2 in H0; apply discr_mt_couple in H0; trivial.
- rewrite H3 in H0; apply discr_mt_couple in H0; trivial.
-Qed.
+ rewrite H2 in H0; symmetry in H0; apply discr_Cons_Nil in H0; trivial.
+ rewrite H3 in H0; symmetry in H0; apply discr_Cons_Nil in H0; trivial.
+Qed.*)
 (*
 Lemma B'nil X x' l :
   x' ∈ W_F A C X ->
@@ -262,7 +272,7 @@ intros.
 apply subset_intro.
  apply Cons_typ;[|apply Nil_typ].
  apply union2_intro2.
- rewrite sup_ax; auto with *.
+ rewrite sup_def; auto with *.
  exists (fst x'); trivial.
  apply fst_A'i with o; trivial.
 
@@ -279,7 +289,7 @@ intros.
 apply subset_intro.
  apply Cons_typ.
   apply union2_intro1.
-  rewrite sup_ax; auto with *.
+  rewrite sup_def; auto with *.
   exists (fst x'); trivial.
   apply fst_A'i with o; trivial.
 
@@ -299,23 +309,20 @@ intros.
 rewrite subset_ax in H.
 destruct H as (zb,(z',eqz, zok)).
 destruct zok.
- left; exists l; trivial.
+*left; exists l; trivial.
  rewrite eqz; trivial.
-
- right; exists i; trivial; exists b'.
-  apply subset_intro; auto.
+*right; exists i; trivial; exists b'.
+ +apply subset_intro; auto.
   unfold B'0 in zb.
-  rewrite List_eqn in zb.
   revert H0; rewrite <- eqz.
-  apply LISTf_ind with (4:=zb); intros.
-   do 2 red; intros.
-   rewrite H0; reflexivity.
-
-   apply discr_mt_couple in H0; contradiction.
-
-   apply couple_injection in H2; destruct H2 as (_,H2); rewrite <- H2; trivial.
-
-  rewrite eqz; trivial.
+  apply List_ind with (4:=zb); intros.
+  ++do 2 red; intros.
+    rewrite H0; reflexivity.
+  ++symmetry in H0; apply discr_Cons_Nil in H0; contradiction.
+  ++apply Cons_inj in H3;
+     [|apply List_list in H1|apply B_ok_list in zok]; trivial.
+   destruct H3 as (_,H3); rewrite <- H3; trivial.
+ +rewrite eqz; trivial.
 Qed.
 
 Lemma B'_ind : forall (P:set->set->Prop),
@@ -343,10 +350,11 @@ revert z H1 H2; induction H3; intros.
    do 2 red; intros.
    rewrite H2; reflexivity.
 
-   apply discr_mt_couple in H2; contradiction.
+   symmetry in H2; apply discr_Cons_Nil in H2; contradiction.
 
-   apply couple_injection in H8; destruct H8.
-   rewrite <- H9; trivial.
+   apply Cons_inj in H8;
+     [|apply List_list in H6|apply B_ok_list in H3]; trivial.
+   destruct H8 as (_,el); rewrite <- el; trivial.
  apply H0 with i b'; auto with *.
  apply subset_intro; trivial.
 Qed.
@@ -370,14 +378,26 @@ Qed.
 
 Lemma B'cases x b :
   b ∈ B' x ->
-  (b == Cons (fst b) Nil /\ fst b ∈ B (fst x) /\
+  (Tl b == Nil /\ Hd b ∈ B (fst x)) \/
+  (b == Cons (Hd b) (Tl b) /\ Hd b ∈ C (fst x) /\ Tl b ∈ B'(cc_app (snd x) (Hd b))).
+intros.
+apply B'_elim in H; destruct H as [(l,?,?)|(i,?,(b',?,?))].
+*left; rewrite H0, Hd_Cons, Tl_Cons; auto with *.
+*right; rewrite H1,Hd_Cons,Tl_Cons;
+   [auto with *|apply subset_elim1 in H0; apply List_list in H0;trivial].
+Qed.
+
+(*
+  Lemma B'cases x b :
+  b ∈ B' x ->
+  (b == Cons (Hd b) Nil /\ Hd b ∈ B (fst x) /\
    forall f g, LIST_case (snd b) f g == f) \/
   (b == Cons (fst b) (snd b) /\ fst b ∈ C (fst x) /\ snd b ∈ B'(cc_app (snd x) (fst b)) /\
    forall f g, LIST_case (snd b) f g == g).
 intros.
 apply B'_elim in H; destruct H as [(l,?,?)|(i,?,(b',?,?))].
- left; split; [|split]; intros.
-  rewrite H0; rewrite fst_def; reflexivity.
+*left; split; [|split]; intros.
+ +rewrite H0; rewrite fst_def; reflexivity.
 
   rewrite H0; rewrite fst_def; trivial.
 
@@ -393,15 +413,21 @@ apply B'_elim in H; destruct H as [(l,?,?)|(i,?,(b',?,?))].
   rewrite H1; rewrite snd_def.
   apply B'_elim in H0; destruct H0 as [(l,?,eqb)|(i',?,(b'',?,eqb))]; rewrite eqb; apply LIST_case_Cons.
 Qed.
-
+*)
 
 Definition B'case_typ x b f g X :
   b ∈ B' x ->
-  (fst b ∈ B(fst x) -> f ∈ X) ->
-  (fst b ∈ C(fst x) -> snd b ∈ B'(cc_app(snd x)(fst b)) -> g ∈ X) ->
-  LIST_case (snd b) f g ∈ X.
+  (Hd b ∈ B(fst x) -> f ∈ X) ->
+  (Hd b ∈ C(fst x) -> Tl b ∈ B'(cc_app(snd x)(Hd b)) -> g ∈ X) ->
+  LIST_case (Tl b) f g ∈ X.
 intros.
-apply B'cases in H; destruct H as [(?,(?,eqc))|(?,(?,(?,eqc)))]; rewrite eqc; auto.
+apply B'_elim in H; destruct H as [(l,?,?)|(i,?,(b',?,?))].
+*revert H0; rewrite H2, Hd_Cons, Tl_Cons, LIST_case_Nil; auto with *.
+*assert (h:=H2).
+ apply B'notnil in h; destruct h as (j & b'' & lb'' & eqb').
+ revert H1 H2; rewrite H3,Hd_Cons,Tl_Cons; intros;
+   rewrite eqb'; auto.
+ rewrite LIST_case_Cons; auto.
 Qed.
 (*
 Parameter B'case : (set -> set) -> (set->set->set) -> set -> set.
@@ -472,28 +498,19 @@ Definition g f t (* f:Y->WF(A',B',X), t:F X Y *) := (* W_F(A'+,B',X) *)
   let fc := cc_app (snd (snd t)) in (* C a -> Y *)
   let a' := couple a (cc_lam (C a) (fun i => fst (f (fc i)))) in
   let fb' b := (* B' a' -> X *)
-    LIST_case (snd b) (fb (fst b)) (* fst b : B a *)
-                      (cc_app (snd (f (fc (fst b)))) (snd b)) in
+    LIST_case (Tl b) (fb (Hd b)) (* fst b : B a *)
+                      (cc_app (snd (f (fc (Hd b)))) (Tl b)) in
   couple (a'of a (fun i => f(fc i))) (cc_lam (B' (a'of a (fun i =>f(fc i)))) fb').
 
 
 Lemma ecase1 : forall Y Z a g x f,
   iso_fun Y Z f ->
-  typ_fun (cc_app (snd (snd x))) (C a) Y ->
   ext_fun (B' (a'of a g))
-     (fun b => LIST_case (snd b) (cc_app (fst (snd x)) (fst b))
-        (cc_app (snd (f (cc_app (snd (snd x)) (fst b)))) (snd b))).
+     (fun b => LIST_case (Tl b) (cc_app (fst (snd x)) (Hd b))
+        (cc_app (snd (f (cc_app (snd (snd x)) (Hd b)))) (Tl b))).
 do 2 red; intros.
-rewrite <- (snd_morph _ _ H2).
-apply B'cases in H1; destruct H1 as [(?,(?,eqc))|(?,(?,(?,eqc)))]; do 2 rewrite eqc.
- rewrite H2; reflexivity.
-
- apply cc_app_morph; auto with *.
- apply snd_morph.
- apply (iso_funm H).
-  unfold a'of in H3; rewrite fst_def in H3; auto.
-
-  rewrite H2; reflexivity.
+assert (fm := iso_funm H).
+rewrite H1; reflexivity.
 Qed.
 
 Lemma gext f f' X Y :
@@ -520,15 +537,17 @@ apply cmorph; intros.
   apply B'm; trivial.
 
   red; intros.
-  rewrite <- (snd_morph _ _ H2).
-  apply B'cases in H0; destruct H0 as [(?,(?,eqc))|(?,(?,(?,eqc)))]; do 2 rewrite eqc.
-   rewrite H1; rewrite H2; reflexivity.
-
-   apply cc_app_morph; auto with *.
+  rewrite <- (Tl_morph _ _ H2).
+  apply B'cases in H0; destruct H0 as [(?,?)|(?,(?,?))].
+  {rewrite H0, !LIST_case_Nil.
+   rewrite H1,H2; reflexivity. }
+  {apply B'notnil in H4.
+   destruct H4 as (i&b&lb&eqc); rewrite eqc,!LIST_case_Cons.
+   apply cc_app_morph;[|reflexivity].
    apply snd_morph.
-   apply H; auto.
-   2:rewrite H1; rewrite H2; reflexivity.
-   unfold a'of in H3; rewrite fst_def in H3; auto.
+   apply H;[|rewrite H1,H2;reflexivity].
+   apply ty3.
+   unfold a'of in H3; rewrite fst_def in H3; auto. }
 Qed.
 
 Instance gm :  Proper ((eq_set==>eq_set)==>eq_set==>eq_set) g.
@@ -548,12 +567,12 @@ apply cmorph; intros.
 
   red; intros.
   apply LIST_case_morph.
-   apply snd_morph; trivial.
+   apply Tl_morph; trivial.
 
    rewrite H0 ;rewrite H1; reflexivity.
 
    apply cc_app_morph.
-   2:apply snd_morph; trivial.
+   2:apply Tl_morph; trivial.
    apply snd_morph; apply H.
    rewrite H0 ;rewrite H1; reflexivity.
 Qed.
@@ -574,10 +593,10 @@ assert (essf1 : forall x,
  apply fst_morph; apply (iso_funm H0); auto.
  rewrite H3; reflexivity.
 constructor; intros.
- apply gm.
+*apply gm.
  apply (iso_funm H0).
 
- red; intros.
+*red; intros.
  apply F_elim in H1; destruct H1 as (ty1,(ty2,(ty3,et1))).
  unfold g.
  assert (tya' : a'of (fst x) (fun i => f (cc_app (snd (snd x)) i)) ∈ TI (W_F A C) (osucc o)).
@@ -602,7 +621,7 @@ constructor; intros.
    destruct H2 as (_,(?,_)); auto.
 
  (* injectivity *)
- unfold g in H3.
+*unfold g in H3.
  apply F_elim in H1; destruct H1 as (ty1,(ty2,(ty3,et))).
  apply F_elim in H2; destruct H2 as (ty1',(ty2',(ty3',et'))).
  destruct WFi_inv with (1:=H3); clear H3; intros; auto with *.
@@ -620,8 +639,8 @@ constructor; intros.
   red; intros.
   red in H4.
   generalize (H2 (Cons x0 Nil) (Cons x'0 Nil)).
-  do 2 rewrite snd_def; do 2 rewrite LIST_case_Nil.
-  do 2 rewrite fst_def.
+  rewrite !Tl_Cons, !LIST_case_Nil; auto.
+  rewrite !Hd_Cons.
   intros h; apply h.
    apply B'nil with (osucc o); auto.
    unfold a'of; rewrite fst_def; trivial.
@@ -637,8 +656,8 @@ constructor; intros.
   apply (iso_inj H0); auto.
   apply (iso_typ H0) in tyf.
   apply (iso_typ H0) in tyf'.
-  rewrite WF_eta with (2:=tyf); auto with *.
-  rewrite WF_eta with (2:=tyf'); auto with *.
+  rewrite WF_eta with (1:=tyf).
+  rewrite WF_eta with (1:=tyf').
   unfold WFmap.
   apply couple_morph; trivial.
   apply cc_lam_ext.
@@ -650,15 +669,16 @@ constructor; intros.
    assert (case_Cons : forall f g, LIST_case x1 f g == g).
     intros; apply B'_elim in H5; destruct H5 as [(l,?,eqx)|(i,?,(b',?,eqx))];
       rewrite eqx; apply LIST_case_Cons.
-   assert (f (cc_app (snd (snd x)) (fst (Cons x0 x1))) == f (cc_app (snd(snd x)) x0)).
-    apply (iso_funm H0); auto.
-    unfold Cons; rewrite fst_def; reflexivity.
-   assert (f (cc_app (snd (snd x')) (fst (Cons x0 x1))) == f (cc_app (snd(snd x')) x0)).
-    apply (iso_funm H0); auto.
-    unfold Cons; rewrite fst_def; reflexivity.
+   assert (f (cc_app (snd (snd x)) (Hd (Cons x0 x1))) == f (cc_app (snd(snd x)) x0)).
+   {apply (iso_funm H0); auto.
+    rewrite Hd_Cons; reflexivity. }
+   assert (f (cc_app (snd (snd x')) (Hd (Cons x0 x1))) == f (cc_app (snd(snd x')) x0)).
+   {apply (iso_funm H0); auto.
+    rewrite Hd_Cons; reflexivity. }
    rewrite <- H6; rewrite <- H7.
    generalize (H2 (Cons x0 x1) (Cons x0 x1)).
-   rewrite snd_def; do 2 rewrite case_Cons.
+   rewrite Tl_Cons, !case_Cons.
+   2:{apply subset_elim1 in H5; apply List_list in H5; trivial. }
    intros h; apply h; auto with *.
    apply B'cons with (osucc o); auto.
     unfold a'of; rewrite fst_def; trivial.
@@ -669,9 +689,9 @@ constructor; intros.
     rewrite H3; trivial.
 
  (* surj *)
- apply W_F_elim in H1; auto with *.
+*apply W_F_elim in H1; auto with *.
  destruct H1 as (tya',(tyb',et)).
- destruct W_F_elim with (2:=tya') as (tya,(tyf,et')); auto with *.
+ destruct W_F_elim with (1:=tya') as (tya,(tyf,et')).
  pose (fb' :=  fun i => couple (cc_app (snd (fst y)) i)
    (cc_lam (B' (cc_app (snd (fst y)) i))
       (fun b' : set => cc_app (snd y) (Cons i b')))).
@@ -762,16 +782,17 @@ constructor; intros.
     red; intros.
     specialize tyb' with (1:=H1).
     rewrite H2 in tyb',H1|-*; clear x tyb' H2.    
-    apply B'cases in H1; destruct H1 as [(?,(?,eqc))|(?,(?,(?,eqc)))]; rewrite eqc.
-     rewrite snd_def.
-     rewrite fst_def.
-     rewrite cc_beta_eq; auto with *.
-     apply cc_app_morph; auto with *.
-     do 2 red; intros.
-     rewrite H4; reflexivity.
-
-     transitivity
-       (cc_app (snd (f (iso_inv Y f (fb' (fst x'))))) (snd x')).
+    destruct B'notnil with (1:=H1) as (i'&b'&lb&eqx').
+    apply B'cases in H1; destruct H1 as [(?,?)|(?,(?,?))].
+    {rewrite H1, LIST_case_Nil.
+     rewrite snd_def, fst_def, cc_beta_eq; auto with *.
+     2:{do 2 red; intros.
+        rewrite H4; reflexivity. }
+     rewrite eqx', Hd_Cons.
+     rewrite eqx' in H1; rewrite Tl_Cons in H1; auto.
+     rewrite H1; reflexivity. }
+    {transitivity
+       (cc_app (snd (f (iso_inv Y f (fb' (Hd x'))))) (Tl x')).
       rewrite iso_inv_eq with (1:=H0); auto.
       unfold fb'; rewrite snd_def.
       rewrite cc_beta_eq; auto with *.
@@ -780,12 +801,15 @@ constructor; intros.
        do 2 red; intros.
        rewrite H5; reflexivity.
 
+      clear i' b' lb eqx'.
+      destruct B'notnil with (1:=H3) as (i'&b'&lb&eqtlx').
+      rewrite eqtlx', LIST_case_Cons.
       apply cc_app_morph; auto with *.
       apply snd_morph.
       apply (iso_funm H0).
       rewrite snd_def.
       rewrite snd_def.
-      rewrite cc_beta_eq; auto with *.
+      rewrite cc_beta_eq; auto with *. }
 Qed.
 
 Hypothesis Fop : set -> set -> set.
@@ -812,7 +836,7 @@ apply TRF_indep with (6:=H1); trivial.
  apply hm; trivial.
 
  intros; rewrite TI_mono_eq; auto with *.
- rewrite sup_ax; auto with *.
+ rewrite sup_def; auto with *.
  do 2 red; intros; apply TI_morph; auto with *.
  apply osucc_morph; trivial.
 

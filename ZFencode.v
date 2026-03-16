@@ -1,7 +1,7 @@
 From Stdlib Require Import Inverse_Image.
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord.
+Require Import ZF Zpairs Zsum Znats Zrelations ZFwfr ZFord.
 Require Import ZFgrothendieck.
-Require Import ZFlist ZFfixfun.
+Require Import Zlist ZFfixfun.
 
 Section EncodeBigParameter.
 
@@ -89,9 +89,8 @@ destruct union2_elim with (1:=H1);[left|right].
  apply singl_elim in H2; trivial.
 
  clear H1.
- apply sigma_elim in H2. 
- 2:do 2 red; intros; apply H; apply fm; auto with *.
- destruct H2 as (eqq & tyb & tyq).
+ apply sigma_ax in H2. 
+ destruct H2 as (eqq & tyb & _ & tyq).
  eauto.
 Qed.
 
@@ -478,7 +477,7 @@ Qed.
 Section UniverseFacts.
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.  
+  Hypothesis Unontriv : N ∈ U.  
 
   (** We don't assume A is in U... *)
   Hypothesis BU : forall a, a ∈ A -> B a ∈ U.
@@ -493,11 +492,11 @@ apply G_sup; trivial.
  apply Lmorph; [|reflexivity].
  apply TIF_morph; trivial.
 *apply G_incl with omega; trivial.
+ apply G_omega; trivial.
 *unfold L; intros.
  apply G_union2; trivial.
   apply G_singl; trivial.
-  apply G_trans with omega; auto.
-  apply zero_omega.
+  apply G_inf_nontriv; trivial.
 
   apply G_sigma; auto.
   do 2 red; intros.

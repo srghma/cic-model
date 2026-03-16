@@ -1,4 +1,4 @@
-Require Import ZF ZFrelations ZFwfr ZFnats ZFord ZFstable.
+Require Import ZF Zrelations ZFwfr Znats ZFord Zstable.
   
 (** Decreasing transfinite iteration of a monotonic operator
  *)
@@ -304,7 +304,7 @@ split; intros.
 *destruct H as (zdom,inall).
  split; [exists (COTI A F zero); rewrite replf_ax; eauto with*|].
  intros.
- rewrite replf_ax in H; auto.
+ rewrite replf_def in H; auto.
  destruct H as (o',inw,eqy).
  assert (o'o : isOrd o') by eauto using isOrd_inv.
  rewrite eqy.
@@ -314,7 +314,7 @@ split; intros.
 *destruct H as ((x,wit),inall).
  split.
  +specialize inall with (1:=wit). 
-  rewrite replf_ax in wit; trivial.
+  rewrite replf_def in wit; trivial.
   destruct wit as (w,wo,eqx).
   rewrite eqx in inall.
   revert inall; apply COTI_bound; eauto using isOrd_inv.
@@ -322,7 +322,7 @@ split; intros.
   assert (o'o : isOrd o') by eauto using isOrd_inv.
   rewrite <- COTI_mono_succ; auto.
   apply inall.
-  rewrite replf_ax; trivial.
+  rewrite replf_def; trivial.
   exists (osucc o'); auto with *.
   apply limo; trivial.
 Qed.
@@ -335,29 +335,29 @@ rewrite COTI_limit_def;[|split;[trivial|intros; apply osucc_omega; trivial]|appl
 red; intros.
 apply stabl.
 *intros.
- rewrite replf_ax in H0; trivial.
+ rewrite replf_def in H0; trivial.
  destruct H0 as (n,inw,eqx).
  exists n; trivial.
  apply isOrd_inv with omega; trivial.
 *apply inter_intro. 
  +intros. 
-  rewrite replf_ax in H0; trivial.
+  rewrite replf_def in H0; trivial.
   2:do 2 red; intros; apply Fmono_morph; trivial.
   destruct H0 as (w,tyw,eqy); rewrite eqy.
-  rewrite replf_ax in tyw; trivial.
+  rewrite replf_def in tyw; trivial.
   destruct tyw as (n,tyn,eqw); rewrite eqw.
   rewrite <- COTI_mono_succ; auto.  
   2:apply isOrd_inv with omega; trivial.
   apply inter_elim with (1:=H).  
-  rewrite replf_ax; trivial.
+  rewrite replf_def; trivial.
   exists (osucc n);[|reflexivity].
   apply osucc_omega; trivial.
 
  +exists (F (COTI A F zero)).
-  rewrite replf_ax.
+  rewrite replf_def.
   2:do 2 red; intros; apply Fmono_morph; trivial.
   exists (COTI A F zero);[|reflexivity].
-  rewrite replf_ax; trivial.
+  rewrite replf_def; trivial.
   exists zero;[|reflexivity].
   apply zero_omega.
 Qed.
@@ -365,8 +365,6 @@ Qed.
   
 (** Stability of ordinal-indexed families *)
 (*
-Definition stable_ord := stable_class isOrd.
-
 Lemma COTI_stable K :
   Proper (eq_set ==> iff) K ->
   stable_class K F ->

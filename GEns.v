@@ -26,6 +26,8 @@ Definition set := set_.
 Definition wfs (x:set) : Prop :=
   Acc (mem x) (head x).
 
+Definition wset := {x:set | wfs x}.
+
 Definition sim_step {X Y:Ti} Rx Ry (R:X->Y->Prop) (i:X) (j:Y) :=
   (forall i', Rx i' i -> exists j', Ry j' j /\ R i' j') /\
   (forall j', Ry j' j -> exists i', Rx i' i /\ R i' j').
@@ -38,15 +40,27 @@ Definition eq_set (x y:set) : Prop :=
   exists R:pts x -> pts y -> Prop,
     R (head x) (head y) /\ sim (mem x) (mem y) R.
 
+Definition eq_wset (x y:wset) := eq_set (proj1_sig x) (proj1_sig y).
+
 Definition eq_set_isL x y : isL (eq_set x y) := fun h => h.
+
+Lemma eq_set_map X Y hx mx my (f:X->Y) :
+  (forall i j, mx i j -> my (f i) (f j)) ->
+  (forall i j, my i (f j) -> exists i', mx i' j /\ i = f i') ->
+  eq_set (mkS X hx mx) (mkS Y (f hx) my).
+exists (fun i j => j = f i); simpl; split; [trivial|].
+split; simpl; intros.
+*subst j.
+ exists (f i'); split;auto.
+*subst j; auto.
+Qed.
+
+
 
 Lemma eq_set_refl : forall x, eq_set x x.
 intros x.
-exists (fun i j:pts x => i=j).
-split;[|split];[trivial|intros |intros].
-*subst j; exists i'; auto.
-*subst i; exists j'; auto.
-Qed.  
+apply eq_set_map with (f:=fun i=>i); eauto.
+Qed.
 
 Lemma eq_set_sym : forall x y, eq_set x y -> eq_set y x.
 intros.
@@ -95,6 +109,9 @@ Definition elts (x:set) (i:idx x) : set :=
 
 Definition in_set x y :=
   exists j, eq_set x (elts y j).
+
+Definition in_wset (x y:wset) := in_set (proj1_sig x) (proj1_sig y).
+
 
 Definition in_set_isL x y : isL (in_set x y) := fun h => h.
 
@@ -156,6 +173,17 @@ unfold in_set; split; intros.
        apply eq_set_sym; trivial.
 Qed.
 
+Lemma eq_set_incl : forall x y,
+  eq_set x y <-> (incl_set x y /\ incl_set y x).
+intros.
+unfold incl_set.
+rewrite eq_set_ax.
+split; try destruct 1; split; auto.
+intros; apply H; auto.
+intros; apply H; auto.
+Qed.
+
+
 Definition in_set_intro (x:set) (i:idx x) : in_set (elts x i) x :=
   ex_intro _ i (eq_set_refl _).
 (*
@@ -192,76 +220,70 @@ destruct (H0 x); auto.
 Qed.
 
 (* Set induction *)
-(*
-Lemma Acc_in_set : forall x, Acc in_set x.
-cut (forall x y, eq_set x y -> Acc in_set y).
- intros.
- apply H with x; apply eq_set_refl.
-induction x; intros.
+
+Lemma Acc_in_set : forall x:wset, Acc in_set (proj1_sig x).
+destruct x as (x,wfx).
+cut (forall i (h:Acc (mem x) i), Acc in_set (move x i)).
+{destruct x as (A,h,m); simpl; intros H; apply H; trivial. }
+clear wfx; induction 1; simpl; intros.
 constructor; intros.
-specialize eq_elim with (1:=H1)(2:=eq_set_sym _ _ H0); intro.
-clear y H0 H1.
-destruct H2; simpl in *.
-apply H with x.
-apply eq_set_sym; trivial.
+destruct H1 as ((j,?),?); simpl in *.
+unfold elts in H1; simpl in H1.
+apply H0 in m.
+constructor; intros.
+apply Acc_inv with (move x j); [trivial|].
+apply eq_elim with y; trivial.
 Qed.
 
+From Stdlib Require Import Inverse_Image.
+Lemma Acc_in_wset : forall x:wset, Acc in_wset x.
+intros.
+apply Acc_inverse_image with (f:=@proj1_sig _ _).
+apply Acc_in_set.
+Qed.
 
 Lemma wf_rec :
-  forall P : set -> Type,
-  (forall x, (forall y, in_set y x -> P y) -> P x) -> forall x, P x.
+  forall P : wset -> Type,
+  (forall x, (forall y, in_wset y x -> P y) -> P x) -> forall x, P x.
 intros.
-elim (Acc_in_set x); intros.
+elim (Acc_in_wset x); intros.
 apply X; apply X0.
 Defined.
 
 
 Lemma wf_ax :
-  forall (P:set->Prop),
-  (forall x, (forall y, in_set y x -> P y) -> P x) -> forall x, P x.
-intros P H x.
-cut (forall x', eq_set x x' -> P x');[auto using eq_set_refl|].
-induction x; intros.
-apply H; intros.
-assert (in_set y (sup X f)).
- apply eq_elim with x'; trivial.
- apply eq_set_sym; trivial.
-clear H1 H2.
-destruct H3; simpl in *.
-apply eq_set_sym in H1; eauto.
+  forall (P:wset->Prop),
+  (forall x, (forall y, in_wset y x -> P y) -> P x) -> forall x, P x.
+intros P.
+apply wf_rec.
 Qed.
-*)
+
 (* *)
 
 Definition supX (X:Ti) (f:X->Ti) : Ti :=
   option {i:X & f i}.
 
-Definition sup (X:Ti) (f:X->set) : set :=
-  mkS (supX X (fun i => pts (f i)))
-    None
-    (fun i j =>
+Definition supm (X:Ti) (f:X->set) (i j:supX X (fun i => pts(f i))) :=
        match i, j with
          Some(existT _ i' x), None => x = head (f i')
        | Some(existT _ i' x), Some(existT _ j' y) =>
            exists e: i' = j',
              mem (f j') (eq_rect _ (fun i=>_) x _ e) y
        | None, _ => False
-       end).
+       end.
+
+Definition sup (X:Ti) (f:X->set) : set :=
+  mkS (supX X (fun i => pts (f i))) None (supm X f).
 
 Lemma eq_set_elts X f (i:X) :
   eq_set (move (sup X f) (Some(existT _ i (head (f i))))) (f i).
-red.
-simpl.
-exists (fun i' j' => i' = Some(existT _ i j')); split; [trivial|].
-split; intros.
-*subst i0.
- destruct i' as [(i',x)|]; [|contradiction].
+apply eq_set_sym.
+apply eq_set_map with (f:=fun j => Some(existT (fun _=>_) i j)); simpl; intros.
+*exists eq_refl; simpl; trivial.
+*destruct i0 as [(i',j')|];[simpl in H|contradiction].
  destruct H as (e,H).
- destruct e; simpl in H.
- exists x; auto.
-*subst i0.
- eexists; split;[|reflexivity]; simpl.
- exists (eq_refl i); simpl; trivial.
+ subst i'; simpl in H.
+ exists j'; auto.
 Qed.
 
 Lemma idx_sup X f (i:idx(sup X f)) :
@@ -284,6 +306,26 @@ split; intros.
  apply eq_set_trans with (1:=e).
  apply eq_set_sym.
  apply eq_set_elts.
+Qed.
+
+Lemma Acc_supm X f i p :
+  Acc (mem (f i)) p ->
+  Acc (supm X f) (Some (existT _ i p)).
+induction 1.
+constructor; intros.
+destruct y as [(j,y)|]; [|contradiction].
+simpl in H1.
+destruct H1 as (e,H1).
+destruct e; simpl in H1; auto.
+Qed.
+
+(* sup preserves well-foundation *)
+Lemma sup_wf X f :
+   (forall i:X, wfs (f i)) -> wfs (sup X f).
+constructor; simpl; intros.
+destruct y as [(i,y)|]; [|contradiction].
+red in H0; subst y.
+apply Acc_supm; apply H.
 Qed.
 
 Lemma subsingleton_morph X f Y g :
@@ -450,14 +492,14 @@ Qed.
 
 Definition subsetX (x:Ti) : Ti :=
   option x.
-Definition subsetm (x:set) (P:set->Prop) (i j:subsetX (pts x)) : Prop :=
+Definition subsetm (x:set) (P:pts x->Prop) (i j:subsetX (pts x)) : Prop :=
   match i, j with
   | Some i, Some j => mem x i j
-  | Some i, None => mem x i (head x) /\ P (move x i)
+  | Some i, None => mem x i (head x) /\ P i
   | None, _ => False
   end.
 Definition subset0 (x:set) (P:set->Prop) :=
-  mkS (subsetX (pts x)) None (subsetm x P).
+  mkS (subsetX (pts x)) None (subsetm x (fun i => P (move x i))).
 
 Definition subset (x:set) (P:set->Prop) :=
   sup {a|exists2 x', eq_set (elts x a) x' & P x'}
@@ -641,46 +683,8 @@ Qed.
 
 
 (* Well-founded recursion *)
-(*
-Parameter WFR
-     : forall {A}, relation A -> (set -> set) -> ((set -> A -> set) -> set -> A -> set) -> set -> A -> set
-Parameter WFR_eqn
-     : forall {A : Type} (Aeq : relation A),
-       Equivalence Aeq ->
-       forall R : set -> set,
-       Proper (eq_set ==> eq_set) R ->
-       forall (F : (set -> A -> set) -> set -> A -> set) (xx : set),
-       (forall (x x' : set) (a a' : A) (f f' : set -> A -> set),
-        clos_refl_trans set (fun x y => in_set x (R y)) x xx ->
-        Acc (fun x y => in_set x (R y)) x ->
-        (forall (y y' : set) (a a' : A),
-         in_set y (R x) -> eq_set y y' -> Aeq a a' -> eq_set (f y a) (f' y' a')) ->
-        eq_set x x' -> Aeq a a' -> eq_set (F f x a) (F f' x' a')) ->
-       forall a : A, Acc (fun x y : set => in_set x (R y)) xx -> eq_set (WFR R F xx a) (F (WFR R F) xx a)
-WFR_eqn
-     : forall Rsub : set -> set,
-       morph1 Rsub ->
-       forall (F : (set -> A -> set) -> set -> A -> set) (x : set),
-       (forall (x0 x' : set) (a a' : A) (f f' : set -> A -> set),
-        WFRle Rsub x0 x ->
-        (forall (y y' : set) (a0 a'0 : A), y ∈ Rsub x0 -> y == y' -> Aeq a0 a'0 -> f y a0 == f' y' a'0) ->
-        x0 == x' -> Aeq a a' -> F f x0 a == F f' x' a') ->
-       forall a : A, Acc (fun x0 y : set => x0 ∈ Rsub y) x -> WFR Rsub F x a == F (WFR Rsub F) x a
 
-
-*)
-
-(*
-Parameter replrec : set -> ((set->set)->set->set) -> set.
-Lemma replrec_ax : forall a R F z,
-  Proper ((eq_set==>eq_set)==>eq_set==>eq_set) F ->
-  (forall x, in_set x a -> Acc (fun x y => in_set x A /\ R x y) x) ->
-  (in_set z (replrec x F) <->
-   exists2 y, in_set y x & eq_set z (F y)).
-
-
-
-Section weakerWFR.
+Module weakerWFR.
 
   Section Unpacked.
 
@@ -690,33 +694,69 @@ Section weakerWFR.
 
     Hypothesis F : (A -> Ti) -> A -> Ti.
 
-Definition WFRX (x:A) : Ti :=
- F WFRX
+    Definition cond_ty (P:Prop) (f:P->Ti) : Ti :=
+      { h:P & f h }. 
 
-    Inductive WFRX (x:A) : Ti :=
-    | Wi : forall y:A, R y x -> WFR y
+    Fixpoint WFRX (x:A) (h:Acc R x) {struct h} : Ti :=
+      F (fun y => option {r:R y x & WFRX y (Acc_inv h r)}) x.
+
+    Hypothesis Fh : forall (f:A->set) (x:A), F (fun y => pts(f y)) x.
+    Hypothesis Fm : forall (f:A->set) (x:A), F (fun y => pts(f y)) x -> F (fun y => pts (f y)) x -> Prop.
+
+    Lemma WFRm (x:A) (h:Acc R x) : WFRX x h * forall(i j:WFRX x h),Prop.
+revert x h; fix WFRm 2; intros.
+destruct h; simpl.
+pose (f := fun y =>
+             let wfrh r := fst (WFRm y (a y r)) in
+             let wfrm r := snd (WFRm y (a y r)) in
+             mkS (option {r:R y x & WFRX y (a y r)}) None
+               (fun i j =>
+                  match i,j with
+                  | Some(existT _ r i), None => 
+                      wfrm r i (wfrh r)
+                  | Some(existT _ r i), Some(existT _ r' j) => 
+                      exists e:r=r', wfrm r' (eq_rect _ (fun r => WFRX y (a y r)) i _ e) j
+                  | None,_ => False
+                  end)).
+split.
+apply (Fh f).
+apply (Fm f).
+Defined.
+
+  Definition WFR_aux (x:A) (h:Acc R x) : set :=
+    mkS (WFRX x h) (fst (WFRm x h)) (snd (WFRm x h)).
+  End Unpacked.
+
 (*
-    Fixpoint WFRX_aux (x:A) (h:Acc R' x) : Ti :=
+
+  Definition WFR (x:set) :=
+    union (sup (Acc R x) (fun h => WFR_aux x a h)).
+
+  Fixpoint WFR_aux (x:set) (a:A) (h:Acc R' x) : set :=
+
+  End Unpacked.
+
+  Variable A:Ti.
+  Hypothesis R : set -> set -> Prop.
+  Hypothesis FX : (A -> Ti) -> A -> Ti.
+  Hypothesis Fm : forall (f:A->set) (x:A), FX f x -> FX f x -> Prop.
+
+
+Ti) (fm:forall x, fX x -> fX x -> Prop) (set -> set) -> set -> set.
+
+Let y' := fun y
+  Let FX := fun (f:pts A->Ti)(x:pts A) =>
+              pts (F (fun (y:set) => ...) (move A x)).
+
+ 
+  Fixpoint WFRm (x:set) (h:Acc R x) (i j:WFRX x h): Prop :=
       F (fun y =>
          union (sup {i:idx (R x)|eq_set y (elts (R x) i)}
                   (fun i => WFR_aux (elts (R x) (proj1_sig i)) a
                               (Acc_inv h (in_set_intro (R x) (proj1_sig i))))))
       x a.
 *)
-  End Unpacked.
-
-  Hypothesis A : set.
-  Hypothesis R : set -> set -> Prop.
-  Hypothesis Rm : Proper (eq_set==>eq_set==>iff) R.
-  Hypothesis F : (set -> set) -> set -> set.
- 
-  Let AX := pts A.
-  Let RX (i j:AX) := R (move A i) (move A j).
-  Let FX (f:AX->Ti) (x:AX) : Ti :=
-        pts (F (fun y:set => ) (move A x)
-
-  Definition WFRX (R:Ti->Ti)
-*)
+End weakerWFR.
 
 Section WellFoundedRecursion.
   Context {A : Type} (Aeq : relation A) {Arefl : Equivalence Aeq}.
@@ -943,4 +983,982 @@ exists infinity.
 
   apply infty_ax2; trivial.
 Qed.
+
+(*Require Import IntMap.*)
+
+Definition icons {A:Type} (x:A) (i:nat->A) (k:nat) : A :=
+  match k with 
+  | 0 => x
+  | S k => i k
+  end.
+Definition idcons {B}{A:nat->Type} (x:B) (i:forall n,A n) (k:nat) : icons B A k :=
+  match k with 
+  | 0 => x
+  | S k => i k
+  end.
+
+
+Inductive zform :=
+| In : zterm -> zterm -> zform
+| Fa : zform
+| And : zform -> zform -> zform
+| Or : zform -> zform -> zform
+| Imp : zform -> zform -> zform
+| Allb : zterm -> zform -> zform
+| Exb : zterm -> zform -> zform
+
+with zterm :=
+| Var : nat-> zterm
+| Pair : zterm -> zterm -> zterm
+| Union : zterm -> zterm
+| Power : zterm -> zterm
+| Subset : zterm -> zform -> zterm 
+| Nat : zterm.
+
+Definition ilift l k :=
+  match k with
+  | 0 => 0
+  | S k => S (l k)
+  end.
+
+Fixpoint ren (l:nat->nat) t : zterm :=
+  match t with
+  | Var k => Var (l k)
+  | Pair x y => Pair (ren l x) (ren l y)
+  | Union x => Union (ren l x)
+  | Power x => Power (ren l x)
+  | Subset x P => Subset (ren l x) (ren_f (ilift l) P)
+  | Nat => Nat
+  end
+with ren_f l f : zform :=
+  match f with
+  | In x y => In (ren l x) (ren l y)
+  | Fa => Fa
+  | And A B => And (ren_f l A) (ren_f l B)
+  | Or A B => Or (ren_f l A) (ren_f l B)
+  | Imp A B => Imp (ren_f l A) (ren_f l B)
+  | Allb x A => Allb (ren l x) (ren_f (ilift l) A)
+  | Exb x A => Exb (ren l x) (ren_f (ilift l) A)
+end.
+
+Definition lift k := ren (fun n=>k+n).
+Definition lift_f k := ren_f (fun n=>k+n).
+Definition lift1_f k := ren_f (ilift(fun n=>k+n)).
+
+Definition slift l k :=
+  match k with
+  | 0 => Var 0
+  | S k => lift 1 (l k)
+  end.
+Fixpoint sub (l:nat->zterm) t : zterm :=
+  match t with
+  | Var k => l k
+  | Pair x y => Pair (sub l x) (sub l y)
+  | Union x => Union (sub l x)
+  | Power x => Power (sub l x)
+  | Subset x P => Subset (sub l x) (sub_f (slift l) P)
+  | Nat => Nat
+  end
+with sub_f l f : zform :=
+  match f with
+  | In x y => In (sub l x) (sub l y)
+  | Fa => Fa
+  | And A B => And (sub_f l A) (sub_f l B)
+  | Or A B => Or (sub_f l A) (sub_f l B)
+  | Imp A B => Imp (sub_f l A) (sub_f l B)
+  | Allb x A => Allb (sub l x) (sub_f (slift l) A)
+  | Exb x A => Exb (sub l x) (sub_f (slift l) A)
+end.
+Definition subst_f f t :=
+  sub_f (icons t Var) f.
+
+Definition Iff A B := And (Imp A B) (Imp B A).
+
+Definition Incl a b :=
+  Allb a (In (Var 0) (lift 1 b)).
+
+Definition Eq a b :=
+  And (Incl a b) (Incl b a).
+
+Definition Pair_ax : zform :=
+  let a := Var 0 in
+  let b := Var 1 in 
+  And
+    (And (In a (Pair a b)) (In b (Pair a b)))
+    (Allb (Pair a b) (Or (Eq (Var 0) (lift 1 a)) (Eq (Var 0) (lift 1 b)))).
+
+Definition Union_ax :=
+  let a := Var 0 in
+  And (Allb a (Allb (Var 0) (In (Var 0) (Union (lift 2 a)))))
+      (Allb (Union a) (Exb (lift 1 a) (In (Var 1) (Var 0)))).
+
+(* If we want z to be bounded, then we should also 
+   include forall x \incl y... as bounded *)
+Definition Power_ax :=
+  let a := Var 1 in
+  let z := Var 0 in (* z not bounded *)
+  Iff (Incl z a) (In z (Power a)).
+ 
+Definition Subset_ax P :=
+  let a := Var 0 in
+  And (Allb a (Imp (subst_f (lift1_f 1 P) (Var 0)) (In (Var 0) (lift 1 (Subset a P)))))
+      (Allb (Subset a P) (And (In (Var 0) (lift 1 a)) (subst_f (lift1_f 1 P) (Var 0)))).
+
+
+Module SetInterp.
+
+Fixpoint int_f (f:zform) (i:nat->set) : Prop :=
+  match f with
+  | In x y => in_set (int x i) (int y i)
+  | Fa => False
+  | And A B => int_f A i /\ int_f B i
+  | Or A B => int_f A i \/ int_f B i
+  | Imp A B => int_f A i -> int_f B i
+  | Allb x A => forall a, in_set a (int x i) -> int_f A (icons a i)
+  | Exb x A => exists a, in_set a (int x i) /\ int_f A (icons a i)
+  end
+with int (t:zterm) (i:nat->set) : set :=
+  match t with
+  | Var n => i n
+  | Pair x y => pair (int x i) (int y i)
+  | Union x => union (int x i)
+  | Power x => power (int x i)
+  | Subset x P => subset (int x i) (fun a => int_f P (icons a i))
+  | Nat => infinity
+end.
+
+(* Showing axioms of Z *)
+ 
+Lemma pair_sound i : int_f Pair_ax i.
+simpl.
+split;[split|].
+*apply pair_ax; left; apply eq_set_refl.
+*apply pair_ax; right; apply eq_set_refl.
+*intros.
+ apply pair_ax in H; destruct H;[left|right].
+ apply eq_set_incl;trivial.
+ apply eq_set_incl;trivial.
+Qed.
+
+
+End SetInterp.
+
+Module CICInterp.
+(* Interp in CIC *)
+
+(* We need: option, +, X->Prop, nat *)
+Fixpoint intTi (t:zterm) (i:nat->Ti) : Ti :=
+  match t with
+  | Var n => i n
+  | Pair x y => pairX (intTi x i) (intTi y i)
+  | Union x => unionX (intTi x i)
+  | Power x => powerX (intTi x i)
+  | Subset x P => subsetX (intTi x i)
+  | Nat => infX
+end.
+
+Definition setm (X:Ti) := (X * (X->X->Prop))%type.
+Definition mks (X:Ti)(m:setm X) : set := mkS X (fst m) (snd m).
+
+Definition eqs (X Y:Ti) (mx:setm X) (my:setm Y) : Prop :=
+  exists R:X->Y->Prop, R (fst mx) (fst my) /\ sim (snd mx) (snd my) R.
+
+Lemma eqs_ok X Y mx my : eqs X Y mx my <-> eq_set (mks _ mx) (mks _ my).
+unfold eqs, eq_set; simpl; reflexivity.
+Qed.
+
+Definition ins (X Y:Ti) (mx:setm X) (my:setm Y) : Prop :=
+  exists j:Y, snd my j (fst my) /\ eqs X Y mx (j,snd my).
+
+Lemma ins_ok X Y mx my : ins X Y mx my <-> in_set (mks _ mx) (mks _ my).
+unfold ins, in_set; simpl.
+split; intros.
+*destruct H as (j&?&?).
+ exists (exist _ j H); simpl.
+ exact H0.
+*destruct H as ((j,?),?).
+ exists j; split; trivial.
+Qed.
+
+
+Fixpoint int_f (f:zform) (i:nat->Ti) (j:forall n, setm(i n)) : Prop :=
+  match f with
+  | In x y => ins (intTi x i) (intTi y i) (intm x i j) (intm y i j)
+  | Fa => False
+  | And A B => int_f A i j /\ int_f B i j
+  | Or A B => int_f A i j \/ int_f B i j
+  | Imp A B => int_f A i j -> int_f B i j
+  | Allb x A => let X := intTi x i in
+                let hm := intm x i j in
+                forall a:X, snd hm a (fst hm) ->
+                int_f A (icons X i) (fun k => match k with 0 => (a,snd hm) | S k=>j k end)
+  | Exb x A => let X := intTi x i in
+               let hm := intm x i j in
+               exists a:X, snd hm a (fst hm) /\
+               int_f A (icons X i) (fun k => match k with 0 => (a,snd hm) | S k=>j k end)
+  end
+with intm (t:zterm) (i:nat->Ti) (j:forall n, setm(i n)) : setm (intTi t i) :=
+  match t return setm (intTi t i) with
+  | Var n => j n
+  | Pair x y => (None,pairm (mks (intTi x i) (intm x i j))
+                            (mks (intTi y i) (intm y i j)))
+  | Union x => (None,unionm (mks (intTi x i) (intm x i j)))
+  | Power x => (None,powerm (mks (intTi x i) (intm x i j)))
+  | Subset x P => let X := intTi x i in
+                  let hm := intm x i j in
+                  (None, subsetm (mks (intTi x i) (intm x i j))
+                           (fun a => int_f P (icons X i)
+           (fun k => match k with 0 => (a,snd hm) | S k=>j k end)))
+  | Nat => (None, infr)
+end.
+
+End CICInterp.
+
+Module ShallowProp_Interp.
+
+Inductive Ty :=
+| opt : Ty -> Ty (* Or sum inf X *)
+| sum : Ty -> Ty -> Ty
+| cart : Ty -> Ty -> Ty
+| arr : Ty -> Ty -> Ty
+| pr : Ty
+| inf : Ty.
+
+Parameter Elpr : Ti. (* Should be Pr... To avoid inductive-rec *)
+
+Fixpoint El (t:Ty) : Ti :=
+  match t with
+  | opt x => option (El x)
+  | sum x y => (El x + El y)%type
+  | cart x y => (El x * El y)%type
+  | arr x y => El x -> El y
+  | pr => Elpr
+  | inf => nat
+  end.
+
+Inductive Pr :=
+| all : forall X:Ty, (El X -> Pr) -> Pr
+| ex : forall X:Ty, (El X -> Pr) -> Pr
+| abs
+| imp : Pr -> Pr -> Pr
+| and : Pr -> Pr -> Pr
+| or : Pr -> Pr -> Pr
+| equ : forall X:Ty, El X -> El X -> Pr.
+
+Fixpoint ElP (P:Pr) : Prop :=
+  match P with
+  | all X P => forall x:El X, ElP(P x)
+  | ex X P => exists x:El X, ElP(P x)
+  | abs => False
+  | imp P Q => ElP P -> ElP Q
+  | and P Q => ElP P /\ ElP Q
+  | or P Q => ElP P \/ ElP Q
+  | equ X a b => a=b
+end.
+
+Parameter prI : Pr -> El pr.
+Parameter prE : El pr -> Pr.
+Parameter pr_ok : forall P, ElP (prE (prI P)) <-> ElP P.
+
+Definition impr_abs := all pr (fun P => prE P).
+
+Lemma impr_fa : ~ ElP impr_abs.
+simpl.
+intro.
+generalize (H (prI abs)).
+apply pr_ok.
+Qed.
+
+Definition impr_and (A B:Pr) : Pr :=
+  all pr (fun P => imp (imp A (imp B (prE P))) (prE P)).
+
+Lemma impr_and_ok A B : ElP (impr_and A B) <-> ElP A /\ ElP B.
+split; simpl; intros.
+*apply (pr_ok (and A B)).
+ apply H; intros.
+ rewrite pr_ok; simpl; auto.
+*destruct H; auto.
+Qed.
+
+Definition pow x := arr x pr.
+Definition rel X Y := arr X (arr Y pr).
+
+Fixpoint intTi (t:zterm) (i:nat->Ty) : Ty :=
+  match t with
+  | Var n => i n
+  | Pair x y => opt (sum (intTi x i) (intTi y i))
+  | Union x => opt (intTi x i)
+  | Power x => opt(sum(pow (intTi x i))(intTi x i))
+  | Subset x P => opt (intTi x i)
+  | Nat => opt inf
+end.
+
+Definition setm (X:Ty) := cart X (rel X X).
+Definition memP {X} (mx:El(setm X)) (i j:El X) : Pr :=
+  prE (snd mx i j).
+
+Definition setr {X} (m:El(setm X)) :=
+  fun x y => ElP (memP m x y).
+
+Definition simP (X Y : Ty) Rx Ry R :=
+ and (all X (fun i => all X (fun i' => all Y (fun j =>
+         imp(Rx i' i) (imp (R i j) (ex Y (fun j'=>and(Ry j' j)(R i' j'))))))))
+     (all Y (fun j => all Y (fun j' => all X (fun i =>
+         imp(Ry j' j) (imp (R i j) (ex X (fun i'=>and(Rx i' i)(R i' j')))))))).
+
+Definition eqsP (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Pr :=
+  ex (rel X Y) (fun R => let R i j := prE(R i j) in
+                               and (R(fst mx)(fst my))
+                                 (simP X Y (memP mx) (memP my) R)).
+Definition insP (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Pr :=
+  ex Y (fun j => and(memP my j (fst my)) (eqsP X Y mx (j,snd my))).
+
+Definition eqs (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Prop :=
+  exists R:El X->El Y->Prop, R (fst mx) (fst my) /\ sim (setr mx) (setr my) R.
+
+
+Definition mks (X:Ty)(m:El(setm X)) : set := mkS (El X) (fst m) (setr m).
+Lemma eqs_ok X Y mx my : eqs X Y mx my <-> eq_set (mks _ mx) (mks _ my).
+unfold eqs, eq_set; simpl; reflexivity.
+Qed.
+
+Definition ins (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Prop :=
+  exists j:El Y, setr my j (fst my) /\ eqs X Y mx (j,snd my).
+
+Lemma ins_ok X Y mx my : ins X Y mx my <-> in_set (mks _ mx) (mks _ my).
+unfold ins, in_set; simpl.
+split; intros.
+*destruct H as (j&?&?).
+ exists (exist _ j H); simpl.
+ exact H0.
+*destruct H as ((j,?),?).
+ exists j; split; trivial.
+Qed.
+Lemma insP_ok X Y mx my : ElP (insP X Y mx my) <-> in_set (mks _ mx) (mks _ my).
+Admitted.
+Opaque insP.
+
+(*Declare ML Module "magic.plugin".*)
+
+Definition pair_m {X Y} (mx:El(setm X))(my:El(setm Y)) (i j:pairX (El X) (El Y)) : El pr :=
+prI
+match i with
+| Some (inl i0) =>
+    match j with
+    | Some (inl j0) => memP mx i0 j0
+    | Some (inr _) => abs
+    | None => equ X i0 (fst mx)
+    end
+| Some (inr j0) =>
+    match j with
+    | Some (inl _) => abs
+    | Some (inr j1) => memP my j0 j1
+    | None => equ Y j0 (fst my)
+    end
+| None => abs
+end.
+
+Lemma pair_m_i1 {X Y} (mx:El(setm X))(my:El(setm Y)) i j :
+  ElP (memP mx i j) ->
+  ElP (prE (pair_m mx my (Some(inl i)) (Some(inl j)))).
+unfold pair_m.
+rewrite pr_ok; trivial.
+Qed.
+
+Lemma pair_m_elim {X Y} (mx:El(setm X))(my:El(setm Y)) i j P :
+  (forall i j, ElP (memP mx i j) -> P (Some(inl i)) (Some(inl j))) ->
+  (forall i j, ElP (memP my i j) -> P (Some(inr i)) (Some(inr j))) ->
+  P (Some(inl(fst mx))) None ->
+  P (Some(inr(fst my))) None ->
+  ElP (prE (pair_m mx my i j)) -> P i j.
+intros.
+unfold pair_m in H.
+rewrite pr_ok in H.
+destruct i as [[i|i]|]; simpl in H; [| |contradiction].
+*destruct j as [[j|?]|]; [auto|contradiction|].
+ simpl in H; subst i; trivial.
+*destruct j as [[j|?]|]; [contradiction|auto|].
+ simpl in H; subst i; trivial.
+Qed.
+
+Definition union_m {X} (mx:El(setm X)) (i j:unionX (El X)) : El pr :=
+prI
+match i with
+| Some i0 =>
+    match j with
+    | Some j0 => memP mx i0 j0
+    | None => ex X (fun i' => and (memP mx i' (fst mx)) (memP mx i0 i'))
+    end
+| None => abs
+end.
+Definition tru := imp abs abs.
+
+Definition power_m {X} (mx:El(setm X)) (i j:option((El X->El pr)+El X)) : El pr :=
+  prI
+  match i, j with
+  | Some (inr i), Some (inr j) => memP mx i j
+  | Some (inr i), Some (inl P) => and (memP mx i (fst mx)) (prE (P i))
+  | Some (inl _), None => tru
+  | _, _ => abs
+  end.
+
+Definition subset_m {X} (mx:El(setm X)) (P:El X->Pr) (i j:subsetX (El X)) : El pr :=
+  prI
+  match i, j with
+  | Some i, Some j => memP mx i j
+  | Some i, None => and (memP mx i (fst mx)) (P i)
+  | None, _ => abs
+  end.
+
+Definition inf_m (i j : infX) : El pr :=
+prI
+match i with
+| Some n => match j with
+            | Some m => if Nat.ltb n m then tru else abs
+            | None => tru
+            end
+| None => abs
+end.
+  
+
+Fixpoint int_fP (f:zform) (i:nat->Ty) (j:forall n, El(setm(i n))) : Pr :=
+  match f with
+  | In x y => insP (intTi x i) (intTi y i) (intm x i j) (intm y i j)
+  | Fa => abs
+  | And A B => and (int_fP A i j) (int_fP B i j)
+  | Or A B => or (int_fP A i j) (int_fP B i j)
+  | Imp A B => imp (int_fP A i j) (int_fP B i j)
+  | Allb x A => let X := intTi x i in
+                let hm := intm x i j in
+                all X (fun a=> imp (prE(snd hm a (fst hm)))
+                  (int_fP A (icons X i) (fun k => match k with 0 => (a,snd hm) | S k=>j k end)))
+  | Exb x A => let X := intTi x i in
+               let hm := intm x i j in
+               ex X (fun a=> and (prE(snd hm a (fst hm)))
+                 (int_fP A (icons X i) (fun k => match k with 0 => (a,snd hm) | S k=>j k end)))
+  end
+with intm (t:zterm) (i:nat->Ty) (j:forall n, El(setm(i n))) : El(setm(intTi t i)) :=
+  match t return El(setm (intTi t i)) with
+  | Var n => j n
+  | Pair x y => (None,pair_m (intm x i j) (intm y i j))
+  | Union x => (None,union_m (intm x i j))
+  | Power x => (None,power_m (intm x i j))
+  | Subset x P => let X := intTi x i in
+                  let hm := intm x i j in
+                  let i' := icons X i in
+                  let j' a k : El(setm(i' k)) :=
+                    match k with 0 => (a,snd hm) | S k=>j k end in
+                  (None, subset_m (intm x i j) (fun a => int_fP P i' (j' a)))
+  | Nat => (None, inf_m)
+end.
+
+
+Fixpoint int_f (f:zform) (i:nat->Ty) (j:forall n, El(setm(i n))) : Prop :=
+  match f with
+  | In x y => ins (intTi x i) (intTi y i) (intm x i j) (intm y i j)
+  | Fa => False
+  | And A B => int_f A i j /\ int_f B i j
+  | Or A B => int_f A i j \/ int_f B i j
+  | Imp A B => int_f A i j -> int_f B i j
+  | Allb x A => let X := intTi x i in
+                let hm := intm x i j in
+                forall a:El X, setr hm a (fst hm) ->
+                int_f A (icons X i) (fun k => match k with 0 => (a,snd hm) | S k=>j k end)
+  | Exb x A => let X := intTi x i in
+               let hm := intm x i j in
+               exists a:El X, setr hm a (fst hm) /\
+               int_f A (icons X i) (fun k => match k with 0 => (a,snd hm) | S k=>j k end)
+  end.
+
+
+#[local] Definition mks2 := existT (fun X=>El(setm X)).
+
+Definition f_equal2 :=
+fun {A1 A2 B : Type} (f : A1 -> A2 -> B) {x1 y1 : A1} {x2 y2 : A2} (H : x1 = y1) =>
+match H in (_ = a) return (x2 = y2 -> f x1 x2 = f a y2) with
+| eq_refl =>
+    fun H0 : x2 = y2 =>
+    match H0 in (_ = a) return (f x1 x2 = f x1 a) with
+    | eq_refl => eq_refl
+    end
+end.
+Fixpoint intTi_ren y {l i i'}:
+  (forall k, i k = i' (l k)) ->
+  intTi y i = intTi (ren l y) i'.
+revert l i i'; induction y; simpl; intros; auto.
+*apply f_equal2 with (f:=fun X Y => opt (sum X Y)); auto.
+*apply f_equal with (f:=opt); auto.
+*apply f_equal with (f:=fun X=>opt(sum(pow X) X)); auto.
+*apply f_equal with (f:=opt); auto.
+Defined.
+
+
+Inductive eqm {X} (mx:El(setm X)): forall {Y}, El(setm Y) -> X=Y -> Prop :=
+  refl_eqm : eqm mx mx eq_refl.
+
+
+Lemma f_eqm {X Y} {mx:El(setm X)}{my:El(setm Y)}{e:X=Y}(f:Ty->Ty)(F:forall X, El(setm X) -> El(setm (f X))) :
+  eqm mx my e -> eqm (F X mx) (F Y my) (f_equal f e).
+intros.
+destruct H.
+unfold f_equal.
+constructor.
+Defined.
+ 
+Lemma f_eqm2 {X Y X' Y'} {mx:El(setm X)}{mx':El(setm X')}{my:El(setm Y)}{my':El(setm Y')}(e1:X=X')(e2:Y=Y')(f:Ty->Ty->Ty)(F:forall X Y, El(setm X) -> El(setm Y) -> El(setm (f X Y))) :
+  eqm mx mx' e1 -> eqm my my' e2 -> eqm (F X Y mx my) (F X' Y' mx' my') (f_equal2 f e1 e2).
+intros.
+destruct H.
+destruct H0.
+unfold f_equal2.
+constructor.
+Defined.
+(*Lemma f_eqmP2 {X Y X' Y'} {mx:El(setm X)}{mx':El(setm X')}{my:El(setm Y)}{my':El(setm Y')}(e1:X=X')(e2:Y=Y')(f:Ty->Ty->Pr)(F:forall X Y, El(setm X) -> El(setm Y) -> El(setm (f X Y))) :
+  eqm mx mx' e1 -> eqm my my' e2 -> F X Y mx my = F X' Y' mx' my'.
+
+) (f_equal2 f e1 e2).
+intros.
+destruct H.
+destruct H0.
+unfold f_equal2.
+constructor.
+Defined.
+*)
+Fixpoint int_ren y l i j i' j':
+  forall E:(forall k, i k = i' (l k)) ,
+  (forall k, eqm (j k) (j' (l k)) (E k)) ->
+  eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)
+
+with int_fP_ren y l i j i' j':
+  forall E:(forall k, i k = i' (l k)) ,
+  (forall k, eqm (j k) (j' (l k)) (E k)) ->
+  int_fP y i j = int_fP (ren_f l y) i' j'.
+*destruct y; simpl; intros; auto.
+ +assert (e1 : eqm (intm y1 i j) (intm (ren l y1) i' j') (intTi_ren y1 E)).
+  {apply int_ren; auto. }
+  assert (e2 : eqm (intm y2 i j) (intm (ren l y2) i' j') (intTi_ren y2 E)).
+  {apply int_ren; auto. }
+  apply f_eqm2 with (f:=fun X Y => opt(sum X Y))(F:=fun X Y mx my => (None,pair_m mx my)); trivial.
+ +assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
+  {apply int_ren; auto. }
+  apply f_eqm with (f:=fun X => opt X)(F:=fun X mx => (None,union_m mx)); trivial.
+ +assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
+  {apply int_ren; auto. }
+  apply f_eqm with (f:=fun X => opt(sum(pow X) X))(F:=fun X mx => (None,power_m mx)); trivial.
+ +assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
+  {apply int_ren; auto. }
+  unfold subset_m, subsetX. 
+  clear; admit.
+ +constructor.
+*destruct y; simpl; intros; auto.
+ +admit.
+ +rewrite <- int_fP_ren with (E:=E)(i:=i)(j:=j); [|trivial].
+  rewrite <- int_fP_ren with (E:=E)(i:=i)(j:=j); [|trivial].
+  trivial.
+ +rewrite <- int_fP_ren with (E:=E)(i:=i)(j:=j); [|trivial].
+  rewrite <- int_fP_ren with (E:=E)(i:=i)(j:=j); [|trivial].
+  trivial.
+ +rewrite <- int_fP_ren with (E:=E)(i:=i)(j:=j); [|trivial].
+  rewrite <- int_fP_ren with (E:=E)(i:=i)(j:=j); [|trivial].
+  trivial.
+Admitted.
+
+
+
+Lemma int_fP_incl x y i j :
+  ElP (int_fP (Incl x y) i j) <->
+  forall z, in_set z (mks _ (intm x i j)) -> in_set z (mks _ (intm y i j)).
+set (il := icons (intTi x i) i) in *.
+set (jl i' := fun k : nat =>
+        match
+          k as k0
+          return
+            (El (il k0) *
+             (El (il k0) -> El (il k0) -> Elpr))
+        with
+        | 0 => (i', snd (intm x i j))
+        | S k0 => j k0
+        end).
+ assert (tmp := fun i' => int_ren y S i j il (jl i') (fun _=>eq_refl) (fun _ => refl_eqm _)).
+split; simpl; intros.
+*destruct H0 as ((i',?),e).
+ unfold elts in e; simpl in e.
+ simpl in m.
+ unfold setr, memP in m.
+ apply H in m; clear H.
+ fold il in m.
+ rewrite insP_ok in m.
+ apply eq_set_sym in e; apply in_reg with (1:=e).
+ apply eq_elim with (1:=m).
+ apply eq_set_sym.
+ change (mks _ (intm y i j) == mks _ (intm (ren S y) il (jl i'))).
+ case (tmp i'); apply eq_set_refl.
+*rewrite insP_ok.
+ apply eq_elim with (mks _ (intm y i j)).
+ +apply H.
+  apply in_set_intro with (i:=exist _ x0 H0).
+ +change (mks _ (intm y i j) == mks _ (intm (ren S y) il (jl x0))).
+  case (tmp x0); apply eq_set_refl.
+Qed.
+
+Lemma int_fP_eq x y i j :
+  ElP (int_fP (Eq x y) i j) <-> mks _ (intm x i j) == mks _ (intm y i j).
+simpl.
+rewrite eq_set_incl; unfold incl_set.
+apply and_iff_morphism.
+*apply int_fP_incl.
+*apply int_fP_incl.
+Qed.
+Opaque Eq.
+
+Lemma pair_i1 X Y mx my :
+  mks X mx == mks (opt(sum X Y)) (Some (inl (fst mx)), pair_m mx my).
+unfold mks; simpl.
+unfold setr, memP, pair_m; simpl.
+apply eq_set_map with (f:=fun i => Some(inl i)); intros.
+*rewrite pr_ok; trivial.
+*rewrite pr_ok in H; trivial.
+ destruct i as [[i|?]|]; try contradiction.
+ exists i; split; auto.
+Qed.
+ 
+
+Lemma pair_i2 X Y mx my :
+  mks Y my == mks (opt(sum X Y)) (Some (inr (fst my)), pair_m mx my).
+unfold mks; simpl.
+unfold setr, memP, pair_m; simpl.
+apply eq_set_map with (f:=fun i => Some(inr i)); intros.
+*rewrite pr_ok; trivial.
+*rewrite pr_ok in H; trivial.
+ destruct i as [[?|i]|]; try contradiction.
+ exists i; split; auto.
+Qed.
+
+
+Lemma Pair_ax_ok i j : ElP (int_fP Pair_ax i j).
+unfold Pair_ax.
+unfold ElP.
+unfold int_fP.
+fold int_fP.
+fold ElP.
+split; [split|].
+*rewrite insP_ok.
+ simpl.
+ eexists (exist (fun _=>_) (Some (inl (fst (j 0)))) _).
+ unfold elts;simpl.
+ Unshelve. 2:simpl; unfold setr, memP, pair_m; simpl; rewrite pr_ok; simpl; auto.
+ apply pair_i1.
+*rewrite insP_ok.
+ simpl.
+ eexists (exist (fun _=>_) (Some (inr (fst (j 1)))) _).
+ unfold elts;simpl.
+ Unshelve. 2:simpl; unfold setr, memP, pair_m; simpl; rewrite pr_ok; simpl; auto.
+ apply pair_i2.
+*intros.
+ simpl in x, H |-.
+ do 2 rewrite int_fP_eq; simpl.
+ unfold pair_m in H; rewrite pr_ok in H.
+ destruct x as [[a|a]|]; [left|right|contradiction].
+ +apply eq_set_sym.
+  simpl in H; subst a.
+  apply pair_i1 with (my:=j 1).
+ +apply eq_set_sym.
+  simpl in H; subst a.
+  apply pair_i2.
+Qed.
+
+End ShallowProp_Interp.
+
+
+
+
+(******************************************************)
+
+Module Interp.
+
+Inductive Ty :=
+| opt : Ty -> Ty (* Or sum inf X *)
+| sum : Ty -> Ty -> Ty
+| cart : Ty -> Ty -> Ty
+| arr : Ty -> Ty -> Ty
+| pr : Ty
+| inf : Ty.
+
+Definition pow x := arr x pr.
+Definition rel X Y := arr X (arr Y pr).
+
+Parameter El : Ty -> Ti.
+
+Parameter None : forall {X}, El (opt X).
+Parameter Some : forall {X}, El X -> El (opt X).
+Parameter match_opt :
+  forall {X} (P:Ty),
+  El P ->
+  (El X -> El P) ->
+  El(opt X) -> El P.
+(*Parameter opt_rect :
+  forall {X} (P:El(opt X)->Ty),
+  El (P None) ->
+  (forall x:El X, El (P (Some x))) ->
+  forall o:El(opt X), El (P o).*)
+Parameter inl : forall {X Y}, El X -> El(sum X Y).
+Parameter inr : forall {X Y}, El Y -> El(sum X Y).
+Parameter match_sum :
+  forall {X Y} (P:Ty),
+  (El X -> El P) -> (El Y -> El P) -> El (sum X Y) -> El P.
+
+Parameter pair : forall {X Y}, El X -> El Y -> El(cart X Y).
+Parameter match_cart :
+  forall {X Y} (P:Ty),
+  (El X -> El Y -> El P) -> El (cart X Y) -> El P.
+Parameter cart_eq : forall {X Y P} (f:El X->El Y->El P) x y,
+  match_cart P f (pair x y) = f x y.
+
+Definition fst {X Y} (p:El(cart X Y)) :=
+  match_cart X (fun x y => x) p.
+Definition snd {X Y} (p:El(cart X Y)) :=
+  match_cart Y (fun x y => y) p.
+
+Parameter lam : forall {X Y}, (El X -> El Y) -> El(arr X Y).
+Parameter app : forall {X Y}, (El (arr X Y)) -> El X -> El Y.
+Parameter infI : nat -> El inf.
+Parameter infE : El inf -> nat.
+
+Inductive Pr :=
+| all : forall X:Ty, (El X -> Pr) -> Pr
+| ex : forall X:Ty, (El X -> Pr) -> Pr
+| abs
+| imp : Pr -> Pr -> Pr
+| and : Pr -> Pr -> Pr
+| or : Pr -> Pr -> Pr
+| equ : forall X:Ty, El X -> El X -> Pr.
+
+Definition tru := imp abs abs.
+
+Parameter prI : Pr -> El pr.
+Parameter prE : El pr -> Pr.
+
+Fixpoint ElP (P:Pr) : Prop :=
+  match P with
+  | all X P => forall x:El X, ElP(P x)
+  | ex X P => exists x:El X, ElP(P x)
+  | abs => False
+  | imp P Q => ElP P -> ElP Q
+  | and P Q => ElP P /\ ElP Q
+  | or P Q => ElP P \/ ElP Q
+  | equ X a b => a=b
+end.
+
+Parameter pr_ok : forall P, ElP (prE (prI P)) <-> ElP P.
+
+
+Definition impr_abs := all pr (fun P => prE P).
+
+Lemma impr_fa : ~ ElP impr_abs.
+simpl.
+intro.
+generalize (H (prI abs)).
+apply pr_ok.
+Qed.
+
+Definition impr_and (A B:Pr) : Pr :=
+  all pr (fun P => imp (imp A (imp B (prE P))) (prE P)).
+
+Lemma impr_and_ok A B : ElP (impr_and A B) <-> ElP A /\ ElP B.
+split; simpl; intros.
+*apply (pr_ok (and A B)).
+ apply H; intros.
+ rewrite pr_ok; simpl; auto.
+*destruct H; auto.
+Qed.
+
+
+Fixpoint intTi (t:zterm) (i:nat->Ty) : Ty :=
+  match t with
+  | Var n => i n
+  | Pair x y => opt (sum (intTi x i) (intTi y i))
+  | Union x => opt (intTi x i)
+  | Power x => opt(sum(pow (intTi x i))(intTi x i))
+  | Subset x P => opt (intTi x i)
+  | Nat => opt inf
+end.
+
+Definition setm (X:Ty) := cart X (rel X X).
+Definition memP {X} (mx:El(setm X)) (i j:El X) : Pr :=
+  prE (app (app (snd mx) i) j).
+
+Definition setr {X} (m:El(setm X)) :=
+  fun x y => ElP (memP m x y).
+
+Definition simP (X Y : Ty) Rx Ry R :=
+ and (all X (fun i => all X (fun i' => all Y (fun j =>
+         imp(Rx i' i) (imp (R i j) (ex Y (fun j'=>and(Ry j' j)(R i' j'))))))))
+     (all Y (fun j => all Y (fun j' => all X (fun i =>
+         imp(Ry j' j) (imp (R i j) (ex X (fun i'=>and(Rx i' i)(R i' j')))))))).
+
+Definition eqsP (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Pr :=
+  ex (rel X Y) (fun R => let R i j := prE(app (app R i) j) in
+                               and (R(fst mx)(fst my))
+                                 (simP X Y (memP mx) (memP my) R)).
+Definition insP (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Pr :=
+  ex Y (fun j => and(memP my j (fst my)) (eqsP X Y mx (pair j (snd my)))).
+
+Definition eqs (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Prop :=
+  exists R:El X->El Y->Prop, R (fst mx) (fst my) /\ sim (setr mx) (setr my) R.
+
+
+Definition mks (X:Ty)(m:El(setm X)) : set := mkS (El X) (fst m) (setr m).
+Lemma eqs_ok X Y mx my : eqs X Y mx my <-> eq_set (mks _ mx) (mks _ my).
+unfold eqs, eq_set; simpl; reflexivity.
+Qed.
+
+Definition ins (X Y:Ty) (mx:El(setm X)) (my:El(setm Y)) : Prop :=
+  exists j:El Y, setr my j (fst my) /\ eqs X Y mx (pair j (snd my)).
+
+Parameter sim_ext: forall X Y,
+  Proper (pointwise_relation X (pointwise_relation X iff)  ==>
+          pointwise_relation Y (pointwise_relation Y iff)  ==>
+          pointwise_relation X (pointwise_relation Y iff)  ==> iff) sim.
+
+Lemma ins_ok X Y mx my : ins X Y mx my <-> in_set (mks _ mx) (mks _ my).
+unfold ins, in_set; simpl.
+split; intros.
+*destruct H as (j&?&?).
+ exists (exist _ j H); simpl.
+ unfold mks, elts, move; simpl.
+ destruct H0 as (R,(?,?)); exists R; simpl.
+ split.
+ +unfold fst at 2 in H0.
+  rewrite cart_eq in H0; trivial.
+ +unfold setr at 2 in H1.
+  revert H1; apply iff_impl; apply sim_ext; auto with *.
+  do 2 red; intros.
+  unfold setr, memP.
+  unfold snd at 1; rewrite cart_eq; reflexivity.
+*destruct H as ((j,?),?).
+ exists j; split; trivial.
+ red in H; simpl in H.
+ red; simpl.
+ replace (fst (pair j _)) with j; [|symmetry;apply cart_eq].
+ destruct H as (R,(?,?)); exists R; simpl.
+ split; trivial.
+ revert H0; apply iff_impl; apply sim_ext; auto with *.
+ do 2 red; intros.
+ unfold setr, memP.
+ unfold snd at 2; rewrite cart_eq; reflexivity.
+Qed.
+
+Definition mksetm {X} (h:El X) (R:El X->El X->El pr) : El(setm X) :=
+  pair h (lam (fun i => lam (fun j => R i j))).
+
+Definition pair_m {X Y} (mx:El(setm X))(my:El(setm Y)) (i j:El(opt(sum X Y))) : El pr :=
+  match_opt pr
+    (prI abs)
+    (fun i =>
+     match_sum pr
+       (fun i:El X =>
+          match_opt pr
+            (prI(equ X i (fst mx)))
+            (fun j =>
+               match_sum pr
+                 (fun j:El X => prI (memP mx i j))
+                 (fun _:El Y => prI abs)
+                 j)
+            j)
+       (fun i:El Y =>
+          match_opt pr
+            (prI(equ Y i (fst my)))
+            (fun j =>
+               match_sum pr
+                 (fun _:El X => prI abs)
+                 (fun j:El Y => prI (memP my i j))
+                 j)
+            j)
+       i)
+    i.
+
+
+Definition union_m {X} (mx:El(setm X)) (i j:El(opt X)) : El pr :=
+  match_opt pr
+    (prI abs)
+    (fun i:El X =>
+       match_opt pr
+         (prI (ex X (fun i' => and (memP mx i' (fst mx)) (memP mx i i'))))
+         (fun j:El X => prI(memP mx i j))
+         j)
+    i.
+
+
+Definition power_m {X} (mx:El(setm X)) (i j:El(opt(sum(arr X pr) X))) : El pr :=
+  match_opt pr
+    (prI abs)
+    (fun i:El(sum _ _) =>
+     match_sum pr
+       (fun P:El(arr _ _) =>
+        match_opt pr
+          (prI tru)
+          (fun _ => prI abs) j) 
+       (fun i:El X =>
+        match_opt pr
+          (prI abs)
+          (fun j:El(sum _ _) =>
+           match_sum pr
+             (fun P:El(arr _ _) =>
+                prI(and (memP mx i (fst mx)) (prE (app P i))))
+             (fun j:El X => prI (memP mx i j))
+             j)
+          j)
+       i)
+    i.
+
+Definition subset_m {X} (mx:El(setm X)) (P:El X->Pr) (i j:El(opt X)) : El pr :=
+  match_opt pr
+    (prI abs)
+    (fun i:El X =>
+     match_opt pr
+       (prI (and (memP mx i (fst mx)) (P i)))
+       (fun j:El X => prI (memP mx i j))
+       j)
+    i.
+
+Definition inf_m (i j : El(opt inf)) : El pr :=
+  match_opt pr
+    (prI abs)
+    (fun i:El inf =>
+     match_opt pr
+       (prI tru)
+       (fun j:El inf => if Nat.ltb (infE i) (infE j) then prI tru else prI abs)
+       j)
+    i.
+
+Fixpoint int_fP (f:zform) (i:nat->Ty) (j:forall n, El(setm(i n))) : Pr :=
+  match f with
+  | In x y => insP (intTi x i) (intTi y i) (intm x i j) (intm y i j)
+  | Fa => abs
+  | And A B => and (int_fP A i j) (int_fP B i j)
+  | Or A B => or (int_fP A i j) (int_fP B i j)
+  | Imp A B => imp (int_fP A i j) (int_fP B i j)
+  | Allb x A => let X := intTi x i in
+                let hm := intm x i j in
+                all X (fun a=> imp (memP hm a (fst hm))
+                  (int_fP A (icons X i) (fun k => match k with 0 => (pair a (snd hm)) | S k=>j k end)))
+  | Exb x A => let X := intTi x i in
+               let hm := intm x i j in
+               ex X (fun a=> and (memP hm a (fst hm))
+                 (int_fP A (icons X i) (fun k => match k with 0 => (pair a (snd hm)) | S k=>j k end)))
+  end
+with intm (t:zterm) (i:nat->Ty) (j:forall n, El(setm(i n))) : El(setm(intTi t i)) :=
+  match t return El(setm (intTi t i)) with
+  | Var n => j n
+  | Pair x y => mksetm None (pair_m (intm x i j) (intm y i j))
+  | Union x => mksetm None (union_m (intm x i j))
+  | Power x => mksetm None (power_m (intm x i j))
+  | Subset x P => let X := intTi x i in
+                  let hm := intm x i j in
+                  let i' := icons X i in
+                  let j' a k : El(setm(i' k)) :=
+                    match k with 0 => pair a (snd hm) | S k=>j k end in
+                  mksetm None (subset_m (intm x i j) (fun a => int_fP P i' (j' a)))
+  | Nat => mksetm None inf_m
+end.
 

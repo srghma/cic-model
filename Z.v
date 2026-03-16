@@ -12,7 +12,7 @@ Hint Resolve TrI : core.
 Notation morph1 := (Proper (eq_set ==> eq_set)).
 Notation morph2 := (Proper (eq_set ==> eq_set ==> eq_set)).
 
-Instance eq_set_equiv: Equivalence eq_set.
+#[global]Instance eq_set_equiv: Equivalence eq_set.
 Proof.
 split; red; intros; rewrite eq_set_ax in *; intros.
  reflexivity.
@@ -60,7 +60,7 @@ rewrite eq_set_ax in H.
 destruct (H x); auto.
 Qed.
 
-Instance in_set_morph : Proper (eq_set ==> eq_set ==> iff) in_set.
+#[global]Instance in_set_morph : Proper (eq_set ==> eq_set ==> iff) in_set.
 apply morph_impl_iff2; auto with *.
 do 4 red; intros.
 apply in_reg with x; trivial.
@@ -71,11 +71,11 @@ Definition incl_set x y := forall z, z ∈ x -> z ∈ y.
 
 Notation "x ⊆ y" := (incl_set x y).
 
-Instance incl_set_pre : PreOrder incl_set.
+#[global]Instance incl_set_pre : PreOrder incl_set.
 split; do 2 red; intros; eauto.
 Qed.
 
-Instance incl_set_morph : Proper (eq_set ==> eq_set ==> iff) incl_set.
+#[global]Instance incl_set_morph : Proper (eq_set ==> eq_set ==> iff) incl_set.
 apply morph_impl_iff2; auto with *.
 unfold incl_set; do 4 red; intros.
 rewrite <- H0; rewrite <- H in H2; auto.
@@ -90,7 +90,7 @@ Lemma eq_incl x y : x == y -> x ⊆ y.
 intro h; rewrite h; reflexivity.
 Qed.
 
-Instance Fmono_morph F : Proper (incl_set==>incl_set) F -> morph1 F.
+#[global]Instance Fmono_morph F : Proper (incl_set==>incl_set) F -> morph1 F.
 do 2 red; intros.
 apply incl_eq; apply H; rewrite H0; reflexivity.
 Qed.
@@ -101,14 +101,14 @@ Hint Resolve Fmono_morph : core.
 Definition eq_fun dom F G :=
   forall x x', x ∈ dom -> x == x' -> F x == G x'.
 
-Instance eq_fun_sym : forall dom, Symmetric (eq_fun dom).
+#[global]Instance eq_fun_sym : forall dom, Symmetric (eq_fun dom).
 do 2 red; intros.
 rewrite H1 in H0.
 symmetry in H1.
 symmetry; apply H; auto.
 Qed.
 
-Instance eq_fun_trans : forall dom, Transitive (eq_fun dom).
+#[global]Instance eq_fun_trans : forall dom, Transitive (eq_fun dom).
 do 2 red; intros.
 transitivity (y x'); auto.
 apply H0.
@@ -138,17 +138,19 @@ do 2 red; reflexivity.
 Qed.
 Hint Resolve cst_is_ext : core.
 
+
+
 Definition eq_pred dom (P Q : set -> Prop) :=
   forall x, x ∈ dom -> (P x <-> Q x).
 
-Instance eq_pred_set : forall dom, Equivalence (eq_pred dom).
+#[global]Instance eq_pred_set : forall dom, Equivalence (eq_pred dom).
 firstorder.
 Qed.
 
 Definition ext_rel dom (R:set->set->Prop) :=
   forall x x' y y', x ∈ dom -> x == x' -> y == y' -> (R x y <-> R x' y').
 
-Definition eq_index x F y G :=
+(*Definition eq_index x F y G :=
   (forall a, a ∈ x -> exists2 b, b ∈ y & F a == G b) /\
   (forall b, b ∈ y -> exists2 a, a ∈ x & F a == G b).
 
@@ -176,15 +178,35 @@ split; intros.
  exists b; trivial.
  apply H0; auto with *.
 Qed.
-
+*)
 Definition typ_fun f A B := forall x, x ∈ A -> f x ∈ B.
 
-Instance typ_fun_morph0 : Proper (eq ==> eq_set ==> eq_set ==> iff) typ_fun.
+#[global]Instance typ_fun_morph : Proper (eq ==> eq_set ==> eq_set ==> iff) typ_fun.
 apply morph_impl_iff3; auto with *.
 do 6 red; intros.
 subst y.
 rewrite <- H1; rewrite <- H0 in H3; auto.
 Qed.
+
+(** Increasing sequences *)
+
+Definition increasing_bounded I F :=
+  forall x x', x ∈ I -> x' ∈ I -> x ⊆ x' -> F x ⊆ F x'.
+
+Lemma increasing_bounded_is_ext I F :
+  increasing_bounded I F ->
+  ext_fun I F.
+intros Fincr.
+red; red; intros.
+apply eq_intro.
+*apply Fincr; trivial.
+ rewrite <- H0; trivial.
+ rewrite H0; reflexivity.
+*apply Fincr; trivial.
+ rewrite <- H0; trivial.
+ rewrite H0; reflexivity.
+Qed.
+#[global]Hint Resolve increasing_bounded_is_ext : core.
 
 (** Rephrasing axioms *)
 
@@ -230,7 +252,7 @@ intros; apply eq_intro; intros.
  Telim H2; intros[x_eq|x_eq]; rewrite x_eq; trivial.
 Qed.
 
-Instance pair_morph : morph2 pair.
+#[global]Instance pair_morph : morph2 pair.
 do 3 red; intros.
 apply pair_ext; intros.
  rewrite <- H; apply pair_intro1.
@@ -268,7 +290,7 @@ apply union_intro with y; trivial.
  Telim H1; intros (y,?,?); eauto.
 Qed.
 
-Instance union_morph : morph1 union.
+#[global]Instance union_morph : morph1 union.
 do 2 red; intros.
 apply union_ext; intros.
 *eapply union_intro;  eauto.
@@ -278,7 +300,7 @@ apply union_ext; intros.
  rewrite <- H; trivial.
 Qed.
 
-Instance union_mono : Proper (incl_set ==> incl_set) union.
+#[global]Instance union_mono : Proper (incl_set ==> incl_set) union.
 do 3 red; intros.
 apply union_elim in H0.
 Tdestruct H0.
@@ -291,6 +313,10 @@ symmetry  in |- *.
 apply union_ext; intros.
 *apply empty_ax in H0; Tdestruct H0.
 *apply empty_ax in H; Tdestruct H.
+Qed.
+
+Lemma power_def x z : z ∈ power x <-> z ⊆ x.
+apply power_ax.  
 Qed.
 
 Lemma power_intro :
@@ -324,7 +350,7 @@ intros; apply eq_intro; intros.
  apply H; intros;  eapply power_elim;  eauto.
 Qed.
 
-Instance power_morph : morph1 power.
+#[global]Instance power_morph : morph1 power.
 do 2 red; intros.
 apply power_ext; intros.
  apply power_intro; intros.
@@ -464,7 +490,7 @@ Qed.
 
   Definition cond_set P x := subset x (fun _ => P). 
 
-  Instance cond_set_morph : Proper (iff ==> eq_set ==> eq_set) cond_set.
+#[global]Instance cond_set_morph : Proper (iff ==> eq_set ==> eq_set) cond_set.
 do 3 red; intros.
 apply subset_morph; trivial.
 red; auto.
@@ -517,6 +543,122 @@ destruct H0.
 Telim H1; auto.
 Qed.
   
+(** Squashing non-extensional behaviors *)
+
+Definition ext (f:set->set) (x:set) :=
+  forall x', x == x' -> f x == f x'.
+
+Hint Unfold ext : core.
+
+Lemma ext_isL f x : isL (ext f x).
+unfold ext.
+apply fa_isL; intro.
+prove_isL.
+Qed.
+Hint Resolve ext_isL : core.
+
+#[global]Instance ext_morph0 f : Proper (eq_set==>iff) (ext f).
+unfold ext; split; intros.
+*rewrite <-H in H1;transitivity (f x); [symmetry|];auto. 
+*rewrite H in H1;transitivity (f y);[symmetry in H|-*|];auto. 
+Qed.
+
+#[global]Instance ext_morph : Proper ((eq_set==>eq_set)==>eq_set==>iff) ext.
+unfold ext; split; intros.
+*transitivity (x x'); [symmetry|]; apply H; auto with *.
+*transitivity (y x'); [|symmetry]; apply H; auto with *.
+Qed.
+Lemma ext_ext a f :
+  ext_fun a f ->
+  forall x, x ∈ a ->  ext f x.
+unfold ext; auto with *.
+Qed.
+Lemma morph_ext f :
+  morph1 f ->
+  forall x, ext f x.
+unfold ext; auto with *.
+Qed.
+Hint Resolve morph_ext : core.
+
+Definition extf (f:set->set) :=
+  fun x => cond_set (ext f x) (f x).
+
+#[global]Instance extf_morph0 f : morph1 (extf f).
+unfold extf; do 2 red; intros.
+apply cond_set_morph2; [|auto].
+rewrite H; reflexivity.
+Qed.
+#[global]Instance extf_morph : Proper ((eq_set==>eq_set)==>eq_set==>eq_set) extf.
+unfold extf; do 3 red; intros.
+apply cond_set_morph2; [|auto].
+apply ext_morph; trivial.
+Qed.
+
+Lemma extf_def f x z:
+  z ∈ extf f x <-> z ∈ f x /\ ext f x.
+unfold extf; rewrite cond_set_ax.
+split; destruct 1; split; auto.
+Telim H0; trivial.
+Qed.
+
+Lemma extf_incl f x : extf f x ⊆ f x.
+red; intros.
+rewrite extf_def in H; destruct H; trivial.
+Qed.
+
+Lemma extf_ok f x :
+  ext f x -> extf f x == f x.
+intros; unfold ext; apply cond_set_ok; auto.
+Qed.
+Lemma ext_extf_ok a f :
+  ext_fun a f ->
+  forall x, x ∈ a -> extf f x == f x.
+intros; apply extf_ok.
+apply ext_ext with (1:=H); trivial.
+Qed.
+Lemma morph_extf_ok f :
+  morph1 f ->
+  forall x, extf f x == f x.
+intros; apply extf_ok; auto with *.
+Qed.
+Hint Resolve morph_extf_ok : core.
+
+
+Definition eq_index x F y G :=
+  (forall a, a ∈ x -> ext F a -> exists2 b, b ∈ y & ext G b /\ F a == G b) /\
+  (forall b, b ∈ y -> ext G b -> exists2 a, a ∈ x & ext F a /\ F a == G b).
+
+Lemma eq_index_sym : forall x F y G, eq_index x F y G -> eq_index y G x F.
+destruct 1; split; intros.
+*apply H0 in H1; [destruct H1 as (b,?,(?,e))|trivial].
+ symmetry in e.
+ exists b; auto.
+*apply H in H1; [destruct H1 as (a,?,(?,e))|trivial].
+ symmetry in e.
+ exists a; auto.
+Qed.
+
+Lemma eq_index_eq : forall x F y G,
+  x == y ->
+  eq_fun x F G ->
+  eq_index x F y G.
+red; intros.
+assert (efg : forall z, z ∈ x -> ext F z <-> ext G z).
+{unfold ext; intros.
+ apply fa_morph; intros z'.
+ apply fa_morph; intros eqz.
+ rewrite (H0 z z); auto with *.
+ rewrite (H0 z' z'); auto with *.
+ rewrite <-eqz; trivial. }
+split; intros.
+*exists a; [rewrite H in H1;trivial|].
+ rewrite efg in H2; [|trivial].
+ auto with *.
+*rewrite <-H in H1.
+ rewrite <-efg in H2; [|trivial].
+ exists b; [|split]; auto with *.
+Qed.
+
 (** other properties of axioms *)
 
 Lemma pair_commut : forall x y, pair x y == pair y x.
@@ -560,6 +702,11 @@ Qed.
 (** macros *)
 Definition singl x := pair x x.
 
+Lemma singl_ax x z : z ∈ singl x <-> z==x.
+unfold singl; rewrite pair_ax.
+split; [intros h; Tdestruct h|]; auto.
+Qed.
+
 Lemma singl_intro : forall x, x ∈ singl x.
 Proof.
 unfold singl in |- *; auto.
@@ -588,7 +735,7 @@ intros; apply eq_intro; intros.
   rewrite (singl_elim _ _ H1); trivial.
 Qed.
 
-Instance singl_morph : morph1 singl.
+#[global]Instance singl_morph : morph1 singl.
 unfold singl; do 2 red; intros.
 rewrite H; reflexivity.
 Qed.
@@ -651,7 +798,7 @@ apply union2_elim in H1; Tdestruct H1.
  apply union2_intro2; auto.
 Qed.
 
-Instance union2_morph : morph2 union2.
+#[global]Instance union2_morph : morph2 union2.
 unfold union2; do 3 red; intros.
 rewrite H; rewrite H0; reflexivity.
 Qed.
@@ -685,7 +832,7 @@ Definition minus2 x y := subset x (fun x' => ~ (x' ∈ y)).
 Definition if_prop P x y :=
   cond_set P x ∪ cond_set (#¬P) y.
   
-Instance if_prop_morph : Proper (iff ==> eq_set ==> eq_set ==> eq_set) if_prop.
+#[global]Instance if_prop_morph : Proper (iff ==> eq_set ==> eq_set ==> eq_set) if_prop.
 do 4 red; intros.
 unfold if_prop.
 apply union2_morph.
@@ -821,7 +968,7 @@ intros; apply eq_intro; intros.
  apply inter_elim with (1 := H2); trivial.
 Qed.
 
-Instance inter_morph : morph1 inter.
+#[global]Instance inter_morph : morph1 inter.
 unfold inter in |- *; do 2 red; intros.
 apply subset_morph; intros;  eauto.
  apply union_morph; trivial.
@@ -838,7 +985,7 @@ Definition inter2 x y := inter (pair x y).
 
 Infix "∩" := inter2.
 
-Instance inter2_morph: morph2 inter2.
+#[global]Instance inter2_morph: morph2 inter2.
 do 3 red; intros; apply inter_morph; apply pair_morph; trivial.
 Qed.
 
@@ -854,7 +1001,7 @@ split; intros.
  apply pair_elim in H1; Tdestruct H1; rewrite H1; trivial.
 Qed.
 
-Instance inter2_mono : Proper (incl_set==>incl_set==>incl_set) inter2.
+#[global]Instance inter2_mono : Proper (incl_set==>incl_set==>incl_set) inter2.
 do 4 red; intros.
 apply inter2_def in H1; destruct H1.
 apply inter2_def; split; auto.

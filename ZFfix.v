@@ -1,4 +1,4 @@
-Require Import ZF ZFrelations ZFwfr ZFnats ZFord ZFstable.
+Require Import ZF Zrelations ZFwfr Znats ZFord Zstable.
 
 (** Transfinite iteration of a monotonic operator
  *)
@@ -19,14 +19,14 @@ assert (Fext : ext_fun (osucc o) (fun o' => F (TI F o'))).
  generalize (isOrd_succ _ H); auto.
 rewrite TI_eq; auto.
  apply eq_intro; intros.
-  rewrite sup_ax in H0; trivial.
+  rewrite sup_def in H0; trivial.
   destruct H0.
   apply Fmono with (TI F x); trivial.
   apply TI_mono; trivial.
    apply isOrd_inv with (osucc o); auto.
    apply olts_le; trivial.
 
- rewrite sup_ax; trivial.
+ rewrite sup_def; trivial.
  exists o; trivial.
  apply lt_osucc; trivial.
 Qed.
@@ -91,97 +91,111 @@ split.
 Qed.
 
 (** Stability of ordinal-indexed families *)
+Lemma TI_stable_aux ob :
+  isOrd ob ->
+  stable_set (replf ob (TI F)) F ->
+  forall o, isOrd o ->
+  forall X, o == inter X ->
+  X ⊆ ob -> inter (replf X (TI F)) ⊆ TI F (inter X).
+intros obo Fs o oo.  
+induction oo using isOrd_ind; red; intros.
+assert (eX : ext_fun X (TI F)).
+{red; red; intros; apply TI_morph; trivial. }
+assert (eN : forall X, ext_fun X F).
+{red; red; intros; apply Fm; trivial. }
+assert (oX : forall x, x ∈ X -> isOrd x).
+{intros x xX; apply H2 in xX; eapply isOrd_inv with ob; eauto. } 
+pose (Y := subset (union X) (fun y => z ∈ F (TI F y))).
+assert (Yob : Y ⊆ ob).
+{red; intros.
+ apply subset_elim1 in H4.
+ apply union_elim in H4.
+ destruct H4.
+ apply H2 in H5.
+ apply isOrd_trans with x; trivial. } 
+assert (oY : forall y, y ∈ Y -> isOrd y).
+{intros.
+ apply Yob in H4.
+ eauto using isOrd_inv. }
+assert (eY : ext_fun Y (TI F)).
+{red; red; intros.
+ apply TI_morph; trivial. }
+assert (wX : exists w, w ∈ X).
+{destruct inter_non_empty with (1:=H3).
+ rewrite replf_ax in H4; trivial.
+ destruct H4.
+ exists x0; trivial. }
+destruct wX as (wx,wX).
+assert (wY : exists w, w ∈ Y).
+{assert (z ∈ TI F wx).
+ {apply inter_elim with (1:=H3).
+  rewrite replf_ax; trivial.
+  exists wx; auto with *. }
+ apply TI_elim in H4; auto.
+ destruct H4.
+ exists x.
+ apply subset_intro; trivial.
+ apply union_intro with wx; trivial. }
+destruct wY as (wy,wY).
+assert (ltY : lt (inter Y) (inter X)).
+{apply inter_intro; eauto.
+ intros.
+ assert (z ∈ TI F y0).
+ {apply inter_elim with (1:=H3).
+  rewrite replf_ax; trivial.
+  exists y0; auto with *. }
+ apply TI_elim in H5; auto.
+ destruct H5.
+ apply isOrd_plump with x; auto.
+ *apply isOrd_inter; auto.
+ *red; intros.
+  apply inter_elim with (1:=H7).
+  apply subset_intro; trivial.
+  apply union_intro with y0; trivial. }
+assert (inter (replf Y (TI F)) ⊆ TI F (inter Y)).
+{apply H0 with (inter Y); auto with *.
+ rewrite H1; trivial. }
+apply TI_intro with (inter Y); auto.
+{apply isOrd_inter; auto. }
+apply Fmono with (1:=H4).
+apply Fs.
+{apply replf_mono_dom; auto with *. }
+apply inter_intro. 
+*intros.
+ rewrite replf_def in H5; trivial.
+ destruct H5.
+ rewrite replf_def in H5; trivial.
+ destruct H5.
+ apply subset_elim2 in H5; destruct H5.
+ setoid_replace y0 with (F (TI F x1)); trivial.
+ rewrite H6; apply Fm.
+ rewrite H7; apply TI_morph; trivial.
+*exists (F (TI F wy)).
+ rewrite replf_def; trivial.
+ exists (TI F wy); auto with *.
+ rewrite replf_def; trivial.
+ exists wy; auto with *.
+Qed.
 
-Definition stable_ord := stable_class isOrd.
+Lemma TI_stable o :
+  isOrd o ->
+  stable_set (replf o (TI F)) F ->
+  stable_set o (TI F).
+intros oo Fs X Xo.
+eapply TI_stable_aux with (1:=oo)(2:=Fs)(5:=Xo);[|reflexivity].
+apply isOrd_inter; intros.
+apply Xo in H.
+eauto using isOrd_inv.
+Qed.
 
+Definition stable_ord F := forall o, isOrd o -> stable_set o F.
+(*
+Definition stable_ord F := stable_class isOrd F.
 Lemma TI_stable K :
   Proper (eq_set ==> iff) K ->
   stable_class K F ->
   (forall o, isOrd o -> K (TI F o)) ->
-  stable_ord (TI F).
-intros Km Fs KTI.
-cut (forall o, isOrd o ->
-  forall X, o == inter X ->
-  (forall x, x ∈ X -> isOrd x) ->
-  inter (replf X (TI F)) ⊆ TI F (inter X)).
- do 2 red; intros.
- apply H with (inter X); auto with *.
- apply isOrd_inter; auto.
-induction 1 using isOrd_ind; red; intros.
-assert (eX : ext_fun X (TI F)).
- red; red; intros; apply TI_morph; trivial.
-assert (eN : forall X, ext_fun X F).
- red; red; intros; apply Fm; trivial.
-pose (Y := subset (union X) (fun y => z ∈ F (TI F y))).
-assert (oY : forall y, y ∈ Y -> isOrd y).
- unfold Y; intros.
- apply subset_elim1 in H5.
- apply union_elim in H5; destruct H5.
- eauto using isOrd_inv.
-assert (eY : ext_fun Y (TI F)).
- red; red; intros.
- apply TI_morph; trivial.
-assert (wX : exists w, w ∈ X).
- destruct inter_non_empty with (1:=H4).
- rewrite replf_ax in H5; trivial.
- destruct H5.
- exists x0; trivial.
-destruct wX as (wx,wX).
-assert (wY : exists w, w ∈ Y).
- assert (z ∈ TI F wx).
-  apply inter_elim with (1:=H4).
-  rewrite replf_ax; trivial.
-  exists wx; auto with *.
- apply TI_elim in H5; auto.
- destruct H5.
- exists x.
- apply subset_intro; trivial.
- apply union_intro with wx; trivial.
-destruct wY as (wy,wY).
-assert (ltY : lt (inter Y) (inter X)).
- apply inter_intro; eauto.
- intros.
- assert (z ∈ TI F y0).
-  apply inter_elim with (1:=H4).
-  rewrite replf_ax; trivial.
-  exists y0; auto with *.
- apply TI_elim in H6; auto.
- destruct H6.
- apply isOrd_plump with x; auto.
-  apply isOrd_inter; auto.
-
-  red; intros.
-  apply inter_elim with (1:=H8).
-  apply subset_intro; trivial.
-  apply union_intro with y0; trivial.
-assert (inter (replf Y (TI F)) ⊆ TI F (inter Y)).
- apply H1 with (inter Y); auto with *.
- rewrite H2; trivial.
-apply TI_intro with (inter Y); auto.
- apply isOrd_inter; auto.
-apply Fmono with (1:=H5).
-apply Fs.
- intros.
- rewrite replf_ax in H6; auto with *.
- destruct H6.
- rewrite H7; auto.
-apply inter_intro.
- intros.
- rewrite replf_ax in H6; trivial.
- destruct H6.
- rewrite replf_ax in H6; trivial.
- destruct H6.
- apply subset_elim2 in H6; destruct H6.
- setoid_replace y0 with (F (TI F x1)); trivial.
- rewrite H7; apply Fm.
- rewrite H8; apply TI_morph; trivial.
-
- exists (F (TI F wy)).
- rewrite replf_ax; trivial.
- exists (TI F wy); auto with *.
- rewrite replf_ax; trivial.
- exists wy; auto with *.
-Qed.
+  stable_ord (TI F). *)
 
 (** * Case of a bounded monotonic operator 
  *)
@@ -561,7 +575,7 @@ Qed.
 Hint Resolve F_a_ord : core.
 
 (** We need stability to prove that Fstages is a fixpoint *)
-  Hypothesis Fstab : stable_class (fun X => X ⊆ Fstages) F.
+  Hypothesis Fstab : stable_set (power (Fstages)) F.
 
   Lemma F_intro : forall w,
     isOrd w ->
@@ -582,13 +596,13 @@ assert (inter (replf F1a (fun X => X)) ⊆ fsub a).
  red; intros.
  apply subset_intro.
   apply inter_elim with (1:=H1).
-  rewrite replf_ax.
+  rewrite replf_def.
   2:red;red;auto.
   exists Fstages; auto with *.
 
   intros.
   apply inter_elim with (1:=H1).
-  rewrite replf_ax.
+  rewrite replf_def.
   2:red;red;auto.
   exists X; auto with *.
   apply subset_intro; trivial.
@@ -596,21 +610,19 @@ assert (inter (replf F1a (fun X => X)) ⊆ fsub a).
 apply Fmono in H1.
 apply H1.
 apply Fstab.
- intros.
- rewrite replf_ax in H2.
+{red; intros.
+ rewrite replf_def in H2.
  2:do 2 red; trivial.
  destruct H2.
  apply subset_elim1 in H2.
- rewrite H3; red; intros.
- apply power_elim with (1:=H2); trivial.
-
- apply TI_elim in H0; auto.
- destruct H0.
- apply inter_intro.
+ rewrite H3; trivial. }
+apply TI_elim in H0; auto.
+destruct H0.
+apply inter_intro.
   intros.
-  rewrite replf_ax in H3; auto.
+  rewrite replf_def in H3; auto.
   destruct H3 as (x',?,?).
-  rewrite replf_ax in H3.
+  rewrite replf_def in H3.
   2:do 2 red; trivial.
   destruct H3 as (x'',?,?).
   rewrite H4; rewrite H5.
@@ -618,10 +630,10 @@ apply Fstab.
   rewrite H3; trivial.
 
   exists (F Fstages).
-  rewrite replf_ax.
+  rewrite replf_def.
   2:red;red;auto.
   exists Fstages; auto with *.
-  rewrite replf_ax.
+  rewrite replf_def.
   2:red;red;trivial.
   exists Fstages; auto with *.
 Qed.

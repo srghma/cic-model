@@ -1,6 +1,6 @@
 From Stdlib Require Export Lia Relations Wellfounded.
 Require Import Sat.
-Require Import ZF ZFcoc ZFuniv ZFecc.
+Require Import ZF Zcoc ZFuniv ZFecc.
 Require Import ZFlambda.
 
 (** Strong normalization proof of the Extended Calculus of Constructions.

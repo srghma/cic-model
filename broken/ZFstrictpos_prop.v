@@ -1,4 +1,4 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFcoc ZFord ZFfix.
+Require Import ZF Zpairs Zsum Zrelations ZFcoc ZFord ZFfix.
 
 Require Import ZFstable.
 

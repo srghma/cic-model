@@ -1,5 +1,5 @@
 
-Require Import ZFnats ZFord ZFrank ZFgrothendieck.
+Require Import Znats ZFord ZFrank ZFgrothendieck.
 
 (* An inaccesible cardinal yields a Grothendieck universe *)
 Section VN_Inaccessible.
@@ -29,9 +29,8 @@ split; intros.
  split; trivial.
 
 *rewrite <- (replf_id x).
- apply mu_reg; intros; trivial.
- apply ZFrepl.repl_rel_fun; auto with *.
- rewrite H1.
+ apply VN_regular_weaker in mu_reg.
+ apply mu_reg; intros; auto with *.
  apply VN_trans with x; trivial.
  
 *assert (ZFrepl.repl_rel I (fun x y => exists2 z, R x z & y == singl z)).
@@ -78,7 +77,7 @@ Section Grothendieck_Universe.
 
   Variable U : set.
   Hypothesis Ug : grot_univ U.
-  Hypothesis Uinf : omega ∈ U.
+  Hypothesis Uinf : N ∈ U.
 
   Definition grot_ord := subset U isOrd.
 
@@ -232,8 +231,8 @@ apply ZFrepl.repl_elim in H3; trivial.
 destruct H3.
 assert (x0 ⊆ VN (F x1)).
  red; intros.
- apply VN_stable.
-  intros.
+ eapply (VN_stable grot_ord);[trivial| |].
+  red; intros.
   apply subset_elim1 in H6; eauto using isOrd_inv.
 
   generalize (H1 _ _ H3 H4); intros.
@@ -243,8 +242,7 @@ assert (x0 ⊆ VN (F x1)).
    clear x2 H6 H7.
    intros.
    rewrite replf_ax in H6.
-   2:red;red;intros;apply VN_morph; trivial.
-   destruct H6.
+   destruct H6 as (?,?,(_,?)).
    rewrite H7; clear H7 y.
    apply subset_elim2 in H6.
    destruct H6.
@@ -255,7 +253,7 @@ assert (x0 ⊆ VN (F x1)).
    rewrite H9 in H5; auto.
 
    exists (VN x2).
-   rewrite replf_ax.
+   rewrite replf_def.
    2:red;red;intros;apply VN_morph; trivial.
    exists x2; auto with *.
    apply subset_intro; trivial.

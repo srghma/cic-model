@@ -1,5 +1,6 @@
 Require Export basic.
-Require Import ZF ZFpairs ZFsum ZFfix ZFnats ZFord ZFstable ZFrank ZFrelations.
+Require Import ZFord ZFrank ZFfix.
+Require Import ZF Zstable Zpairs Zsum Znats Zrelations.
 
 (** Geeralized continuity *)
 
@@ -33,7 +34,7 @@ assert (Xm : morph1 X).
 red; intros.
 setoid_replace y with (sup o X).
  rewrite (Fcont X); auto with *.
- rewrite sup_ax.
+ rewrite sup_def.
  2:do 2 red; intros; apply Fm; auto with *.
  exists w; trivial.
  revert H1; apply eq_elim; apply Fm.
@@ -46,7 +47,7 @@ setoid_replace y with (sup o X).
  contradiction.
 
  apply eq_set_ax; intros z'.
- rewrite sup_ax; auto with *.
+ rewrite sup_def; auto with *.
  split; intros.
   exists (osucc w).
    apply oo; auto.
@@ -68,9 +69,9 @@ rewrite TI_eq; auto.
 red in Fcont.
 rewrite Fcont; auto.
 apply eq_set_ax; intros z.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 2:do 2 red; intros; apply Fm; apply Fm; apply TI_morph; trivial.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 split; destruct 1.
  exists (osucc x).
   apply oo; trivial.
@@ -261,11 +262,11 @@ End ConvergenceOmega.
 Lemma cst_cont : forall X o, (exists y, lt y o) -> X == sup o (fun _ => X).
 intros.
 apply eq_intro; intros.
- rewrite sup_ax; trivial.
+ rewrite sup_def; trivial.
  destruct H as (y,?); exists y; trivial.
 
  rewrite sup_ax in H0; trivial.
- destruct H0; trivial.
+ destruct H0 as (?,_,(_,?)); trivial.
 Qed. 
 
 Lemma sum_cont : forall o F G,
@@ -274,20 +275,20 @@ Lemma sum_cont : forall o F G,
   sum (sup o F) (sup o G) == sup o (fun y => sum (F y) (G y)).
 intros.
 apply eq_intro; intros.
- rewrite sup_ax; auto.
+ rewrite sup_def; auto.
  elim H1 using sum_ind; clear H1; intros.
   rewrite sup_ax in H1; auto.
-  destruct H1.
+  destruct H1 as (?,?,(_,?)).
   exists x0; trivial.
   rewrite H2; apply inl_typ; trivial.
 
   rewrite sup_ax in H1; auto.
-  destruct H1.
+  destruct H1 as (?,?,(_,?)).
   exists x; trivial.
   rewrite H2; apply inr_typ; trivial.
 
  rewrite sup_ax in H1; auto.
- destruct H1.
+ destruct H1 as (?,?,(_,?)).
  apply sum_mono with (F x) (G x); auto.
 Qed.
 
@@ -298,7 +299,7 @@ Qed.
 intros.
 apply eq_set_ax; intros z.
 rewrite union2_ax.
-repeat rewrite sup_ax; auto with *.
+repeat rewrite sup_def; auto with *.
  split; intros.
   destruct H1 as [(o',?,?)|(o',?,?)]; exists o'; trivial.
    apply union2_intro1; trivial.
@@ -319,15 +320,11 @@ assert (Hm : ext_fun dom (fun i => sigma A (fun x => f x i))).
  apply sigma_morph; auto with *.
  red; intros; apply H; trivial.
 apply eq_intro; intros.
- rewrite sup_ax; trivial.
+ rewrite sup_def; trivial.
  assert (snd z ∈ sup dom (f (fst z))).
-  apply snd_typ_sigma with (2:=H0); auto with *.
-  do 2 red; intros.
-  apply sup_morph; auto with *.
-  red; intros; apply H; trivial.
+ {apply snd_typ_sigma with (1:=H0); reflexivity. }
  rewrite sup_ax in H1.
- 2:do 2 red; intros; apply H;auto with *.
- destruct H1.
+ destruct H1 as (?,?,(_,?)).
  exists x; trivial.
  rewrite surj_pair with (1:=subset_elim1 _ _ _ H0).
  apply couple_intro_sigma; trivial.
@@ -335,7 +332,7 @@ apply eq_intro; intros.
  apply fst_typ_sigma in H0; trivial.
 
  rewrite sup_ax in H0; trivial.
- destruct H0.
+ destruct H0 as (?,?,(_,?)).
  rewrite surj_pair with (1:=subset_elim1 _ _ _ H1).
  apply couple_intro_sigma; trivial.
   do 2 red; intros.
@@ -344,11 +341,10 @@ apply eq_intro; intros.
 
   apply fst_typ_sigma in H1; trivial.
 
-  rewrite sup_ax.
+  rewrite sup_def.
   2:do 2 red; intros; apply H; auto with *.
   exists x; trivial.
-  apply snd_typ_sigma with (2:=H1); auto with *.
-  do 2 red; intros; apply H; auto with *.
+  apply snd_typ_sigma with (1:=H1); reflexivity.
 Qed.
 
 Section ProductContinuity.
@@ -369,59 +365,52 @@ Section ProductContinuity.
     func X (sup mu F) ⊆ sup mu (fun A => func X (F A)).
 intros F Fstb Fincr.
 assert (Fm : forall o, isOrd o -> ext_fun o F) by auto.
+assert (Fm' : forall z, ext_fun (subset mu (fun y => z ∈ F y)) F).
+{red; red; intros.
+ apply Fm with mu; auto.
+ apply subset_elim1 in H; trivial. }
 red; intros.
 pose (G := fun n => inter (subset mu (fun y => app z n ∈ F y))).
 assert (Gm : ext_fun X G).
- red; red; intros.
+{red; red; intros.
  apply inter_morph.
  apply subset_morph; auto with *.
  red; intros.
- rewrite H1; reflexivity.
+ rewrite H1; reflexivity. }
 assert (Fprop : forall x, x ∈ X -> app z x ∈ F (G x) /\ lt (G x) mu).
-  intros.
-  apply app_typ with (x:=x) in H; trivial.
-  rewrite sup_ax in H; auto.
-  destruct H.
-  split.
-   apply Fstb; intros.
-    apply subset_elim1 in H2; eauto using isOrd_inv.
-   apply inter_intro.
-    intros.
-    rewrite replf_ax in H2.
-     destruct H2.
-     rewrite H3.
-     rewrite subset_ax in H2; destruct H2.
-     destruct H4.
-     setoid_replace (F x1) with (F x2); trivial.
-     apply Fm with mu; auto.
-
-     red; red; intros.
-     apply Fm with mu; auto.
-     apply subset_elim1 in H3; trivial.
-
-    exists (F x0).
-    rewrite replf_ax.
-     exists x0; auto with *.
-     apply subset_intro; trivial.
-
-     red; red; intros.
-     apply Fm with mu; auto.
-     apply subset_elim1 in H2; trivial.
-
-   apply isOrd_plump with x0; auto.
-    apply isOrd_inter; intros.
-    apply subset_elim1 in H2; eauto using isOrd_inv.
-
-    red; intros.
-    apply inter_elim with (1:=H2).
-    apply subset_intro; trivial.
+{intros.
+ apply app_typ with (x:=x) in H; trivial.
+ rewrite sup_ax in H.
+ destruct H as (?,?,(_,?)).
+ split.
+ *eapply (Fstb mu); [trivial| |intros].
+  {intros y h; apply subset_elim1 in h; eauto using isOrd_inv. }
+  apply inter_intro.
+  +intros.
+   rewrite replf_ax in H2.
+   destruct H2 as (?,?,(_,?)).
+   rewrite H3.
+   rewrite subset_ax in H2; destruct H2.
+   destruct H4.
+   setoid_replace (F x1) with (F x2); trivial.
+   apply Fm with mu; auto.
+  +exists (F x0).
+   rewrite replf_def; [|trivial].
+   exists x0; auto with *.
+   apply subset_intro; trivial.
+ *apply isOrd_plump with x0; auto.
+  {apply isOrd_inter; intros.
+   apply subset_elim1 in H2; eauto using isOrd_inv. }
+  red; intros.
+  apply inter_elim with (1:=H2).
+  apply subset_intro; trivial. }
 assert (Fmu := fun x h => proj2 (Fprop x h)).
 assert (Fspec := fun x h => proj1 (Fprop x h)).
 clear Fprop.
 assert (Ford : forall x, x ∈ X -> isOrd (G x)).
  intros.
  apply isOrd_inv with mu; auto.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 assert (lt (osup X G) mu) by (apply X_small; trivial).
 exists (osup X G); trivial.
 apply func_narrow with (1:=H); intros.
@@ -430,7 +419,6 @@ apply Fincr with (G x); auto.
 
  apply osup_intro; trivial.
 Qed.
-
 
   Hypothesis mu_bound : lt (osup (func X mu) (fun f => osup X (app f))) mu.
 

@@ -1,6 +1,6 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix ZFfixfun.
-Require Import ZFstable ZFiso ZFind_w ZFspos.
-Require Import ZFcoc.
+Require Import ZF Zpairs Zsum Zrelations ZFord ZFfix ZFfixfun.
+Require Import Zstable ZFiso ZFind_w ZFspos.
+Require Import Zcoc.
 Require Import ZFgrothendieck.
 
 (** Inductive families. Indexes are modelled as a constraint over an inductive
@@ -328,20 +328,12 @@ apply couple_morph.
   apply w3typ; trivial.
   apply fst_typ_sigma in ty; trivial.
 
-  eapply snd_typ_sigma in ty;[| |reflexivity].
-   apply cc_prod_elim with (1:=ty); trivial.
+  eapply snd_typ_sigma in ty;[|reflexivity].
+  apply cc_prod_elim with (1:=ty); trivial.
 
-   do 2 red; intros.
-   apply cc_prod_morph.
-    apply w2m; auto with *.
-
-    red; intros.
-    apply H0.
-    apply w3m; auto with *.
-
-   apply cc_app_morph; trivial.
-   apply snd_morph.
-   apply dpm; auto with *.
+  apply cc_app_morph; trivial.
+  apply snd_morph.
+  apply dpm; auto with *.
 Qed.
 
 Let isow p := TIF_iso Arg (dp_oper' p) (wiso p).
@@ -512,11 +504,10 @@ Qed.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.
+  Hypothesis Unontriv : Znats.N ∈ U.
 
   Let Unonmt : empty ∈ U.
-apply G_trans with omega; trivial.
-apply zero_omega.
+apply G_inf_nontriv; trivial.
 Qed.
 
 Section Universes.
@@ -1158,27 +1149,19 @@ constructor; simpl; intros.
   apply H in H5.
   apply eq_dop; auto with *.
 
-  do 2 red; intros. 
-  apply H in H5.
-  apply eq_dop; auto with *.
-
   intros.
   transitivity (dp_oper (F x) Y).
    apply H0 in H4; trivial.
    apply dpmo; auto.
 
-   apply H in H5.
+   apply H0 in H4.
    red; intro; apply eq_elim.
    apply eq_dop; auto with *.
 
- apply sigma_elim in H1.
-  destruct H1 as (_ & x1 & x2).
-  specialize H0 with (1:=x1).
-  apply w3ty; trivial.
-
-  do 2 red; intros.
-  apply H in H4.
-  apply eq_dw1; auto with *.
+ apply sigma_ax in H1.
+ destruct H1 as (_ & x1 & _ & x2).
+ specialize H0 with (1:=x1).
+ apply w3ty; trivial.
 
  apply iso_arg_norec with (P:=A) (A:=fun y => w1 (F y))
    (B:=fun y => w2 (F y)) (f:=fun y => w3 (F y)); auto.
@@ -1230,14 +1213,10 @@ split; simpl; intros.
   intros.
   apply UF; trivial.
 
- apply sigma_elim in H.
-  destruct H as (_&ty1&ty2).
-  specialize UF with (1:=ty1).
-  apply UF; trivial.
-
-  do 2 red; intros.
-  apply Fm in H1.
-  apply H1.
+ apply sigma_ax in H.
+ destruct H as (_&ty1&_&ty2).
+ specialize UF with (1:=ty1).
+ apply UF; trivial.
 Qed.
 
 Definition dpos_param (A:set) (F:set->dpositive) :=
@@ -1418,16 +1397,11 @@ constructor; simpl; intros.
   apply H0 in H4; trivial.
   apply dpmo; auto.
 
- apply sigma_elim in H2.
-  destruct H2 as (_ & x1 & x2).
-  specialize H0 with (1:=x1).
-  apply w3ty; trivial.
-  apply cc_prod_elim with (1:=H1); trivial.
-
-  do 2 red; intros.
-  assert (eqp := H _ _ H4).
-  apply eq_dw2; auto with *.
-  apply cc_app_morph; auto with *.
+ apply sigma_ax in H2.
+ destruct H2 as (_ & x1 & _ & x2).
+ specialize H0 with (1:=x1).
+ apply w3ty; trivial.
+ apply cc_prod_elim with (1:=H1); trivial.
 
  apply iso_param with (P:=A) (A:=fun y => w1 (F y))
    (B:=fun y => w2 (F y)) (f:=fun y => w3 (F y)); auto.
@@ -1605,7 +1579,7 @@ Lemma nil_typ A X :
   nil ∈ dp_oper (vect A zero) X.
 simpl; intros.
 apply inl_typ.
-unfold ZFcoc.P2p.
+unfold P2p.
 rewrite cond_set_ax; split.
  apply singl_intro.
  reflexivity.
@@ -1626,12 +1600,12 @@ apply couple_intro_sigma; trivial.
  do 2 red; intros.
  apply prodcart_morph; auto with *.
  apply prodcart_morph; auto with *.
- apply ZFcoc.P2p_morph.
+ apply P2p_morph.
 rewrite H4; reflexivity.
 
  apply couple_intro; trivial.
  apply couple_intro; trivial.
- unfold ZFcoc.P2p.
+ unfold P2p.
  rewrite cond_set_ax; split.
   apply singl_intro.
   reflexivity.

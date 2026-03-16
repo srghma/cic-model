@@ -3,7 +3,7 @@
     It is similar to SATnat, but it supports type-based termination
  *)
 
-Require Import ZF ZFpairs ZFsum ZFord ZFfix ZFgrothendieck ZFcoc Sat SATtypes.
+Require Import ZF Zpairs Zsum ZFord ZFfix ZFgrothendieck Zcoc Sat SATtypes.
 Require Import ZFlambda.
 Require Import Lambda.
 Module Lc:=Lambda.

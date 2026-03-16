@@ -1,5 +1,5 @@
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFfixfun.
-Require Import ZFstable ZFiso ZFind_w ZFspos.
+Require Import ZF Zpairs Zsum ZFnats Zrelations ZFord ZFfix ZFfixfun.
+Require Import Zstable ZFiso ZFind_w ZFspos.
 Require Import ZFsposd.
 
 (** Examples *)

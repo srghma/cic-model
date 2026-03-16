@@ -1,6 +1,5 @@
 
-Require Export basic ZF ZFpairs ZFrelations ZFstable ZFiso.
-Require Import ZFgrothendieck.
+Require Export basic ZF Zstable Zpairs Zrelations Ziso.
 
 (** * Impredicativity of props *)
 
@@ -42,7 +41,6 @@ apply power_intro; intros.
 apply singl_intro_eq.
 rewrite cc_eta_eq with (1:=H0).
 apply cc_impredicative_lam.
- do 2 red; intros; apply cc_app_morph; trivial; reflexivity.
 intros.
 apply props_proof_irrelevance with (F x); auto.
 apply cc_prod_elim with (1:=H0); trivial.
@@ -88,8 +86,8 @@ Lemma cc_exists_typ A B :
   cc_exists A B ∈ props.
 unfold cc_exists; intros.
 apply power_intro; intros.
-rewrite sup_ax in H1; trivial.
-destruct H1.
+rewrite sup_ax in H1.
+destruct H1 as (?,?,(_,?)).
 apply singl_intro_eq.
 apply props_proof_irrelevance with (B x); auto.
 Qed.
@@ -108,7 +106,7 @@ Lemma cc_exists_elim A B :
   empty ∈ cc_exists A B ->
   exists2 x, x ∈ A & empty ∈ B x.
 unfold cc_exists; intros.
-rewrite sup_ax in H0; auto.
+rewrite sup_def in H0; auto.
 Qed.
 
 
@@ -404,34 +402,42 @@ Lemma cc_prod_ext_mt U V f :
   f ∈ cc_prod U V ->
   f ∈ cc_prod (cc_bot U) V.
 intros.
-assert (f == cc_lam (cc_bot U) (cc_app f)).
- apply cc_prod_is_cc_fun in H2.
- apply eq_set_ax; intros z.
- rewrite cc_lam_def.
- 2:do 2 red; intros; apply cc_app_morph; auto with *.
- split; intros.
-  destruct (H2 _ H3).
-  exists (fst z); [apply cc_bot_intro;trivial|].
-  exists (snd z); trivial.
-  rewrite <- couple_in_app.
-  rewrite H4 in H3; trivial.
-
-  destruct H3 as (x,xty,(y,yty,eqc)).
-  rewrite eqc.
-  rewrite couple_in_app; trivial.
-rewrite H3; apply cc_prod_intro; trivial.
- do 2 red; intros; apply cc_app_morph; auto with *.
-
- intros.
- rewrite cc_bot_ax in H4; destruct H4.
-  rewrite cc_app_outside_domain.
+rewrite cc_prod_def; [|trivial].
+split.
+*apply cc_prod_is_cc_fun in H2.
+ destruct H2; split; [trivial|].
+ rewrite H3; red; auto.
+*intros x tyx.
+ rewrite cc_bot_ax in tyx; destruct tyx.
+ +rewrite cc_app_outside_domain.
   2:apply cc_prod_is_cc_fun in H2; eexact H2.
-   apply eq_elim with (V empty); trivial.
-   apply H; auto with *.
+  ++apply eq_elim with (V empty); trivial.
+    apply H; auto with *.
+  ++rewrite H3; trivial.
+ +apply cc_prod_elim with (1:=H2); trivial.
+Qed.
 
-   rewrite H4; trivial.
-
- apply cc_prod_elim with (1:=H2); trivial.
+Lemma cc_bot_stable_set X :
+  (forall z x, z ∈ X ->  x ∈ z -> x==empty \/ ~x==empty) ->
+  stable_set X cc_bot.
+intros empty_dec Y YX.
+red; intros.
+destruct inter_wit with (1:=H).
+assert (forall x, x ∈ Y -> z ∈ cc_bot x).
+{intros.
+ apply inter_elim with (1:=H).
+ apply replf_ax; auto with *.
+ exists x0; auto with *. }
+assert (zcase:=H1 _ H0).
+apply cc_bot_ax in zcase; destruct zcase.
+*rewrite H2; auto.
+*destruct (empty_dec x z) as [is_mt|not_mt]; auto.
+ +rewrite is_mt; auto.
+ +apply cc_bot_intro. 
+  apply inter_intro;[|eauto].
+  intros. 
+  apply H1 in H3.
+  apply cc_bot_ax in H3; destruct H3; [contradiction|trivial].
 Qed.
 
 Definition fbot f x := cond_set (~x==empty) (f x).
@@ -510,38 +516,15 @@ split; intros.
   intro h; rewrite h in H3; contradiction.
 Qed.
 
-Lemma cc_bot_stable K :
-  (forall x X, K X -> x ∈ X -> x==empty \/ ~x==empty) ->
-  stable_class K cc_bot.
-intros empty_dec.
-do 2 red; intros.
-destruct inter_wit with (2:=H0); auto with *.
-assert (forall x, x ∈ X -> z ∈ cc_bot x).
-{intros.
- apply inter_elim with (1:=H0).
- apply replf_ax; auto with *.
- exists x0; auto with *. }
-assert (zcase:=H2 _ H1).
-apply cc_bot_ax in zcase; destruct zcase.
- rewrite H3; auto.
-specialize H with (1:=H1).
-destruct (empty_dec z x) as [is_mt|not_mt]; trivial.
- rewrite is_mt; auto.
-apply cc_bot_intro. 
-apply inter_intro;[|eauto].
-intros. 
-apply H2 in H4.
-apply cc_bot_ax in H4; destruct H4; [contradiction|trivial].
-Qed.
-
 (** Taking the bottom value out of the domain of a function *)
-Definition squash f := subset f (fun c => ~ fst c == empty).
+Require Import Zbot.
+Definition squash f := squ (singl empty) f.
 
-Instance squash_morph : morph1 squash.
+#[global]Instance squash_morph : morph1 squash.
 do 2 red; intros.
 apply subset_morph; auto with *.
 Qed.
-
+(*
 Lemma squash_ax f z :
   z ∈ squash f <-> z ∈ f /\ ~ fst z == empty.
 unfold squash; rewrite subset_ax.
@@ -615,239 +598,4 @@ apply cc_prod_intro; intros.
  apply cc_prod_elim with (1:=H1).
  apply cc_bot_intro; trivial.
 Qed.
-
-(** #<a name="EquivTTColl"/># *)
-(** * Correspondance between ZF universes and (Coq + TTColl) universes *)
-
-Section Universe.
-
- (* A grothendieck universe... *)
-  Hypothesis U : set.
-  Hypothesis Ugrot : grot_univ U.
-
-(*
-Section Equiv_TTRepl.
-
-  Hypothesis cc_set : set.
-  Hypothesis cc_eq_set : set -> set -> Prop.
-  Hypothesis cc_eq_set_morph : Proper (eq_set==>eq_set==>iff) cc_eq_set.
-  Hypothesis cc_set_incl_U : cc_set ⊆ U.
-
-Lemma cc_ttrepl A R :
-  Proper (eq_set ==> eq_set ==> iff) R ->
-  (* A : Ti *)
-  A ∈ U ->
-  (* type of R + existence assumption *)
-  (forall x, x ∈ A -> exists2 y, y ∈ cc_set & R x y) ->
-  (forall x y y', x ∈ A -> R x y -> (R x y' <-> cc_eq_set y y')) ->
-  (* exists f:A->set, *)
-  exists2 f, f ∈ cc_arr A cc_set &
-    (* forall x:A, R x (f i) *)
-    forall x, x ∈ A -> R x (cc_app f x).
-
-(forall x in A, exists y ∈ A, exists g:y->cc_set, R x (cc_sup y g))
-
-R' x y := (z ∈ y <-> R x z)  (y = ens de cc_set -> ⊆ U)
-
-End Equiv_TTRepl.
 *)
-
-Section Equiv_ZF_CIC_TTColl.
-
-(** We assume now that U is a *ZF* universe (not just IZF),
-   so it is closed by collection. *)
-
-  Hypothesis coll_axU : forall A (R:set->set->Prop), 
-    A ∈ U ->
-    (forall x x' y y', in_set x A ->
-     eq_set x x' -> eq_set y y' -> R x y -> R x' y') ->
-    exists2 B, B ∈ U &
-      forall x, in_set x A ->
-        (exists2 y, y ∈ U & R x y) ->
-        exists2 y, y ∈ B & R x y.
-
-  (* The inductive type of sets (cf Ens.set and
-      #<a href="ZFind_w.html##sets">ZFind_w.sets</a>#) and the fact that
-      it is included in the universe of its index. *)
-  Hypothesis sets : set.
-  Hypothesis sets_incl_U : sets ⊆ U.
-
-(** We prove that the model will validate TTColl (Ens.ttcoll).
-   This formulation heavily uses the reification of propositions of the model
-   as Coq's Prop elements. *)
-Lemma cc_ttcoll A R :
-  Proper (eq_set ==> eq_set ==> iff) R ->
-  (* A : Ti *)
-  A ∈ U ->
-  (* exists X:Ti, *)
-  exists2 X, X ∈ U &
-    (* exists f:X->set, *)
-    exists2 f, f ∈ cc_arr X sets &
-    (* forall x:A, (exists w, R x w) -> exists i:X, R x (f i) *)
-    forall x, x ∈ A ->
-    (exists2 w, w ∈ sets & R x w) -> exists2 i, i ∈ X & R x (cc_app f i).
-intros.
-destruct coll_axU with (A:=A) (R:=fun x y => y ∈ sets /\ R x y) as (B,HB,?);
-  trivial.
- intros.
- rewrite <- H2; rewrite <- H3; trivial.
-
- pose (B':= B ∩ sets).
- exists B'.
-  apply G_incl with B; trivial.
-  apply inter2_incl1.
- exists (cc_lam B' (fun x => x)).
-  apply cc_arr_intro; intros.
-   do 2 red; intros; trivial.
-   revert H2; apply inter2_incl2.
- intros.
- destruct H1 with (1:=H2) as (y,yB,(ys,yR)).
-  destruct H3 as (w,?,?).
-  exists w; auto.
-
-  exists y.
-   unfold B'; rewrite inter2_def; auto.
-
-   rewrite cc_beta_eq; trivial.
-    do 2 red; auto.
-
-    unfold B'; rewrite inter2_def; auto.
-Qed.
-
-(** And now using the real connectives of props: *)
-Lemma cc_ttcoll' : empty ∈
-  (** forall A : U, *)
-  cc_prod U (fun A =>
-  (** forall R : A->set->Prop, *)
-  cc_prod (cc_arr A (cc_arr sets props)) (fun R =>
-  (** exists X:U, *)
-  cc_exists U (fun X =>
-  (** exists g:X->set, *)
-  cc_exists (cc_arr X sets) (fun g =>
-    (* *forall i:A, *)
-    cc_prod A (fun i =>
-    (** (exists w:set, R i w) -> *)
-    cc_arr (cc_exists sets (fun w => cc_app (cc_app R i) w))
-    (** (exists j:X, R i (g j)) *)
-           (cc_exists X (fun j => cc_app (cc_app R i) (cc_app g j)))))))).
-assert (e1 : Proper (eq_set==>eq_set==>eq_set==>eq_set) (fun R i w => cc_app (cc_app R i) w)).
- do 4 red; intros.
- repeat apply cc_app_morph; trivial.
-assert (e2 : Proper (eq_set==>eq_set==>eq_set==>eq_set==>eq_set)
-               (fun R g i j => cc_app (cc_app R i) (cc_app g j))).
- do 5 red; intros.
- repeat apply cc_app_morph; trivial.
-assert (e3: Proper (eq_set==>eq_set==>eq_set==>eq_set==>eq_set) (fun R X g i =>
-    cc_arr (cc_exists sets (fun w => cc_app (cc_app R i) w))
-           (cc_exists X (fun j => cc_app (cc_app R i) (cc_app g j))))).
- do 5 red; intros.
- apply cc_arr_morph.
-  apply sup_morph; auto with *.
-  red; intros; apply e1; trivial.
-
-  apply sup_morph; trivial.
-  red; intros; apply e2; trivial.
-assert (e4 : Proper (eq_set==>eq_set==>eq_set==>eq_set==>eq_set) (fun A R X g =>
-    cc_prod A (fun i =>
-    cc_arr (cc_exists sets (fun w => cc_app (cc_app R i) w))
-           (cc_exists X (fun j => cc_app (cc_app R i) (cc_app g j)))))).
- do 5 red; intros.
- apply cc_prod_ext; trivial.
- red; intros.
- apply e3; trivial.
-assert (e5 : Proper (eq_set==>eq_set==>eq_set==>eq_set) (fun A R X =>
-  cc_exists (cc_arr X sets) (fun g =>
-    cc_prod A (fun i =>
-    cc_arr (cc_exists sets (fun w => cc_app (cc_app R i) w))
-           (cc_exists X (fun j => cc_app (cc_app R i) (cc_app g j))))))).
- do 4 red; intros.
- apply sup_morph.
-  rewrite H1; reflexivity.
-
-  red; intros; apply e4; trivial.
-assert (e6: morph2 (fun A R =>
-  cc_exists U (fun X =>
-  cc_exists (cc_arr X sets) (fun g =>
-    cc_prod A (fun i =>
-    cc_arr (cc_exists sets (fun w => cc_app (cc_app R i) w))
-           (cc_exists X (fun j => cc_app (cc_app R i) (cc_app g j)))))))).
- do 3 red; intros.
- apply sup_morph; auto with *.
- red; intros; apply e5; trivial.
-assert (e7: morph1 (fun A =>
-  cc_prod (cc_arr A (cc_arr sets props)) (fun R =>
-  cc_exists U (fun X =>
-  cc_exists (cc_arr X sets) (fun g =>
-    cc_prod A (fun i =>
-    cc_arr (cc_exists sets (fun w => cc_app (cc_app R i) w))
-           (cc_exists X (fun j => cc_app (cc_app R i) (cc_app g j))))))))).
- do 2 red; intros.
- apply cc_prod_ext.
-  rewrite H; reflexivity.
-  red; intros; apply e6; trivial.
-apply cc_forall_intro; [auto with *|intros A tyA].
-apply cc_forall_intro.
- apply morph_is_ext;apply e6; reflexivity.
-intros R tyR.
-destruct cc_ttcoll with (A:=A) (R:=fun x y => empty ∈ cc_app (cc_app R x) y)
-    as (X,tyX,(g,tyg0,Hg)); trivial.
- do 3 red; intros.
- rewrite H; rewrite H0; reflexivity.
-assert (tyg : forall j, j ∈ X -> cc_app g j ∈ sets).
- intros.
- apply cc_arr_elim with (1:=tyg0); trivial.
-apply cc_exists_intro with X; trivial.
- do 2 red; intros.
- apply e5; auto with *.
-apply cc_exists_intro with g; trivial.
- do 2 red; intros.
- apply e4; auto with *.
-apply cc_forall_intro.
- do 2 red; intros.
- apply e3; auto with *.
-intros i tyi.
-apply cc_forall_intro; auto with *.
-intros p exw.
-destruct Hg with (1:=tyi) as (j,tyj,Hj).
- apply cc_exists_elim.
-  do 2 red; intros; apply cc_app_morph; auto with *.
-
-  rewrite props_proof_irrelevance with (2:=exw) in exw; trivial.
-   apply cc_exists_typ; intros; auto with *.
-    do 2 red; intros; apply e1; auto with *.
-   apply cc_arr_elim with sets; trivial.
-   apply cc_arr_elim with A; trivial.
-
- apply cc_exists_intro with j; auto.
- do 2 red; intros; apply e2; auto with *.
-Qed.
-
-End Equiv_ZF_CIC_TTColl.
-
-End Universe.
-
-(** Choices implies description:  ∃x. P(x) -> Σx. P(x) *)
-
-Section ChoicesImpliesDescription.
-
-Hypothesis choose : set -> set.
-Hypothesis choose_morph : morph1 choose.
-Hypothesis choose_ax : forall x, (exists y, y ∈ x) -> choose x ∈ x.
-
-Lemma description_from_choice A P (Pm:Proper (eq_set==>iff) P) : 
-  cc_lam (cc_exists A (fun x => P2p (P x))) (fun _ => choose (subset A P)) ∈
-  cc_arr (cc_exists A (fun x => P2p (P x))) (subset A P).
-apply cc_arr_intro; auto with *.
-intros.
-apply choose_ax.
-apply sup_ax in H.
- destruct H as (y,?,?).
- exists y; apply subset_intro; trivial.
- apply cond_set_ax in H0.
- destruct H0; trivial.
-
- do 2 red; intros.
- rewrite H2; reflexivity.
-Qed.
-
-End ChoicesImpliesDescription.

@@ -2,7 +2,7 @@
 (** A theory of dependent inductive families (here W-types) as a subset
     of a W-type *)
 
-Require Import ZF ZFpairs ZFrelations ZFord ZFstable ZFind_w ZFfixfun.
+Require Import ZF Zpairs Zrelations ZFord Zstable ZFind_w ZFfixfun.
 
 Section DependentW.
 
@@ -56,31 +56,22 @@ Qed.
 Lemma W_Fd_mono : mono_fam Arg W_Fd.
 do 2 red; intros.
 apply sigma_mono.
- do 2 red; intros.
- apply subset_elim1 in H3.
- apply cc_prod_ext; auto with *.
- red; intros.
- apply H; apply fm; auto.
-
- do 2 red; intros.
+*do 2 red; intros.
  apply subset_elim1 in H3.
  apply cc_prod_ext; auto with *.
  red; intros.
  apply H0; apply fm; auto.
 
- red; intros.
+*red; intros.
  rewrite subset_ax in H3|-*; destruct H3 as (?,(z',?,?)).
  split; trivial.
  exists z'; trivial.
 
- intros.
+*intros.
  apply subset_elim1 in H3.
  apply cc_prod_covariant; auto with *.
   do 2 red; intros.
   apply H0; apply fm; auto with *.
-
-  intros.
-  rewrite <- H4; apply H1; auto.
 Qed.
 Hint Resolve W_Fd_mono : core.
 
@@ -90,13 +81,6 @@ Lemma W_Fd_incl_W_F X Y :
   forall a, a ∈ Arg -> W_Fd X a ⊆ W_F A B Y.
 intros.
 apply sigma_mono.
- do 2 red; intros.
- apply subset_elim1 in H2.
- apply cc_prod_ext; auto with *.
- red; intros.
- apply H; auto.
- apply fm; trivial.
-
  do 2 red; intros; apply cc_arr_morph; auto with *.
 
  red; intros.
@@ -208,12 +192,12 @@ rewrite TIF_eq; auto with *.
 apply eq_set_ax; intros z.
 rewrite subset_ax.
 rewrite TI_eq; auto with *.
-rewrite sup_ax.
- rewrite sup_ax.
+rewrite sup_def.
+ rewrite sup_def.
   split; intros.
    destruct H3 as ((o',?,?),(z',?,?)).
    exists o'; trivial.
-   apply W_F_elim in H4; trivial.
+   apply W_F_elim in H4.
    destruct H4 as (?,(?,?)).
    rewrite H8.
    apply couple_intro_sigma.
@@ -265,12 +249,6 @@ rewrite sup_ax.
        rewrite <- H1 in H4; auto.
        rewrite subset_ax in H4; destruct H4 as (_,(w',?,?)).
        rewrite H4; trivial.
-
-       do 2 red; intros.
-       apply subset_elim1 in H7.
-       apply cc_prod_ext; auto.
-       red; intros; apply TIF_morph; auto with *.
-       apply fm; auto.
 
   do 2 red; intros.
   apply W_Fd_morph; auto with *.

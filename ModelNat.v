@@ -8,10 +8,10 @@ Set Implicit Arguments.
 
 Require Import basic.
 Require Import Models.
-Require Import ModelZF ZFnats.
+Require Import ModelZ ZFnats.
 
 (** We give an instance of the abstract model of CC + nats *)
-Module CCN <: CCNat_Model := ModelZF.CCM <+ ZFnats.
+Module CCN <: CCNat_Model := ModelZ.CCM <+ Znats <+ ZFnats.
 
 (** We derive the syntax and the typing rules *)
 Require Import GenModelNat.

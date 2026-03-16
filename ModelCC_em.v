@@ -1,7 +1,7 @@
 Require Import basic.
 Require Import Sublogic.
 Require Import Models GenModelSyntax.
-Require Import ZF ZFcoc.
+Require Import ZF Zcoc.
 
 (** Set-theoretical model of the Classical Calculus of Constructions in IZF *)
 

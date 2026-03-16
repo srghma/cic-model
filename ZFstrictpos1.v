@@ -1,4 +1,4 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFcoc ZFord.
+Require Import ZF Zpairs Zsum Zrelations Zcoc ZFord.
 Require Import ZFind_basic.
 Require Import ZFstrictpos.
 
@@ -175,12 +175,6 @@ induction eqp; simpl; intros; auto with *.
  apply prodcart_mono; auto.
 
  apply sigma_mono; auto with *.
-  do 2 red; intros.
-  apply dpos_oper_morph; auto with *.
-  transitivity (p2 x'); auto with *.
-  symmetry.
-  rewrite H3 in H2; auto with *.
-
   do 2 red; intros.
   apply dpos_oper_morph; auto with *.
   rewrite <- H in H2.
@@ -413,11 +407,8 @@ symmetry; apply subset_ext; intros.
 
    apply H0; trivial.
    rewrite <- (snd_def x0 y); rewrite <- H8.
-   apply snd_typ_sigma with (2:=H1).
-    do 2 red; intros; apply pos_oper_morph; auto with *.
-    apply tr_pos_morph; auto.
-
-    symmetry; rewrite H8; apply fst_def.
+   apply snd_typ_sigma with (1:=H1).
+   symmetry; rewrite H8; apply fst_def.
 
   (* Param *)
   inversion H2; clear H2; subst.
@@ -450,18 +441,11 @@ symmetry; apply subset_ext; intros.
 
   (* sigma *)
   revert x H1; apply sigma_mono; auto with *.
-   do 2 red; intros; apply dpos_oper_morph; auto with *.
-   apply DINDi_morph; auto with *.
-
    do 2 red; intros; apply pos_oper_morph; auto with *.
    apply tr_pos_morph; auto.
 
    red; intros.
    apply H0 with a; trivial.
-    rewrite <- H2; trivial.
-
-    revert H3; apply eq_elim; apply dpos_oper_morph; auto with *.
-    apply DINDi_morph; auto with *.
 
   (* cc_prod *)
   revert H1; apply cc_prod_covariant; auto with *.
@@ -503,9 +487,7 @@ symmetry; apply subset_ext; intros.
   assert (fst x ∈ A) by (apply fst_typ_sigma in H1; trivial).
   apply I_ConsNoRec with (fst x) (snd x); trivial.
    apply H0; trivial.
-   apply snd_typ_sigma with (2:=H1); auto with *.
-   do 2 red; intros; apply dpos_oper_morph; auto with *.
-   apply DINDi_morph; auto with *.
+   apply snd_typ_sigma with (1:=H1); auto with *.
 
    apply surj_pair with (1:=subset_elim1 _ _ _ H1).
 
@@ -528,7 +510,7 @@ destruct H2.
 rewrite H2 in H1|-*; clear z H2.
 apply TI_elim in H1; auto with *.
 destruct H1.
-rewrite sup_ax.
+rewrite sup_def.
  2:do 2 red; intros; apply dpos_oper_morph; auto with *.
  2:apply DINDi_morph; auto with *.
 exists x0; trivial.
@@ -537,9 +519,7 @@ apply subset_intro; trivial.
 rewrite INDi_succ_eq; eauto using isOrd_inv.
 
 rewrite sup_ax in H1.
- 2:do 2 red; intros; apply dpos_oper_morph; auto with *.
- 2:apply DINDi_morph; auto with *.
-destruct H1.
+destruct H1 as (?,?,(_,?)).
 rewrite <- DINDi_eq in H2; eauto using isOrd_inv.
 revert H2; apply DINDi_mono; eauto using isOrd_inv.
 red; intros.
@@ -578,9 +558,7 @@ rewrite DIND_eq; trivial.
 rewrite DINDi_eq2; trivial.
 red; intros.
 rewrite sup_ax in H3.
- 2:do 2 red; intros; apply dpos_oper_morph; auto with *.
- 2:apply DINDi_morph; auto with *.
-destruct H3.
+destruct H3 as (?,?,(_,?)).
 revert H4; apply dpos_oper_mono; auto with *.
  apply DINDi_morph; auto with *.
 Qed.

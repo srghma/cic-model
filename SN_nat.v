@@ -6,19 +6,20 @@
  *)
 
 Set Implicit Arguments.
-Require Import basic ZF ZFcoc ZFuniv_real ZFnats.
+Require Import basic ZF Zcoc ZFuniv_real ZFnats.
 Require Import Sat SATnat SN_CC_Real.
 Module Lc:=Lambda.
 
 (* Building the realizability on the nats of ZFnats *)
-Require ModelZF.
-Module natARG <: SimpleNats ModelZF.ZFsets.
+Require ModelZ.
+Module natARG <: SimpleNats ModelZ.Zsets.
+  Include Znats.
   Include ZFnats.
   Definition Nbot := N.
  Definition N_Nbot : forall x:X, x∈N -> x ∈Nbot := fun _ h => h.
  Definition Ndec n (h:n∈Nbot) : n∈N \/ ~n∈N := or_introl _ h.
 End natARG.
-Module SAT_nat := SATnat.Make(ModelZF.ZFsets)(natARG).
+Module SAT_nat := SATnat.Make(ModelZ.Zsets)(natARG).
 Export natARG SAT_nat.
 Export CC_Real.
 

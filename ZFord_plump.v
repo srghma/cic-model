@@ -269,13 +269,13 @@ Qed.
 Lemma isOrd_eq : forall o, isOrd o -> o == sup o osucc.
 intros.
 apply eq_intro; intros.
- rewrite sup_ax.
+ rewrite sup_def.
  2:do 2 red; intros; apply osucc_morph; trivial.
  exists z; auto.
  apply lt_osucc.
  apply isOrd_inv with o; trivial.
 
- rewrite sup_ax in H0.
+ rewrite sup_def in H0.
  2:do 2 red; intros; apply osucc_morph; trivial.
  destruct H0.
  apply le_lt_trans with x; trivial.
@@ -603,13 +603,13 @@ Section OrdinalUpperBound.
 
   Lemma isOrd_supf_intro : forall n, n ∈ I -> f n ⊆ sup I f.
 red; intros.
-rewrite sup_ax; trivial.
+rewrite sup_def; trivial.
 exists n; trivial.
 Qed.
 
   Lemma isOrd_supf_elim : forall x, lt x (sup I f) -> exists2 n, n ∈ I & lt x (f n).
 intros.
-rewrite sup_ax in H; trivial.
+rewrite sup_def in H; trivial.
 Qed.
 
   Lemma isOrd_supf : isOrd (sup I f).
@@ -654,13 +654,13 @@ Lemma toOrd_ord : forall o, isOrd o -> toOrd o == o.
 intros.
 unfold toOrd.
 apply eq_intro; intros.
- rewrite sup_ax in H0.
+ rewrite sup_def in H0.
  2:red; red; intros; rewrite H2; reflexivity.
  destruct H0.
  apply le_lt_trans with x; auto.
  apply subset_elim1 with (1:=H0).
 
- rewrite sup_ax.
+ rewrite sup_def.
  2:red; red; intros; rewrite H2; reflexivity.
  exists z.
   apply subset_intro; trivial.
@@ -1027,7 +1027,7 @@ Qed.
     x ∈ TI o.
 intros.
 rewrite TI_eq; trivial.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 exists o'; trivial.
 Qed.
 
@@ -1037,7 +1037,7 @@ Qed.
     exists2 o', lt o' o & x ∈ F (TI o').
 intros.
 rewrite TI_eq in H0; trivial.
-rewrite sup_ax in H0; auto.
+rewrite sup_def in H0; auto.
 Qed.
 
   Lemma TI_initial : TI zero == empty.

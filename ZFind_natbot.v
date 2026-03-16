@@ -1,7 +1,7 @@
 Set Implicit Arguments.
-Require Import ZF ZFpairs ZFsum ZFnats ZFrelations ZFord ZFfix ZFstable.
+Require Import ZF Zpairs Zsum Znats Zrelations ZFwfr ZFord ZFfix Zstable.
 Require Import ZFgrothendieck.
-Require Import ZFlist ZFcoc.
+Require Import Zcoc.
 Require Export ZFind_nat.
 
 (** In this file we develop an alternative model of nat contain the empty set.
@@ -53,8 +53,8 @@ Require Import ZFcont.
 intros.
 apply eq_set_ax; intros z.
 rewrite cc_bot_ax.
-rewrite sup_ax; auto with *.
-rewrite sup_ax.
+rewrite sup_def; auto with *.
+rewrite sup_def.
  split; intros.
   destruct H1 as [?|(w,?,?)]; eauto.
   destruct H0 as (w,?).
@@ -91,7 +91,7 @@ rewrite <- NAT'_continuous; trivial.
 apply (Fmono_morph _ NATf'_mono).
 unfold NAT'.
 apply eq_set_ax; intros z.
-rewrite sup_ax; auto.
+rewrite sup_def; auto.
 split; intros.
  destruct H0 as (o,?,?).
  assert (isOrd o) by eauto using isOrd_inv.

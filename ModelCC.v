@@ -1,7 +1,7 @@
 Require Import basic.
 Require Import Sublogic.
 Require Import Models GenModelSyntax.
-Require Import ZF ZFrelations ZFcoc ModelZF.
+Require Import ZF Zrelations Zcoc ModelZ.
 Require Term Env TypeJudge.
 
 (** Set-theoretical model of the Calculus of Constructions in IZF *)

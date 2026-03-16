@@ -1,7 +1,7 @@
 Require Export ZFrepl.
 Require Export ZFnats.
 Require Export ZFind_basic.
-Require Export ZFcoc.
+Require Export Zcoc.
 
 
 Instance succ_m2 : morph2 (fun _ => succ).

@@ -1,4 +1,4 @@
-Require Import ZF ZFnats ZFord ZFcoc ZFwdom ZFcow.
+Require Import ZF Znats ZFord Zcoc ZFwdom ZFcow.
 Require Import ZFwsimul.
 Import ZFcofix.
 
@@ -65,29 +65,36 @@ apply Scons_typ_gen; auto with *.
 Qed.
 
   Lemma Scons_mono_raw x x' s s' :
+    isWobj s ->
+    isWobj s' ->
     x == x' ->
     s ⊆ s' ->
     Scons x s ⊆ Scons x' s'.
-intros eqx incls.
-apply ZFwdom.Wsup_mono with (B:=Bstrm); auto with *.
-+apply is_cc_fun_lam; auto with *.
-+intros.
- rewrite cc_beta_eq; auto.
- rewrite cc_beta_eq; auto.
+intros sw sw' eqx incls.
+apply Zwdom.Wsup_mono; auto with *.
+*apply isWfun_cc_lam;auto.
+*apply isWfun_cc_lam;auto.
+*intros.
+ rewrite cc_lam_def in H|-*; auto with *.
+ destruct H as (n,?,(y,?,?)).
+ exists n;[|exists y]; auto.
 Qed.
   
   Lemma Scons_mono X x s :
+    (forall x, x ∈ X -> isWobj (s x)) ->
     mono_bounded X s ->
     mono_bounded X (fun i => Scons x (s i)).
-unfold mono_bounded; intros smono; intros.
-apply Scons_mono_raw; [reflexivity|auto].
+unfold mono_bounded; intros sw smono; intros.
+apply Scons_mono_raw; auto with *.
 Qed.
 
   Lemma Scons_imono I X x s :
+    (forall f i, i ∈ I -> typ_fun f I X -> isWobj (s f i)) ->
+    (forall w, w ∈ X -> isWobj w) ->
     imono_bounded I X s ->
     imono_bounded I X (fun f i => Scons (x i) (s f i)).
-unfold imono_bounded; intros smono; red; intros.
-apply Scons_mono_raw; [reflexivity|].
+unfold imono_bounded; intros sw Xw smono; red; intros.
+apply Scons_mono_raw; auto with *.
 apply smono; auto.
 Qed.
 
@@ -112,9 +119,9 @@ Qed.
 intros oo tys.
 assert (e : cc_app (cc_lam (succ zero) (fun _ => s)) zero == s).
 {rewrite cc_beta_eq; auto with *. apply succ_intro1; reflexivity. }
-unfold tl, Scons; rewrite Wsnd_def with (A:=A)(B:=Bstrm); trivial.
-rewrite e.
-apply COWi_typ in tys; trivial.
+unfold tl, Scons; rewrite Wsnd_def; trivial.
+apply isWfun_cc_lam; intros; auto.
+eapply Wdom_Wobj; apply COWi_typ with (3:=tys); trivial.
 Qed.
 
 
@@ -179,7 +186,9 @@ Qed.
   
   Lemma mono_rpt : mono_bounded sdom (fun s => Scons x s).
 apply Scons_mono with (s:=fun s=>s).
-apply mono_bounded_id.
+*intros.
+ apply Wdom_Wobj with (1:=H).
+*apply mono_bounded_id.
 Qed.
 
 Hint Resolve rpt_m rpt_typ mono_rpt : core.
@@ -224,7 +233,11 @@ Qed.
   
   Lemma frm_mono : imono_bounded A sdom (fun frm x => Scons x (frm (f x))).
 apply Scons_imono.
-apply imono_bounded_inst; trivial.
+*intros.
+ eapply Wdom_Wobj; apply H0; auto.
+*intros.
+ apply Wdom_Wobj with (1:=H).
+*apply imono_bounded_inst; trivial.
 Qed.
 
   Hint Resolve frm_m frm_typ frm_mono : core.
@@ -317,8 +330,8 @@ Qed.
 red; intros.
 intros z.
 unfold map.
-rewrite Wfmap_def with (2:=H); trivial.
-rewrite Wfmap_def with (2:=H0); trivial.
+rewrite Wfmap_def with (2:=Wdom_Wobj _ _ _ H); trivial.
+rewrite Wfmap_def with (2:=Wdom_Wobj _ _ _ H0); trivial.
 intros (w,?,?); exists w;[trivial|].
 apply H1; trivial.
 Qed.
@@ -345,7 +358,10 @@ Qed.
     mono_bounded sdom (fun s => Scons x (map s)).
 intros tyx.
 apply Scons_mono.
-apply map_mono.
+*intros.
+ apply Wfmap_Wobj; trivial.
+ eapply Wdom_Wobj with (1:=H).
+*apply map_mono.
 Qed.
 
 Hint Resolve altfrmm altfrm_typ altfrm_mono : core.

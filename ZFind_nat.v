@@ -1,6 +1,6 @@
-Require Import ZF ZFsum ZFfix ZFnats ZFrelations ZFord ZFcont ZFrank.
+Require Import ZF Zpairs Zsum ZFfix Znats Zrelations ZFord ZFcont ZFrank.
 Require Import ZFind_basic.
-Require Import ZFfunext ZFfixrec.
+Require Import Zfunext ZFfixrec.
 
 Section Nat_theory.
 
@@ -261,11 +261,11 @@ rewrite union2_ax in H; do 2 rewrite cond_set_ax in H.
 destruct H as [(_,?)|(_,(k,?))].
  (* ~ empty == ZERO *)
  rewrite eqn in H.
- apply ZFpairs.discr_mt_couple in H; trivial.
+ apply discr_mt_couple in H; trivial.
 
  (* ~ empty == SUCC _ *)
  rewrite eqn in H.
- apply ZFpairs.discr_mt_couple in H; trivial.
+ apply discr_mt_couple in H; trivial.
 Qed.
 
 Lemma NATCASE_mt :
@@ -492,8 +492,7 @@ apply eq_intro; intros.
  2:exists zero; auto.
  rewrite sum_cont in H; auto.
  rewrite sup_ax in H.
- 2:do 2 red; intros; apply NATf_morph; eapply NATfun_ext; eauto.
- destruct H.
+ destruct H as (?,?,(_,?)).
  rewrite <- TI_mono_succ in H0; auto.
  apply TI_intro with (osucc x); auto.
  apply isOrd_inv with omega; trivial.
@@ -507,7 +506,7 @@ unfold NATi.
 rewrite TI_eq; auto.
 red; intros.
 rewrite sup_ax in H2; auto.
-destruct H2.
+destruct H2 as (?,?,(_,?)).
 rewrite NAT_eq.
 apply NATf_mono with (NATi x); auto.
 Qed.

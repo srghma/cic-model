@@ -1,4 +1,4 @@
-Require Import ZF ZFsum ZFfix ZFnats ZFrelations ZFord ZFcard ZFcont.
+Require Import ZF Zsum ZFfix ZFnats Zrelations ZFord ZFcard ZFcont.
 Require Import ZFstable ZFrank ZFgrothendieck ZFinaccessible.
 Require Import ZFind_basic ZFind_nat.
 Import ZFrepl.
@@ -223,7 +223,7 @@ rewrite sup_ax in H|-*.
 2:admit.
 2:admit.
 destruct H as (R,woR,otR).
-Require Import ZFpairs.
+Require Import Zpairs.
 pose (R' :=
    union2
     (replf R (fun p => couple (SUCC (fst p)) (SUCC (snd p)))) (* shift R *)
@@ -502,7 +502,7 @@ intros.
 unfold ORDf.
 unfold sum.
 apply VN_subset; trivial.
-unfold ZFpairs.prodcart.
+unfold Zpairs.prodcart.
 apply VN_subset; trivial.
 apply VNlim_power; trivial.
 apply VNlim_power; trivial.
@@ -515,7 +515,7 @@ unfold func.
 apply VN_subset; trivial.
 unfold rel.
 apply VNlim_power; trivial.
-unfold ZFpairs.prodcart.
+unfold Zpairs.prodcart.
 apply VN_subset; trivial.
 apply VNlim_power; trivial.
 apply VNlim_power; trivial.
@@ -529,20 +529,20 @@ red; intros.
 apply ORDf_case with (3:=H0); intros.
  rewrite H1.
  unfold ZERO, inl.
- unfold ZFpairs.couple.
+ unfold Zpairs.couple.
  apply VNlim_pair; trivial.
   apply VNlim_pair; trivial.
   apply VNlim_pair; trivial.
 
  rewrite H2; unfold LIM.
  unfold inr.
- unfold ZFpairs.couple.
+ unfold Zpairs.couple.
  apply VNlim_pair; trivial.
   apply VNlim_pair; auto.
 
-Import ZFrelations.
+Import Zrelations.
   apply VNlim_pair; auto.
-  pose (F n := inter (subset o (fun x => ZFpairs.couple  n (app f n) ∈ VN x))).
+  pose (F n := inter (subset o (fun x => Zpairs.couple  n (app f n) ∈ VN x))).
   assert (eS : ext_fun (func NAT o) (fun f0 => sup NAT (app f0))).
    red; red; intros.
    apply sup_morph; auto with *.
@@ -554,7 +554,7 @@ Import ZFrelations.
    apply subset_morph; auto with *.
    red; intros.
    rewrite H4; reflexivity.
-  assert (pF : forall n, n ∈ NAT -> lt (F n) o /\ ZFpairs.couple n (app f n) ∈ VN (F n)). 
+  assert (pF : forall n, n ∈ NAT -> lt (F n) o /\ Zpairs.couple n (app f n) ∈ VN (F n)). 
    intros.
    assert (app f n ∈ X).
     apply app_typ with NAT; auto.
@@ -573,7 +573,7 @@ Import ZFrelations.
 
 
 
-   assert (ZFpairs.couple n (app f n) ∈ VN (osucc (osucc (osucc x1)))).
+   assert (Zpairs.couple n (app f n) ∈ VN (osucc (osucc (osucc x1)))).
     assert (n ∈ VN (osucc x1)).
      apply VN_incl with (VN x0); auto.
      apply VN_mono; auto.
@@ -643,11 +643,11 @@ Import ZFrelations.
   rewrite H4.
   unfold lam.
   apply VN_incl with (VN (osup NAT F)); auto.
-   assert (eSS : ext_fun NAT (fun x : set => singl (ZFpairs.couple x (app f x)))).
+   assert (eSS : ext_fun NAT (fun x : set => singl (Zpairs.couple x (app f x)))).
     red; red; intros.
     rewrite H6; reflexivity.
-   setoid_replace (replf NAT (fun x => ZFpairs.couple x (app f x)))
-     with (sup NAT (fun x => singl (ZFpairs.couple x (app f x)))).
+   setoid_replace (replf NAT (fun x => Zpairs.couple x (app f x)))
+     with (sup NAT (fun x => singl (Zpairs.couple x (app f x)))).
     red; intros.
     rewrite sup_ax in H5; trivial.
     destruct H5.
@@ -664,7 +664,7 @@ Import ZFrelations.
      apply osup_intro; trivial.
 
      apply pF; trivial.
-    assert (ext_fun NAT (fun x : set => ZFpairs.couple x (app f x))).
+    assert (ext_fun NAT (fun x : set => Zpairs.couple x (app f x))).
      red; red; intros.
      rewrite H6; reflexivity.
     apply eq_intro; intros.

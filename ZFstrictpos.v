@@ -1,6 +1,4 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFcoc ZFord ZFfix.
-
-Require Import ZFstable.
+Require Import ZF Zstable Zpairs Zsum Zrelations Zcoc ZFord ZFfix.
 
 (** Here we define the (semantic) notion of strict positiveness.
    We then show that it fulfills all the requirements for the existence
@@ -133,19 +131,13 @@ Lemma pos_oper_mono :
 do 2 red; intros.
 red.
 induction H; simpl; intros; auto with *.
- rewrite H; reflexivity.
+*rewrite H; reflexivity.
 
- apply sum_mono; auto.
+*apply sum_mono; auto.
 
- apply prodcart_mono; auto.
+*apply prodcart_mono; auto.
 
- apply sigma_mono; auto with *.
-  do 2 red; intros.
-  apply pos_oper_morph; auto with *.
-  transitivity (p2 x'); auto with *.
-  symmetry.
-  rewrite H4 in H3; auto with *.
-
+*apply sigma_mono; auto with *.
   do 2 red; intros.
   apply pos_oper_morph; auto with *.
   rewrite <- H in H3.
@@ -154,7 +146,7 @@ induction H; simpl; intros; auto with *.
 
   rewrite H; reflexivity.
 
- apply cc_prod_covariant; auto with *.
+*apply cc_prod_covariant; auto with *.
  do 2 red; intros.
  apply pos_oper_morph; auto with *.
  rewrite <- H in H3.
@@ -175,22 +167,17 @@ Qed.
 
 Hint Resolve sp_morph : core.
 
-Lemma sp_stable : forall p, eq_pos p p -> stable (pos_oper p).
+Lemma sp_stable Y : forall p, eq_pos p p -> stable_set Y (pos_oper p).
 intros.
 apply pos_rect with (7:=H); simpl; intros.
- apply cst_stable_class.
-
- apply id_stable_class.
-
- apply sum_stable_class; eauto.
-
- apply prodcart_stable_class; eauto.
-
- apply sigma2_stable_class; trivial; intros.
- apply pos_oper_morph; auto.
-
- apply cc_prod_stable_class; trivial; intros.
- apply pos_oper_morph; auto.
+*apply cst_stable_set.
+*apply id_stable_set.
+*apply sum_stable_set with (K:=Y); eauto.
+*apply prodcart_stable_set; eauto.
+*apply sigma2_stable_set; [|auto].
+ intros; apply pos_oper_morph; auto.
+*apply cc_prod_stable_set; [|auto].
+ intros; apply pos_oper_morph; auto.
 Qed.
 
 
@@ -215,12 +202,11 @@ apply pos_oper_mono; trivial.
 Qed.
 
   Lemma INDi_stable : forall p, eq_pos p p -> stable_ord (INDi p).
-unfold INDi; intros.
-apply TI_stable with (fun _ => True); trivial.
-2:do 2 red; reflexivity.
+unfold INDi; red; intros.
+apply TI_stable; trivial.
  apply pos_oper_mono; trivial.
 
- apply sp_stable; trivial.
+ apply sp_stable; auto with *.
 Qed.
 
   Lemma INDi_mono : forall p o o',
@@ -1119,7 +1105,7 @@ unfold INDi.
 rewrite TI_eq; auto.
 red; intros.
 rewrite sup_ax in H2; auto.
-destruct H2.
+destruct H2 as (?,?,(_,?)).
 rewrite IND_eq.
 revert H3; apply sp_mono; auto.
 apply H1; trivial.
@@ -1132,11 +1118,10 @@ Section InductiveUniverse.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.
+  Hypothesis Unontriv : Znats.N ∈ U.
 
   Let Unonmt : empty ∈ U.
-apply G_trans with omega; trivial.
-apply zero_omega.
+apply G_inf_nontriv; trivial.
 Qed.
 
   Inductive pos_universe : positive -> Prop :=
@@ -1197,10 +1182,7 @@ Qed.
     eq_pos p p ->
     pos_universe p -> x ∈ pos_to_w1 p -> pos_to_w2 p x ∈ U.
 intros p_ok.
-revert x; elim p_ok using pos_rect; simpl; intros.
- apply G_trans with omega; trivial.
- apply zero_omega.
-
+revert x; elim p_ok using pos_rect; simpl; intros; trivial.
  apply G_singl; trivial.
 
  inversion_clear H3.
@@ -1225,8 +1207,7 @@ revert x; elim p_ok using pos_rect; simpl; intros.
   apply H4.
   apply fst_typ_sigma in H2; trivial.
 
-  apply snd_typ_sigma with (2:=H2); auto with *.
-  do 2 red; intros; apply pos_to_w1_morph; auto.
+  apply snd_typ_sigma with (1:=H2); auto with *.
 
  inversion_clear H1.
  apply G_sigma; trivial.

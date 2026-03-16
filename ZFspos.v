@@ -1,5 +1,5 @@
-Require Import ZF ZFpairs ZFsum ZFrelations ZFord ZFfix.
-Require Import ZFstable ZFiso ZFind_w.
+Require Import ZF Zpairs Zsum Zrelations ZFord ZFfix.
+Require Import Zstable ZFiso ZFind_w.
 
 (** Here we define the (semantic) notion of strictly positiveness.
    We then show that it fulfills all the requirements for the existence
@@ -79,23 +79,13 @@ Qed.
 Hint Resolve w2_morph' pos_oper_morph0 : core.
 
 (* pos_oper is stable by isomorphism with W_F *)
-Lemma pos_oper_stable : forall p, isPositive p ->
-  stable (pos_oper p).
-intros.
+Lemma pos_oper_stable K : forall p, isPositive p ->
+  stable_set K (pos_oper p).
 red; red; intros.
 assert (WFm : morph1 (W_F (w1 p) (w2 p))).
- apply W_F_morph.
- apply w2m; trivial.
-(*assert (WFm : ext_fun X (W_F (w1 p) (w2 p))).
- do 2 red; intros; apply W_F_ext; auto with *.
- apply H.*)
-(*assert (posm : morph1 (pos_oper p)).
- do 2 red; intros.
- apply (Fmono_morph _ (pos_mono p H)); trivial.*)
-(*assert (posm' : ext_fun X (pos_oper p)).
-do 2 red; intros; apply posm; trivial.*)
-red; intros.
-destruct inter_wit with (2:=H1) as (w,?); auto.
+{apply W_F_morph.
+ apply w2m; trivial. }
+destruct inter_wit with (1:=H1) as (w,?).
 apply iso_fun_narrow with
  (1:=w_iso _ H (inter X)) (2:=w_iso _ H w).
  apply pos_mono; trivial.
@@ -105,18 +95,16 @@ apply iso_fun_narrow with
  apply inter_elim with (1:=H1).
  rewrite replf_ax; eauto with *.
 
- apply W_F_stable;[apply w2m; trivial|apply H0|].
+ apply W_F_stable with (X:=K);[apply w2m; trivial|apply H0|].
  apply inter_intro; intros.
  rewrite replf_ax in H3; trivial.
- destruct H3.
+ destruct H3 as (?,?,(_,?)).
  rewrite H4.
  apply (iso_typ (w_iso _ H x)).
  apply inter_elim with (1:=H1).
- rewrite replf_ax; eauto with *.
- apply morph_is_ext; trivial.
+ rewrite replf_def; eauto with *.
 
  econstructor; rewrite replf_ax; eauto with *.
- econstructor; [ exact H2|reflexivity].
 Qed.
 
 
@@ -155,13 +143,10 @@ apply H.
 Qed.
 
   Lemma INDi_stable : forall p, isPositive p -> stable_ord (INDi p).
-unfold INDi; intros.
-apply TI_stable with (fun _=>True); auto.
+unfold INDi; red; intros.
+apply TI_stable; trivial.
  apply H.
-
- do 2 red; reflexivity.
-
- apply pos_oper_stable; trivial.
+ eapply pos_oper_stable; trivial.
 Qed.
 
   Lemma INDi_mono : forall p o o',
@@ -228,8 +213,6 @@ destruct TI_iso_fun with
  red; intros; unfold wf', comp_iso.
  apply WFmap_ext with (A:=w1 p); trivial.
   eapply W_F_elim.
-   apply (w2m _ p_ok).
-
    apply (iso_typ (w_iso _ p_ok (TI (pos_oper p) o))); trivial.
 
   apply fst_morph.
@@ -237,8 +220,6 @@ destruct TI_iso_fun with
   intros.
   apply H1.
    eapply W_F_elim.
-    apply (w2m _ p_ok).
-
     apply (iso_typ (w_iso _ p_ok (TI (pos_oper p) o))); trivial.
 
     trivial.
@@ -284,7 +265,7 @@ unfold INDi.
 rewrite TI_eq; auto.
 red; intros.
 rewrite sup_ax in H2; auto.
-destruct H2.
+destruct H2 as (?,?,(_,?)).
 rewrite IND_eq.
 revert H3; apply p_ok; auto.
 apply H1; trivial.
@@ -734,19 +715,17 @@ Lemma isPos_consnonrec A F :
   (forall x, x ∈ A -> isPositive (F x)) ->
   isPositive (pos_norec A F).
 constructor; simpl.
- do 2 red; intros; apply sigma_mono; intros; auto with *.
-  do 2 red; intros; apply pos_oper_morph; auto with *.
+*do 2 red; intros; apply sigma_mono; intros; auto with *.
   do 2 red; intros; apply pos_oper_morph; auto with *.
 
-  rewrite <- H3.
   apply @pos_mono; auto.
 
- do 2 red; intros.
+*do 2 red; intros.
  apply H.
   apply fst_morph; trivial.
   apply snd_morph; trivial.
 
- intros X; apply iso_arg_norec with (B:=fun x y => w2 (F x) y); intros.
+*intros X; apply iso_arg_norec with (B:=fun x y => w2 (F x) y); intros.
   do 2 red; intros; apply pos_oper_morph; auto with *.
   do 2 red; intros; apply w1_morph; auto with *.
   red; intros; apply w2_morph; auto with *.
@@ -949,11 +928,10 @@ Section InductiveUniverse.
 
   Variable U : set.
   Hypothesis Ugrot : grot_univ U.
-  Hypothesis Unontriv : omega ∈ U.
+  Hypothesis Unontriv : Znats.N ∈ U.
 
   Let Unonmt : empty ∈ U.
-apply G_trans with omega; trivial.
-apply zero_omega.
+apply G_inf_nontriv; trivial.
 Qed.
 
 
@@ -1055,7 +1033,6 @@ split; simpl; intros.
    apply fst_typ_sigma in H2; trivial.
 
    apply snd_typ_sigma with (y:=fst x) in H2; auto with *.
-   do 2 red; intros; apply w1_morph; auto.
 Qed.
 
   Lemma pos_univ_param A p' :

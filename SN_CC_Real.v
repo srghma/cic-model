@@ -1,12 +1,12 @@
 From Stdlib Require Import Relations Wellfounded.
 Require Import Sat.
-Require Import ZFcoc ZFuniv_real.
+Require Import Zcoc ZFuniv_real.
 Require Import ZFlambda.
 Require Import Models SnModels.
 Require GenRealSN.
 Set Implicit Arguments.
 Module Lc := Lambda.
-Import ZF ZFrelations.
+Import ZF Zrelations.
 
 (** Strong normalization proof of the Calculus of Constructions.
     It is based on GenRealSN, so it does support strong eliminations.
@@ -214,7 +214,7 @@ apply cc_eta_eq in H3; trivial.
 Qed.
 
 (** ** Choice *)
-(*Require Import ZFcoc SATtypes.
+(*Require Import Zcoc SATtypes.
 Module Lc:=Lambda.
 
 Definition Ch (X:term) : term.
@@ -341,7 +341,7 @@ split.
 Definition Tr (X:term) : term.
 (* begin show *)
 left;
-exists (fun i => mkTY (ZFcoc.trunc (El(int X i)))
+exists (fun i => mkTY (Zcoc.trunc (El(int X i)))
                       (fun _ => interSAT(fun Y:{Y|forall x,x ∈El(int X i)->
                                            inclSAT(Real (int X i) x) Y}=>proj1_sig Y)))
        (fun j => tm X j).
