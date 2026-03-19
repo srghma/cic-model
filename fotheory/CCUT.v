@@ -1,7 +1,7 @@
 Require Import Models.
 Require Import GenModelSN.
 Require Import ZF Zpairs.
-Require Import ZFind_nat ZFlambda Sat.
+Require Import ZFind_nat Zlambda Sat.
 
 Require Import SN_CC.
 
@@ -28,7 +28,7 @@ Lemma inSAT_Real : forall x t S,
 intros.
 unfold Real, mkTY.
 rewrite snd_def.
-rewrite ZFlambda.iSAT_id; trivial.
+rewrite Zlambda.iSAT_id; trivial.
 Qed.
 
 Lemma inSAT_Real_rev : forall x t S,
@@ -45,7 +45,7 @@ apply subset_elim2 in H2.
 destruct H2.
 destruct H3.
 rewrite H4 in H2.
-apply ZFlambda.iLAM_inj in H2.
+apply Zlambda.iLAM_inj in H2.
 subst x2.
 trivial.
 Qed.

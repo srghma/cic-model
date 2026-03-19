@@ -3,13 +3,17 @@ Require Import Models.
 Require Import TypeJudge.
 Require GenModel.
 
-(* Finally introducing the syntax... *)
+(** The functor MakeModelSyntax produces both the semantic judgements
+    (as done by GenModel) and the translation from the syntactic judgements
+    to the semantic ones (and the soundeness property).
+ *)
 
-Module MakeModel (Import M : CC_Model).
+Module MakeModelSyntax (Import M : CC_Model).
 Include GenModel.MakeModel M.
 Import T.
 Import Term.
   
+(* Finally introducing the syntax... *)
 Fixpoint int_trm t :=
   match t with
   | Srt prop => T.prop
@@ -238,17 +242,24 @@ Load "template/Library.v".
     valid_context e = true -> forall M M', ~ eq_typ e M M' FALSE.
 *)
 
-  Lemma non_provability : forall T,
+  Lemma non_provability T :
     (forall x, ~ el (int_trm (unmark_app T)) vnil x) ->
     forall M M', ~ eq_typ nil M M' T.
-red in |- *; intros.
+red; intros.
 apply int_sound in H0.
 destruct H0 as (H0,_).
-red in H0.
-apply H with (int (int_trm (unmark_app M)) vnil).
-apply H0.
-red; intros.
-destruct n; discriminate.
+apply abstract_non_provability in H0; [trivial|eauto].
 Qed.
 
-End MakeModel.
+  Lemma consistency M M' FF :
+  FF ∈ props ->
+  (forall x, ~ x ∈ FF) ->
+  ~ eq_typ nil M M' (Prod (Srt prop) (Ref 0)).
+red; intros.
+apply int_sound in H1.
+destruct H1 as (H1,_).
+apply  abstract_theory_consistency with (FF:=FF) in H1;trivial.
+exists vnil; trivial.
+Qed.
+
+End MakeModelSyntax.

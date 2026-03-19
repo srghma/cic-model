@@ -379,7 +379,7 @@ apply fa_morph; intros z.
 rewrite H0; reflexivity.
 Qed.
 
-Lemma grot_succ_ub_sound UU x :
+Lemma Zuniv_succ_ub_sound UU x :
   (exists U, Zuniv U /\ x ∈ U /\ U ⊆ UU) ->
   Zuniv_succ_pred x (Zuniv_succ_ub UU x).
 intros has_ub.

@@ -1,6 +1,6 @@
 Require Import ZF Zpairs Zrelations ZFord Zstable.
 Require Import ZFgrothendieck.
-Require Import Zfunext ZFfix ZFfixrec.
+Require Import ZFfix ZFfixrec.
 Require Import ZFw.
 Require Import ZFiso.
 

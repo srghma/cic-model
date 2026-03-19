@@ -1,7 +1,7 @@
 (** Specialized version of transfinite recursion where the case of limit
    ordinals is union and the stage ordinal is fed to the step function.  *)
 
-Require Import ZF Zrelations Znats ZFord Zfunext.
+Require Import ZF Zrelations Znats Zfunext ZFord.
 
 Definition continuous (T:set->set) :=
   forall o, isOrd o -> T o == sup o (fun o' => T (osucc o')).

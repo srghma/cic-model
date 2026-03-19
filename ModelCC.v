@@ -8,63 +8,35 @@ Require Term Env TypeJudge.
 
 (** * Instantiating the generic model construction *)
 
-Module BuildModel := MakeModel(CCM).
+Module BuildModel := MakeModelSyntax(CCM).
 
 Import BuildModel T J R.
 
-Lemma El_int_arr T U i :
-  int (Prod T (lift 1 U)) i == cc_arr (int T i) (int U i).
-simpl.
-apply cc_prod_ext.
- reflexivity.
-
- red; intros.
- rewrite simpl_int_lift.
- rewrite lift0_term; reflexivity.
-Qed.
 (** Subtyping *)
 
-(*
-Definition sub_typ_covariant : forall e U1 U2 V1 V2,
-  U1 <> kind ->
+Lemma sub_typ_covariant e U1 U2 V1 V2 :
   eq_typ e U1 U2 ->
   sub_typ (U1::e) V1 V2 ->
   sub_typ e (Prod U1 V1) (Prod U2 V2).
-intros.
-apply sub_typ_covariant; trivial.
-intros.
-unfold eqX, lam, app.
-unfold inX in H2.
-unfold prod, ZFuniv_real.prod in H2; rewrite El_def in H2.
-apply cc_eta_eq in H2; trivial.
-Qed.
-*)
-
-(** Universes *)
-(*
-Lemma cumul_Type : forall e n, sub_typ e (type n) (type (S n)).
-red; simpl; intros.
+Proof.
 red; intros.
-apply ecc_incl; trivial.
+simpl in H2|-*.
+unfold CCM.inX, CCM.prod in *.
+revert x H2; apply cc_prod_covariant.
+*do 2 red; intros.
+ rewrite H3; reflexivity.
+*apply H; trivial.
+*intros.
+ intros z; apply H0.
+ apply vcons_add_var; trivial.
 Qed.
-
-Lemma cumul_Prop : forall e, sub_typ e prop (type 0).
-red; simpl; intros.
-red; intros.
-apply G_trans with props; trivial.
- apply (grot_succ_typ gr).
-
- apply (grot_succ_in gr).
-Qed.
-*)
-
 
 (** The model in ZF implies the consistency of CC *)
 
 Import Term Env TypeJudge.
 Load "template/Library.v".
 
-Lemma cc_consistency : forall M M', ~ eq_typ nil M M' FALSE.
+Theorem cc_consistency : forall M M', ~ eq_typ nil M M' FALSE.
 Proof.
 unfold FALSE; red in |- *; intros.
 specialize BuildModel.int_sound with (1 := H); intro.
@@ -76,3 +48,4 @@ apply abstract_consistency with (M:=int_trm(unmark_app M)) (FF:=empty); trivial.
  red; intros.
  apply empty_ax with (1:=H1); trivial.
 Qed.
+Print Assumptions cc_consistency.

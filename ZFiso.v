@@ -1,6 +1,6 @@
 Require Import basic Zpairs Zsum Zrelations.
 Require Import ZFcont.
-Require Import ZFord ZFfix Zfunext ZFfixrec.
+Require Import ZFord ZFfix ZFfixrec.
 Require Import ZFfixfun.
 Import ZF.
 Require Export Ziso.

@@ -4,7 +4,7 @@
 
 From Stdlib Require Import List Bool.
 Require Import Models TypModels.
-Require Import ZF Zsum Znats Zrelations ZFord ZFfix ZFgrothendieck Zcoc ZFecc.
+Require Import ZF Zsum Znats Zrelations ZFgrothendieck Zcoc ZFecc.
 Require Import ModelCC.
 
 Import BuildModel.

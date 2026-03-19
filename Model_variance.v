@@ -1,5 +1,5 @@
 From Stdlib Require Import Bool.
-Require Import ZF Zcoc Zfunext.
+Require Import ZF Zcoc.
 Require Import ModelCC.
 
 Import BuildModel.

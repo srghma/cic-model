@@ -1,7 +1,6 @@
 From Stdlib Require Import Relations Wellfounded.
 Require Import Sat.
 Require Import Zcoc ZFuniv_real.
-Require Import ZFlambda.
 Require Import Models SnModels.
 Require GenRealSN.
 Set Implicit Arguments.

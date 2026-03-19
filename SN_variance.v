@@ -1,6 +1,6 @@
 Require SN_ECC_Real.
 Import ZF Zsum Znats Zrelations ZFord ZFfix.
-Require Import Zfunext Zcoc ZFuniv_real.
+Require Import Zcoc ZFuniv_real.
 Import Sat.
 Import SN_ECC_Real.
 Import SN.Notations.

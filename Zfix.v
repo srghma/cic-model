@@ -1,4 +1,4 @@
-Require Import ZF Zrelations Znats Zstable Ztarski.
+Require Import ZF Zrelations Zstable Ztarski.
 
 (** Bounded recursive functions over a fixpoint *)
 

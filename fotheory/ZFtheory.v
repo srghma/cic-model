@@ -1,4 +1,3 @@
-Require Export ZFrepl.
 Require Export ZFnats.
 Require Export ZFind_basic.
 Require Export Zcoc.
@@ -43,7 +42,7 @@ Qed.
 Lemma EQ_add_0 : forall x, x ∈ N ->
   EQ N x (add x zero) == singl empty.
 intros x HxN.
-rewrite add0.
+rewrite add0; [|trivial].
 apply eq_set_ax; split; intros.
  apply EQ_elim in H. destruct H as (_, (_, H0)); 
  rewrite H0; apply singl_intro.
@@ -66,6 +65,7 @@ intros x y HxN HyN. apply eq_set_ax; split; intros.
 
  repeat rewrite add1; trivial.
  rewrite addS; auto with *.
+ apply add_typ; trivial.
 Qed.
 
 

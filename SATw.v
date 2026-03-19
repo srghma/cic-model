@@ -1,6 +1,6 @@
 
-Require Import ZF Zpairs Zsum Zrelations ZFord ZFfix ZFgrothendieck.
-Require Import ZFlambda Sat SATtypes.
+Require Import ZF Zpairs Zsum Zrelations.
+Require Import Sat SATtypes.
 Require Import Lambda.
 Module Lc:=Lambda.
 Require Import Zcoc.

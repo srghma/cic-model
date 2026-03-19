@@ -2,7 +2,7 @@ From Stdlib Require Import Lia.
 Require Import basic Explicit_sub.
 Require Import FOTheory.
 Import ZFind_basic.
-Import ZFnats.
+Import Znats.
 Import TheoryInTerm.
 
 Import BuildModel.
@@ -79,22 +79,14 @@ unfold hyp_ok; unfold val_ok; induction t; simpl in *; intros.
  
  apply succ_typ. apply zero_typ.
 
- replace (fun k : nat => i k) with i; trivial.
+ change (fun k : nat => i k) with i.
  assert (int (int_fotrm t2) i ∈ N).
   apply IHt2; trivial; intros.
    apply H. apply in_or_app. right; trivial.
- elim H1 using N_ind; intros.
-  revert H4; apply in_set_morph; try reflexivity.
-   apply natrec_morph; try reflexivity.
-    do 2 red; intros. rewrite H5; reflexivity.
-
-    symmetry; trivial.
-
-  rewrite add0. apply IHt1; trivial; intros.
-   apply H. apply in_or_app; left; trivial.
-
-  rewrite addS;trivial. 
-   apply succ_typ; trivial.
+ assert (int (int_fotrm t1) i ∈ N).
+  apply IHt1; trivial; intros.
+   apply H. apply in_or_app. left; trivial.
+ apply add_typ; trivial.
 Qed.
 
    
@@ -113,11 +105,8 @@ induction t; simpl; intros.
 
  red; intros. apply succ_morph. reflexivity.
 
- red; intros. apply natrec_morph; try rewrite H.
+ red; intros. apply add_morph; try rewrite H.
   rewrite <- IHt1. rewrite int_lift_rec_eq. reflexivity.
-
-  do 2 red. intros x0 y0 H' x1 y1 HE; rewrite HE; reflexivity.
-
   rewrite <- IHt2. rewrite int_lift_rec_eq. reflexivity.
 Qed.
 
@@ -209,11 +198,9 @@ induction t; intros.
  do 2 red; simpl; intros. do 2 red. intros. 
  apply succ_morph. reflexivity.
 
- do 2 red; simpl; intros. do 2 red; intros. apply natrec_morph.
+ do 2 red; simpl; intros. do 2 red; intros. apply add_morph.
   rewrite <- IHt1. rewrite H. 
   rewrite int_subst_rec_eq; reflexivity.
-
-  do 2 red; intros. rewrite H1; reflexivity.
    
   rewrite <- IHt2. rewrite H. 
   rewrite int_subst_rec_eq; reflexivity.
@@ -543,7 +530,7 @@ induction t2; simpl; try reflexivity.
   rewrite succ_max_distr. apply max_split2. unfold max_var; simpl; lia.
   do 2 red in H; simpl in H; apply H; trivial.
 
- apply natrec_morph.
+ apply add_morph.
   apply IHt2_1. intros. apply H0.
   rewrite succ_max_distr. rewrite succ_max_distr in H. 
   apply max_comb in H. destruct H.
@@ -551,8 +538,6 @@ induction t2; simpl; try reflexivity.
 
    apply max_split2. unfold max_var; simpl.
    rewrite succ_max_distr. apply max_split1. trivial.
-
-  do 2 red; intros. rewrite H2; reflexivity.
 
   apply IHt2_2. intros. apply H0.
   rewrite succ_max_distr. rewrite succ_max_distr in H. 

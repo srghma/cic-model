@@ -1,9 +1,7 @@
 
-Require Import ZF Zpairs Zsum Sat.
-Require Import Zrelations ZFfixrec ZFrecbot.
-Require Import ZFlambda.
-Require Import ZFord.
-Require Import Lambda.
+Require Import ZF Zpairs Zsum Zrelations.
+Require Import ZFord ZFfixrec ZFrecbot.
+Require Import Sat Lambda.
 
 Set Implicit Arguments.
 

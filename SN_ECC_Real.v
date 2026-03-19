@@ -1,6 +1,6 @@
 Require Export basic.
 Require Import Sat.
-Require Import ZF Zcoc ZFuniv_real ZFecc ZFlambda.
+Require Import ZF Zcoc ZFuniv_real ZFecc Zlambda.
 Require Export SN_CC_Real.
 Import CC_Real.
 

@@ -641,6 +641,11 @@ apply Zu_sup; trivial.
 apply morph_is_ext; trivial.
 Qed.
 
+(*  Lemma G_Wsup X f :
+    X ∈ U ->
+    f ∈ cc_prod  ->
+    Wsup X f ∈ U.*)
+
 End Wdom_Universe.
 
 (*******************************************************************************************)

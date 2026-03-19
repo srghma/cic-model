@@ -79,7 +79,7 @@ Proof cc_beta_eq.
 
 End HF_Coc_Model.
 
-Module Soundness := GenModelSyntax.MakeModel(HF_Coc_Model).
+Module Soundness := GenModelSyntax.MakeModelSyntax(HF_Coc_Model).
 
 Import Soundness.
 Import T.

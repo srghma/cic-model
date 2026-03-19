@@ -4,9 +4,8 @@
 From Stdlib Require Import List Bool.
 Require Import Models TypModels.
 Require Import ZF Zpairs Zsum Znats Zrelations ZFord ZFfix ZFgrothendieck.
-Require Import Zfunext ZFind_w ZFfixrec.
+Require Import ZFind_w ZFfixrec.
 Require Import ModelCC ModelECC.
-
 
 (** Importing the common model constructions + variance judgments *)
 
@@ -151,21 +150,17 @@ apply in_int_not_kind in H1.
 2:discriminate.
 destruct tyord_inv with (2:=H)(3:=H2) as (?,?); trivial.
 apply in_int_el.
-assert (couple (int X i) (int F i) ∈ TI (WF' i) (osucc (int O i))).
- apply TI_intro with (int O i); auto.
-  apply WF'_morph; reflexivity.
-
-  unfold WF'.
-  apply couple_intro_sigma.
-   do 2 red; intros.
-   rewrite H6; reflexivity.
-
-   apply H0.
-
-   rewrite El_int_arr in H1.
-   rewrite int_subst_eq in H1.
-   trivial.
-assumption.
+change (couple (int X i) (int F i) ∈ TI (WF' i) (osucc (int O i))).
+apply TI_intro with (int O i); auto.
+*apply WF'_morph; reflexivity.
+*unfold WF'.
+ apply couple_intro_sigma.
+ +do 2 red; intros.
+  rewrite H6; reflexivity.
+ +apply H0.
+ +rewrite int_Prod_arr in H1.
+  change (int F i ∈ cc_arr (int(subst X B) i) (int(WI O) i)) in H1.
+  rewrite int_subst_eq in H1; trivial.
 Qed.
 
 

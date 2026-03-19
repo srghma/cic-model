@@ -188,7 +188,7 @@ apply Wi_typ; trivial.
 Qed.
 
 End W_Univ.
-
+(*
 Class subtermClass (K:set->Prop) :=
   { Kinter : forall X,
       (exists z0, z0 ∈ X) ->
@@ -666,7 +666,7 @@ apply Zwdom.Wf_intro; auto.
 Qed.
 
 End TransitiveRecursor.
-
+*)
 End W.
 
 #[global]Hint Resolve W_ord_o : core.
@@ -685,7 +685,7 @@ apply clos_ord_morph.
  apply Zwdom.Wdom_morph; trivial.
 Qed.
 
-Lemma fsub_ext A A' B B' K K' :
+(*Lemma fsub_ext A A' B B' K K' :
   A==A' ->
   eq_fun A B B' ->
   (forall X, X ⊆ W A B -> (K X <-> K' X)) ->
@@ -729,3 +729,4 @@ apply WFR_morph; trivial.
 
    red; intros; auto.
 Qed.
+*)

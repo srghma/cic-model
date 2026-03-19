@@ -8,7 +8,7 @@ Require SN_ECC_Real.
 Import ZFgrothendieck.
 Import ZF Zsum Znats Zrelations ZFord ZFfix.
 Require Import ZFind_natbot.
-Require Import Zfunext Zcoc ZFecc SATtypes SATnat_real.
+Require Import Zcoc ZFecc SATtypes SATnat_real.
 Require Import ZFrecbot.
 
 Import ZFuniv_real SN_ECC_Real.

@@ -4,7 +4,10 @@ Require Import VarMap.
 Require Import Models TypModels.
 
 (** A general model construction of a model of CC given an
-    abstract model. *)
+    abstract model.
+    It produces both the semantic judgements (as done by GenModel)
+    and the fact that the this judgment is sound w.r.t the
+    syntactic jugments *)
 
 Module MakeModel(M : CC_Model) <: Judge.
 Import M.
@@ -624,14 +627,31 @@ apply prod_ext; intros.
   rewrite H1; rewrite H; reflexivity.
 Qed.
 
+Lemma int_Prod_arr T U i :
+  int (Prod T (lift 1 U)) i == prod (int T i) (fun _ => int U i).
+simpl.
+apply prod_ext.
+*reflexivity.
+*red; intros.
+ rewrite simpl_int_lift.
+ rewrite lift0_term; reflexivity.
+Qed.
+
 End T.
 Import T.
 
 (** * Environments *)
 Definition env := list term.
+Definition mt_env : env := List.nil.
 
 Definition val_ok (e:env) (i:val) :=
   forall n T, nth_error e n = value T -> el (lift (S n) T) i (i n).
+
+Lemma val_ok_nil i : val_ok mt_env i.
+Proof.
+intros [|n]; simpl; intros; discriminate.
+Qed.
+Hint Resolve val_ok_nil : core.
 
 Lemma val_ok_shift1 e ty i :
   val_ok (ty::e) i ->
@@ -1167,23 +1187,34 @@ Hint Resolve in_int_el : core.
 
 (** Consistency *)
 
-Lemma abstract_theory_consistency TH M FF :
+Lemma abstract_non_provability (TH:env) T :
+  (exists2 i, val_ok TH i & (forall x, ~ el T i x)) ->
+  forall M, ~ typ TH M T.
+red in |- *; intros (i,iok,Tmt) M prf.
+apply Tmt with (int M i).
+red in prf.
+apply prf; trivial.
+Qed.
+
+Lemma abstract_theory_consistency (TH:env) M FF :
   FF ∈ props ->
   (exists i, val_ok TH i) ->
   (forall x, ~ x ∈ FF) ->
   ~ typ TH M (Prod prop (Ref 0)).
 intros FFty (i,THcons) FFmt.
-unfold typ; intros Mty.
-specialize Mty with (1:=THcons); simpl in Mty.
-apply FFmt with (app (int M i) FF).
-apply prod_elim with (2:=Mty) (3:=FFty).
+apply abstract_non_provability.
+exists i; [trivial|].
+simpl.
+intros abs tyabs.
+apply FFmt with (x:=app abs FF).
+apply prod_elim with (2:=tyabs) (3:=FFty).
 red; auto.
 Qed.
 
 Lemma abstract_consistency M FF :
   FF ∈ props ->
   (forall x, ~ x ∈ FF) ->
-  ~ typ List.nil M (Prod prop (Ref 0)).
+  ~ typ mt_env M (Prod prop (Ref 0)).
 intros; apply abstract_theory_consistency with (FF:=FF); trivial.
 exists (V.nil props).
 red; simpl; intros.

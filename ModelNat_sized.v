@@ -1,5 +1,5 @@
 From Stdlib Require Import Lia List Bool.
-Require Import Models Zfunext ZFecc ZFind_nat ZFfixrec.
+Require Import Models ZFecc ZFind_nat ZFfixrec.
 Import ZF Zsum Znats Zrelations ZFord ZFfix ZFgrothendieck.
 Require ModelCC.
 

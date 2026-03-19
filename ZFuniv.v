@@ -1,6 +1,6 @@
 Require Import Sat.
 Require Import ZF Zcoc ZFord ZFgrothendieck.
-Require Import ZFlambda.
+Require Import Zlambda.
 
 Set Implicit Arguments.
 

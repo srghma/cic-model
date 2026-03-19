@@ -966,6 +966,49 @@ apply eq_intro; intros.
  apply couple_in_app; auto.
 Qed.
 
+
+Definition fcompat dom f g :=
+  forall x, x ∈ dom -> cc_app f x == cc_app g x.
+
+Definition fdirected I A F :=
+  forall x y, x ∈ I -> y ∈ I -> fcompat (A x ∩ A y) (F x) (F y).
+
+Instance fcompat_morph :
+  Proper (eq_set ==> eq_set ==> eq_set ==> iff) fcompat.
+apply morph_impl_iff3; auto with *.
+do 5 red; intros.
+unfold fcompat.
+intros.
+rewrite <- H0; rewrite <- H1.
+apply H2.
+rewrite H; trivial.
+Qed.
+
+Lemma fcompat_lam : forall A B f g,
+    ext_fun A f ->
+    ext_fun B g ->
+    (forall x, x ∈ A -> x ∈ B) ->
+    (forall x, x ∈ A -> f x == g x) ->
+    fcompat A (cc_lam A f) (cc_lam B g).
+red; intros.
+rewrite cc_beta_eq; trivial.
+rewrite cc_beta_eq; auto.
+Qed.
+
+Lemma fcompat_typ_eq : forall A f f',
+  is_cc_fun A f ->
+  is_cc_fun A f' ->
+  fcompat A f f' ->
+  f == f'.
+intros.
+rewrite cc_eta_eq' with (1:=H).
+rewrite cc_eta_eq' with (1:=H0).
+apply cc_lam_ext; auto with *.
+red; intros.
+rewrite <- H3; auto.
+Qed.
+
+
 (** Typing: dependent products *)
 
 Definition cc_prod (x:set) (y:set->set) : set :=

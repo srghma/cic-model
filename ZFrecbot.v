@@ -1,4 +1,4 @@
-Require Import Zrelations Zbot Zfunext ZFord ZFfixrec.
+Require Import Zrelations Zbot ZFord ZFfixrec.
 
 Section Recursor.
 

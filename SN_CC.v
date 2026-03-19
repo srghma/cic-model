@@ -1,7 +1,7 @@
 From Stdlib Require Export Lia Relations Wellfounded Compare_dec.
 Require Import Sat.
 Require Import ZF Zcoc.
-Require Import ZFlambda.
+Require Import Zlambda.
 
 (** Another strong normalization proof of the Calculus of Constructions *)
 

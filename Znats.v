@@ -487,3 +487,175 @@ elim H using N_ind; intros.
  exists (S x0); rewrite H1; reflexivity.
 Qed.
 
+(** Binary operations: Addition, etc. *)
+
+Section BinaryOperation.
+
+  Variable f : nat->nat->nat.
+
+Definition isBinop m n p :=
+  exists m':nat, nat2set m' == m /\
+  exists n':nat, nat2set n' == n /\ nat2set (f m' n') == p.
+
+Instance isBinop_morph : Proper (eq_set==>eq_set==>eq_set==>iff) isBinop.
+do 4 red; intros.
+apply ex_morph; intros m'.
+apply and_iff_morphism; [rewrite H; reflexivity|].
+apply ex_morph; intros n'.
+apply and_iff_morphism; [rewrite H0; reflexivity|].
+rewrite H1; reflexivity.
+Qed.
+
+Lemma isBinop_typ m n p : isBinop m n p -> m ∈ N /\ n ∈ N /\ p ∈ N.
+intros (m'&eqm&n'&eqn&eqp).
+rewrite <-eqm,<-eqn,<-eqp.
+auto using nat2set_typ.
+Qed.
+
+Lemma isBinop_uniq m n p p' : isBinop m n p -> isBinop m n p' -> p==p'.
+intros (m1&em1&n1&en1&ep) (m2&em2&n2&en2&ep').
+rewrite <-em2 in em1; apply nat2set_inj in em1; subst m2.
+rewrite <-en2 in en1; apply nat2set_inj in en1; subst n2.
+rewrite <-ep,<-ep'; reflexivity.
+Qed.
+
+Lemma isBinop_ex m n :
+  m ∈ N -> n ∈ N -> exists p, isBinop m n p.
+intros tym tyn.
+apply nat2set_reflect in tym; destruct tym as (m',eqm).
+apply nat2set_reflect in tyn; destruct tyn as (n',eqn).
+exists (nat2set(f m' n')).
+exists m'; split;[ auto with *|].
+exists n'; split; auto with *.
+Qed.
+
+Definition binop m n := union (subset N (isBinop m n)).
+
+Instance binop_morph : morph2 binop.
+do 3 red; intros.
+unfold binop.
+apply union_morph.
+apply subset_morph; [reflexivity|red; intros].
+rewrite H,H0; reflexivity.
+Qed.
+
+Lemma binop_ax m n p :
+  m ∈ N -> n ∈ N ->
+  binop m n == p <-> isBinop m n p.
+intros tym tyn.
+destruct isBinop_ex with (1:=tym)(2:=tyn) as (p',p'def).
+unfold binop; rewrite union_subset_singl with (y:=p')(y':=p'); auto with *.
+*split; intros.
+ +rewrite <-H; trivial.
+ +apply isBinop_uniq with (1:=p'def)(2:=H).
+*apply isBinop_typ with (1:=p'def).
+*intros; apply isBinop_uniq with m n; trivial.
+Qed.
+
+Lemma binop_typ m n :
+  m ∈ N -> n ∈ N -> binop m n ∈ N.
+intros tym tyn.
+destruct isBinop_ex with (1:=tym)(2:=tyn) as (p,pdef).
+destruct isBinop_typ with (1:=pdef) as (_&_&typ).
+apply binop_ax in pdef; trivial.
+rewrite pdef; trivial.
+Qed.
+
+Lemma binop_reflect m n :
+  binop (nat2set m) (nat2set n) == nat2set (f m n).
+apply binop_ax; auto using nat2set_typ.
+eexists; split; [reflexivity| eexists; split; reflexivity].
+Qed.
+
+End BinaryOperation.
+Existing Instance binop_morph.
+
+Definition add := binop plus.
+
+Instance add_morph : morph2 add.
+apply binop_morph.
+Qed.
+
+Lemma add0 n : n ∈ N -> add n zero == n.
+intros tyn.
+unfold add.
+apply binop_ax; auto using zero_typ.
+apply nat2set_reflect in tyn; destruct tyn as (n',eqn').
+exists n'; split; [auto with *|].
+exists 0; split; [reflexivity|].
+replace (n'+0) with n'; auto with *.
+Qed.
+  
+Lemma addS n m : n ∈ N -> m ∈ N -> add n (succ m) == succ (add n m).
+intros tyn tym.
+apply nat2set_reflect in tyn; destruct tyn as (n',eqn).
+apply nat2set_reflect in tym; destruct tym as (m',eqm).
+rewrite eqn, eqm.
+unfold add; rewrite (binop_reflect plus n' m').
+rewrite (binop_reflect plus n' (S m')).
+replace (n'+S m') with (S(n'+m')); simpl; auto with *.
+Qed.
+
+Lemma add1 n : n ∈ N -> add n (succ zero) == succ n.
+intros; rewrite addS; trivial.
+ rewrite add0; trivial; reflexivity.  
+
+ apply zero_typ.
+Qed.
+
+Lemma add_typ m n :
+  m ∈ N -> n ∈ N -> add m n ∈ N.
+apply binop_typ.
+Qed.
+
+(* Bijection NxN = N *)
+From Stdlib Require Import Arith Lia.
+
+Require Import Zpairs.
+
+Definition NN2N xy := binop nn2n (fst xy) (snd xy).
+
+Instance NN2N_morph : morph1 NN2N.
+do 2 red; intros; unfold NN2N.
+apply binop_morph; rewrite H; reflexivity.
+Qed.
+
+Lemma NN2N_def x y :
+  NN2N (couple (nat2set x) (nat2set y)) == nat2set(nn2n x y).
+unfold NN2N.
+rewrite fst_def, snd_def.
+apply binop_reflect.
+Qed.
+
+Lemma NN2N_typ : typ_fun NN2N (prodcart N N) N.
+red; intros.
+apply binop_typ.
+apply fst_typ in H; trivial.
+apply snd_typ in H; trivial.
+Qed.
+
+Lemma NN2N_inj xy1 xy2 :
+  xy1 ∈ prodcart N N -> xy2 ∈ prodcart N N -> NN2N xy1 == NN2N xy2 -> xy1 == xy2.
+intros.
+rewrite surj_pair with (1:=H) in H1|-*.
+rewrite surj_pair with (1:=H0) in H1|-*.
+destruct (nat2set_reflect (fst xy1)); [apply fst_typ in H; trivial|].
+destruct (nat2set_reflect (snd xy1)); [apply snd_typ in H; trivial|].
+destruct (nat2set_reflect (fst xy2)); [apply fst_typ in H0; trivial|].
+destruct (nat2set_reflect (snd xy2)); [apply snd_typ in H0; trivial|].
+rewrite H2,H3,H4,H5 in H1|-*.
+rewrite !NN2N_def in H1.
+apply nat2set_inj in H1.
+apply nn2n_inj in H1.
+destruct H1; subst x1 x2; reflexivity.
+Qed.
+
+Lemma NN2N_surj n : n ∈ N -> exists xy, xy ∈ prodcart N N /\ n == NN2N xy.
+intros.
+destruct (nat2set_reflect n) as (k,?); [trivial|].
+destruct (nn2n_surj k) as (x & y & e).
+exists (couple (nat2set x)(nat2set y)); split.
+apply couple_intro; apply nat2set_typ.
+rewrite H0; subst k.
+symmetry; apply NN2N_def.
+Qed.

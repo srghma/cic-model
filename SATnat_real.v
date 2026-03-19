@@ -4,7 +4,6 @@
  *)
 
 Require Import ZF Zpairs Zsum ZFord ZFfix ZFgrothendieck Zcoc Sat SATtypes.
-Require Import ZFlambda.
 Require Import Lambda.
 Module Lc:=Lambda.
 

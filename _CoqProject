@@ -92,14 +92,18 @@ Zsum.v
 Zrelations.v
 Ziso.v
 Znats.v
-Zlist.v
-Zbot.v
-Zcoc.v
-Zfunext.v
 Ztarski.v
 Zfix.v
+Zlist.v
+Zlambda.v
 Zuniv.v
+Zbot.v
+Zcoc.v
+Zecc.v
+Zfunext.v
 Zw.v
+Zwdom.v
+Zind_w.v
 
 ZF.v
 ZFrepl.v
@@ -127,10 +131,8 @@ ZFfixfun.v
 ZFfixrec.v
 ZFfix.v
 ZFlimit.v
-ZFlambda.v
 ZFlist.v
 
-Zwdom.v
 ZFencode.v
 ZFwdom.v
 ZFw.v

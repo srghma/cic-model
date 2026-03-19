@@ -88,20 +88,9 @@ End ClassicCCM.
 Require Term Env.
 Require TypeJudge.
 
-Module BuildModel := MakeModel(ClassicCCM).
+Module BuildModel := MakeModelSyntax(ClassicCCM).
 
 Import BuildModel T J R.
-
-Lemma El_int_arr T U i :
-  int (Prod T (lift 1 U)) i == cc_arr (int T i) (int U i).
-simpl.
-apply cc_prod_ext.
- reflexivity.
-
- red; intros.
- rewrite simpl_int_lift.
- rewrite lift0_term; reflexivity.
-Qed.
 
 (** The model in ZF implies the consistency of CC *)
 

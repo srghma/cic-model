@@ -1094,7 +1094,7 @@ Qed.
 
    Contravariance of product does not hold in set-theory.
  *)
-Definition sub_typ_covariant
+Lemma sub_typ_covariant
   (eta_eq : forall dom F f, eqX_fun dom F F -> f ∈ prod dom F -> f == lam dom (app f))
   e U1 U2 V1 V2 :
   U1 <> kind ->

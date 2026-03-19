@@ -9,7 +9,7 @@ Import BuildModel.
 Import T J R.
 Import CCM.
 Import ZFind_basic.
-Import ZFnats.
+Import Znats.
 
 
 Lemma app2_m2 m : morph2 (fun n x => cc_app (cc_app m n) x).
@@ -124,8 +124,7 @@ Definition Add : term -> term -> term.
 intros m n; left; 
 exists (fun i => add (int m i) (int n i)).
 do 2 red; intros. 
-apply natrec_morph; try rewrite H; try reflexivity.
- do 2 red; intros. rewrite H1; reflexivity.
+rewrite H; reflexivity.
 Defined.
 
 Lemma typ_Add : forall e m n, typ e m T -> typ e n T -> 
@@ -149,11 +148,13 @@ Defined.
 (*Presburger Axioms*)
 
 Lemma discr_term : forall e n i, val_ok e i ->
+  typ e n T ->
   ~ eq_typ e Zero (Add n (Succ Zero)).
-red; intros. red in H0; simpl in *.
-specialize H0 with (1 := H).
- rewrite add1 in H0.
- symmetry in H0; apply discr in H0. trivial.
+red; intros. red in H1; simpl in *.
+red in H0; specialize H0 with (1 := H); simpl in H0.
+specialize H1 with (1 := H).
+rewrite add1 in H1; [|trivial].
+ symmetry in H1; apply discr in H1. trivial.
 Qed.
 
 Lemma Succ_inj : forall e x y, typ e x T -> typ e y T ->
@@ -163,22 +164,23 @@ red; intros. red in H, H0, H1; simpl in *.
 specialize H with (1:=H2).
 specialize H0 with (1:=H2).
 specialize H1 with (1:=H2).
-do 2 rewrite add1 in H1.
+do 2 rewrite add1 in H1; trivial.
 apply succ_inj; trivial.
 Qed.
  
 Lemma Add_0 : forall e n, typ e n T -> eq_typ e (Add n Zero) n.
-destruct n; red; intros; simpl; rewrite add0; auto with *.
+red; intros.
+red in H; specialize H with (1:=H0).
+simpl; rewrite add0; [reflexivity|trivial].
 Qed.
 
-Lemma Add_ass : forall e x y, typ e y T ->
+Lemma Add_ass : forall e x y, typ e x T -> typ e y T ->
  eq_typ e (Add (Add x y) (Succ Zero)) (Add x (Add y (Succ Zero))).
-assert (morph2 (fun _ => succ)).
- do 3 red; intros x y H0 x1 y1 H1; rewrite H1; reflexivity.
 do 2 red; intros; simpl.
-replace (fun k : nat => i k) with i; trivial.
-red in H0; simpl in H0; specialize H0 with (1:=H1).
-repeat rewrite add1.
+change (fun k : nat => i k) with i; trivial.
+red in H; specialize H with (1:=H1).
+red in H0; specialize H0 with (1:=H1).
+repeat rewrite add1; try apply add_typ; trivial.
 rewrite addS; trivial.
 reflexivity.
 Qed.
@@ -593,24 +595,19 @@ apply Fall_intro.
   intro; simpl in H; discriminate.
 
   do 2 red; simpl; intros. unfold val_ok in H.
-  assert (nth_error (EQ_trm Zero (Add (Ref 0) (Succ Zero))::T::e) 
-    0 = value (EQ_trm Zero (Add (Ref 0) (Succ Zero)))); trivial.
-  specialize H with (1:=H0). clear H0. red in H; simpl in H.
-  rewrite add1 in H.
-  rewrite EQ_discr in H. apply empty_ax in H; contradiction.
+  assert (tyn := H 1 _ eq_refl); simpl in tyn.
+  assert (hyp := H 0 _ eq_refl); simpl in hyp.
+  clear H.
+  rewrite add1 in hyp; [|trivial].
+  rewrite EQ_discr in hyp. apply empty_ax in hyp; contradiction.
 Qed.
 
 Lemma P_ax_intro2 : forall e, exists t, 
   typ e t (Fall (Fall (Impl
   (EQ_trm (Add (Ref 0) (Succ Zero)) (Add (Ref 1) (Succ Zero)))
   (EQ_trm (Ref 0) (Ref 1))))).
-refine (let P1 := (EQ_trm (Add (Ref 0) (Succ Zero)) 
-  (Add (Ref 1) (Succ Zero))) in _).
-assert (P1 = (EQ_trm (Add (Ref 0) (Succ Zero)) 
-  (Add (Ref 1) (Succ Zero)))); auto.
-refine (let P2 := (EQ_trm (Ref 0) (Ref 1)) in _).
-assert (P2 = (EQ_trm (Ref 0) (Ref 1))); auto.
-rewrite <- H. rewrite <- H0. clearbody P1 P2.
+set (P1 := EQ_trm (Add (Ref 0) (Succ Zero))  (Add (Ref 1) (Succ Zero))).
+set (P2 := EQ_trm (Ref 0) (Ref 1)).
 exists (Abs T (Abs T (Abs P1 prf_term))).
 apply Fall_intro.
  intro; simpl; discriminate.
@@ -619,38 +616,25 @@ apply Fall_intro.
   intro; simpl; discriminate.
 
   apply Impl_intro. 
-   rewrite H; intro; simpl; discriminate.
+   discriminate.
 
-   rewrite H0; intro; simpl; discriminate.
+   discriminate.
 
    do 2 red; intros.
    refine (let i':= V.shift 1 i in _).
    assert (i' = (V.shift 1 i)); auto.
    assert (eq_val i (V.cons (i 0) i')).
-    symmetry. apply V.cons_ext; try reflexivity.
-   case_eq (lift 1 P2); intros.
-    rewrite <- H4. unfold val_ok in H1.
-    assert (nth_error (P1::T::T::e) 0 = Some P1); trivial.
-    assert (nth_error (P1::T::T::e) 1 = Some T) as H1T; trivial.
-    assert (nth_error (P1::T::T::e) 2 = Some T) as H2T; trivial.
-    generalize (H1 _ _ H5); intro H0P.
-    generalize (H1 _ _ H1T); intro H1N.
-    generalize (H1 _ _ H2T); intro H2N.
-    assert (forall n, eq_term (lift n T) T) as HlT.
-     red; simpl; red; intros; reflexivity.
-    rewrite HlT in H1N, H2N. red in H1N, H2N.
-    simpl in H1N, H2N. red in H0P; simpl in H0P.
-    case_eq (lift 1 P1); intros.
-     rewrite H6 in H0P. rewrite <- H6 in H0P.
-     simpl. rewrite H3. rewrite simpl_int_lift1.
-     rewrite H3 in H0P at 2. rewrite simpl_int_lift1 in H0P.
-     rewrite H in H0P; simpl in H0P. rewrite H0; simpl.
-     do 2 rewrite add1 in H0P.
-     apply EQ_succ_inj with (x0 := i 0); trivial.
-    
-     rewrite H in H6; simpl in H6; discriminate.
-
-    rewrite H0 in H4; simpl in H4; discriminate.
+   {symmetry. apply V.cons_ext; try reflexivity. }
+   case_eq (lift 1 P2); [intros|trivial].
+   rewrite <- H2. unfold val_ok in H.
+   assert (H0P := H 0 _ eq_refl); simpl in H0P.
+   unfold V.shift,V.lams in H0P; simpl in H0P.
+   unfold V.shift in H0P; simpl in H0P.
+   assert (H1N := H 1 _ eq_refl); simpl in H1N.
+   assert (H2N := H 2 _ eq_refl); simpl in H2N.
+   clear H.
+   do 2 rewrite add1 in H0P; trivial.
+   apply EQ_succ_inj with (x0 := i 0); trivial.
 Qed.
 
 Lemma P_ax_intro3 : forall e , exists t, 
@@ -771,7 +755,7 @@ apply Impl_intro.
    rewrite int_lift_rec_eq.
    apply int_morph;[reflexivity|].
    intros [|?]; unfold V.lams,V.shift; simpl.
-    apply add1.
+    apply add1; trivial.
     replace (n-0-0) with n; auto with *.
     lia.    
 

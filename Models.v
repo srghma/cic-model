@@ -132,6 +132,32 @@ Module Type ECC_Model.
 *)
 End ECC_Model.
 
+Module Type ECC_ZModel.
+
+  Declare Module CC : CC_Model.
+  Import CC.
+
+  Definition unif_bound U A B :=
+    exists2 B', B' ∈ U & forall x, x ∈ A -> B x ⊆ B'.
+
+  Parameter u_card : nat -> X.
+  Parameter u_card_in1 : props ∈ u_card 0.
+  Parameter u_card_in2 : forall n, u_card n ∈ u_card (S n).
+  Parameter u_card_incl_prop : forall x, x ∈ props -> x ∈ u_card 0.
+  Parameter u_card_incl : forall n x, x ∈ u_card n -> x ∈ u_card (S n).
+  Parameter u_card_prod : forall n X Y,
+    eqX_fun X Y Y ->
+    X ∈ u_card n ->
+    unif_bound (u_card n) X Y ->
+    prod X Y ∈ u_card n.
+(*  Parameter u_card_prod2 : forall n X Y,
+    eq_fun X Y Y ->
+    X ∈ props ->
+    (forall x, x ∈ X -> Y x ∈ u_card n) ->
+    prod X Y ∈ u_card n.
+*)
+End ECC_ZModel.
+
 (** A CC model where kinds form an element of the model. *)
 
 Module Type CC_Model2.

@@ -948,6 +948,7 @@ simpl.
 rewrite beta_nat_eq; trivial.
  rewrite beta_nat_eq; trivial.
   revert nn Hn.
+  rewrite Hm in Him.
   elim Hin using N_ind; intros; auto.
   rewrite <- H1.
    2:rewrite H0; trivial.
@@ -963,7 +964,6 @@ rewrite beta_nat_eq; trivial.
    rewrite beta_nat_eq; auto.
    rewrite beta_nat_eq; auto with *.
    apply add_typ; trivial.
-   rewrite <-Hm; trivial.
 
   apply add_aux_ext2.
  apply add_aux_ext1.
@@ -1148,7 +1148,7 @@ apply Impl_intro; [|discriminate|].
        (rewrite int_S; simpl; [reflexivity|apply zero_typ]).
      rewrite int_Add with (3:=H0) (4:=H1); 
        [|rewrite H0; trivial|rewrite H1; apply succ_typ; apply zero_typ].
-     rewrite add1.
+     rewrite add1; [|trivial].
      rewrite int_S; [reflexivity|trivial].
 
   setoid_replace Nat with (lift 3 Nat) using relation eq_term at 2;
@@ -1241,7 +1241,7 @@ assert ([int (Ref 0) i, tm (Ref 0) j] \real
     assert (int (App Succ Zero) (V.shift 1 i) == succ zero) by (apply int_S; apply zero_typ).
     rewrite int_Add with (3:=H4) (4:=H5); [
       |rewrite H4; trivial|rewrite H5; apply succ_typ; apply zero_typ].
-    rewrite add1.
+    rewrite add1; [|trivial].
     rewrite H3; reflexivity.
 
     rewrite split_lift. do 2 rewrite int_cons_lift_eq.
@@ -1249,7 +1249,7 @@ assert ([int (Ref 0) i, tm (Ref 0) j] \real
     assert (int (App Succ Zero) (V.shift 1 i) == succ zero) by (apply int_S; apply zero_typ).
     rewrite int_Add with (3:=H6) (4:=H7); [
       |rewrite H6; trivial|rewrite H7; apply succ_typ; apply zero_typ].
-    rewrite add1.
+    rewrite add1; [|trivial].
     rewrite H3; reflexivity.
 
 apply H0 in H; clear H0.
@@ -1291,7 +1291,7 @@ apply in_int_not_kind in H; [destruct H as (H, _)|discriminate].
 unfold inX in H; simpl in H; rewrite El_def,eqNbot in H.
 assert (int (Ref 0) (V.shift 2 (fun k : nat => i k)) == i 2) by reflexivity.
 assert (int Zero (V.shift 2 (fun k : nat => i k)) == zero) by reflexivity.
-rewrite int_Add with (3:=H0) (4:=H1); [rewrite add0;reflexivity
+rewrite int_Add with (3:=H0) (4:=H1); [rewrite add0;trivial;reflexivity
   |rewrite H0; trivial|rewrite H1; apply zero_typ].
 Qed.
 
@@ -1368,10 +1368,7 @@ apply typ_abs; [right| |discriminate].
    assert (forall n, int (App Succ Zero) (V.shift n i) == succ zero) as Hn1 by
      (intros n; apply int_S; apply zero_typ).
    rewrite int_Add with (3:=H) (4:=(Hn1 1)); [clear H
-     |rewrite H; change N with ((fun _ => N) (i 3)); apply natrec_typ; trivial; 
-       [do 2 red; intros; reflexivity
-       |do 3 red; intros; rewrite H1; reflexivity  
-       |intros; apply succ_typ; trivial]
+     |rewrite H; apply add_typ; trivial
      |rewrite (Hn1 1); apply succ_typ; apply zero_typ].
    assert (int (Ref 0) (V.shift 2 (fun k : nat => i k)) == (i 2)) by reflexivity.
    assert (int (App (App Add (Ref 1)) (App Succ Zero)) (V.shift 2 (fun k : nat => i k)) ==
@@ -1380,12 +1377,9 @@ apply typ_abs; [right| |discriminate].
     rewrite int_Add with (3:=H0) (4:=(Hn1 2)); [reflexivity|rewrite H0
       |rewrite (Hn1 2); apply succ_typ; apply zero_typ]; trivial.
    rewrite int_Add with (3:=H) (4:=H0); [|rewrite H; trivial
-     |rewrite H0; change N with ((fun _ => N) (succ zero)); apply natrec_typ; trivial; 
-       [do 2 red; reflexivity
-       |do 3 red; intros; rewrite H2; reflexivity
-       |apply succ_typ; apply zero_typ
-       |intros; apply succ_typ; trivial]].
-   repeat (rewrite addS||rewrite add0||apply zero_typ); auto with *.
+     |rewrite H0; apply add_typ; auto using succ_typ, zero_typ].
+   repeat (rewrite addS||rewrite add0||apply zero_typ);
+     auto using add_typ with *.
 Qed.
 
 
@@ -1521,7 +1515,7 @@ apply Impl_intro; [|discriminate|].
          rewrite int_Add with (3:=H0) (4:=H1); [|rewrite H0; trivial
            |rewrite H1; apply succ_typ; apply zero_typ].
          do 3 rewrite int_lift_rec_eq.
-         rewrite add1.
+         rewrite add1; [|trivial].
          rewrite int_S; [|simpl; unfold V.shift; trivial].
          do 3 (rewrite <- V.cons_lams; [|do 2 red; intros; rewrite H2; reflexivity]).
          do 3 rewrite V.lams0. unfold V.lams, V.shift; simpl.
