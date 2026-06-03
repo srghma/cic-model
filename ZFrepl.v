@@ -209,52 +209,98 @@ split; intros.
  rewrite (H4 _ _ H0 H1); trivial.
 Qed.
 
+Lemma uchoice_eq P x :
+  uchoice_pred P ->
+  (x == uchoice P <-> P x).
+split; intro.
+*apply (proj1 H) with (uchoice P); [symmetry; trivial|].
+ apply uchoice_def; trivial.
+*apply uchoice_ext; trivial.
+Qed.
 
 (* Relations between repl and uchoice *)
-(*Lemma repl_rel_uchoice_pred A R :
+Lemma repl_rel_from_uchoice_pred A R :
   (forall x, x ∈ A -> uchoice_pred (R x)) ->
+  (forall x x' y, x ∈ A -> x==x' -> R x y -> R x' y) ->
   repl_rel A R.
-split; intros.
- destruct (H _ H0) as (?,_); eauto with *.
+intros Ruch Rm.
+ split; intros.
+*apply Rm with (x:=x); trivial.
+ destruct (Ruch _ H) as (?,_); eauto with *.
 
- destruct H as (?,?).
- split; [|split]; intros.
-  destruct H; eauto with *.
+*destruct (Ruch _ H) as (_&_&?).
+ eauto.
+Qed.
 
-  exists 
-*)
-
-(*
-Lemma repl_is_choice A R :
+Lemma uchoice_pred_from_repl_rel A R :
   repl_rel A R ->
+  (forall x y, x ∈ A -> R x y -> uchoice_pred (R x)).
+intros Rrepl x y tyx r.
+split; [|split;[eauto|]].
+*intros.
+ eapply (proj1 Rrepl) with (4:=H0); auto with *.
+*intros.
+ apply (proj2 Rrepl) with x; trivial.
+Qed.
+ 
+Lemma repl_is_choice_total A R :
+  repl_rel A R ->
+  (forall x, x ∈ A -> exists y, R x y) ->
   repl A R == replf A (fun x => uchoice (R x)).
-intros.
+intros (Rm, Rfun) Rtot.
 assert (ext_fun A (fun x => uchoice (R x))).
- destruct H as (?,_).
- do 2 red; intros.
+{do 2 red; intros.
  apply uchoice_morph_raw.
  red; intros.
  split; intros.
-  apply H with x x0; auto with *.
+ *apply Rm with x x0; auto with *.
+ *apply Rm with x' y; auto with *.
+  rewrite <- H0; trivial. }
+apply eq_set_ax; intros z.
+rewrite repl_ax; auto.
+rewrite replf_def; trivial.
+apply ex2_morph'; [reflexivity|].
+intros.
+symmetry; apply uchoice_eq.
+destruct Rtot with (1:=H0) as (y,?).
+apply uchoice_pred_from_repl_rel with A y; auto.
+split; trivial.
+Qed.
+
+Lemma repl_is_choice A R :
+  repl_rel A R ->
+  repl A R ==
+  replf (subset A (fun x => exists y, R x y)) (fun x => uchoice (R x)).
+intros (Rm, Rfun).
+apply eq_set_ax; intros z.
+rewrite repl_ax; auto.
+rewrite replf_def.
+2:{do 2 red; intros.
+   apply subset_elim1 in H.
+   apply uchoice_morph_raw.
+   red; intros.
+   split; intros.
+   *apply Rm with x x0; auto with *.
+   *apply Rm with x' y; auto with *.
+    rewrite <- H0; trivial. }
+split; intros (x, tyx, ?); exists x.
+*apply subset_intro; eauto.
+*apply uchoice_ext; trivial.
+ apply uchoice_pred_from_repl_rel with A z; trivial.
+ split; trivial.
+*apply subset_elim1 in tyx; trivial.
+*apply subset_ax in tyx.
+ destruct tyx as (tyx,(x',eqx,(y,r))).
+ apply Rm with x (uchoice (R x));
+   [|reflexivity|symmetry|]; trivial.
+ apply uchoice_def. 
+ apply uchoice_pred_from_repl_rel with A y; auto.
+ split; trivial.
+ rewrite eqx in tyx.
+ apply Rm with x' y; auto with *.
+Qed.
   
-  apply H with x' y; auto with *.
-  rewrite <- H1; trivial.
-apply eq_intro; intros.
- apply repl_elim in H1; trivial; destruct H1.
- rewrite replf_ax; trivial.
- exists x; trivial.
- apply uchoice_ext; trivial.
- destruct H as (?,?).
- split; [|split]; intros; eauto.
- apply H with x x0; auto with *.
-
- rewrite replf_ax in H1; trivial.
- destruct H1.
- rewrite H2; clear z H2.
- apply repl_intro with x; trivial.
- apply uchoice_def.
-*)
-
+  
 (** Building well-founded recursor using uchoice *)
 Section PolymorphicWellFoundedRecursion.
   Context {A : Type} (Aeq : relation A) {Aeqv : Equivalence Aeq}.

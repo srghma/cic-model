@@ -5,7 +5,7 @@ Require Import Znats ZFord ZFrank ZFgrothendieck.
 Section VN_Inaccessible.
 
 Variable mu : set.
-Hypothesis mu_inacc : VN_inaccessible_rel mu.
+Hypothesis mu_inacc : VN_inaccessible mu.
 
 Let mu_ord : isOrd mu.
 destruct mu_inacc as ((?,_),_); trivial.
@@ -15,7 +15,7 @@ Let mu_lim : forall x, lt x mu -> lt (osucc x) mu.
 destruct mu_inacc as ((_,?),_); trivial.
 Qed.
 
-Let mu_reg : VN_regular_rel mu.
+Let mu_reg : VN_regular mu.
 destruct mu_inacc as ((_,_),?); trivial.
 Qed.
 
@@ -23,49 +23,25 @@ Lemma VN_grot : grot_univ (VN mu).
 split; intros.
 *apply VN_trans with x; trivial.
 
-*apply VN_clos_pair; auto.
-
+*apply VNlim_pair; trivial.
+ split; auto.
+ 
 *apply VNlim_power; trivial.
  split; trivial.
 
 *rewrite <- (replf_id x).
- apply VN_regular_weaker in mu_reg.
  apply mu_reg; intros; auto with *.
  apply VN_trans with x; trivial.
  
-*assert (ZFrepl.repl_rel I (fun x y => exists2 z, R x z & y == singl z)).
- {destruct H as (Rext,Rfun).
-  split; intros.
-  destruct H4.
-   exists x0.
-    apply Rext with x x0; auto; try reflexivity.
-    transitivity y; auto; symmetry; auto.
-
-    destruct H2; destruct H3.
-    rewrite H4; rewrite H5.
-    apply singl_morph.
-    eauto. }
- setoid_replace (repl I R) with
-   (union (repl I (fun x y => exists2 z, R x z & y == singl z))).
- {apply mu_reg; trivial.
-  intros.
-  destruct H4 as (z', ?,eqz).
-  rewrite eqz.  
-  assert (z' ∈ VN mu) by eauto.
-  apply VN_clos_pair; auto. }
- {apply union_ext; intros.
-  elim ZFrepl.repl_elim with (2:=H4); trivial; intros.
-  destruct H6.
-  rewrite H7 in H3.
-  rewrite (singl_elim _ _ H3).
-  apply ZFrepl.repl_intro with x0; trivial.
-
-  elim ZFrepl.repl_elim with (2:=H3); trivial; intros.
-  exists (singl x).
-   apply singl_intro.
-
-   apply ZFrepl.repl_intro with x0; trivial.
-   exists x; trivial; reflexivity. }
+*revert I f H H0 H1; apply G_replf_fsup.
+ {intros.
+  apply VN_incl with x; trivial. }
+ intros.
+ assert (replf A F ⊆ power (sup A F)).
+ {apply union_power; reflexivity. }
+ apply VN_incl with (2:=H2); trivial.
+ apply VNlim_power; [apply mu_inacc|].
+ apply mu_reg; trivial.
 Qed.
                 
 End VN_Inaccessible.
@@ -170,107 +146,46 @@ assert (isOrd (osup x F)).
 apply grot_ord_inv; trivial.
 Qed.
 
-  Lemma G_regular : VN_regular_rel grot_ord.
-red; intros.
-rewrite VN_def; trivial.
-pose (A := subset x (fun x' => exists y, R x' y)).
-pose (F := fun x' => inter
-       (subset grot_ord (fun z => exists2 y, R x' y & y ⊆ VN z))).
-assert (oF : forall y, y ∈ A -> isOrd (F y)).
- intros.
- apply isOrd_inter; intros.
- apply subset_elim1 in H3; apply isOrd_inv with grot_ord; trivial.
-assert (eF : ext_fun A F).
- red; red; intros.
- apply inter_morph.
- apply subset_morph; auto with *.
- red; intros.
- apply ex2_morph.
-  red; intros.
-  split; intros.
-   apply (proj1 H) with x0 a; auto with *.
-   apply subset_elim1 in H2; trivial.
-
-   apply (proj1 H) with x' a; auto with *.
-   rewrite <- H3.
-   apply subset_elim1 in H2; trivial.
-
-  red; intros.
-  reflexivity.
-exists (osup A F).
- apply grot_ord_inv.
-  apply isOrd_osup; trivial.
-
-  apply grot_ord_intro.  
-  apply G_ord_sup; trivial.
-   apply G_subset; trivial.
-   apply VN_incl_grot; trivial.
-
-   intros.
-   assert (exists2 z, R y z & z ∈ VN grot_ord).
-    unfold A in H2; rewrite subset_ax in H2; destruct H2.
-    destruct H3.
-    destruct H4.
-    exists x1.
-     apply (proj1 H) with x0 x1; auto with *.
-     rewrite <- H3; trivial.
-
-     apply H1 with x0; trivial.
-     rewrite <- H3; trivial.
-   destruct H3 as (z0, r0, ?).
-   rewrite VN_def in H3; trivial; destruct H3.
-   apply isOrd_plump with x0; auto.
-   red; intros.
-   apply inter_elim with (1:=H5).
-   apply subset_intro; trivial.
-   exists z0; trivial.
-
-red; intros.
-rewrite union_ax in H2; destruct H2.
-apply ZFrepl.repl_elim in H3; trivial.
-destruct H3.
-assert (x0 ⊆ VN (F x1)).
- red; intros.
- eapply (VN_stable grot_ord);[trivial| |].
-  red; intros.
-  apply subset_elim1 in H6; eauto using isOrd_inv.
-
-  generalize (H1 _ _ H3 H4); intros.
-  rewrite VN_def in H6; eauto using isOrd_inv.
-  destruct H6.
-  apply inter_intro.
-   clear x2 H6 H7.
-   intros.
-   rewrite replf_ax in H6.
-   destruct H6 as (?,?,(_,?)).
-   rewrite H7; clear H7 y.
-   apply subset_elim2 in H6.
-   destruct H6.
-   destruct H7.
-   rewrite H6.
-   assert (x0 == x4).
-    apply (proj2 H) with x1; trivial.
-   rewrite H9 in H5; auto.
-
-   exists (VN x2).
-   rewrite replf_def.
-   2:red;red;intros;apply VN_morph; trivial.
-   exists x2; auto with *.
-   apply subset_intro; trivial.
-   exists x0; trivial.
-apply H5 in H2.
-rewrite VN_def in H2.
-2:apply oF; apply subset_intro; eauto.
-destruct H2.
-rewrite VN_def.
-2:apply isOrd_osup; auto.
-exists x2; trivial.
-revert H2; apply osup_intro; trivial.
-apply subset_intro; trivial.
-exists x0; trivial.
+Lemma G_rk x : x ∈ U -> rk x ∈ U.
+elim x using wf_ax; intros.
+rewrite rk_def.
+apply G_osup; intros; auto with *.
+apply ZFrank.rk_aux_ext.
+apply G_subset; trivial.
+apply G_power; trivial.
+apply H; trivial.
+apply G_trans with x0; trivial. 
 Qed.
 
-  Lemma G_inaccessible : VN_inaccessible_rel grot_ord.
+
+  Lemma U_incl_VN_grot : U ⊆ VN grot_ord.
+red; intros.
+apply VN_incl with (VN (rk z)); auto.
+*apply VN_rk_intro.
+*apply VN_mono; auto.
+ apply subset_intro; auto.
+ apply G_rk; trivial.
+Qed.
+
+  Lemma U_eq_VN_grot : U == VN grot_ord.
+apply incl_eq.  
+*apply U_incl_VN_grot.
+*apply VN_incl_grot.
+Qed.
+(*Print Assumptions U_eq_VN_grot.*)
+
+  Lemma G_regular : VN_regular grot_ord.
+red; intros.
+rewrite <- U_eq_VN_grot in H0|-*.
+apply G_union; trivial.
+apply G_fsup_replf; trivial.
+*apply G_incl; trivial.
+*apply G_fsup; trivial.
+*intros.
+ rewrite U_eq_VN_grot; eauto.
+Qed.
+
+  Lemma G_inaccessible : VN_inaccessible grot_ord.
 split;[split|]; auto.
  exact G_limit.
 

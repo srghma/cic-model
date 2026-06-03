@@ -372,14 +372,19 @@ Qed.
 
 Hint Resolve empty_incl_all empty_in_power : core.
 
-Lemma union_in_power :
-    forall x X, x ⊆ power X -> union x ∈ power X.
-intros.
-apply power_intro; intros.
-apply union_elim in H0; Tdestruct H0.
-apply power_elim with x0; auto.
+Lemma union_power a b :
+  a ⊆ power b <-> union a ⊆ b.
+split; intros.
+*red; intros.
+ apply union_elim in H0.
+ Tdestruct H0.
+ apply H in H1; apply power_def in H1; auto.
+*red; intros.
+ apply power_def.
+ transitivity (union a); [|trivial].
+ red; intros.
+ apply union_intro with z; trivial.
 Qed.
-
 
 Lemma subset_ax' x P z :
   Proper (eq_set==>iff) P ->

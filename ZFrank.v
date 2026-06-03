@@ -1,7 +1,40 @@
-Require Import ZF Zpairs Znats ZFord Zstable ZFfix.
+Require Import ZF Zpairs Znats ZFord Zstable ZFwfr ZFfix ZFgrothendieck.
 
-  (* Von Neumann universes *)
-  Definition VN := TI power.
+(* The rank function: uses well-foundation axiom *)
+Definition rk :=
+  WFR (fun x => x) (fun f y => osup y (fun z => osucc (f z))).
+
+Instance rk_morph : morph1 rk.
+apply WFR_morph.
+*red; trivial.
+*do 2 red; intros.
+ apply osup_morph; trivial.
+ red; intros; apply osucc_morph; auto.
+Qed.
+
+#[local]Lemma rk_aux_ext x : ext_fun x (fun y => osucc (rk y)).
+do 2 red; intros.
+rewrite H0; reflexivity.
+Qed.
+#[local]Hint Resolve rk_aux_ext : core.
+
+Lemma rk_def x : rk x == osup x (fun y => osucc (rk y)).
+unfold rk at 1; apply WFR_eqn; auto with *.
+*intros.
+ apply osup_morph; auto.
+ red; intros.
+ apply osucc_morph; auto.
+*elim x using wf_ax; intros; constructor; auto.
+Qed.
+
+Lemma isOrd_rk x : isOrd (rk x).
+elim x using wf_ax; intros.
+rewrite rk_def; apply isOrd_osup; auto with *.
+Qed.
+Hint Resolve isOrd_rk : core.
+
+(* Von Neumann universes *)
+Definition VN := TI power.
 
 Instance VN_morph : morph1 VN.
 do 2 red; intros.
@@ -92,6 +125,19 @@ Lemma VN_intro :
 induction 1 using isOrd_ind; red; intros.
 rewrite VN_def; trivial.
 eauto.
+Qed.
+
+Lemma VN_rk_intro :
+  forall x, x ⊆ VN (rk x).
+intros.
+pattern x; apply wf_ax; trivial; clear x; intros.
+red; intros.
+specialize H with (1:=H0).
+apply VN_incl with (2:=H); auto.
+apply VN_mono; auto.
+rewrite (rk_def x).
+apply osup_intro with (x:=z); auto with *.
+apply lt_osucc; auto.
 Qed.
 
 Lemma VN_succ : forall x, isOrd x -> power (VN x) == VN (osucc x).
@@ -539,9 +585,44 @@ Definition VN_regular_rel o :=
   (forall y z, y ∈ x -> R y z -> z ∈ VN o) ->
   union (repl x R) ∈ VN o.
 
-Definition VN_inaccessible_rel o :=
-  limitOrd o /\ VN_regular_rel o.
+Section Strengthen.
+  Variable mu : set.
+  Hypothesis mu_ord : isOrd mu.
+  Hypothesis mu_lim : forall x, lt x mu -> lt (osucc x) mu.
+  Hypothesis mu_reg : VN_regular mu.
 
+  Lemma VN_regular_strengthen : VN_regular_rel mu.
+red; intros.
+rewrite repl_is_choice; trivial.
+apply mu_reg.
+*do 2 red; intros.
+ rewrite subset_ax in H2.
+ destruct H2 as (tyy,(x0',eqx0,(z,r0'))). 
+ assert (r : R x0 z).
+ {apply (proj1 H) with x0' z; auto with *.
+  rewrite <-eqx0; trivial. }
+ assert (r' : R x' z).
+ {apply (proj1 H) with x0 z; auto with *. }
+ rewrite <- uchoice_ext with (x:=z); trivial.
+ +apply uchoice_ext; trivial.
+  apply uchoice_pred_from_repl_rel with x z; trivial.
+  rewrite <-H3; trivial.
+ +apply uchoice_pred_from_repl_rel with x z; trivial.
+*apply VN_incl with x; auto.
+ intro; apply subset_elim1. 
+*intros.
+ rewrite subset_ax in H2.
+ destruct H2 as (tyy,(y',eqy,(z,r'))). 
+ assert (r : R y z).
+ {apply (proj1 H) with y' z; auto with *.
+  rewrite <-eqy; trivial. }
+ clear r'.
+ rewrite <- uchoice_ext with (x:=z); eauto.
+ apply uchoice_pred_from_repl_rel with x z; trivial.
+Qed.
+
+End Strengthen.
+(*
 Section UnionClosure.
 
   Variable mu : set.
@@ -550,76 +631,13 @@ Section UnionClosure.
   Hypothesis mu_reg : VN_regular_rel mu.
   Hypothesis mu_inf : omega ∈ mu.
 
-
-  Lemma VN_regular_weaker : VN_regular mu.
-red; intros.
-unfold sup; rewrite replf_repl; trivial.
-apply mu_reg; trivial; intros.
-*apply repl_ext_rel_fun; auto with *.
-*destruct H3 as (_,H3); rewrite H3; auto.
-Qed.
-
 Let mul : limitOrd mu := conj mu_ord mu_lim.
-
-(*
-  Lemma isDir_regular : isDir mu.
-red; intros.
-pose (R := fun n z => n==zero /\ z==osucc x \/ n==osucc zero /\ z==osucc y).
-assert (repl_rel (osucc (osucc zero)) R).
- split; intros.
-  unfold R; rewrite <- H2; rewrite <- H3; trivial.
-
-  destruct H2 as [(e1,e2)|(e1,e2)];
-  destruct H3 as [(e1',e2')|(e1',e2')];
-  rewrite e2; rewrite e2'; try reflexivity.
-   assert (h:=lt_osucc zero isOrd_zero); rewrite e1' in e1;
-   rewrite e1 in h; apply lt_antirefl in h; trivial; contradiction.
-
-   assert (h:=lt_osucc zero isOrd_zero); rewrite e1' in e1;
-   rewrite <- e1 in h; apply lt_antirefl in h; trivial; contradiction.
-exists (union (repl (osucc (osucc zero)) R)).
- apply VN_ord_inv; trivial.
-  apply isOrd_union; intros.
-  apply repl_elim in H2; trivial.
-  destruct H2.
-  destruct H3 as [(_,e)|(_,e)]; rewrite e; eauto using isOrd_inv.
-
-  apply mu_reg; auto.
-   apply VN_intro; auto.
-   do 2 apply mu_lim.
-   apply isOrd_plump with x; trivial.
-   red; intros.
-   elim empty_ax with z; trivial.
-
-   intros.   
-   destruct H3 as [(_,e)|(_,e)]; rewrite e; apply VN_intro; trivial;
-   apply mu_lim; trivial.
-
- split; red; intros.
-  apply union_intro with (osucc x).
-   apply isOrd_trans with x; eauto using isOrd_inv, lt_osucc.
-
-   apply repl_intro with zero; trivial.
-    apply isOrd_trans with (osucc zero); auto.
-
-    left; split; auto with *.
-
-  apply union_intro with (osucc y).
-   apply isOrd_trans with y; eauto using isOrd_inv, lt_osucc.
-
-   apply repl_intro with (osucc zero); trivial.
-    apply lt_osucc; auto.
-
-    right; split; auto with *.
-Qed.
-*)
 
   Lemma VN_clos_pair : forall x y,
     x ∈ VN mu -> y ∈ VN mu -> pair x y ∈ VN mu.
 intros.
 apply VNlim_pair; trivial.
-(*apply isDir_regular.*)
 Qed.
 
 End UnionClosure.
-
+*)

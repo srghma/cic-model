@@ -9,22 +9,22 @@ Record grot_univ (U:set) : Prop := {
   G_pair : forall x y, x ∈ U -> y ∈ U -> pair x y ∈ U;
   G_power : forall x, x ∈ U -> power x ∈ U;
   G_union : forall x, x ∈ U -> union x ∈ U;
-  G_repl_hidden : forall I R, repl_rel I R -> I ∈ U ->
-                (forall x y, x ∈ I -> R x y -> y ∈ U) ->
-                repl I R ∈ U }.
+  G_fsup : forall I f, I ∈ U ->
+                       f ∈ rel I U ->
+                       isFunction f ->
+                       rel_image f ∈ U }.
 
 Instance grot_univ_morph : Proper (eq_set==>iff) grot_univ.
 apply morph_impl_iff1; auto with *.
 do 3 red; intros.
-destruct H0 as (Gtr,G2,Gpow,Gun,Grepl).
+destruct H0 as (Gtr,G2,Gpow,Gun,Gfs).
 split; intros.
 *rewrite <- H in H1|-*; eauto.
 *rewrite <- H in H0,H1|-*; auto.
 *rewrite <- H in H0|-*; auto.
 *rewrite <- H in H0|-*; auto.
-*rewrite <- H in H1|-*.
- apply Grepl; intros; auto.
- rewrite H; eauto.
+*rewrite <- H in H0,H1|-*.
+ apply Gfs with I; intros; auto.
 Qed.
 
 Lemma grot_empty : grot_univ empty.
@@ -33,8 +33,9 @@ split; intros.
 *elim empty_ax with (1:=H0).
 *elim empty_ax with (1:=H).
 *elim empty_ax with (1:=H).
-*elim empty_ax with (1:=H0).
+*elim empty_ax with (1:=H).
 Qed.
+(* TODO: grot_succ empty == HF *)
 
 Lemma grot_univ_zermelo U :
   grot_univ U -> Zuniv U.
@@ -42,7 +43,128 @@ destruct 1; split; trivial.
 Qed.
 #[global]Hint Resolve grot_univ_zermelo : core.
   
-(* grot_succ empty == HF *)
+Section EquivalenceOfClosureByReplacement.
+
+  (* Showing that all 3 formulation of closure by union are equivalent:
+   1- closure by replf
+   2- closure by repl
+   3- closure by function image
+   2 =>(obvious) 1 =>(G_replf_fsup) 3 =>(G_fsup_repl) 2
+    We also prove 3 => 1 without reference to repl
+   *)
+
+  Variable U : set.
+  Hypothesis G_incl :
+    forall x y, x ∈ U -> y ⊆ x -> y ∈ U.
+  
+Lemma G_replf_fsup :
+  (forall A F,
+      ext_fun A F ->
+      A ∈ U ->
+      (forall x, x ∈ A -> F x ∈ U) ->
+      replf A F ∈ U) ->
+  (forall I f,
+      I ∈ U ->
+      f ∈ rel I U ->
+      isFunction f ->
+      rel_image f ∈ U).
+intros G_replf.
+intros.
+assert (incl_set (rel_image f) (replf (rel_domain f) (app f))).
+{red; intros.
+ apply rel_image_ax in H2. 
+ destruct H2.
+ apply replf_ax; exists x;[|split].
+ *apply rel_domain_ax; eauto.
+ *red; intros.
+  rewrite H3; reflexivity.
+ *symmetry; apply app_defined; trivial. }
+apply G_incl with (2:=H2).
+apply G_replf; [do 2 red; intros; apply app_morph; auto with *|trivial|intros].
+*apply G_incl with I; trivial.
+ red; intros.
+ rewrite rel_domain_ax in H3.
+ destruct H3 as (y,?).
+ apply power_def in H0.
+ apply H0 in H3. 
+ apply fst_typ in H3.
+rewrite fst_def in H3; trivial. 
+*apply app_typ with (2:=H3).
+ clear x H2 H3.
+ rewrite func_def.
+ split; [|split;auto with *].
+ destruct H1 as (H1,_). 
+ apply relation_is_rel; auto with *.
+ apply rel_image_incl with (1:=H0).
+Qed.
+
+Lemma G_fsup_replf :
+  (forall I f,
+      I ∈ U ->
+      f ∈ rel I U ->
+      isFunction f ->
+      rel_image f ∈ U) ->
+  (forall A F,
+      ext_fun A F ->
+      A ∈ U ->
+      (forall x, x ∈ A -> F x ∈ U) ->
+      replf A F ∈ U).
+intros G_fsup.
+intros.
+apply G_incl with (rel_image (lam A F)).
+*apply G_fsup with A; [trivial| |apply lam_isFunction].
+ apply func_rel_incl.
+ apply lam_is_func; trivial.
+*red; intros.
+ apply replf_ax in H2.
+ destruct H2 as (x,tyx,(efx,eqz)).
+ apply rel_image_ax.
+ exists x.
+ rewrite eqz.
+ apply lam_ax_couple.
+ split; [|split]; auto with *.
+Qed.
+
+Lemma G_fsup_repl :
+  (forall I f,
+      I ∈ U ->
+      f ∈ rel I U ->
+      isFunction f ->
+      rel_image f ∈ U) ->
+  (forall I R,
+      repl_rel I R -> I ∈ U ->
+      (forall x y, x ∈ I -> R x y -> y ∈ U) ->
+      repl I R ∈ U).
+intros G_fsup.
+intros.
+pose (f := inject_rel R I U).  
+assert (extR : ext_rel I R).  
+{red; intros.
+ split; apply H; auto.
+ *rewrite <-H3; trivial.
+ *symmetry; trivial.
+ *symmetry; trivial. }
+apply G_incl with (rel_image f).
+*apply G_fsup with I; [trivial|apply inject_rel_is_rel|].
+ split.
+ +apply rel_isRelation with I U.
+  apply inject_rel_is_rel.
+ +intros.
+  apply inject_rel_elim in H2; auto with *.
+  destruct H2 as (ty1&ty2&rel).
+  apply inject_rel_elim in H3; auto with *.
+  destruct H3 as (_&ty2'&rel').
+  apply (proj2 H) with x; trivial.
+*red; intros.
+ apply repl_ax in H2; [|apply H|apply H].
+ destruct H2 as (x,tyx,eqz).
+ apply rel_image_ax.
+ exists x.
+ apply inject_rel_intro; eauto.
+Qed.
+
+
+End EquivalenceOfClosureByReplacement.
 
 Section GrothendieckUniverse.
 
@@ -63,68 +185,13 @@ apply G_incl with x; trivial.
 red; intros.
 apply subset_elim1 in H0; trivial.
 Qed.
-
-Lemma G_singl : forall x, x ∈ U -> singl x ∈ U.
-unfold singl; intros; apply G_pair; auto.
-Qed.
-
-(*Lemma hidden_G_repl : forall A R,
-  repl_rel A R ->
-  A ∈ U ->
-  (forall x y, x ∈ A -> R x y -> y ∈ U) ->
-  repl A R ∈ U.
-intros.
-assert (repl_rel A (fun x y => exists2 z, R x z & y == singl z)).
- destruct H as (Rext,Rfun).
- split; intros.
-  destruct H4.
-  exists x0.
-   apply Rext with x x0; auto; try reflexivity.
-   transitivity y; auto; symmetry; auto.
-
-   destruct H2; destruct H3.
-   rewrite H4; rewrite H5.
-   apply singl_morph.
-   eauto.
-setoid_replace (repl A R) with
- (union (repl A (fun x y => exists2 z, R x z & y == singl z))).
- apply G_union_repl; trivial.
- destruct 2.
- rewrite H5.
- apply G_singl; eauto.
-
- apply union_ext; intros.
-  elim repl_elim with (2:=H4); trivial; intros.
-  destruct H6.
-  rewrite H7 in H3.
-  rewrite (singl_elim _ _ H3).
-  apply repl_intro with x0; trivial.
-
-  elim repl_elim with (2:=H3); trivial; intros.
-  exists (singl x).
-   apply singl_intro.
-
-   apply repl_intro with x0; trivial.
-   exists x; trivial; reflexivity.
-Qed.
-*)
-
+  
 Lemma G_replf : forall A F,
   ext_fun A F ->
   A ∈ U ->
   (forall x, x ∈ A -> F x ∈ U) ->
   replf A F ∈ U.
-intros; rewrite replf_repl.
-apply G_repl_hidden; intros; auto.
-*apply repl_ext_rel_fun; auto with *.
-*destruct H3 as (_,H3); rewrite H3; auto.
-Qed.
-
-Lemma G_union2 : forall x y, x ∈ U -> y ∈ U -> x ∪ y ∈ U.
-intros.
-unfold union2.
-apply G_union; trivial.
-apply G_pair; trivial.
+apply G_fsup_replf; [apply G_incl|apply G_fsup; trivial].
 Qed.
 
 Lemma G_sup A B :
@@ -137,15 +204,31 @@ apply G_union; trivial.
 apply G_replf; trivial.
 Qed.
 
-Lemma ext_is_unif_bound A F :
-  ext_fun A F ->
-  A ∈ U ->
-  typ_fun F A U ->
-  unif_bound U A F.
-exists (sup A F).
-*apply G_sup; trivial.
-*red; intros.
- apply sup_ax; eauto.
+Lemma G_power_inv x :
+  power x ∈ U -> x ∈ U.
+intros.
+apply G_trans with (power x); trivial.
+apply power_def; reflexivity.
+Qed.
+
+Lemma G_union_inv x :
+  union x ∈ U -> x ∈ U.
+intros.
+apply G_incl with (power (union x)); [apply G_power; auto|].
+red; intros.
+apply power_def; red; intros.
+apply union_intro with z; trivial.
+Qed.
+
+Lemma G_singl : forall x, x ∈ U -> singl x ∈ U.
+unfold singl; intros; apply G_pair; auto.
+Qed.
+
+Lemma G_union2 : forall x y, x ∈ U -> y ∈ U -> x ∪ y ∈ U.
+intros.
+unfold union2.
+apply G_union; trivial.
+apply G_pair; trivial.
 Qed.
 
 Lemma G_nat x : x ∈ U -> N ⊆ U.
@@ -159,7 +242,15 @@ elim H0 using N_ind; intros.
  apply G_singl; trivial.
 Qed.
 
-Local Transparent prodcart sigma couple.
+
+Lemma G_couple : forall x y, x ∈ U -> y ∈ U -> couple x y ∈ U.
+intros.
+apply G_union_inv.
+rewrite union_couple_eq.
+apply G_pair; trivial.
+Qed.
+
+Local Transparent prodcart sigma.
 
 Lemma G_prodcart : forall A B, A ∈ U -> B ∈ U -> prodcart A B ∈ U.
 intros.
@@ -181,16 +272,18 @@ apply G_prodcart; trivial.
 apply G_sup; trivial.
 Qed.
 
-Lemma G_couple : forall x y, x ∈ U -> y ∈ U -> couple x y ∈ U.
-intros.
-unfold couple.
-apply G_pair; trivial.
- apply G_singl; trivial.
+Opaque prodcart sigma.
 
- apply G_pair; trivial.
+Lemma ext_is_unif_bound A F :
+  ext_fun A F ->
+  A ∈ U ->
+  typ_fun F A U ->
+  unif_bound U A F.
+exists (sup A F).
+*apply G_sup; trivial.
+*red; intros.
+ apply sup_ax; eauto.
 Qed.
-
-Opaque prodcart sigma couple.
 
   Lemma G_sum X Y : X ∈ U -> Y ∈ U -> sum X Y ∈ U.
 unfold sum; intros.
@@ -619,8 +712,12 @@ split; intros.
  apply clos_un; eapply inter_elim; eauto.
 
 *apply inter_intro; intros; eauto.
- destruct (H0 _ H4) as (_,_,_,_,clos_repl).
- apply clos_repl; trivial; intros; eapply inter_elim; eauto.
+ destruct (H0 _ H4) as (_,_,_,_,clos_fsup).
+ apply clos_fsup with I; trivial; intros.
+ +eapply inter_elim; eauto.
+ +revert H2; apply rel_mono; [reflexivity|].
+  red; intros.
+  eapply inter_elim; eauto.
 Qed.
 
 (* The intersection of all Grothendieck universes satisfying P given
@@ -648,9 +745,11 @@ split; intros.
  apply G_power; auto.
 *rewrite Vdef in H|-*; intros.
  apply G_union; auto.
-*rewrite Vdef in H0|-*; intros.
- assert (RV := fun x y tyx rxy => proj1 (Vdef y) (H1 x y tyx rxy)); clear H1.
- apply G_repl_hidden; eauto.
+*rewrite Vdef in H|-*; intros.
+ apply G_fsup with I; auto.
+ revert H0; apply rel_mono; [reflexivity|].
+ red; intros.
+ rewrite Vdef in H0; auto.
 Qed.
 
 
