@@ -62,6 +62,8 @@ Section Terms.
 
 End Terms.
 
+Definition closed t := forall k, ~ occur k t.
+
 (* Term-interpretation *)
 Require VarMap.
 

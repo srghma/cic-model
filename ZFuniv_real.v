@@ -290,6 +290,9 @@ Definition inclX x y := forall z, inX z x -> inX z y.
 Existing Instance eqX_equiv.
 Existing Instance in_ext.
 
+Definition eqX_fun dom f g :=
+  forall x x', x ∈ El dom -> x == x' -> f x == g x'.
+
 (* Accessing the realizability relation.
    inSAT t (Real T x), means that t is a realizer of x in type T. It
    implicitely requires x ∈ El T. 
@@ -315,6 +318,11 @@ rewrite cc_beta_eq; auto.
 
  do 2 red; intros.
  apply iSAT_morph; auto.
+Qed.
+
+Definition istype (x:X) :=True.
+Lemma istype_morph : Proper (eqX==>iff) istype.
+do 2 red; reflexivity.
 Qed.
 
 (** Sorts *)
@@ -364,6 +372,14 @@ Qed.
 
 Definition prod A F :=
   mkTY (cc_prod (El A) (fun x => El (F x))) (fun f => piSAT A F (cc_app f)).
+
+Lemma istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ El x -> istype (f x)) ->
+  istype (prod x f).
+intros; exact I.
+Qed.
 
 Lemma El_prod dom F :
   ext_fun (El dom) F ->
@@ -456,11 +472,14 @@ apply sn_sort_intro.
  apply El_in_props; trivial.
 Qed.
 
-
-Definition eqX_fun dom f g := (* ZF.eq_fun (El dom) f g. *)
-  forall x x', x ∈ El dom -> x == x' -> f x == g x'.
-
 Definition props := sn_props.
+
+Lemma istype_props : istype props.
+exact I.
+Qed.
+Lemma istype_prop : forall P, P ∈ El props -> istype P.
+intros; exact I.
+Qed.
 
 Lemma lam_ext :
   forall x1 x2 f1 f2,

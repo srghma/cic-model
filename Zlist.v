@@ -63,7 +63,7 @@ Definition Nil := lam zero (fun _ => empty).
 Definition Cons x l :=
   lam (next (rel_domain l)) (fun n => natcase n x (app l (pred n))).
 
-#[global] Instance Cons_Morph : morph2 Cons.
+#[global] Instance Cons_morph : morph2 Cons.
 unfold Cons; do 3 red; intros.
 apply lam_morph; [rewrite H0;reflexivity|].
 red; intros.

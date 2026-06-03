@@ -764,6 +764,8 @@ Print Assumptions IZFRpack. (* TTrepl *)
 
 Module IZF_C <: IZF_C_sig CoqSublogicThms.
   Include Skolem CoqSublogicThms.
+  Definition replf := ExZ.replf.
+  Definition replf_ax := ExZ.replf_ax.
   Parameter tt_coll_ax : ExZ.ttcoll ExZ.eq_set.
   Module Co <: ExCollection.
     Definition coll_ex := ExZ.collection_ax tt_coll_ax.

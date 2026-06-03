@@ -11,8 +11,8 @@ Require Import Models.
     theoretical interpretation. *)
 Module Type SimpleNats (Import S:Sets).
   
-  (** N is the type of natural numbers including neutral values.
-      Nbot is a decidable subet of N. *)
+  (** Nbot is the type of natural numbers including neutral values.
+      N is a decidable subset of Nbot. Elements of N are constructors. *)
   Parameter N Nbot : X.
   Parameter N_Nbot : N ⊆ Nbot.
   Parameter Ndec : forall n, n ∈ Nbot -> n∈N \/ ~n∈N.

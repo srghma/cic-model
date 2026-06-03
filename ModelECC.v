@@ -61,11 +61,12 @@ apply ecc_incl_prop; trivial.
 Qed.
 
 Lemma typ_prod2 : forall e n T U,
+  T <> kind ->
   typ e T (type n) ->
   typ (T :: e) U (type n) ->
   typ e (Prod T U) (type n).
 Proof.
-unfold typ, Prod; simpl; red; intros e n T U ty_T ty_U i is_val.
+unfold typ, Prod; simpl; red; intros e n T Tnk U ty_T ty_U i is_val.
 apply G_cc_prod.
  apply ecc_grot.
 
@@ -116,11 +117,12 @@ apply ecc_incl_prop; trivial.
 Qed.
 
 Lemma typ_prod2 : forall e n T U,
+  T <> kind ->
   typ e T (type n) ->
   typ (T :: e) U (type n) ->
   typ e (Prod T U) (type n).
 Proof.
-red; intros e n T U ty_T ty_U i is_val.
+red; intros e n T U Tnk ty_T ty_U i is_val.
 apply G_cc_prod.
  apply ecc_grot.
 
@@ -133,7 +135,7 @@ apply G_cc_prod.
  red in ty_U.
  change (int (type n) i) with (int (type n) (V.cons x i)).
  apply in_int_not_kind.
- 2:discriminate.
+ discriminate.
  apply ty_U.
  apply vcons_add_var; auto.
 Qed.

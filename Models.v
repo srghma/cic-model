@@ -29,10 +29,22 @@ End Sets.
 (** Abstract model of the syntax of CC (no properties) *)
 Module Type CC_Sig (Import S:Sets).
 
+Parameter istype : X -> Prop. 
+Parameter istype_morph : Proper (eqX ==> iff) istype.
+Existing Instance istype_morph.
+
 Parameter props : X.
 Parameter app : X -> X -> X.
 Parameter lam : X -> (X -> X) -> X.
 Parameter prod : X -> (X -> X) -> X.
+
+Parameter istype_props : istype props.
+Parameter istype_prop : forall P, P ∈ props -> istype P.
+Parameter istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ x -> istype (f a)) ->
+  istype (prod x f).
 
 Parameter lam_ext :
   forall x1 x2 f1 f2,
@@ -62,10 +74,10 @@ Existing Instance app_ext.
 End CC_Sig.
 
 Module Type CC_Terms := Sets <+ CC_Sig.
-
+  
 (** Abstract model of CC *)
 Module Type CC_Properties (Import T:CC_Terms).
-
+  
 Parameter prod_intro : forall dom f F,
   eqX_fun dom f f ->
   eqX_fun dom F F ->
@@ -150,16 +162,10 @@ Module Type ECC_ZModel.
     X ∈ u_card n ->
     unif_bound (u_card n) X Y ->
     prod X Y ∈ u_card n.
-(*  Parameter u_card_prod2 : forall n X Y,
-    eq_fun X Y Y ->
-    X ∈ props ->
-    (forall x, x ∈ X -> Y x ∈ u_card n) ->
-    prod X Y ∈ u_card n.
-*)
 End ECC_ZModel.
 
 (** A CC model where kinds form an element of the model. *)
-
+(*
 Module Type CC_Model2.
 
 Include CC_Terms.
@@ -191,12 +197,13 @@ Parameter prod_elim : forall dom f x F,
   app f x ∈ F x.
 
 End CC_Model2.
-
+*)
 (** A model of natural numbers with recursor *)
 
 Module Type Nat_Model (Import M:CC_Model).
 
 Parameter N : X.
+Parameter istype_N : istype N.
 Parameter zero : X.
 Parameter succ : X->X.
 Parameter succ_morph : Proper (eqX==>eqX) succ.

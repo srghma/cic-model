@@ -184,7 +184,7 @@ apply cc_prod_intro; intros; auto with *.
  do 2 red; intros.
  rewrite H2; reflexivity.
 
- unfold lift; rewrite int_lift_rec_eq.
+ unfold lift; unfold int1; simpl; rewrite int_lift_rec_eq.
  rewrite V.lams0.
  apply SUCCi_typ; auto.
 Qed.
@@ -194,10 +194,8 @@ Lemma typ_app_SuccI : forall e i n,
   typ e n (NatI i) ->
   typ e (App (SuccI i) n) (NatI (OSucc i)). 
 intros.
-apply typ_conv with (subst n (NatI (OSucc (lift 1 i)))).
-3:discriminate.
- apply typ_app with (NatI i); trivial.
- 2:discriminate.
+apply typ_conv with (subst n (NatI (OSucc (lift 1 i)))); try discriminate.
+ apply typ_app with (NatI i); trivial; try discriminate.
  apply typ_SuccI; trivial.
 
  red; intros; simpl.
@@ -241,6 +239,7 @@ red; intros.
 red in H; specialize H with (1:=H1).
 red in H0; specialize H0 with (1:=H1).
 simpl in *.
+unfold int1; simpl.
 rewrite <- (fun e1 e2 => NATCASE_morph (int fZ i) (int fZ i) e1
   (fun k => int fS(V.cons k i)) (fun k => int fS(V.cons k i)) e2
   (SUCC (int n (fun k => i k)))); auto with *.
@@ -283,8 +282,9 @@ apply NATCASE_typ with (o:=int O i) (P:=fun n => app (int P i) n); trivial.
 
  intros.
  assert (val_ok (NatI O :: e) (V.cons n0 i)).
-  apply vcons_add_var; trivial.
- apply H1 in H5; clear H1; simpl in H5.
+ {apply vcons_add_var; trivial.
+  discriminate. }
+  apply H1 in H5; clear H1; simpl in H5.
  change (fun k => V.cons n0 i k) with (V.cons n0 i) in H5.
  rewrite beta_eq in H5; trivial.
   rewrite simpl_int_lift1 in H5; trivial.
@@ -296,6 +296,7 @@ apply NATCASE_typ with (o:=int O i) (P:=fun n => app (int P i) n); trivial.
 Qed.
 
 Lemma typ_natcase' : forall e O P fZ fS n T,
+  T <> kind ->
   typ_ord e O ->
   sub_typ e (App P n) T -> 
   typ e fZ (App P Zero) ->
@@ -350,6 +351,7 @@ red in H0; specialize H0 with (1:=H4).
 rewrite H5 in H.
 apply SUCCi_inv_typ in H; auto.
 apply val_push_var; simpl; auto.
+discriminate.
 rewrite <- H6.
 clear H5 H6 x'; revert x H.
 apply TI_mono; auto.
@@ -360,6 +362,7 @@ Qed.
     var_mono e O ->
     var_ext e (NatI O) (SuccI O).
 do 2 red; simpl; intros.
+unfold int1; simpl.
 red in H, H0.
 specialize H0 with (1:=H1).
 rewrite cc_beta_eq; auto with *.
@@ -503,22 +506,24 @@ Qed.
       (V.cons f (V.cons y i)) (V.cons g (V.cons y' i')).
 intros is_val Oo Oo' oo' yo y'o yO y'O yy' fty gty eqfg.
 apply val_push_fun.
- apply val_push_ord; auto.
-  apply ole_lts; trivial.
+*apply val_push_ord; auto.
+  discriminate.
 
   apply ole_lts; trivial.
 
- revert fty; apply eq_elim; apply cc_prod_ext; intros.
+  apply ole_lts; trivial.
+
+*revert fty; apply eq_elim; apply cc_prod_ext; intros.
   reflexivity.
 
   apply ext_fun_ty.
 
- revert gty; apply eq_elim; apply cc_prod_ext; intros.
+*revert gty; apply eq_elim; apply cc_prod_ext; intros.
   reflexivity.
 
   apply ext_fun_ty.
 
- trivial.
+*trivial.
 Qed.
   
   Lemma ty_fix_body : forall i o f,
@@ -540,7 +545,9 @@ refine (eq_elim _ _ _ _ (ty_M (V.cons f (V.cons o i)) _)).
   apply int_UL.
 
  apply vcons_add_var; auto.
+ discriminate.
  apply vcons_add_var; simpl; auto.
+ discriminate.
 Qed.
 
   Lemma fix_body_irrel : forall i,
@@ -556,6 +563,8 @@ apply Hstab; clear Hstab; trivial.
  apply val_push_fun; auto.
  apply ole_lts in H1; trivial.
  apply val_push_ord; auto.
+  discriminate.
+ 
   apply val_mono_refl; trivial.
 
   simpl.
@@ -574,7 +583,9 @@ Qed.
 unfold U'; intros.
 apply var_mono_U.
 apply val_push_var; simpl; auto.
+ discriminate.
  apply val_push_ord; simpl; auto; change (int O (fun k => i k)) with (int O i).
+  discriminate.
   apply val_mono_refl; trivial.
 
   apply ole_lts; auto.
@@ -614,7 +625,7 @@ apply eq_elim with
  apply prod_ext.
   reflexivity.
   unfold U'; red; intros.
-  rewrite int_subst_rec_eq.
+  unfold int1; rewrite int_subst_rec_eq.
   rewrite V.shift_cons.
   rewrite <- V.cons_lams.
    rewrite V.lams0.
@@ -727,6 +738,7 @@ Qed.
     typ_ext e (SuccI O) (NatI O) (NatI (OSucc (lift 1 O))).
 split; simpl.
  do 2 red; simpl; intros.
+ unfold int1; simpl.
  rewrite cc_beta_eq; auto with *.
  rewrite cc_beta_eq; auto with *.
  change (x ∈ NATi (int O i')).
@@ -739,7 +751,8 @@ Qed.
 
 
 (** Case-analysis *)
-  Lemma typ_eq_natcase : forall e O P fZ fS n T,
+  Lemma typ_eq_natcase e O P fZ fS n T :
+    T <> kind ->
     typ_ord (tenv e) O ->
     var_mono e O ->
     sub_typ (tenv e) (App P n) T -> 
@@ -748,7 +761,7 @@ Qed.
       (App (lift 1 P) (App (SuccI (lift 1 O)) (Ref 0))) ->
     typ_equals e n (NatI (OSucc O)) ->
     typ_equals e (Natcase fZ fS n) T.
-intros.
+intros Tnk; intros.
 destruct H2.
 destruct H3.
 simpl in H6.
@@ -788,7 +801,8 @@ split.
  apply typ_nat_fix; trivial.
 Qed.
 
-  Lemma typ_eq_fix' : forall e O U M T,
+  Lemma typ_eq_fix' e O U M T :
+    T <> kind ->
     sub_typ (tenv e) (Prod (NatI O) (subst_rec O 1 U)) T ->
     typ_ord (tenv e) O ->
     var_equals e O ->
@@ -797,7 +811,7 @@ Qed.
       (Nplus 2) (UL U) ->
     typ_equals e (NatFix O M) T.
 intros.
-apply typ_eq_subsumption with (2:=H).
+apply typ_eq_subsumption with (2:=H0); trivial.
 2:discriminate.
 apply typ_eq_fix; trivial.
 Qed.
@@ -885,6 +899,7 @@ apply typ_eq_abs with (s1:=kind); try discriminate; auto.
   red; simpl; trivial.
 (* *)
 apply typ_eq_fix' with (U:=App (Ref 4) (Ref 0)); auto.
+ discriminate.
  red; simpl; intros.
  exact H1.
  (* Infty : ord *)
@@ -907,6 +922,7 @@ apply typ_ext_abs; try discriminate.
 
 (* case *)
 apply typ_eq_natcase with (Ref 2) (Ref 5); auto.
+ discriminate.
  eapply typ_ord_ref.
   simpl; reflexivity.
   discriminate.
@@ -923,6 +939,7 @@ apply typ_eq_natcase with (Ref 2) (Ref 5); auto.
   compute; reflexivity.
   simpl; reflexivity.
   discriminate.
+  discriminate.
  (* eqtrm *)
  red; intros; exact H1.
 
@@ -931,6 +948,7 @@ apply typ_eq_natcase with (Ref 2) (Ref 5); auto.
    (App (Ref 7) (App (SuccI Infty) (Ref 1))); try discriminate.
   simpl tenv.
   apply sub_refl; red; intros; simpl.
+  unfold int1; simpl.
   (* conversion (succ domain) *)
   unfold V.lams, V.shift; simpl.
   assert (i 0 ∈ NATi (i 3)).
@@ -958,12 +976,14 @@ apply typ_eq_natcase with (Ref 2) (Ref 5); auto.
     compute; reflexivity.
     simpl; reflexivity.
     discriminate.
+    discriminate.
     (* eqtrm *)
     red; simpl; intros; assumption.
 
    eapply typ_eq_ref'.
     compute; reflexivity.
     simpl; reflexivity.
+    discriminate.
     discriminate.
     (* subtyping: nat -> infty *)
     red; simpl; intros.
@@ -986,6 +1006,7 @@ apply typ_eq_natcase with (Ref 2) (Ref 5); auto.
    eapply typ_eq_ref'.
     compute; reflexivity.
     simpl; reflexivity.
+    discriminate.
     discriminate.
     (* eqtrm *)
     red; simpl; intros; assumption.
@@ -1086,12 +1107,15 @@ Lemma minus_def e O :
 intros tyO eqO.
 unfold minus, minus_typ.
 apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
+ discriminate.
  (* sub *)
  rewrite eq_subst_prod.
  apply sub_refl.
  apply eq_typ_prod.
+  discriminate.
   reflexivity.
  apply eq_typ_prod.
+  discriminate.
   red; intros; simpl; reflexivity.
 
   red; intros; simpl.
@@ -1101,6 +1125,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
 
  (* codom mono *)
  apply var_mono_prod.
+  discriminate.
   apply var_eq_noc; noc_tac.
 
   apply var_mono_NATi; trivial.
@@ -1136,6 +1161,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
  rewrite eq_subst_prod.
  unfold lift1; rewrite eq_lift_prod.
  eapply typ_eq_subsumption.
+  4:discriminate.
   apply typ_eq_abs with (s1:=kind); try discriminate; auto.
   6:discriminate.
   5:apply sub_refl; reflexivity.
@@ -1148,6 +1174,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
  (**)
  apply typ_eq_natcase with (Ref 3)
     (Abs (NatI (OSucc (Ref 3))) (NatI (OSucc (Ref 4)))); auto.
+  discriminate.
   eapply typ_ord_ref.
    simpl; reflexivity.
    discriminate.
@@ -1173,6 +1200,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
 
   (* branch 0 *)
   eapply typ_eq_subsumption.
+   4:discriminate.
    apply typ_eq_Zero.
    eapply typ_ord_ref with (n:=3).
     simpl; reflexivity.
@@ -1202,6 +1230,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
   (* branch S *)
   apply typ_eq_natcase with Infty
      (Abs (NatI (OSucc Infty)) (NatI (OSucc (Ref 5)))); auto.
+   discriminate.
    apply typ_Infty.
 
    red; simpl; reflexivity.
@@ -1215,6 +1244,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
      red; intros; simpl; reflexivity.
 
      apply typ_conv with (NatI (OSucc (lift_rec 1 0 (Ref 3)))).
+     3:discriminate.
      3:discriminate.
       apply typ_app_SuccI; trivial.
        apply typ_ord_lift; simpl.
@@ -1241,6 +1271,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
    compute; reflexivity.
    simpl; reflexivity.
    discriminate.
+   discriminate.
 
    apply sub_refl.
    rewrite eq_typ_betar.
@@ -1253,6 +1284,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
 
   (* branch S *)    
   apply typ_eq_app with (NatI Infty) (NatI (Ref 6)).
+   discriminate.
    discriminate.
    discriminate.
 
@@ -1277,6 +1309,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
      reflexivity.
 
      apply typ_conv with (NatI (OSucc (lift_rec 1 0 Infty))).
+     3:discriminate.
      3:discriminate.
       apply typ_app_SuccI; auto.
        apply typ_Infty.
@@ -1305,6 +1338,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
      compute; reflexivity.
      simpl; reflexivity.
      discriminate.
+     discriminate.
 
      apply sub_refl.
      red; intros; simpl; reflexivity.
@@ -1312,6 +1346,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
      eapply typ_eq_ref'.
       compute; reflexivity.
       simpl; reflexivity.
+      discriminate.
       discriminate.
 
       apply sub_refl.
@@ -1322,6 +1357,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
     compute; reflexivity.
     simpl; reflexivity.
     discriminate.
+    discriminate.
     (* infty < infty+ *)
     red; simpl; intros.
     revert H0; apply TI_incl; auto with *.
@@ -1330,6 +1366,7 @@ apply typ_eq_fix' with (Prod (NatI Infty) (NatI (Ref 2))); auto.
   eapply typ_eq_ref'.
    compute; reflexivity.
    simpl; reflexivity.
+   discriminate.
    discriminate.
 
    apply sub_refl.

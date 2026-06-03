@@ -144,7 +144,7 @@ Lemma False_closed1 : forall n x t m' n' j,
   n ∈ N ->
   m' == zero ->
   n' == succ n ->
-  (forall m, closed_pure_term (j m)) ->
+  (forall m, Lc.closed (j m)) ->
   ~[x, tm t j]\real prod (prod (mkTY N cNAT) (fun _ : X => props))
   (fun x0 : X => prod (app x0 m') (fun _ : X => app x0 n')).
 intros n x t m' n' j Hn Hm' Hn' Hm Ht.
@@ -190,7 +190,7 @@ apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y)))
       destruct (neutral_not_closed _ H). inversion_clear H0.
        inversion_clear H1.
         inversion_clear H0.
-         apply tm_closed in H1. unfold closed_pure_term in Hm. apply H1. intros n0 HF.
+         apply tm_closed in H1. unfold Lc.closed in Hm. apply H1. intros n0 HF.
          apply Hm with (m:=n0) (k:=x0); trivial.
 
          inversion_clear H1; inversion_clear H0; inversion_clear H1.
@@ -264,7 +264,7 @@ Lemma False_closed2 : forall n x t m1 m2 j,
   n ∈ N -> 
   m1 == succ n ->
   m2 == zero ->
-  (forall m, closed_pure_term (j m)) ->
+  (forall m, Lc.closed (j m)) ->
   ~[x, tm t j]\real prod (prod (mkTY N cNAT) (fun _ : X => props))
   (fun x0 : X => prod (app x0 m1) (fun _ : X => app x0 m2)).
 intros n x t m1 m2 j Hn Hm1 Hm2 Hm Ht.
@@ -311,7 +311,7 @@ apply rprod_elim with (x:=lam props (fun x => lam x (fun y => y)))
       destruct (neutral_not_closed _ H). inversion_clear H0.
        inversion_clear H1.
         inversion_clear H0.
-         apply tm_closed in H1. unfold closed_pure_term in Hm. apply H1. intros n0 HF.
+         apply tm_closed in H1. unfold Lc.closed in Hm. apply H1. intros n0 HF.
          apply Hm with (m:=n0) (k:=x0); trivial.
 
          inversion_clear H1; inversion_clear H0; inversion_clear H1.
@@ -545,12 +545,12 @@ Qed.
 
 Lemma const_env_j : forall n i, 
   (forall m, (m < n)%nat -> i m ∈ N) -> 
-  exists j, val_ok (const_env n) i j /\ (forall m, closed_pure_term (j m)).
+  exists j, val_ok (const_env n) i j /\ (forall m, Lc.closed (j m)).
 induction n; intros.
  exists (fun _ => Lc.Abs (Lc.Ref 0)); split; [red|]; intros.
   destruct n; simpl in H; discriminate.
 
-  unfold closed_pure_term; intros k HF; inversion_clear HF. inversion H0.
+  unfold Lc.closed; intros k HF; inversion_clear HF. inversion H0.
 
  specialize IHn with (i:=V.shift 1 i).
  assert (forall m : nat, (m < n)%nat -> V.shift 1 i m ∈ N).

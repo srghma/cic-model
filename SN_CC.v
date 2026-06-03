@@ -62,6 +62,13 @@ apply sSAT_morph.
 apply snd_morph; trivial.
 Qed.
 
+(** Types *)
+
+Definition istype (x:X) :=True.
+Lemma istype_morph : Proper (eqX==>iff) istype.
+do 2 red; reflexivity.
+Qed.
+
 (** Pi-types *)
 
 Definition piSAT A (F:set->SAT) :=
@@ -70,6 +77,14 @@ Definition piSAT A (F:set->SAT) :=
 Definition prod A F :=
   mkTY (cc_prod (El A) (fun x => El (F x)))
        (piSAT A (fun x => Real (F x))).
+
+Lemma istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ El x -> istype (f x)) ->
+  istype (prod x f).
+intros; exact I.
+Qed.
 
 Definition app := cc_app.
 Definition lam A F := cc_lam (El A) F.
@@ -148,6 +163,13 @@ Qed.
 
 Definition props :=
   mkTY (replSAT(fun A => mkTY (singl prf_trm) A)) snSAT.
+
+Lemma istype_props : istype props.
+exact I.
+Qed.
+Lemma istype_prop : forall P, P ∈ El props -> istype P.
+intros; exact I.
+Qed.
 
 Lemma prop_repl_morph :
   Proper (eqSAT ==> eq_set) (fun A => couple (singl prf_trm) (iSAT A)).

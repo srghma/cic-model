@@ -209,6 +209,14 @@ apply le_case in H0; destruct H0.
  apply lt_trans with n; trivial.
 Qed.
 
+Lemma le_lt_trans : forall m n p, p ∈ N -> m <= n -> n < p -> m < p.
+intros.
+apply le_case in H0; trivial.
+destruct H0.
+*rewrite H0; trivial.
+*apply lt_trans with n; trivial.
+Qed.
+
 Lemma pred_succ_eq : forall n, n ∈ N -> pred (succ n) == n.
 Proof.
 unfold pred, succ in |- *; intros.
@@ -308,6 +316,27 @@ elim Hm using N_ind; intros. rewrite <- H0; auto.
 
     right.
     apply lt_mono; trivial.
+Qed.
+
+Lemma N_strong_ind (P:set->Prop) n :
+  (forall n, n ∈ N -> (forall k, k < n -> P k) -> P n) ->
+  n ∈ N -> P n.
+intros Hrec tyn.
+cut (forall n', n' ∈ N -> n' ⊆ n -> P n'); eauto with *.
+elim tyn using N_ind; intros.
+*apply H1; trivial.
+ rewrite H0; trivial.
+*apply Hrec; trivial.
+ intros.
+ apply H0 in H1; apply empty_ax in H1; contradiction.
+*apply Hrec; trivial.
+ intros.
+ apply H0; [apply N_trans with n'; trivial|].
+ red; intros.
+ apply H2 in H3.
+ apply le_case in H3; destruct H3.
+ rewrite <-H3; trivial.
+ apply lt_trans with k; trivial.
 Qed.
 
 (** definition by case on N *)
@@ -487,6 +516,39 @@ elim H using N_ind; intros.
  exists (S x0); rewrite H1; reflexivity.
 Qed.
 
+Lemma nat2set_le_intro m n :
+  (m <= n)%nat ->
+  nat2set m <= nat2set n.
+induction 1; [apply succ_intro1;reflexivity|simpl].
+apply le_trans with (2:=IHle).
+*apply succ_typ; apply nat2set_typ.
+*apply succ_intro2; apply succ_intro1; reflexivity.
+Qed.
+
+Lemma nat2set_le_elim m n :
+  nat2set m <= nat2set n ->
+  (m <= n)%nat.
+intros lemn.
+cut (forall n', nat2set n == nat2set n' -> (m<=n')%nat); [auto with *|].
+elim lemn using Nle_ind; auto using nat2set_typ with *.
+*do 2 red; intros.
+ apply fa_morph; intros n'.
+ rewrite H; reflexivity.
+*intros.
+ apply nat2set_inj in H; subst n'; auto with arith.
+*intros.
+ destruct n'; simpl in *.
+ +apply discr in H1; contradiction.
+ +apply succ_inj in H1; auto using nat2set_typ with arith.  
+Qed.
+
+Lemma nat2set_le_reflect m n :
+  nat2set m <= nat2set n <-> (m <= n)%nat.
+split.
+apply nat2set_le_elim.
+apply nat2set_le_intro.
+Qed.
+
 (** Binary operations: Addition, etc. *)
 
 Section BinaryOperation.
@@ -576,6 +638,11 @@ Instance add_morph : morph2 add.
 apply binop_morph.
 Qed.
 
+Lemma add_typ m n :
+  m ∈ N -> n ∈ N -> add m n ∈ N.
+apply binop_typ.
+Qed.
+
 Lemma add0 n : n ∈ N -> add n zero == n.
 intros tyn.
 unfold add.
@@ -603,9 +670,71 @@ intros; rewrite addS; trivial.
  apply zero_typ.
 Qed.
 
-Lemma add_typ m n :
-  m ∈ N -> n ∈ N -> add m n ∈ N.
-apply binop_typ.
+Lemma addS_l m n : m ∈ N -> n ∈ N -> add (succ m) n == succ (add m n).
+intros.
+elim H0 using N_ind; intros.
+*rewrite <-H2; trivial.
+*rewrite !add0; auto using zero_typ, succ_typ.
+ reflexivity.
+*rewrite !addS,H2; auto using zero_typ, succ_typ.
+ reflexivity.
+Qed.
+
+Lemma discr_even_odd m n :
+  m ∈ N -> n ∈ N ->
+  ~ add m m == succ (add n n).
+intros mty; revert n; elim mty using N_ind; intros.
+*rewrite <-H0; auto.
+*rewrite add0; [|apply zero_typ].
+ intros h; symmetry in h; apply discr in h; trivial. 
+*rewrite addS; [|apply succ_typ;trivial|trivial].
+ rewrite addS_l; trivial.
+ elim H1 using N_ind; intros.
+ +rewrite <-H3; trivial.
+ +rewrite add0; [|apply zero_typ].
+  intro h.
+  apply succ_inj in h; auto using zero_typ, succ_typ, add_typ.
+  apply discr in h; trivial.
+ +rewrite addS; [|apply succ_typ|]; trivial.
+  rewrite addS_l; trivial.
+  intro h.
+  apply succ_inj in h; auto using zero_typ, succ_typ, add_typ.
+  apply succ_inj in h; auto using zero_typ, succ_typ, add_typ.
+  apply H0 in h; auto.
+Qed.
+
+Lemma mult2_inj m n : m ∈ N -> n ∈ N -> add m m == add n n -> m==n.
+intros mty; revert n; elim mty using N_ind; intros.
+*rewrite <-H0 in H3|-*; auto.
+*rewrite add0 in H0; [|apply zero_typ].
+ revert H0; elim H using N_ind; intros.
+ +rewrite <-H1 in H3|-*; auto.
+ +reflexivity.
+ +rewrite addS in H2; [|apply succ_typ|]; trivial.
+  symmetry in H2; apply discr in H2; contradiction.  
+*rewrite addS in H2; [|apply succ_typ|]; trivial.
+ rewrite addS_l in H2; trivial.
+ revert H2; elim H1 using N_ind; intros.
+ +rewrite <-H3 in H5|-*; auto.
+ +rewrite add0 in H2; [|apply zero_typ].
+  apply discr in H2; contradiction.
+ +rewrite addS in H4; [|apply succ_typ|]; trivial.
+  rewrite addS_l in H4; trivial.
+  apply succ_inj in H4; auto using zero_typ, succ_typ, add_typ.
+  apply succ_inj in H4; auto using zero_typ, succ_typ, add_typ.
+  apply succ_morph; auto.
+Qed.
+
+Lemma mult2_incr n : n ∈ N -> n <= add n n.
+intros.
+elim H using N_ind; intros.
+*rewrite <-H1; trivial.
+*rewrite add0; [apply succ_intro1; reflexivity|apply zero_typ].
+*rewrite addS; [|apply succ_typ|]; trivial.
+ rewrite addS_l; trivial.
+ red in H1|-*.
+ apply lt_mono; auto using succ_typ, add_typ.
+ apply succ_intro2; trivial.
 Qed.
 
 (* Bijection NxN = N *)

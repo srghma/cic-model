@@ -15,10 +15,12 @@ Import BuildModel T J R.
 (** Subtyping *)
 
 Lemma sub_typ_covariant e U1 U2 V1 V2 :
+  U1 <> kind ->
   eq_typ e U1 U2 ->
   sub_typ (U1::e) V1 V2 ->
   sub_typ e (Prod U1 V1) (Prod U2 V2).
 Proof.
+intros Unk.
 red; intros.
 simpl in H2|-*.
 unfold CCM.inX, CCM.prod in *.

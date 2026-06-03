@@ -28,6 +28,10 @@ Definition T : term.
 left; exists (fun _ => N); do 2 red; reflexivity.
 Defined.
 
+Lemma Tnk : T <> kind.
+discriminate.
+Qed.
+
 Definition Zero : term.
 left; exists (fun _ => zero); do 2 red; reflexivity.
 Defined.
@@ -70,6 +74,8 @@ red in H0; specialize H0 with (1:=H3).
 red in H1; specialize H1 with (1:=H3).
 red in H2; specialize H2 with (1:=H3).
 simpl in *.
+unfold int1 in *; simpl in *.
+unfold int1 in *; simpl in *.
 replace (fun k0 : nat => i k0) with i in *; trivial.
 set (c := int n i) in *; clearbody c.
 set (f0 := int f i) in *; clearbody f0.
@@ -100,7 +106,7 @@ elim H using N_ind; intros.
    apply app_ext; try reflexivity.
    rewrite simpl_int_lift. symmetry; apply simpl_int_lift1.
 
-   red; intros.
+   unfold int1; red; intros.
    apply prod_ext; auto with *.
     rewrite !simpl_int_lift.
     apply app_ext; auto with *.
@@ -370,19 +376,19 @@ intros e t A B HSA HSB H.
   destruct HSA; trivial.
 Qed.
 
-Lemma Disj_elim : forall e t t1 t2 A B C, C <> None -> 
+Lemma Disj_elim : forall e t t1 t2 A B C, A<>kind -> B<>kind -> C <> None -> 
   typ e C prop ->
   typ e t (Disj A B) ->
   typ (A::e) t1 (lift 1 C) ->
   typ (B::e) t2 (lift 1 C) ->
   typ e prf_term C.
-do 2 red; simpl; intros e t t1 t2 A B C HSC HCP H H1 H2 i HE.
+do 2 red; simpl; intros e t t1 t2 A B C HSA HSB HSC HCP H H1 H2 i HE.
 do 2 red in H; simpl in H; specialize H with (1:=HE).
 generalize (lift_Some1 _ HSC); intros HSClift1.
 apply union2_elim in H; destruct H.
  apply weakening with (A:=A) in HCP. rewrite lift_prop in HCP.
  generalize (proof_irr _ _ _ HSClift1 H1 HCP); intros.
- generalize (vcons_add_var _ _ _ _ HE H); intros.
+ generalize (vcons_add_var _ _ _ _ HSA HE H); intros.
  do 2 red in H1. 
  specialize H1 with (1:=H3). specialize H0 with (1:=H3).
  case_eq (lift 1 C); intros. 
@@ -397,7 +403,7 @@ apply union2_elim in H; destruct H.
 
  apply weakening with (A:=B) in HCP. rewrite lift_prop in HCP.
  generalize (proof_irr _ _ _ HSClift1 H2 HCP); intros.
- generalize (vcons_add_var _ _ _ _ HE H); intros.
+ generalize (vcons_add_var _ _ _ _ HSB HE H); intros.
  do 2 red in H2. specialize H2 with (1:=H3). 
  specialize H0 with (1:=H3).
  case_eq (lift 1 C); intros. rewrite H4 in H2; rewrite <- H4 in H2.
@@ -548,12 +554,14 @@ case_eq (subst a t); intros.
  elim H3; trivial.
 Qed.
  
-Lemma Exst_elim : forall e t1 t2 A C, 
-  C <> None ->
+Lemma Exst_elim e t1 t2 A C :
+  A <> kind ->
+  C <> kind ->
   typ e C prop -> 
   typ e t1 (Exst A) ->
   typ (A::T::e) t2 (lift 2 C) ->
   typ e prf_term C.
+intros Ank.
 do 2 red; intros.
 do 2 red in H1; simpl in H1; specialize H1 with (1:=H3).
 apply weakening with (A:=T) in H0.
@@ -565,8 +573,8 @@ apply union_elim in H1; destruct H1.
 apply replf_elim in H4.
 destruct H4. rewrite H5 in H1.
 assert (N == int T i). simpl; reflexivity. rewrite H6 in H4.
-generalize (vcons_add_var _ _ _ _ H3 H4); intros.
-generalize (vcons_add_var _ _ _ _ H7 H1); intros.
+generalize (vcons_add_var _ _ _ _ Tnk H3 H4); intros.
+generalize (vcons_add_var _ _ _ _ Ank H7 H1); intros.
 generalize (proof_irr _ _ _ Hlift H2 H0 _ H8); intros.
 do 2 red in H2; simpl in H2; specialize H2 with (1:=H8).
 case_eq (lift 2 C); intros.
@@ -688,7 +696,7 @@ apply Impl_intro.
    (Prod (Fall
           (Impl (lift_rec 1 1 P)
              (lift_rec 1 1 (subst (Add (Ref 0) (Succ Zero)) (lift_rec 1 1 P)))))
-      (Prod T (lift_rec 2 1 P))); [| |discriminate].
+      (Prod T (lift_rec 2 1 P))); [| |discriminate|discriminate].
  2:{red; simpl.
     intros.
     apply prod_ext.
@@ -713,17 +721,18 @@ apply Impl_intro.
     red; intros.
     apply prod_ext; [reflexivity|].
     red; intros.    
-    rewrite int_lift_rec_eq.
+    unfold int1; rewrite int_lift_rec_eq.
     apply int_morph;[reflexivity|].
     do 2 red.
     destruct a as [|j]; simpl; try assumption.
     unfold V.lams, V.shift; simpl.
     reflexivity. }
- apply typ_abs;[|discriminate].
+ apply typ_abs;[|discriminate|discriminate].
  apply typ_abs. 2:{ destruct P. destruct s; discriminate. contradiction. }
+ 2:{apply lift_rec_nk; trivial. }
  red; intros.
- apply in_int_el; simpl.
- rewrite int_lift_rec_eq.
+ rewrite el_lift_rec_eq.
+ apply in_int_not_kind; simpl; trivial.
  setoid_replace (V.lams 1 (V.shift 2) i) with
    (V.cons (i 0) (V.shift 3 i)).
  2:{intros [|?];try reflexivity. 

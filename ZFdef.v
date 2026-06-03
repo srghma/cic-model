@@ -83,6 +83,42 @@ Parameter
 
 End Zermelo_sig.
 
+Module Type HasWFR (L:SublogicTheory) (S:SetTheory L).
+  Import L S.
+  Parameter
+    (replf : set -> (set -> set) -> set)
+    (WFR : forall {A}, relation A -> (set -> set) ->
+                       ((set -> A -> set) -> set -> A -> set) -> set -> A -> set).
+
+  Parameter replf_morph : Proper (eq_set ==> (eq_set==>eq_set) ==> eq_set) replf.
+  Parameter replf_ax : forall x F z,
+      (forall z z', z ∈ x -> z == z' -> F z == F z') ->
+      (z ∈ replf x F <-> exists2 y, y ∈ x & z == F y).
+
+  #[local]Notation E := eq_set (only parsing).
+  Parameter WFR_morph :
+    forall {A} (Aeq:relation A),
+    Equivalence Aeq ->
+    Proper ((E==>E)==>((E==>Aeq==>E)==>E==>Aeq==>E)==>E==>Aeq==>E) (WFR Aeq).
+
+  Parameter WFR_eqn :
+    forall {A} (Aeq : relation A),
+       Equivalence Aeq ->
+       forall R : set -> set,
+       Proper (eq_set ==> eq_set) R ->
+       forall (F : (set -> A -> set) -> set -> A -> set) xx,
+       (forall x x' (a a' : A) f f',
+        clos_refl_trans _ (fun x y => in_set x (R y)) x xx ->
+        Acc (fun x y => in_set x (R y)) x ->
+        (forall y y' (a a' : A),
+         in_set y (R x) -> eq_set y y' -> Aeq a a' -> eq_set (f y a) (f' y' a')) ->
+        eq_set x x' -> Aeq a a' -> eq_set (F f x a) (F f' x' a')) ->
+       forall a : A, Acc (fun x y => in_set x (R y)) xx ->
+       eq_set (WFR Aeq R F xx a) (F (WFR Aeq R F) xx a).
+
+End HasWFR.
+  
+
 (** ** Existential version *)
 Module Type Zermelo_Ex_sig (L:SublogicTheory).
 Include WfSetTheory L.

@@ -30,11 +30,6 @@ unfold inX, El, eqX in *.
 rewrite H; rewrite H0; reflexivity.
 Qed.
 
-Definition props := sn_props.
-Definition app := cc_app.
-Definition lam := sn_lam.
-Definition prod := sn_prod.
-
 Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, inX y1 x -> y1 == y2 -> f1 y1 == f2 y2.
 
@@ -43,6 +38,32 @@ red; intros.
 apply H; auto.
 Qed.
 Hint Resolve eq_fun_El : core.
+
+Definition props := sn_props.
+Definition app := cc_app.
+Definition lam := sn_lam.
+Definition prod := sn_prod.
+
+(** Types *)
+
+Definition istype (x:X) :=True.
+Lemma istype_morph : Proper (eqX==>iff) istype.
+do 2 red; reflexivity.
+Qed.
+Lemma istype_props : istype props.
+exact I.
+Qed.
+Lemma istype_prop : forall P, P ∈ El props -> istype P.
+intros; exact I.
+Qed.
+Lemma istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ El x -> istype (f x)) ->
+  istype (prod x f).
+intros; exact I.
+Qed.
+
 
 Lemma lam_ext :
   forall x1 x2 f1 f2,

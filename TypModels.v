@@ -51,11 +51,13 @@ Module Type Judge.
       eq_typ e (App M N) (App M' N').
 
     Parameter eq_typ_abs : forall e T T' M M',
+      T <> kind ->
       eq_typ e T T' ->
       eq_typ (T::e) M M' ->
       eq_typ e (Abs T M) (Abs T' M').
 
     Parameter eq_typ_prod : forall e T T' U U',
+      T <> kind ->
       eq_typ e T T' ->
       eq_typ (T::e) U U' ->
       eq_typ e (Prod T U) (Prod T' U').
@@ -75,19 +77,23 @@ Module Type Judge.
       nth_error e n = value T ->
       typ e (Ref n) (lift (S n) T).
 
-    Parameter typ_app : forall e u v V Ur,
-      typ e v V ->
-      typ e u (Prod V Ur) ->
-      V <> kind ->
-      typ e (App u v) (subst v Ur).
+    Parameter typ_app : forall e u v T U,
+      typ e v T ->
+      typ e u (Prod T U) ->
+      T <> kind ->
+      U <> kind ->
+      typ e (App u v) (subst v U).
 
     Parameter typ_abs : forall e T M U,
       typ (T :: e) M U ->
+      T <> kind ->
       U <> kind ->
       typ e (Abs T M) (Prod T U).
 
     Parameter typ_prod : forall e T U s2,
+      T <> kind ->
       s2 = kind \/ s2 = prop ->
+      typ e T kind ->
       typ (T :: e) U s2 ->
       typ e (Prod T U) s2.
 
@@ -95,6 +101,7 @@ Module Type Judge.
       typ e M T ->
       eq_typ e T T' ->
       T <> kind ->
+      T' <> kind ->
       typ e M T'.
 
 
@@ -109,6 +116,7 @@ Module Type Judge.
       typ e M T ->
       sub_typ e T T' ->
       T <> kind ->
+      T' <> kind ->
       typ e M T'.
 
 
@@ -152,6 +160,7 @@ Module Type ECC_Rules (M:Syntax).
   Parameter cumul_Prop : forall e, sub_typ e prop (type 0).
 
   Parameter typ_prod2 : forall e n T U,
+    T <> kind ->
     typ e T (type n) ->
     typ (T :: e) U (type n) ->
     typ e (Prod T U) (type n).

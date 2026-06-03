@@ -149,7 +149,7 @@ red in H1; specialize H1 with (1:=H2).
 apply in_int_not_kind in H1.
 2:discriminate.
 destruct tyord_inv with (2:=H)(3:=H2) as (?,?); trivial.
-apply in_int_el.
+apply in_int_not_kind; [discriminate|].
 change (couple (int X i) (int F i) ∈ TI (WF' i) (osucc (int O i))).
 apply TI_intro with (int O i); auto.
 *apply WF'_morph; reflexivity.
@@ -158,7 +158,8 @@ apply TI_intro with (int O i); auto.
  +do 2 red; intros.
   rewrite H6; reflexivity.
  +apply H0.
- +rewrite int_Prod_arr in H1.
+ +rewrite in_int_not_kind in H1; [|discriminate].
+  rewrite int_Prod_arr in H1.
   change (int F i ∈ cc_arr (int(subst X B) i) (int(WI O) i)) in H1.
   rewrite int_subst_eq in H1; trivial.
 Qed.
@@ -219,7 +220,7 @@ red in H0; specialize H0 with (1:=H2).
 apply in_int_not_kind in H0;[|discriminate].
 red in H1; specialize H1 with (1:=H2).
 apply in_int_not_kind in H1;[|discriminate].
-apply in_int_el.
+apply in_int_not_kind; [discriminate|].
 simpl int in H0.
 simpl in H1.
 red; simpl.
@@ -248,6 +249,7 @@ assert (fst (int n i) ∈ Aw i).
    reflexivity.
 
    red; intros.
+   unfold lift; unfold int1; rewrite int_lift_rec_eq.
    rewrite V.lams0.
    reflexivity.
 Qed.
@@ -428,6 +430,7 @@ Qed.
 intros is_val Oo Oo' oo' yo y'o yO y'O yy' fty gty eqfg.
 apply val_push_fun.
  apply val_push_ord; auto.
+  discriminate.
   apply ole_lts; trivial.
 
   apply ole_lts; trivial.
@@ -460,7 +463,9 @@ Qed.
 Proof.
 intros.
 apply val_push_var; auto with *.
+ discriminate.
  apply val_push_ord; auto with *.
+  discriminate.
   apply val_mono_refl; trivial.
 
   apply ole_lts; auto.
@@ -508,7 +513,9 @@ unfold F; intros.
 destruct tyord_inv with (2:=ty_O) (3:=H); trivial.
 assert (val_ok (Prod (WIL 1 (Ref 0)) U::OSucc O::e) (V.cons f (V.cons o i))).
  apply vcons_add_var; auto.
+  discriminate.
   apply vcons_add_var; auto.
+  discriminate.
 
   red; revert H1; apply eq_elim.
   apply cc_prod_ext.
@@ -526,7 +533,7 @@ symmetry; apply cc_prod_ext.
  reflexivity.
 
  red; intros.
- rewrite int_lift_rec_eq.
+ unfold int1; rewrite int_lift_rec_eq.
  rewrite int_subst_rec_eq.
  rewrite int_lift_rec_eq.
  apply int_morph; auto with *.
@@ -594,7 +601,7 @@ Lemma typ_wfix :
   typ e (WFix O M) (Prod (WI A B O) (subst_rec O 1 U)).
 red; intros.
 destruct tyord_inv with (2:=ty_O)(3:=H); trivial.
-apply in_int_el.
+apply in_int_not_kind; [discriminate|].
 eapply eq_elim.
 2:simpl.
 2:apply typed_rec_typ with (1:=WREC_ok _ H); auto with *.
@@ -602,7 +609,7 @@ apply cc_prod_ext.
  reflexivity.
 
  red; intros.
- rewrite int_subst_rec_eq.
+ unfold int1; rewrite int_subst_rec_eq.
  rewrite <- V.cons_lams.
  2:apply V.cons_morph; reflexivity.
  rewrite V.lams0.
@@ -663,7 +670,7 @@ eapply typed_recursor_ext with (3:=WREC_ok _ isval) (4:=WREC_ok _ isval'); auto 
  apply W_F_ext; auto.
  red; intros.
  eapply Beq.
- apply val_push_var with (1:=H); trivial.
+ apply val_push_var with (2:=H); trivial.
  rewrite <- H4, <- aeq; trivial.
 
  red; intros.
@@ -708,7 +715,7 @@ apply fcompat_typ_eq with (3:=fxs).
 
   red; intros.
   apply Beq.
-  apply val_push_var with (1:=H0); trivial.
+  apply val_push_var with (2:=H0); trivial.
    rewrite H3 in H2.
    rewrite <- (Aeq _ _ H0); trivial.
 Qed.

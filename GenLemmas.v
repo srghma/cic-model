@@ -258,11 +258,6 @@ destruct D; rewrite tm_lift_rec_eq;
 Qed.
 
 
-(***************************************************************************************)
-(*This following definition should be in Lambda.v*)
-(***************************************************************************************)
-Definition closed_pure_term t := forall k, ~ Lc.occur k t.
-
 
 (***************************************************************************************)
 (*This following lemma should be in SATnat.v.*)
@@ -276,16 +271,16 @@ Import Znats Sat SAT_nat.
 
 (*Import ZFind_nat.*)
 
-Lemma inSAT_n : forall n, n ∈ N -> exists t, inSAT t (cNAT n) /\ closed_pure_term t.
+Lemma inSAT_n : forall n, n ∈ N -> exists t, inSAT t (cNAT n) /\ Lc.closed t.
 intros. pattern n; apply N_ind; trivial; intros.
  destruct H2 as (t, (HinSAT, Hclsd)). 
  exists t; split;[revert HinSAT; apply cNAT_morph; auto with *|trivial].
 
- exists ZE. split; [apply cNAT_ZE|unfold closed_pure_term].
+ exists ZE. split; [apply cNAT_ZE|unfold Lc.closed].
   intros k HF. inversion_clear HF. inversion_clear H0. inversion_clear H1.
 
  destruct H1 as (t, (HinSAT, Hclsd)); exists (Lc.App SU t). 
- split; [apply cNAT_SU; trivial|unfold closed_pure_term in Hclsd |- *].
+ split; [apply cNAT_SU; trivial|unfold Lc.closed in Hclsd |- *].
   intros k HF. inversion_clear HF.
    inversion_clear H1. inversion_clear H2. inversion_clear H1. inversion_clear H2.
     inversion_clear H1; inversion_clear H2.

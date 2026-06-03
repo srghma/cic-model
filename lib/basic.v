@@ -369,7 +369,7 @@ destruct xy as (x0,y0); simpl in *.
   f_equal.
 apply PeanoNat.Nat.sub_add; trivial.
 Qed.
- 
+
 (* nn2n2 : iso {(x,y)|y<=x} -> N *)
 Definition nn2n2 (xy:nat*nat) :=
   nat_sum (fun x=>x) (S (fst xy)) + snd xy.
@@ -414,6 +414,13 @@ destruct (nn2n1_surj (x,y)) as (x' & y' & e); simpl; auto.
 exists x'; exists y'.
 unfold nn2n.
 rewrite e, H0; trivial.
+Qed.
+ 
+Lemma nn2n_order n m :
+  (n <= nn2n n m /\ m <= nn2n n m)%nat.
+unfold nn2n.
+unfold nn2n1, nn2n2; simpl.
+lia.
 Qed.
 
 Fixpoint listn2N (l:list nat) : nat :=

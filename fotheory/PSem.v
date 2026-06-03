@@ -22,7 +22,7 @@ Lemma sort_clsd :
 Proof. split; intros; simpl; split; red; reflexivity. Qed.
 
 Definition wf_clsd_env e := forall i j, val_ok e i j ->
-  exists j', val_ok e i j' /\ (forall n, closed_pure_term (j' n)).
+  exists j', val_ok e i j' /\ (forall n, Lc.closed (j' n)).
 
 Definition prf_T : term.
 left. 
@@ -61,7 +61,7 @@ apply rprod_intro_lam.
 Qed.
 
 Lemma FprfF : forall i j v,
-  (forall n : nat, closed_pure_term (j n)) ->
+  (forall n : nat, Lc.closed (j n)) ->
   [int v i, tm v j] \real prod props (fun p => p) -> False.
 intros i j v Hclsd Hv.
 assert (forall S, inSAT (Lc.App (tm v j) (Lc.Abs (Lc.Ref 0))) S) as HF.
@@ -82,7 +82,7 @@ assert (forall S, inSAT (Lc.App (tm v j) (Lc.Abs (Lc.Ref 0))) S) as HF.
 
  destruct (neutral_not_closed _ HF).
  inversion_clear H.
-  apply tm_closed in H0. unfold closed_pure_term in Hclsd.
+  apply tm_closed in H0. unfold Lc.closed in Hclsd.
     apply False_ind. apply H0. intros. apply Hclsd.
 
     inversion_clear H0. inversion_clear H.
@@ -418,7 +418,7 @@ Lemma PredVary : forall e x y i j,
   typ e x sort ->
   typ e y sort ->
   val_ok e i j ->
-  (exists j', val_ok e i j' /\ (forall n, closed_pure_term (j' n)) /\
+  (exists j', val_ok e i j' /\ (forall n, Lc.closed (j' n)) /\
     (exists P, P <> kind /\ [int P i, tm P j'] \real int (Prod sort prop) i /\ 
       exists u, [int u i, tm u j'] \real (app (int P i) (int x i)) /\
         ((exists v, [int v i, tm v j'] \real (app (int P i) (int y i))) -> 

@@ -310,12 +310,14 @@ unfold Zcoc.props; rewrite power_ax; intros; trivial.
   intros. do 2 red in IHf; simpl in IHf; 
   apply IHf with (e:=(T::e)).
   apply vcons_add_var; simpl; trivial.
-
+  discriminate.
+  
  apply union_elim in H0. destruct H0. 
  apply replf_elim in H1.
   destruct H1. revert y H0. rewrite <- power_ax. rewrite H2. 
   do 2 red in IHf; simpl in IHf; apply IHf with (e:=(T::e)).
-   apply vcons_add_var; simpl; trivial.
+  apply vcons_add_var; simpl; trivial.
+  discriminate.
 Qed.
 
 Lemma P_ax_intro5_ex : forall P, eq_term 
@@ -435,6 +437,8 @@ destruct IHderiv. exists x. simpl in H0. apply Conj_elim in H0.
  apply Disj_elim with (t:=x) (t1:=x0) (t2:=x1) 
    (A:=int_fofml f1) (B:=int_fofml f2); try rewrite lift_int_lift_fml; trivial.
   apply fofml_Some.
+  apply fofml_Some.
+  apply fofml_Some.
 
   apply fofml_in_props.
 
@@ -478,6 +482,7 @@ destruct IHderiv. exists x. simpl in H0. apply Conj_elim in H0.
 (*exst_elim*)
 destruct IHderiv1, IHderiv2. simpl in H1, H2.
 exists prf_term. apply Exst_elim with (t1:=x) (t2:=x0) (A:=int_fofml f); trivial.
+ apply fofml_Some.
  apply fofml_Some.
 
  apply fofml_in_props.

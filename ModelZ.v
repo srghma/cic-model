@@ -35,6 +35,25 @@ Definition app : X -> X -> X := cc_app.
 Definition lam : X -> (X -> X) -> X := cc_lam.
 Definition prod : X -> (X -> X) -> X := cc_prod.
 
+Definition istype (x:X) :=True.
+Lemma istype_morph : Proper (eqX==>iff) istype.
+do 2 red; reflexivity.
+Qed.
+
+Lemma istype_props : istype props.
+exact I.
+Qed.
+Lemma istype_prop : forall P, P ∈ props -> istype P.
+intros; exact I.
+Qed.
+Lemma istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ x -> istype (f x)) ->
+  istype (prod x f).
+intros; exact I.
+Qed.
+
 Lemma lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->

@@ -33,6 +33,27 @@ Definition prod := cc_prod.
 Definition eqX_fun (x:X) (f1 f2:X->X) :=
   forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
 
+
+Definition istype (x:X) :=True.
+Lemma istype_morph : Proper (eqX==>iff) istype.
+do 2 red; reflexivity.
+Qed.
+
+Lemma istype_props : istype props.
+exact I.
+Qed.
+Lemma istype_prop : forall P, P ∈ props -> istype P.
+intros; exact I.
+Qed.
+
+Lemma istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ x -> istype (f x)) ->
+  istype (prod x f).
+intros; exact I.
+Qed.
+
 Lemma lam_ext :
   forall x1 x2 f1 f2,
   x1 == x2 ->

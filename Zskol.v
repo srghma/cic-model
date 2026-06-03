@@ -381,28 +381,37 @@ do 2 red; intros.
 rewrite H; reflexivity.
 Qed.
 
+Lemma lift_pair a b :
+    (#exists2 a', Z2set a' == a &
+      exists2 b', Z2set b' == b &
+      exists c', forall z, ExZ.in_set z c' <-> #(ExZ.eq_set z a' \/ ExZ.eq_set z b')) ->
+    { pair | forall x, x ∈ pair <-> pair_spec a b x }.
+intros expair.
+apply set_intro' with (P:=pair_spec a b); unfold pair_spec; intros; auto.
+*apply pair_spec_morph; trivial.
+*Tdestruct expair as (a',adef,(b',bdef,(c',cdef))).
+ Texists c'; intros.
+ rewrite cdef, <-adef, <-bdef.
+ apply Tr_morph.
+ apply or_iff_morphism; symmetry; apply eq_equiv.
+Qed.
+
 Lemma pair_sig : forall a b,
   { pair | forall x, x ∈ pair <-> pair_spec a b x }.
 intros a b.
-apply set_intro' with (P:=pair_spec a b); unfold pair_spec; intros; auto.
- apply pair_spec_morph; trivial.
-
- Tdestruct (Z2set_surj a) as (a',?).
- Tdestruct (Z2set_surj b) as (b',?).
- Tdestruct (ExZ.pair_ex a' b') as (w,?).
- Texists w; intros.
- rewrite H1.
- rewrite H; rewrite H0.
- apply Tr_morph.
- apply or_iff_morphism.
-  symmetry; apply eq_equiv.
-
-  symmetry; apply eq_equiv.
+apply lift_pair.
+Tdestruct (Z2set_surj a) as (a',?).
+Tdestruct (Z2set_surj b) as (b',?).
+Tdestruct (ExZ.pair_ex a' b') as (w,?).
+Texists a'; [symmetry;trivial|exists b';[symmetry;trivial|]].
+exists w; trivial.
 Qed.
 
 Definition pair a b := proj1_sig (pair_sig a b).
 Lemma pair_ax: forall a b x, x ∈ pair a b <-> #(x == a \/ x == b).
-Proof fun a b => proj2_sig (pair_sig a b).
+exact (fun a b => proj2_sig (pair_sig a b)).
+Qed.
+
 End Pair.
 
 Section Union.
@@ -630,5 +639,10 @@ Proof.
 exact (proj2 (proj2_sig infinite_sig)).
 Qed.
 
+
+(*
+Lemma replf_sig a f :
+  {b | 
+*)
 End Skolem.
 

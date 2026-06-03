@@ -177,6 +177,7 @@ Qed.
     instantiate Nat_Model. *)
 Module ZFind_Nats <: Models.Nat_Model CCM.
 Definition N := NAT.
+Definition istype_N : CCM.istype N := I.
 Definition zero := ZERO.
 Definition succ := SUCC.
 Definition succ_morph := inr_morph.

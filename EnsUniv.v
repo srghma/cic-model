@@ -1,4 +1,4 @@
-Require Import basic.
+Require Import basic Sublogic.
 
 (** In this file we show that Coq universes allows to build
    Grothendieck universes.
@@ -7,13 +7,20 @@ Require Import basic.
    and we show that U is a Grothendieck universe.
  *)
 
-Require Ens0.
-Require Ens.
+Require EnsEm0.
+Require EnsEm.
 
 (** Level 1: small sets *)
-Module S := Ens0.IZF_R.
+Module S := EnsEm0.RawEnsembles CoqSublogicThms.
 (** Level 2 : big sets *)
-Module B := Ens.IZF_R.
+Module B := EnsEm.RawEnsembles CoqSublogicThms.
+
+(* Axioms to get replacement for small sets... *)
+Axiom ttrepl_axiom : S.ttrepl S.eq_set.
+Definition S_repl_ax := S.ttrepl_implies_repl_ex ttrepl_axiom.
+(* Axioms to get collection for small sets... *)
+Axiom ttcoll_axiom : S.ttcoll S.eq_set.
+Definition S_coll_ax := S.collection_ax_total ttcoll_axiom.
 
 (** Notations for big sets *)
 Notation "x ∈ y" := (B.in_set x y) (at level 60).
@@ -153,24 +160,23 @@ intros.
 unfold S.subset, B.subset.
 destruct x; simpl.
 split; intros.
- destruct i; simpl.
- assert (exists2 x', injU (f x) == x' & Q x').
-  destruct e.
-  exists (injU x0).
-   apply lift_eq; trivial.
-   rewrite <- (H x0); trivial.
-   apply B.eq_set_refl.
- exists (exist (fun a => exists2 x', injU (f a) == x' & Q x') x H0); simpl.
+*destruct i; simpl in *.
+ assert (sb_spec' : exists2 x', injU (f sb_i) == x' & Q x').
+ {destruct sb_spec.
+  exists (injU x).
+  *apply lift_eq; trivial.
+  *rewrite <- (H x); trivial.
+   apply B.eq_set_refl. }
+ exists (B.mkSi (B.sup _ _) Q sb_i sb_spec'); simpl.
  apply B.eq_set_refl.
-
- destruct j; simpl.
- assert (exists2 x', S.eq_set (f x) x' & P x').
-  destruct e.
-  exists (f x).
-   apply S.eq_set_refl.
-   rewrite (H (f x) x0); trivial.
-   apply B.eq_set_sym; trivial.
- exists (exist (fun a => exists2 x', S.eq_set (f a) x' & P x') x H0); simpl.
+*destruct j; simpl.
+ assert (sb_spec' : exists2 x', S.eq_set (f sb_i) x' & P x').
+ {destruct sb_spec.
+  exists (f sb_i).
+  *apply S.eq_set_refl.
+  *rewrite (H (f sb_i) x); trivial.
+   apply B.eq_set_sym; trivial. }
+ exists (S.mkSi (S.sup _ _) P sb_i sb_spec'); simpl.
  apply B.eq_set_refl.
 Qed.
 
@@ -293,7 +299,38 @@ apply B.in_reg with (injU (S.union x0)).
 
  apply U_intro.
 Qed.
+(*
+Section Fsup.
 
+Definition couple x y := B.pair (B.singl x) (B.pair x y).
+Definition fst p := B.union (B.subset (B.union p) (fun x => B.singl x ∈ p)).
+Definition snd p :=
+  B.union (B.subset (B.union p) (fun z => B.pair (fst p) z == B.union p)).
+Definition isCouple c := c == couple (fst c) (snd c).
+Definition isRelation x :=
+  forall p, p ∈ x -> isCouple p.
+Definition isFunction f :=
+  isRelation f /\
+  forall x y y', couple x y ∈ f -> couple x y' ∈ f -> y == y'.
+Definition rel_domain r :=
+  B.subset (B.union (B.union r)) (fun x => exists y, (*y∈union r*) couple x y ∈ r).
+Definition rel_image r :=
+  B.subset (B.union (B.union r)) (fun y => exists x, (*x∈r*) couple x y ∈ r).
+
+Lemma U_fsup : forall f, f ∈ B.power U ->
+                       isFunction f ->
+                       rel_domain f ∈ U ->
+                       rel_image f ∈ U.
+intros.
+destruct H.
+simpl in x.
+simpl in H.
+apply U_elim in H1.
+destruct H1.
+  
+
+End Fsup.
+ *)
 
 Lemma U_repl : forall a R,
   Proper (B.eq_set==>B.eq_set==>iff) R ->
@@ -305,7 +342,7 @@ Lemma U_repl : forall a R,
 intros.
 apply U_elim in H0; destruct H0.
 (* replacement on small sets *)
-destruct S.repl_ax with x (fun x y => R (injU x) (injU y)) as (b,Hb).
+  destruct S_repl_ax with x (fun x y => R (injU x) (injU y)) as (b,Hb).
  intros.
  revert H5; apply iff_impl; apply H; apply lift_eq; trivial.
 
@@ -353,6 +390,7 @@ destruct S.repl_ax with x (fun x y => R (injU x) (injU y)) as (b,Hb).
   revert H4; apply iff_impl; apply H; trivial.
   apply B.eq_set_sym; trivial.
 Qed.
+Print Assumptions U_repl.
 
 (** If the small sets are closed under collection, then so
    is U. *)
@@ -364,11 +402,11 @@ Lemma U_coll : forall a R,
 intros.
 apply U_elim in H0; destruct H0 as (a',?).
 (* We use collection on small sets *)
-destruct S.coll_ax_ttcoll with a' (fun x y => R (injU x) (injU y)).
- intros.
- revert H5; apply iff_impl; apply H; apply lift_eq; trivial.
-
- intros.
+destruct S_coll_ax with a' (fun x y => R (injU x) (injU y)).
+*do 3 red; intros; apply H; apply lift_eq; trivial.
+(* intros. 
+ revert H5; apply iff_impl; apply H; apply lift_eq; trivial.*)
+*intros.
  apply lift_in in H2.
  apply B.eq_set_sym in H0.
  specialize B.eq_elim with (1:=H2) (2:=H0); intro.
@@ -376,21 +414,18 @@ destruct S.coll_ax_ttcoll with a' (fun x y => R (injU x) (injU y)).
  destruct H3.
  apply U_elim in H3; destruct H3.
  exists x1.
- revert H4; apply iff_impl; apply H; trivial.
- apply B.eq_set_refl.
-
- exists (injU x).
-  apply U_intro.
-
-  intros.
-  apply down_in_ex with (1:=H0) in H3.
-  destruct H3.
-  apply H2 in H4.
-  destruct H4.
-  exists (injU x2).
-   apply lift_in; trivial.
-
-   revert H5; apply iff_impl; apply H; trivial.
+ revert H4; apply H; trivial.
+ +apply B.eq_set_refl.
+ +apply B.eq_set_sym; trivial.
+*exists (injU x); [apply U_intro|].
+ intros.
+ apply down_in_ex with (1:=H0) in H3.
+ destruct H3.
+ apply H2 in H4.
+ destruct H4.
+ exists (injU x2).
+ +apply lift_in; trivial.
+ +revert H5; apply iff_impl; apply H; trivial.
     apply B.eq_set_sym; trivial.
     apply B.eq_set_refl.
 Qed.
@@ -401,7 +436,7 @@ Record grot_univ (U:B.set) : Prop := {
   G_pair : forall x y, x ∈ U -> y ∈ U -> B.pair x y ∈ U;
   G_power : forall x, x ∈ U -> B.power x ∈ U;
   G_union : forall x, x ∈ U -> B.union x ∈ U;
-  G_repl : forall a R, Proper (B.eq_set==>B.eq_set==>iff) R ->
+  G_hidden_repl : forall a R, Proper (B.eq_set==>B.eq_set==>iff) R ->
            a ∈ U ->
            (forall x y y', x ∈ a -> y ∈ U -> y' ∈ U -> R x y -> R x y' -> y == y') ->
            exists2 b, b ∈ U & forall y, y ∈ U -> (y ∈ b <-> exists2 x, x ∈ a & R x y) }.
@@ -447,7 +482,7 @@ constructor.
     small sets to use functional replacement on small sets. We're stuck
     again. Relational replacement does it, of course!
   *)
- destruct S.repl_ax with x
+ destruct S_repl_ax with x
          (fun x' y => exists h:injU x' ∈ I, F (exist (fun z=>z ∈ I) _ h) == injU y)
    as (B,HB).
   intros.

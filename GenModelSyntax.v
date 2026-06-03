@@ -47,7 +47,7 @@ induction t; intros.
 
   red; intros.
   rewrite H; rewrite <- IHt2.
-  rewrite int_lift_rec_eq.
+  unfold int1; rewrite int_lift_rec_eq.
   rewrite V.cons_lams; eauto with *.
   rewrite H1; reflexivity.
 
@@ -63,7 +63,7 @@ induction t; intros.
 
   red; intros.
   rewrite H; rewrite <- IHt2.
-  rewrite int_lift_rec_eq.
+  unfold int1; rewrite int_lift_rec_eq.
   rewrite V.cons_lams; eauto with *.
   rewrite H1; reflexivity.
 Qed.
@@ -126,7 +126,7 @@ induction t; intros.
 
   red; intros.
   rewrite H; rewrite <- IHt2.
-  rewrite int_subst_rec_eq.
+  unfold int1; rewrite int_subst_rec_eq.
   rewrite V.cons_lams; eauto with *.
   rewrite H1; reflexivity.
 
@@ -142,7 +142,7 @@ induction t; intros.
 
   red; intros.
   rewrite H; rewrite <- IHt2.
-  rewrite int_subst_rec_eq.
+  unfold int1; rewrite int_subst_rec_eq.
   rewrite V.cons_lams; eauto with *.
   rewrite H1; reflexivity.
 Qed.
@@ -171,11 +171,11 @@ Lemma int_sound : forall e M M' T,
   J.eq_typ (int_env (unmark_env e)) (int_trm (unmark_app M)) (int_trm (unmark_app M')).
 induction 1; simpl; intros.
  (* Srt *)
- split.
+*split.
   apply R.typ_prop.
   apply R.refl.
  (* Ref *)
- split.
+*split.
   destruct H0.
   subst t.
   unfold lift; rewrite unmark_lift.
@@ -185,14 +185,14 @@ induction 1; simpl; intros.
 
   apply R.refl.
  (* Abs *)
- destruct IHeq_typ1.
+*destruct IHeq_typ1.
  clear IHeq_typ2.
  destruct IHeq_typ3.
  split.
-  apply R.typ_abs; eauto.
-  apply R.eq_typ_abs; trivial.
+ +apply R.typ_abs; eauto.
+ +apply R.eq_typ_abs; eauto.
  (* App *)
- destruct IHeq_typ1.
+*destruct IHeq_typ1.
  destruct IHeq_typ3.
  split.
   rewrite unmark_subst0 with (1:=H2).
@@ -200,15 +200,17 @@ induction 1; simpl; intros.
   apply R.typ_app with (int_trm (unmark_app V)); eauto.
   apply R.eq_typ_app; trivial.
  (* Prod *)
- destruct IHeq_typ1.
+*destruct IHeq_typ1.
  destruct IHeq_typ2.
  split.
-  apply R.typ_prod; trivial.
+ +apply R.typ_prod; eauto.
   destruct s2; auto.
+  destruct s1; trivial.
+  apply R.typ_prop_kind; trivial.
 
-  apply R.eq_typ_prod; trivial.
+ +apply R.eq_typ_prod; eauto.
  (* Beta *)
- destruct IHeq_typ1.
+*destruct IHeq_typ1.
  destruct IHeq_typ3.
  split.
   rewrite unmark_subst0 with (1:=H2).
@@ -220,17 +222,18 @@ induction 1; simpl; intros.
    apply R.eq_typ_beta; eauto.
    apply typ_refl2 in H; eauto.
  (* Red *)
- destruct IHeq_typ1.
+*destruct IHeq_typ1.
  destruct IHeq_typ2.
  split; trivial.
  apply R.typ_conv with (int_trm (unmark_app T)); eauto.
- (* Exp *)
- destruct IHeq_typ1.
+ apply typ_refl2 in H0; eauto.
+(* Exp *)
+*destruct IHeq_typ1.
  destruct IHeq_typ2.
  split; trivial.
- apply typ_refl2 in H0.
  apply R.typ_conv with (int_trm (unmark_app T')); eauto.
  apply R.sym; trivial.
+ apply typ_refl2 in H0; eauto.
 Qed.
 
 (***********)

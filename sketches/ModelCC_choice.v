@@ -54,6 +54,8 @@ Defined.
 red; simpl; intros.
 generalize (H 0 _ (eq_refl _)); simpl; unfold V.lams, V.shift; simpl; intros.
 generalize (H 1 _ (eq_refl _)); simpl; unfold V.lams, V.shift; simpl; intros.
+unfold int1 in H0,H1; simpl in H0,H1.
+unfold int1 in H0; simpl in H0.
 clear H.
 set (P := i 2) in *; clearbody P.
 set (Y := i 3) in *; clearbody Y.
@@ -61,7 +63,7 @@ generalize (uchoice_def _ (CH_spec_u Y (i 1) (i 0))).
 set (w := uchoice (CH_spec Y (i 1) (i 0))) .
 clearbody w; unfold CH_spec; intros.
 destruct H.
- destruct H.
+*destruct H.
  rewrite H2.
  refine (prod_elim _ _ _ _ _ H0 _).
   admit.
@@ -75,7 +77,7 @@ destruct H.
   admit.
  elim empty_ax with x; trivial.
 
- destruct H.
+*destruct H.
  rewrite H2.
  refine (prod_elim _ _ _ _ _ H1 _).
   admit.

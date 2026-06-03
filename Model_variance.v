@@ -130,12 +130,14 @@ destruct (ords e n); auto with *.
 destruct (fixs e n); auto with *.
 Qed.
 
-Lemma val_push_var : forall e i i' x x' T,
+Lemma val_push_var e i i' x x' T :
+  T <> kind ->
   val_mono e i i' ->
   x == x' ->
   x ∈ int T i ->
   x' ∈ int T i' ->
   val_mono (push_var e T) (V.cons x i) (V.cons x' i').
+intros Tnk.
 destruct 1 as (?&?&?); split;[idtac|split]; trivial.
  unfold push_var; simpl.
  apply vcons_add_var; trivial.
@@ -148,12 +150,14 @@ destruct 1 as (?&?&?); split;[idtac|split]; trivial.
  destruct (ords e n); trivial.
 Qed.
 
-Lemma val_push_ord : forall e i i' x x' T,
+Lemma val_push_ord e i i' x x' T :
+  T <> kind ->
   val_mono e i i' ->
   x ⊆ x' ->
   x ∈ int T i ->
   x' ∈ int T i' ->
   val_mono (push_ord e T) (V.cons x i) (V.cons x' i').
+intros Tnk.
 destruct 1 as (?&?&?); split;[idtac|split]; trivial.
  unfold push_ord; simpl.
  apply vcons_add_var; trivial.
@@ -176,9 +180,11 @@ Lemma val_push_fun : forall e i i' f g T U,
 destruct 1 as (?&?&?); split;[idtac|split]; trivial.
  unfold push_fun; simpl.
  apply vcons_add_var; trivial.
-
+ discriminate.
+ 
  unfold push_fun; simpl.
  apply vcons_add_var; trivial.
+ discriminate.
 
  destruct n as [|n]; simpl; auto.
  generalize (H1 n).
@@ -242,10 +248,12 @@ simpl.
 rewrite H; rewrite H0; reflexivity.
 Qed.
 
-  Lemma var_eq_abs : forall e T M,
+  Lemma var_eq_abs e T M :
+    T <> kind ->
     var_equals e T ->
     var_equals (push_var e T) M ->
     var_equals e (Abs T M).
+intros Tnk.
 unfold var_equals; intros.
 simpl.
 apply cc_lam_ext; eauto.
@@ -256,10 +264,12 @@ apply val_push_var; auto.
 rewrite <- H3; rewrite <- H; trivial.
 Qed.
 
-  Lemma var_eq_prod : forall e T U,
+  Lemma var_eq_prod e T U :
+    T <> kind ->
     var_equals e T ->
     var_equals (push_var e T) U ->
     var_equals e (Prod T U).
+intros Tnk.
 red; simpl; intros.
 specialize (H _ _ H1).
 apply cc_prod_ext; trivial.
@@ -310,10 +320,12 @@ generalize (H0 n); rewrite H.
 simpl; intros; trivial.
 Qed.
 
-Lemma var_mono_prod : forall e T U,
+Lemma var_mono_prod e T U :
+  T <> kind ->
   var_equals e T ->
   var_mono (push_var e T) U ->
   var_mono e (Prod T U).
+intros Tnk.
 red; red; intros.
 red in H; specialize H with (1:=H1).
 revert H2; simpl; apply cc_prod_covariant; intros.
@@ -329,11 +341,13 @@ Qed.
 
   (** Function subtyping rules *)
 
-  Lemma var_ext_abs : forall e U T M,
+  Lemma var_ext_abs e U T M :
+    T <> kind ->
     var_mono e T ->
     var_equals (push_var e T) M ->
     typ (T::tenv e) M U ->
     var_ext e T (Abs T M).
+intros Tnk.
 unfold var_equals, var_ext; intros.
 specialize El_sub with (1:=H)(2:=H2); clear H; intro H.
 simpl.
@@ -391,7 +405,11 @@ Qed.
 
 (** Subsumption *)
   Lemma typ_eq_subsumption e M T T' :
-    typ_equals e M T -> sub_typ (tenv e) T T' -> T <> kind -> typ_equals e M T'.
+    typ_equals e M T ->
+    sub_typ (tenv e) T T' ->
+    T <> kind ->
+    T' <> kind ->
+    typ_equals e M T'.
 destruct 1; split; trivial.
 apply typ_subsumption with (2:=H1); trivial.
 Qed.
@@ -446,15 +464,16 @@ split.
  apply typ_var; trivial.
 Qed.
   
-  Lemma typ_eq_abs : forall e s1 U T T' M,
+  Lemma typ_eq_abs e s1 U T T' M :
+    T <> kind ->
     U <> kind ->
     s1=prop \/ s1=kind ->
     eq_typ (tenv e) T T' ->
     typ_equals e T s1 ->
     typ_equals (push_var e T) M U ->
     typ_equals e (Abs T M) (Prod T' U).
-intros.
-destruct H2; destruct H3.
+intros Tnk Unk srt1 eqT tyT tyM.
+destruct tyT; destruct tyM.
 split.
  apply var_eq_abs; trivial.
 
@@ -465,28 +484,31 @@ split.
   reflexivity.
 
  discriminate.
+ discriminate.
 Qed.
 
-  Lemma typ_ext_abs : forall e U T M,
+  Lemma typ_ext_abs e U T M :
+    T <> kind ->
     U <> kind ->
     typ_mono e T kind ->
     typ_equals (push_var e T) M U ->
     typ_ext e (Abs T M) T U.
 intros.
-destruct H0; destruct H1; split.
+destruct H1; destruct H2; split.
  apply var_ext_abs with U; trivial.
 
  apply typ_abs; trivial.
 Qed.
 
 Lemma typ_eq_app e u v V Ur T :
+  T <> kind ->
   V <> kind ->
   Ur <> kind ->
   sub_typ (tenv e) (subst v Ur) T ->
   typ_equals e u (Prod V Ur) ->
   typ_equals e v V ->
   typ_equals e (App u v) T.
-intros Vnk Unk Tsub (uty,ueq) (vty,veq).
+intros Tnk Vnk Unk Tsub (uty,ueq) (vty,veq).
 split.
  apply var_eq_app; trivial.
 
@@ -523,8 +545,8 @@ split.
  2:destruct u as [(u,um)|]; trivial.
  2:discriminate.
  apply typ_app with (lift (S n) t); trivial.
- destruct t as [(t,tm)|]; trivial.
- discriminate.
+ apply lift_rec_nk; trivial.
+ apply lift_rec_nk; trivial.
 Qed.
 
 
@@ -534,6 +556,7 @@ Qed.
     spec_var e n = false ->
     nth_error (tenv e) n = value t ->
     t <> kind ->
+    T <> kind ->
     sub_typ (tenv e) (lift (S n) t) T ->
     typ_equals e (Ref n) T.
 intros.
@@ -542,9 +565,7 @@ split.
 
  apply typ_subsumption with (lift (S n) t); trivial.
   apply typ_var; trivial.
-
-  destruct t as [(t,tm)|]; simpl in *; auto.
-  discriminate.
+  apply lift_rec_nk; trivial.
 Qed.
 
 (*  Lemma typ_eq_app' : forall e u v V Ur T,

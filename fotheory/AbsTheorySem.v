@@ -22,14 +22,14 @@ Axiom sort_clsd :
   (forall t k, eq_term (subst_rec t k sort) sort).
 
 Definition wf_clsd_env e := forall i j, val_ok e i j ->
-  exists j', val_ok e i j' /\ (forall n, closed_pure_term (j' n)).
+  exists j', val_ok e i j' /\ (forall n, Lc.closed (j' n)).
 
 Axiom PredVary : forall e x y i j, 
   wf_clsd_env e ->
   typ e x sort ->
   typ e y sort ->
   val_ok e i j ->
-  (exists j', val_ok e i j' /\ (forall n, closed_pure_term (j' n)) /\
+  (exists j', val_ok e i j' /\ (forall n, Lc.closed (j' n)) /\
     (exists P, P <> kind /\ [int P i, tm P j'] \real int (Prod sort prop) i /\ 
       exists u, [int u i, tm u j'] \real (app (int P i) (int x i)) /\
         ((exists v, [int v i, tm v j'] \real (app (int P i) (int y i))) -> 

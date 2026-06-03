@@ -1192,6 +1192,19 @@ red; intros; subst M.
 apply typ_inversion with (1 := H); red; simpl; intros; trivial.
 discriminate.
 Qed.
+  Lemma eq_typ_not_kind_r : forall e M M' T,
+    eq_typ e M M' T ->
+    M' <> Srt kind.
+Proof.
+induction 1; try discriminate; trivial.
+destruct M'; try discriminate.
+destruct s; try discriminate.
+elim IHeq_typ3; trivial.
+destruct n;[|discriminate].
+destruct N'; try discriminate.
+destruct s; try discriminate.
+elim IHeq_typ1; trivial.
+Qed.
 
 
   Lemma red_prod_prod_eq : forall e T U K,
@@ -1729,7 +1742,7 @@ induction 1; intros.
   constructor 1 with x; apply eq_conv_sym; trivial.
 
  (* sort *)
- apply typ_inversion with (1 := H); red; intros;  subst t'; trivial.
+  apply typ_inversion with (1 := H); red; intros;  subst t'; trivial.
 
  (* var *)
  apply typ_inversion with (1 := H); red; intros;  subst t'; trivial.

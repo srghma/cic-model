@@ -8,20 +8,21 @@ Require Import ZFdef.
    Axiom (TTColl).
  *)
 
+Definition Tchoice (Tr:Prop->Prop) A B :=
+  forall (R:A->B->Prop),
+  (forall x:A, Tr(exists y:B, R x y)) ->
+  Tr(exists f:A->B, forall x:A, Tr(R x (f x))).
+Definition Tunique_choice (Tr:Prop->Prop) A B (E:B->B->Prop) :=
+  forall (R:A->B->Prop),
+  (forall x:A, Tr(exists y:B, R x y)) ->
+  (forall x y y', R x y -> (R x y' <-> E y y')) ->
+  Tr(exists f:A->B, forall x:A, Tr(R x (f x))).
+
 Module RawEnsembles (L:SublogicTheory).
 
 Import L.
 
 (* Statement of choice principles in the given logic *) 
-Definition Tchoice A B :=
-  forall (R:A->B->Prop),
-  (forall x:A, #exists y:B, R x y) ->
-  #exists f:A->B, forall x:A, #R x (f x).
-Definition Tunique_choice A B (E:B->B->Prop) :=
-  forall (R:A->B->Prop),
-  (forall x:A, #exists y:B, R x y) ->
-  (forall x y y', R x y -> (R x y' <-> E y y')) ->
-  #exists f:A->B, forall x:A, #R x (f x).
 
 (** The level of sets *)
 Definition Thi := Type.
@@ -105,6 +106,8 @@ intros; apply Tr_isL.
 Qed.
 Global Hint Resolve in_set_isL : core.
 
+Definition incl_set x y := forall z, in_set z x -> in_set z y.
+
 Notation "x ∈ y" := (in_set x y) (at level 60).
 Notation "x == y" := (eq_set x y) (at level 70).
 
@@ -178,6 +181,9 @@ Qed.
 
 Definition el (x:set) := {z|z ∈ x}.
 Definition eli x y (h:y ∈ x): el x := exist (fun z=>z∈ x) y h.
+
+Definition in_set_intro (x:set) (i:idx x) : in_set (elts x i) x :=
+  TrI (ex_intro _ i (eq_set_refl _)).
 
 Definition elts' (x:set) (i:idx x) : el x.
 exists (elts x i).
@@ -323,6 +329,24 @@ split; intros.
  Tdestruct H0.
  Texists x; trivial.
  apply eq_elim with a'; trivial.
+Qed.
+
+(* A useful tool to hide some logical information in a set *)
+Lemma union_sup_eq X f x (d:forall P:Prop,(X->#P)->#P):
+  (forall i:X, f i == x) ->
+  union (sup X f) == x.
+intros; apply eq_set_ax; intros z.
+rewrite union_ax.
+split.
+*intros h; Telim h; intros (b, inb, insup); simpl in *.
+ Telim insup; intros (i,ei).
+ apply eq_elim with b; trivial.
+ apply eq_set_trans with (f i); trivial.
+*intros.
+ apply d; intros i. 
+ Texists x; trivial.
+ Texists i; simpl.
+ apply eq_set_sym; trivial.
 Qed.
 
 (** Separation axiom *)
@@ -504,29 +528,178 @@ intros; rewrite eq_set_ax; split; apply repl1_mono; intros; auto.
  apply eq_set_sym; trivial.
 Qed.
 
-Section WellFoundedRecursion.
+Section EpsilonRecursion.
 Variable f : set -> set.
 Hypothesis fm : Proper (eq_set==>eq_set) f.
 
-Fixpoint WFR (x:set) (p:Acc in_set x) {struct p} : set :=
+Fixpoint EPS (x:set) (p:Acc in_set x) {struct p} : set :=
   f (repl1 x (fun (y:el x) =>
-               WFR (proj1_sig y) (Acc_inv p (proj2_sig y)))).
+               EPS (proj1_sig y) (Acc_inv p (proj2_sig y)))).
 
-Lemma WFR_eqn x p : WFR x p == f (repl1 x (fun y => WFR _ (Acc_inv p (proj2_sig y)))).
+Lemma EPS_eqn x p : EPS x p == f (repl1 x (fun y => EPS _ (Acc_inv p (proj2_sig y)))).
 destruct p; simpl.
 apply eq_set_refl.
 Qed.
 
-Lemma WFR_irrel x p x' p' : x==x' -> WFR x p == WFR x' p'.
+Lemma EPS_irrel x p x' p' : x==x' -> EPS x p == EPS x' p'.
 revert x p x' p'.
-fix WFRi 2.
+fix EPSi 2.
 destruct p; simpl; intros.
-apply eq_set_trans with (2:=eq_set_sym _ _ (WFR_eqn x' p')).
+apply eq_set_trans with (2:=eq_set_sym _ _ (EPS_eqn x' p')).
 apply fm; apply repl1_morph; intros; trivial.
-apply WFRi; trivial.
+apply EPSi; trivial.
+Qed.
+
+End EpsilonRecursion.
+
+Section WellFoundedRecursion.
+  Context {A : Type} (Aeq : relation A) {Arefl : Equivalence Aeq}.
+
+  Hypothesis R : set -> set.
+  Hypothesis Rm : Proper (eq_set==>eq_set) R.
+  Let R' x y := in_set x (R y).
+  Hypothesis F : (set -> A -> set) -> set -> A -> set.
+  Variable xx : set.
+
+  Let Rle := clos_trans _ (fun x y => eq_set x y\/R' x y).
+  
+  Hypothesis Fext : forall x x' a a' f f',
+    Rle x xx ->
+    (forall y y' a a',
+        R' y x -> eq_set y y' -> Aeq a a' -> eq_set (f y a) (f' y' a')) ->
+    eq_set x x' ->
+    Aeq a a' ->
+    eq_set (F f x a) (F f' x' a').
+
+  Fixpoint WFR_aux (x:set) (a:A) (h:Acc R' x) : set :=
+    F (fun y a =>
+         union (sup {i:idx (R x)|eq_set (elts (R x) i) y}
+                  (fun i => WFR_aux (elts (R x) (proj1_sig i)) a
+                              (Acc_inv h (in_set_intro (R x) (proj1_sig i))))))
+      x a.
+
+  Definition WFR (x:set)(a:A) :=
+    union (sup (Acc R' x) (fun h => WFR_aux x a h)).
+  
+  Lemma WFR_auxm x x' a a' (h:Acc R' x) (h':Acc R' x') (r:Rle x xx) :
+    eq_set x x' -> Aeq a a' ->
+    eq_set (WFR_aux x a h) (WFR_aux x' a' h').
+revert x x' a a' h h' r.
+fix aux 5.
+destruct h; destruct h'; simpl.
+intros lexx eqx eqa.
+apply Fext; [trivial| |trivial|trivial].
+clear a a' eqa.
+intros.
+Tdestruct H as (i,?).
+assert (eR := Rm _ _ eqx).
+apply eq_set_def in eR.
+destruct eR as (i2j,j2i).
+apply union_sup_eq.
+{intros P h; apply h; exists i.
+ apply eq_set_sym; trivial. }
+intros (i', eqy); simpl.
+Tdestruct (i2j i') as (j,?).
+apply eq_set_sym; apply union_sup_eq.
+{intros P h; apply h; exists j.
+ apply eq_set_trans with (2:=H0). 
+ apply eq_set_trans with (2:=eqy). 
+ apply eq_set_sym; trivial. }
+intros (j',eqy'); simpl.
+apply eq_set_sym; apply aux; [| |trivial].
+{apply t_trans with x; [|trivial].
+ apply t_step; right; Texists i'; apply eq_set_refl. }
+apply eq_set_trans with (1:=eqy). 
+apply eq_set_trans with (1:=H0). 
+apply eq_set_sym; trivial.
+Qed.
+
+Lemma WFR_unfold x a (h:Acc R' x) (r:Rle x xx) : eq_set (WFR_aux x a h) (WFR x a).
+unfold WFR.
+apply eq_set_sym; apply union_sup_eq; [auto|].
+intros.
+apply WFR_auxm; [trivial|apply eq_set_refl | reflexivity].
+Qed.
+
+Lemma WFR_eqn a :
+  Acc R' xx ->
+  eq_set (WFR xx a) (F WFR xx a).
+intros h.
+assert (r:Rle xx xx) by (apply t_step; left; apply eq_set_refl).
+apply eq_set_trans with (1:=eq_set_sym _ _ (WFR_unfold _ _ h r)).  
+clear r.
+destruct h as (acc); simpl.
+apply Fext;[apply t_step;left;apply eq_set_refl| |apply eq_set_refl|reflexivity].
+clear a; intros.
+assert (r' : R' y' xx).
+{apply in_reg with y; trivial. }
+assert (r: Rle y' xx) by (apply t_step;right; trivial).
+apply eq_set_trans with (2:=WFR_unfold _ _ (acc _ r') r).
+Tdestruct H as (i,?).
+apply union_sup_eq.
+*intros P h; apply h; exists i.
+ apply eq_set_sym; trivial.
+*intros; apply WFR_auxm; trivial.
+ {destruct i0 as (i',ei'); simpl.
+  apply t_step; right; Texists i'; apply eq_set_refl. }
+ apply eq_set_trans with y; trivial. 
+ apply (proj2_sig i0).
 Qed.
 
 End WellFoundedRecursion.
+
+Local Notation E:=eq_set (only parsing).
+
+Lemma WFR_morph {A} (Aeq:relation A) {Aeqv : Equivalence Aeq} :
+    Proper ((E==>E)==>((E==>Aeq==>E)==>E==>Aeq==>E)==>E==>Aeq==>E) WFR.
+intros Rs Rs' eqRs F F' eqF x x' eqx a a' eqa.
+pose (R:= fun x y => in_set x (Rs y)).
+pose (R':= fun x y => in_set x (Rs' y)).
+assert (accm : (eq_set ==> iff)%signature (Acc R) (Acc R')). 
+{intros y y' eqy.
+ split; intros acc.
+ *revert y' eqy; induction acc; constructor; intros.
+  apply H0 with y; [|apply eq_set_refl].
+  apply eq_elim with (Rs' y'); trivial.
+  apply eq_set_sym; apply eqRs; trivial.
+ *revert y eqy; induction acc; constructor; intros.
+  apply H0 with y0; [|apply eq_set_refl].
+  apply eq_elim with (Rs y); trivial.
+  apply eqRs; trivial. }
+assert (aux : forall h h', eq_set (WFR_aux Rs F x a h) (WFR_aux Rs' F' x' a' h')).
+{revert x x' eqx a a' eqa; fix aux 7; destruct h; destruct h'; simpl.
+ apply eqF; trivial.
+ clear a a' eqa.
+ intros y y' eqy a a' eqa.
+ apply union_morph.
+ simpl.
+ apply eqRs in eqx.
+ split.
+ *intros (i,iny); simpl.
+  apply eq_elim with (x:=elts (Rs x) i) in eqx.
+  2:Texists i; apply eq_set_refl.
+  Tdestruct eqx as (j,iny').
+  Texists (exist (fun i=>elts(Rs' x') i==y') j (eq_set_trans _ _ _ (eq_set_sym _ _ iny') (eq_set_trans _ _ _ iny eqy))); simpl.
+  apply aux; trivial.
+ *intros (j,iny'); simpl.
+  apply eq_set_sym in eqx.
+  apply eq_elim with (x:=elts (Rs' x') j) in eqx.
+  2:Texists j; apply eq_set_refl.
+  Tdestruct eqx as (i,iny).
+  Texists (exist (fun _=>_) i (eq_set_trans _ _ _ (eq_set_sym _ _ iny) (eq_set_trans _ _ _ iny' (eq_set_sym _ _ eqy)))); simpl.
+  apply aux; trivial.
+  apply eq_set_sym; trivial. }
+unfold WFR.
+apply union_morph.
+simpl.
+split; intros.
+*assert (j : Acc R' x').
+ {apply (accm _ _ eqx); exact i. }
+ Texists j; trivial.
+*assert (i : Acc R x).
+ {apply (accm _ _ eqx); exact j. }
+ Texists i; trivial.
+Qed.
 
 (***********************************************************************)
 
@@ -620,11 +793,11 @@ Qed.
 
 (** TTRepl *)
 Definition ttrepl (E:set->set->Prop) :=
-  forall X:Tlo, Tunique_choice X set E.
+  forall X:Tlo, Tunique_choice Tr X set E.
 
 (** We show that all instances of [ttrepl] are a consequence of [choice]. *)
 Lemma ttrepl_from_choice E :
-  (forall X:Tlo, Tchoice X set) -> ttrepl E.
+  (forall X:Tlo, Tchoice Tr X set) -> ttrepl E.
 red; red; intros choice_ax X R Rex _Runiq; clear _Runiq. (* unicity not needed *)
 apply choice_ax; trivial.
 Qed.

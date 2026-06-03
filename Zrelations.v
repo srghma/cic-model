@@ -1092,10 +1092,13 @@ Lemma cc_prod_def_intro A B f :
 Proof.
 intros Bext ff tyf.
 unfold cc_prod.
-rewrite replf_def; trivial.
-exists (lam A (cc_app f)).
+rewrite replf_ax; trivial.
+exists (lam A (cc_app f)); [|split].
 *apply dep_func_intro; trivial.
  intros ??? h; rewrite h; reflexivity.
+*red; intros.
+ apply cc_lam_ext; [reflexivity|red; intros].
+ rewrite H,H1; reflexivity.
 *rewrite cc_eta_eq' with (1:=ff).
  apply cc_lam_ext; [reflexivity|].
  red; intros.

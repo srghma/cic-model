@@ -47,6 +47,22 @@ red; intros.
 apply subset_elim1 in H0; trivial.
 Qed.
 
+Lemma Zu_power_inv x :
+  power x ∈ U -> x ∈ U.
+intros.
+apply Zu_trans with (power x); trivial.
+apply power_def; reflexivity.
+Qed.
+
+Lemma Zu_union_inv x :
+  union x ∈ U -> x ∈ U.
+intros.
+apply Zu_incl with (power (union x)); [apply Zu_power; auto|].
+red; intros.
+apply power_def; red; intros.
+apply union_intro with z; trivial.
+Qed.
+
 Lemma Zu_singl : forall x, x ∈ U -> singl x ∈ U.
 unfold singl; intros; apply Zu_pair; auto.
 Qed.

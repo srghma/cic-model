@@ -1,99 +1,14 @@
-From Stdlib Require Import Setoid Compare_dec Lia.
+From Stdlib Require Import Setoid.
 Require Import basic.
-Require Import Lambda.
 Require Import ZF Zpairs Zsum Znats Ziso.
 Require Import Ztarski Zfix.
-Require Import Sat.
+Require Import Lambda Sat.
 
 (** * The set of lambda-terms *)
-
-Lemma N_strong_ind (P:set->Prop) n :
-  (forall n, n ∈ N -> (forall k, k < n -> P k) -> P n) ->
-  n ∈ N -> P n.
-intros Hrec tyn.
-cut (forall n', n' ∈ N -> n' ⊆ n -> P n'); eauto with *.
-elim tyn using N_ind; intros.
-*apply H1; trivial.
- rewrite H0; trivial.
-*apply Hrec; trivial.
- intros.
- apply H0 in H1; apply empty_ax in H1; contradiction.
-*apply Hrec; trivial.
- intros.
- apply H0; [apply N_trans with n'; trivial|].
- red; intros.
- apply H2 in H3.
- apply le_case in H3; destruct H3.
- rewrite <-H3; trivial.
- apply lt_trans with k; trivial.
-Qed.
-
-Lemma le_lt_trans : forall m n p, p ∈ N -> m <= n -> n < p -> m < p.
-intros.
-apply le_case in H0; trivial.
-destruct H0.
-*rewrite H0; trivial.
-*apply lt_trans with n; trivial.
-Qed.
 
 (* N+N iso N *)
 Definition Cnn : set -> set :=
   sum_case (fun n => add n n) (fun n => succ (add n n)).
-
-Lemma addS_l m n : m ∈ N -> n ∈ N -> add (succ m) n == succ (add m n).
-intros.
-elim H0 using N_ind; intros.
-*rewrite <-H2; trivial.
-*rewrite !add0; auto using zero_typ, succ_typ.
- reflexivity.
-*rewrite !addS,H2; auto using zero_typ, succ_typ.
- reflexivity.
-Qed.
-
-Lemma discr_even_odd m n :
-  m ∈ N -> n ∈ N ->
-  ~ add m m == succ (add n n).
-intros mty; revert n; elim mty using N_ind; intros.
-*rewrite <-H0; auto.
-*rewrite add0; [|apply zero_typ].
- intros h; symmetry in h; apply discr in h; trivial. 
-*rewrite addS; [|apply succ_typ;trivial|trivial].
- rewrite addS_l; trivial.
- elim H1 using N_ind; intros.
- +rewrite <-H3; trivial.
- +rewrite add0; [|apply zero_typ].
-  intro h.
-  apply succ_inj in h; auto using zero_typ, succ_typ, add_typ.
-  apply discr in h; trivial.
- +rewrite addS; [|apply succ_typ|]; trivial.
-  rewrite addS_l; trivial.
-  intro h.
-  apply succ_inj in h; auto using zero_typ, succ_typ, add_typ.
-  apply succ_inj in h; auto using zero_typ, succ_typ, add_typ.
-  apply H0 in h; auto.
-Qed.
-
-Lemma mult2_inj m n : m ∈ N -> n ∈ N -> add m m == add n n -> m==n.
-intros mty; revert n; elim mty using N_ind; intros.
-*rewrite <-H0 in H3|-*; auto.
-*rewrite add0 in H0; [|apply zero_typ].
- revert H0; elim H using N_ind; intros.
- +rewrite <-H1 in H3|-*; auto.
- +reflexivity.
- +rewrite addS in H2; [|apply succ_typ|]; trivial.
-  symmetry in H2; apply discr in H2; contradiction.  
-*rewrite addS in H2; [|apply succ_typ|]; trivial.
- rewrite addS_l in H2; trivial.
- revert H2; elim H1 using N_ind; intros.
- +rewrite <-H3 in H5|-*; auto.
- +rewrite add0 in H2; [|apply zero_typ].
-  apply discr in H2; contradiction.
- +rewrite addS in H4; [|apply succ_typ|]; trivial.
-  rewrite addS_l in H4; trivial.
-  apply succ_inj in H4; auto using zero_typ, succ_typ, add_typ.
-  apply succ_inj in H4; auto using zero_typ, succ_typ, add_typ.
-  apply succ_morph; auto.
-Qed.
 
 Lemma Cnn_iso : iso_fun (sum N N) N Cnn.
 unfold Cnn; split; intros.
@@ -146,18 +61,6 @@ unfold Cnn; split; intros.
     rewrite addS; [|apply succ_typ|]; trivial.
     rewrite addS_l; auto with *.
 Qed.
-
-Lemma mult2_incr n : n ∈ N -> n <= add n n.
-intros.
-elim H using N_ind; intros.
-*rewrite <-H1; trivial.
-*rewrite add0; [apply succ_intro1; reflexivity|apply zero_typ].
-*rewrite addS; [|apply succ_typ|]; trivial.
- rewrite addS_l; trivial.
- red in H1|-*.
- apply lt_mono; auto using succ_typ, add_typ.
- apply succ_intro2; trivial.
-Qed.
  
   Lemma Cnn_order : forall n, n ∈ N -> n <= Cnn (inl n) /\ n <= Cnn (inr n).
 intros.
@@ -186,39 +89,13 @@ split.
  symmetry; trivial.
 Qed.
 
-Lemma nat2set_le_intro m n :
-  (m <= n)%nat ->
-  nat2set m ⊆ nat2set n.
-induction 1; [reflexivity|simpl].
-rewrite IHle.
-red; intros.
-apply lt_trans with (2:=H0).
-*apply succ_typ; apply nat2set_typ.
-*apply succ_intro1; reflexivity.
-Qed.
-Lemma nat2set_le_intro' m n :
-  (m <= n)%nat ->
-  nat2set m <= nat2set n.
-induction 1; [apply succ_intro1;reflexivity|simpl].
-apply le_trans with (2:=IHle).
-*apply succ_typ; apply nat2set_typ.
-*apply succ_intro2; apply succ_intro1; reflexivity.
-Qed.
-
-Lemma nn2n_order n m :
-  (n <= nn2n n m /\ m <= nn2n n m)%nat.
-unfold nn2n.
-unfold nn2n1, nn2n2; simpl.
-lia.
-Qed.
-
   Lemma Cnxn_order : forall n m, n ∈ N -> m ∈ N -> n <= Cnxn (couple n m) /\ m <= Cnxn (couple n m).
 unfold Cnxn; intros.
 destruct (nat2set_reflect n) as (n',?); [trivial|].
 destruct (nat2set_reflect m) as (m',?); [trivial|].
 rewrite H1,H2.
 rewrite NN2N_def.
-split; apply nat2set_le_intro'; apply nn2n_order.
+split; apply nat2set_le_intro; apply nn2n_order.
 Qed.
   
 (* f iso A ->N  yields iso  1+A -> N*)

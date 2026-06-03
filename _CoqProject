@@ -64,6 +64,7 @@ ModelNat.v
 ModelNat_ZFind.v
 Model_variance.v
 ModelZ.v
+ModelZ_CIC0.v
 
 SATtypes.v
 SATnat.v

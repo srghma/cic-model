@@ -14,6 +14,8 @@ Definition inX : X -> X -> Prop := in_set.
 Definition eqX : X -> X -> Prop := eq_set.
 Definition inclX : X -> X -> Prop := incl_set.
 Definition eqX_equiv : Equivalence eqX := eq_set_equiv.
+Definition eqX_fun (x:X) (f1 f2:X->X) :=
+  forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
 
 Lemma in_ext: Proper (eqX ==> eqX ==> iff) inX.
 Proof in_set_morph.
@@ -23,8 +25,25 @@ Definition app : X -> X -> X := cc_app.
 Definition lam : X -> (X -> X) -> X := cc_lam.
 Definition prod : X -> (X -> X) -> X := cc_prod.
 
-Definition eqX_fun (x:X) (f1 f2:X->X) :=
-  forall y1 y2, y1 ∈ x -> y1 == y2 -> f1 y1 == f2 y2.
+
+Definition istype (x:X) :=True.
+Lemma istype_morph : Proper (eqX==>iff) istype.
+do 2 red; reflexivity.
+Qed.
+
+Lemma istype_props : istype props.
+exact I.
+Qed.
+Lemma istype_prop : forall P, P ∈ props -> istype P.
+intros; exact I.
+Qed.
+Lemma istype_prod :
+  forall x f, eqX_fun x f f ->
+  istype x -> 
+  (forall a, a ∈ x -> istype (f x)) ->
+  istype (prod x f).
+intros; exact I.
+Qed.
 
 Lemma lam_ext :
   forall x1 x2 f1 f2,
@@ -109,6 +128,7 @@ apply subset_intro.
 Qed.
 Hint Resolve mt_cl_props : core.
 
+Hint Unfold int1 : core.
 Lemma em_consistent :
   let FF := T.Prod T.prop (T.Ref 0) in
   let N p := T.Prod p FF in
@@ -117,17 +137,19 @@ Lemma em_consistent :
 intros; red; intros.
 destruct n as [ | [|?]]; try discriminate.
 injection H; clear H; intros; subst T.
-simpl. unfold ClassicCCM.prod, ClassicCCM.props.
+simpl.
+unfold ClassicCCM.prod, ClassicCCM.props.
 red.
 apply cc_forall_intro.
- do 2 red; intros.
- apply cc_arr_morph; trivial.
- apply cc_arr_morph; [|reflexivity].
- apply cc_arr_morph; [trivial|reflexivity].
+{do 2 red; intros.
+ rewrite H0; reflexivity. }
 intros P Pty.
 assert (Pty' := Pty).
 apply subset_ax in Pty'; destruct Pty' as (Pty',(P',eqP,Pcl)).
 rewrite <- eqP in Pcl.
+unfold int1; simpl.
+unfold int1; simpl.
+unfold int1; simpl.
 apply cc_forall_intro; [auto with *|].
 intros prf nnpty.
 apply Pcl.

@@ -25,6 +25,7 @@ Module Structure.
         subset : set -> (set -> Prop) -> set;
         infinite : set;
         power : set -> set;
+(*        replf : set -> (set->set) -> set;*)
         empty_ax : forall x : set, ~ in_set x empty;
         pair_ax :
           forall a b x : set, in_set x (pair a b) <-> eq_set x a \/ eq_set x b;
@@ -38,6 +39,10 @@ Module Structure.
           forall x : set, in_set x infinite -> in_set (union (pair x (pair x x))) infinite;
         power_ax :
           forall a x : set, in_set x (power a) <-> (forall y : set, in_set y x -> in_set y a);
+(*        replf_morph : Proper (eq_set ==> (eq_set==>eq_set) ==> eq_set) replf;
+        replf_ax : forall x F z,
+          (forall z z', in_set z x -> eq_set z z' -> eq_set (F z) (F z')) ->
+          (in_set z (replf x F) <-> exists2 y, in_set y x & eq_set z (F y));*)
         repl : set -> (set -> set -> Prop) -> set;
         repl_mono :
           forall a a' : set,
@@ -76,6 +81,7 @@ Section BuildStructure.
         subset
         infinite
         power
+        (*ZFskolEm.IZF_R.ExZ.replf*)
         empty_ax
         pair_ax
         union_ax
@@ -83,6 +89,7 @@ Section BuildStructure.
         infinity_ax1
         infinity_ax2
         power_ax
+        (*replf_ax*)
         repl
         repl_mono
         repl_ax).
@@ -198,17 +205,7 @@ apply repl_ax; intros.
 *rewrite (proj2 H1); apply H0.
 Qed.
 #[global]Opaque replf.
-(*Lemma replf_ax' : forall a F z,
-  ext F ->
-  (z ∈ replf a F <-> exists2 x, x ∈ a & z == F x).
-unfold replf; intros.
-rewrite repl_ax; intros.
-*apply ex2_morph'; [reflexivity|intros].
- rewrite extf_ok; [reflexivity|].
- apply ext_ext with (1:=H); trivial.
-*rewrite <- H2,H3,H1; reflexivity.
-*rewrite H2; trivial.
-Qed.*)
+
 Lemma replf_def : forall a F z,
   ext_fun a F ->
   (z ∈ replf a F <-> exists2 x, x ∈ a & z == F x).

@@ -42,11 +42,12 @@ do 2 red; intros. destruct n; simpl in H0; discriminate.
 Qed.
 
 Lemma esub_typ_cons : forall env1 env2 s t A,
+  A<>kind ->
   typ_esub env1 s env2 ->
   typ env1 t (app_esub s A) ->
   typ_esub env1 (sub_cons t s) (A::env2).
 red; intros. simpl. 
-apply vcons_add_var; [apply H | apply H0]; trivial.
+apply vcons_add_var; [|apply H0 | apply H1]; trivial.
 Qed.
 
 Lemma explicit_sub : forall env1 env2 s t A, A <> None ->

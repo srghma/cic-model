@@ -65,7 +65,7 @@ apply prod_intro; intros; auto with *.
 Qed.
 
 Lemma typ_N : forall e, typ e Nat kind.
-red; simpl; trivial.
+red; simpl; intros; apply istype_N.
 Qed.
 
 (** * The recursor *)
@@ -111,7 +111,7 @@ apply natrec_typ with (P:=fun x => app (int P i) x); trivial.
  simpl in H1.
  apply prod_elim with (3:=H3) in H1.
   eapply in_ext; [reflexivity| |apply prod_elim with (2:=H1)].
-   rewrite simpl_int_lift.
+   unfold int1; simpl; rewrite simpl_int_lift.
    rewrite simpl_int_lift1.
    rewrite beta_eq; auto with *.
    reflexivity.
@@ -122,14 +122,14 @@ apply natrec_typ with (P:=fun x => app (int P i) x); trivial.
    intros x.
    rewrite H6; reflexivity.
 
-   rewrite simpl_int_lift1; trivial.
+   simpl; rewrite simpl_int_lift1; trivial.
 
   red; intros.
   apply prod_ext.
    apply app_ext; [|trivial].
    rewrite !simpl_int_lift1; reflexivity.
   red; intros.
-  rewrite !simpl_int_lift.
+  unfold int1; simpl; rewrite !simpl_int_lift.
   rewrite H6; reflexivity.
 Qed.
 
