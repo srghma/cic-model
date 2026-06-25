@@ -1534,21 +1534,26 @@ with int_fP_ren y l i j i' j':
   (forall k, eqm (j k) (j' (l k)) (E k)) ->
   int_fP y i j = int_fP (ren_f l y) i' j'.
 *destruct y; simpl; intros; auto.
+ (* Pair *)
  +assert (e1 : eqm (intm y1 i j) (intm (ren l y1) i' j') (intTi_ren y1 E)).
   {apply int_ren; auto. }
   assert (e2 : eqm (intm y2 i j) (intm (ren l y2) i' j') (intTi_ren y2 E)).
   {apply int_ren; auto. }
   apply f_eqm2 with (f:=fun X Y => opt(sum X Y))(F:=fun X Y mx my => (None,pair_m mx my)); trivial.
- +assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
+ (* Union *)
++assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
   {apply int_ren; auto. }
   apply f_eqm with (f:=fun X => opt X)(F:=fun X mx => (None,union_m mx)); trivial.
+ (* Power *)
  +assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
   {apply int_ren; auto. }
   apply f_eqm with (f:=fun X => opt(sum(pow X) X))(F:=fun X mx => (None,power_m mx)); trivial.
+ (* Subset *)
  +assert (e : eqm (intm y i j) (intm (ren l y) i' j') (intTi_ren y E)).
   {apply int_ren; auto. }
   unfold subset_m, subsetX. 
   clear; admit.
+ (* Inf *)
  +constructor.
 *destruct y; simpl; intros; auto.
  +admit.
