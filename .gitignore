@@ -6,3 +6,7 @@
 *~
 Ens0.v
 EnsEm0.v
+
+# Lean 4 / Lake ignores
+.lake/
+lake-manifest.json
