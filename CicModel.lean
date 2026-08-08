@@ -5,3 +5,4 @@ import CicModel.Choice
 import CicModel.Sublogic
 import CicModel.ZF
 import CicModel.Lemmas
+import CicModel.VarMap
