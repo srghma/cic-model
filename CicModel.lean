@@ -7,3 +7,4 @@ import CicModel.ZF
 import CicModel.Lemmas
 import CicModel.VarMap
 import CicModel.MyList
+import CicModel.IntMap
