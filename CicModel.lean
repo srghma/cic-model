@@ -9,3 +9,4 @@ import CicModel.VarMap
 import CicModel.MyList
 import CicModel.IntMap
 import CicModel.Ens
+import CicModel.Zsum
