@@ -13,3 +13,4 @@ import CicModel.Zsum
 import CicModel.Lambda
 import CicModel.Zpairs
 import CicModel.Zstable
+import CicModel.Znats
