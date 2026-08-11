@@ -15,3 +15,4 @@ import CicModel.Zpairs
 import CicModel.Zstable
 import CicModel.Znats
 import CicModel.Completeness
+import CicModel.Can
