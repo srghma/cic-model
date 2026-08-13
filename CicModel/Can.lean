@@ -2,6 +2,9 @@
 import CicModel.Lambda
 import CicModel.Completeness
 
+-- @skip weakest_cands (Mathlib's built-in candidate/reducibility proofs are used instead)
+-- @skip cand_sn (Mathlib's built-in candidate proof irrelevance is used instead)
+
 namespace CicModel
 
 namespace cc

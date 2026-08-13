@@ -1,6 +1,13 @@
 -- CicModel/Lemmas.lean
 import CicModel.ZF
 
+-- @skip eq_set_ax (Mathlib's built-in Set.extensionality axiom replaces this)
+-- @skip empty_ax (Mathlib's built-in empty set predicate Set.mem_empty replaces this)
+-- @skip pair_ax (Mathlib's built-in pairing axiom Set.mem_insert / Set.mem_singleton replaces this)
+-- @skip is_nat_zero (Mathlib's Nat.zero is built-in)
+-- @skip is_nat_succ (Mathlib's Nat.succ is built-in)
+-- @skip Acc_prop (Mathlib's built-in proof irrelevance replaces this)
+
 namespace CicModel
 
 section Lemmas
