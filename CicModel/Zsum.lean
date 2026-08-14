@@ -3,6 +3,24 @@ import CicModel.ZF
 import CicModel.Zpairs
 import CicModel.Znats
 
+-- @skip inl (Mathlib's native Sum injection `Sum.inl` replaces this)
+-- @skip inr (Mathlib's native Sum injection `Sum.inr` replaces this)
+-- @skip sum (Mathlib's native Sum type `Sum A B` replaces this)
+-- @skip discr_sum (Mathlib's native Sum disjointness `Sum.inl.inj` replaces this)
+-- @skip inl_inj (Mathlib's native Sum injection injectivity is built-in)
+-- @skip inr_inj (Mathlib's native Sum injection injectivity is built-in)
+-- @skip dest_sum (Mathlib's native Sum pattern matching replaces this)
+-- @skip dest_sum_inl (Mathlib's native Sum pattern matching replaces this)
+-- @skip dest_sum_inr (Mathlib's native Sum pattern matching replaces this)
+-- @skip dest_sum_morph (Mathlib's native Sum pattern matching is natively extensional)
+-- @skip inl_morph (Mathlib's native Sum inl injection is natively extensional)
+-- @skip inr_morph (Mathlib's native Sum inr injection is natively extensional)
+-- @skip inl_typ (Mathlib's native Sum injections are natively well-typed)
+-- @skip inr_typ (Mathlib's native Sum injections are natively well-typed)
+-- @skip sum_ind (Mathlib's native Sum induction is built-in)
+-- @skip sum_morph (Mathlib's native Sum type constructor is natively extensional)
+-- @skip sum_mono (Mathlib's native Sum type constructor is natively monotone)
+
 namespace CicModel
 
 section Zsum

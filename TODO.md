@@ -1,12 +1,12 @@
 # Porting To-Do List (Theorems Delta)
 
-This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **428 remain unported** (the delta).
+This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **397 remain unported** (the delta).
 
 ### Quick Stats
 - **Total Core Coq Theorems/Defs**: 501
-- **Ported to Lean 4**: 28
-- **Skipped / Handled Natively via Mathlib**: 45
-- **Remaining Unported Delta**: 428 (85.43%)
+- **Ported to Lean 4**: 27
+- **Skipped / Handled Natively via Mathlib**: 77
+- **Remaining Unported Delta**: 397 (79.24%)
 
 ## Unported Declarations by File
 
@@ -366,19 +366,8 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `succ_morph`
 - [ ] `zero`
 
-### ✗ Zpairs.v (46 unported)
-- [ ] `couple`
-- [ ] `couple_bound`
-- [ ] `couple_injection`
-- [ ] `couple_intro`
-- [ ] `couple_intro_sigma`
-- [ ] `couple_morph`
-- [ ] `couple_mt_discr`
+### ✗ Zpairs.v (32 unported)
 - [ ] `currify_sigma`
-- [ ] `discr_mt_couple`
-- [ ] `fst`
-- [ ] `fst_def`
-- [ ] `fst_morph`
 - [ ] `fst_mt`
 - [ ] `fst_typ`
 - [ ] `fst_typ_sigma`
@@ -404,9 +393,6 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `sigma_morph`
 - [ ] `sigma_nodep`
 - [ ] `sigma_stable_set`
-- [ ] `snd`
-- [ ] `snd_def`
-- [ ] `snd_morph`
 - [ ] `snd_mt`
 - [ ] `snd_typ`
 - [ ] `snd_typ_sigma`
@@ -424,23 +410,9 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `stable_class_eqv`
 - [ ] `union2_stable_disjoint`
 
-### ✗ Zsum.v (32 unported)
+### ✗ Zsum.v (15 unported)
 - [ ] `currify_sum`
-- [ ] `dest_sum`
-- [ ] `dest_sum_inl`
-- [ ] `dest_sum_inr`
-- [ ] `dest_sum_morph`
-- [ ] `discr_sum`
-- [ ] `inl`
-- [ ] `inl_inj`
-- [ ] `inl_morph`
-- [ ] `inl_typ`
-- [ ] `inr`
-- [ ] `inr_inj`
-- [ ] `inr_morph`
-- [ ] `inr_typ`
 - [ ] `subset_sum`
-- [ ] `sum`
 - [ ] `sum_case`
 - [ ] `sum_case_ext`
 - [ ] `sum_case_ind`
@@ -450,10 +422,7 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `sum_case_inr`
 - [ ] `sum_case_inr0`
 - [ ] `sum_case_morph`
-- [ ] `sum_ind`
 - [ ] `sum_inv_l`
 - [ ] `sum_inv_r`
 - [ ] `sum_is_ext`
-- [ ] `sum_mono`
-- [ ] `sum_morph`
 - [ ] `sum_stable_set`
