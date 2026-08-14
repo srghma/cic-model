@@ -20,6 +20,9 @@ import CicModel.Znats
 -- @skip sum_ind (Mathlib's native Sum induction is built-in)
 -- @skip sum_morph (Mathlib's native Sum type constructor is natively extensional)
 -- @skip sum_mono (Mathlib's native Sum type constructor is natively monotone)
+-- @skip sum_inv_l (Mathlib's native Sum.inl inversion is built-in)
+-- @skip sum_inv_r (Mathlib's native Sum.inr inversion is built-in)
+-- @skip currify_sum (Mathlib's native Sum elimination is built-in)
 
 namespace CicModel
 

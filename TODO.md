@@ -1,12 +1,12 @@
 # Porting To-Do List (Theorems Delta)
 
-This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **397 remain unported** (the delta).
+This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **394 remain unported** (the delta).
 
 ### Quick Stats
 - **Total Core Coq Theorems/Defs**: 501
 - **Ported to Lean 4**: 27
-- **Skipped / Handled Natively via Mathlib**: 77
-- **Remaining Unported Delta**: 397 (79.24%)
+- **Skipped / Handled Natively via Mathlib**: 80
+- **Remaining Unported Delta**: 394 (78.64%)
 
 ## Unported Declarations by File
 
@@ -410,8 +410,7 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `stable_class_eqv`
 - [ ] `union2_stable_disjoint`
 
-### ✗ Zsum.v (15 unported)
-- [ ] `currify_sum`
+### ✗ Zsum.v (12 unported)
 - [ ] `subset_sum`
 - [ ] `sum_case`
 - [ ] `sum_case_ext`
@@ -422,7 +421,5 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `sum_case_inr`
 - [ ] `sum_case_inr0`
 - [ ] `sum_case_morph`
-- [ ] `sum_inv_l`
-- [ ] `sum_inv_r`
 - [ ] `sum_is_ext`
 - [ ] `sum_stable_set`
