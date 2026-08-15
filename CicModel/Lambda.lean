@@ -22,6 +22,13 @@ def lift_rec (n : Nat) (t : term) (k : Nat) : term :=
 def lift (n : Nat) (t : term) : term :=
   lift_rec n t 0
 
+-- K and App2 combinators
+def K : term :=
+  Abs (Abs (Ref 1))
+
+def App2 (f x y : term) : term :=
+  App (App f x) y
+
 -- Substitution of N into M at index k
 def subst_rec (N : term) (M : term) (k : Nat) : term :=
   match M with
@@ -57,6 +64,26 @@ def boccur (n : Nat) (t : term) : Bool :=
 
 def closed (t : term) : Prop :=
   ∀ k : Nat, ¬ occur k t
+
+-- Lifting properties
+theorem lift_rec0 (M : term) (k : Nat) : lift_rec 0 M k = M := by
+  induction M generalizing k with
+  | Ref i =>
+    unfold lift_rec
+    split_ifs with h
+    · have h0 : 0 + i = i := by omega
+      rw [h0]
+    · rfl
+  | Abs M ih =>
+    unfold lift_rec
+    rw [ih (k + 1)]
+  | App u v ih1 ih2 =>
+    unfold lift_rec
+    rw [ih1 k, ih2 k]
+
+theorem lift0 (M : term) : lift 0 M = M := by
+  unfold lift
+  exact lift_rec0 M 0
 
 end term
 
