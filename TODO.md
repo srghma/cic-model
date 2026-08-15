@@ -1,23 +1,22 @@
 # Porting To-Do List (Theorems Delta)
 
-This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **394 remain unported** (the delta).
+This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **390 remain unported** (the delta).
 
 ### Quick Stats
 - **Total Core Coq Theorems/Defs**: 501
-- **Ported to Lean 4**: 21
+- **Ported to Lean 4**: 25
 - **Skipped / Handled Natively via Mathlib**: 86
-- **Remaining Unported Delta**: 394 (78.64%)
+- **Remaining Unported Delta**: 390 (77.84%)
 
 ## Unported Declarations by File
 
-### ✗ Can.v (41 unported)
+### ✗ Can.v (38 unported)
 - [ ] `Abs_sound_Arr`
 - [ ] `Abs_sound_Pi`
 - [ ] `Arr`
 - [ ] `Inter`
 - [ ] `InterSubset`
 - [ ] `Neu`
-- [ ] `Neutral`
 - [ ] `Pi`
 - [ ] `Union`
 - [ ] `cand_context`
@@ -47,11 +46,9 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `is_cand_union2`
 - [ ] `neutral_is_cand`
 - [ ] `sat1_in_cand`
-- [ ] `var_in_cand`
 - [ ] `weak_Abs_sound_Arr`
 - [ ] `weak_cand_Arr`
 - [ ] `weak_chain`
-- [ ] `weaker_cand`
 
 ### ✗ Ens.v (19 unported)
 - [ ] `choose`
@@ -180,7 +177,7 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `wf_ax`
 - [ ] `wf_ax0`
 
-### ✗ Lambda.v (99 unported)
+### ✗ Lambda.v (98 unported)
 - [ ] `App2`
 - [ ] `K`
 - [ ] `church_rosser`
@@ -210,7 +207,6 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `lift_ref_ge`
 - [ ] `lift_ref_lt`
 - [ ] `liftable`
-- [ ] `neutral`
 - [ ] `nf_neutral_open`
 - [ ] `nf_norm`
 - [ ] `nf_sound`
