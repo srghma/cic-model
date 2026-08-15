@@ -4,8 +4,8 @@ This document tracks the unported theorems and definitions from the core files o
 
 ### Quick Stats
 - **Total Core Coq Theorems/Defs**: 501
-- **Ported to Lean 4**: 27
-- **Skipped / Handled Natively via Mathlib**: 80
+- **Ported to Lean 4**: 21
+- **Skipped / Handled Natively via Mathlib**: 86
 - **Remaining Unported Delta**: 394 (78.64%)
 
 ## Unported Declarations by File

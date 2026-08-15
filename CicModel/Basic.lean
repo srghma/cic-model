@@ -4,6 +4,14 @@ import Mathlib.Data.Nat.Basic
 import Mathlib.Data.List.Basic
 import Mathlib.Tactic.Linarith
 
+-- @skip and_iff_morphisml (Mathlib's native higher-order logic congruence replaces this)
+-- @skip and_forall_commut (Mathlib's native `forall_and` replaces this)
+-- @skip impl_morph (Mathlib's native `Iff.imp` / higher-order logic congruence replaces this)
+-- @skip fa_mono (Mathlib's native implication monotonicity replaces this)
+-- @skip ex2_mono (Mathlib's native `exists_and_distrib` / logic congruence replaces this)
+-- @skip ex2_morph (Mathlib's native `exists_and_distrib` / logic congruence replaces this)
+-- @skip ex2_morph' (Mathlib's native `exists_and_distrib` / logic congruence replaces this)
+
 namespace CicModel
 
 -- Indexed relations as defined in Coq:
