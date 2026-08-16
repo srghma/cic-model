@@ -117,6 +117,9 @@ inductive red1 : term → term → Prop where
 def sn : term → Prop :=
   Acc (fun x y => red1 y x)
 
+theorem sn_var (n : Nat) : sn (Ref n) :=
+  Acc.intro (Ref n) (fun _ h => by cases h)
+
 -- Unmarking / un-annotation operator for typed lambda terms (converting typed terms to pure Lambda.term)
 axiom unmark_app (M : term) : CicModel.term
 

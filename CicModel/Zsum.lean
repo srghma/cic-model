@@ -40,6 +40,9 @@ def z_inl (x : Set' L) : Set' L :=
 def z_inr (y : Set' L) : Set' L :=
   z_couple (z_succ z_zero) y
 
+def z_dest_sum (p : Set' L) : Set' L :=
+  z_snd p
+
 end Zsum
 
 end CicModel

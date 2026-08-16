@@ -1,12 +1,12 @@
 # Porting To-Do List (Theorems Delta)
 
-This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **386 remain unported** (the delta).
+This document tracks the unported theorems and definitions from the core files of the Coq library. Out of 501 total core Coq declarations, **385 remain unported** (the delta).
 
 ### Quick Stats
 - **Total Core Coq Theorems/Defs**: 501
-- **Ported to Lean 4**: 29
+- **Ported to Lean 4**: 30
 - **Skipped / Handled Natively via Mathlib**: 86
-- **Remaining Unported Delta**: 386 (77.05%)
+- **Remaining Unported Delta**: 385 (76.85%)
 
 ## Unported Declarations by File
 
@@ -177,7 +177,7 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `wf_ax`
 - [ ] `wf_ax0`
 
-### ✗ Lambda.v (94 unported)
+### ✗ Lambda.v (93 unported)
 - [ ] `church_rosser`
 - [ ] `commut_lift_subst`
 - [ ] `commut_lift_subst_rec`
@@ -255,7 +255,6 @@ This document tracks the unported theorems and definitions from the core files o
 - [ ] `sn_subst`
 - [ ] `sn_subst_inv_l`
 - [ ] `sn_subst_var`
-- [ ] `sn_var`
 - [ ] `sub_all_comp`
 - [ ] `sub_all_ext`
 - [ ] `sub_all_lift_r`
